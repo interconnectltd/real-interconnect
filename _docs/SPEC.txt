@@ -1,0 +1,233 @@
+=== シート一覧 ===
+[ '構築タスク一覧', '集計' ]
+
+========== シート: 構築タスク一覧 ==========
+INTERCONNECT 構築設計書 FINAL v2 — Render + Supabase ゼロベース構築,,,,,,,
+Render (Web+API+Worker) × Supabase (DB+Auth+Realtime+Storage) × Cloudflare (CDN) ｜ 認証: Email + Facebook OAuth ｜ Claude Sonnet 4.6 ｜ AI分析: 全員対象(利用規約同意),,,,,,,
+【設計判断】LINE OAuth/LIFF:不採用(Supabase非対応で実装コスト過大→Facebook OAuth採用) ｜ メッセージ機能:Phase2(コネクション後はLINE/メール直接連絡) ｜ AI分析:利用規約で基本機能として定義(consent個別同意不要) ｜ ゲストモード/通知音:不採用 ｜ meeting_minutes/meeting_confirmations/event_certificates/search_history/share_activities/case_studies/site_settings動的管理/cashout(換金):不採用 ｜ Drizzle ORM:不採用(Supabase CLI型生成+supabase-jsで十分) ｜ FAQ/ニュース:静的ファイル ｜ referral_details→invitations統合 ｜ invite_history→referral_clicks統合,,,,,,,
+#,大分類,中分類,小分類,作業内容,優先度,Phase,成果物
+1,プロジェクト基盤構築,リポジトリ・ツールチェーン,GitHub リポジトリ,プライベートリポジトリ。ブランチ戦略(main/develop/feature/*)。Branch Protection Rules,最高,Phase 1,リポジトリ+CODEOWNERS
+2,,,pnpm + Node.js,pnpm init + .npmrc厳格モード。Node.js 20 LTS(.node-version),最高,Phase 1,package.json
+3,,,TypeScript,strict / noUncheckedIndexedAccess / paths alias(@/*),最高,Phase 1,tsconfig.json
+4,,,ESLint + Prettier,eslint-config-next + strict。dangerouslySetInnerHTML禁止。Prettier統一設定,最高,Phase 1,.eslintrc.cjs + .prettierrc
+5,,,Husky + lint-staged,commit時lint+format。pre-push時tsc --noEmit,最高,Phase 1,.husky/
+6,,,Git管理ファイル,.gitignore / .editorconfig,最高,Phase 1,各設定ファイル
+7,,ディレクトリ設計,src/ 構造 + 命名規約,src/app / src/components(ui/features/layouts/forms) / src/lib / src/hooks / src/stores / src/types。ファイル(kebab)/コンポーネント(Pascal)/hooks(useCamel),最高,Phase 1,構成図+CONVENTIONS.md
+8,,外部サービス,Supabase プロジェクト,"東京リージョン。Proプラン。APIキー取得。Auth URL Configuration(サイトURL+リダイレクトURL: /login?confirmed=true, /reset-password等)。Facebook OAuth設定(App ID/Secret登録)",最高,Phase 1,Supabase設定一式
+9,,,Render アカウント,有料プラン(Starter以上),最高,Phase 1,Renderダッシュボード
+10,,,Cloudflare アカウント,inter-connect.app追加。ネームサーバー設定,高,Phase 2,Cloudflare DNS
+11,,,Facebook App 作成,Facebook Developers で App作成。Facebook Login有効化。App ID/Secret取得。OAuthリダイレクトURI登録(Supabaseのコールバック),最高,Phase 1,Facebook App ID/Secret
+12,,,tl;dv API Key,API Key取得。Webhook URL登録,最高,Phase 1,TLDV_API_KEY
+13,,,Anthropic API Key,APIキー取得。レート制限確認,最高,Phase 1,AI_API_KEY
+14,,,Resend アカウント,ドメイン認証。DNS TXT。API Key,高,Phase 2,RESEND_API_KEY
+15,,,Sentry プロジェクト,Next.js用。DSN取得,中,Phase 3,SENTRY_DSN
+16,,環境変数,一覧定義 + 登録,全環境変数一覧(NEXT_PUBLIC_分類)。remotePatterns用ドメイン(*.supabase.co / ui-avatars.com)明記。Render Environment Groups(dev/prod)。Supabase Secrets(TLDV/AI/JWT),最高,Phase 1,.env.example + Render/Supabase設定
+17,,ドキュメント,README + ARCHITECTURE + LICENSE,概要/技術スタック/ローカル開発/デプロイ。設計判断の経緯(不採用機能の理由)。ライセンス,最高,Phase 1,3ファイル
+18,デザインシステム,デザイン思想,設計原則 + 禁止パターン,4原則:人間の温かみ/装飾排除/空白/非対称。禁止:紫→青グラデ/均等3カラム反復/ネオン/アイソメトリック/過剰パーティクル,最高,Phase 1,DESIGN_PRINCIPLES.md
+19,,,競合・参考調査,Wantedly/LinkedIn/Eight/YENTA調査。差別化ポイント,最高,Phase 1,調査レポート
+20,,カラーシステム,ブランドカラー策定,信頼感+温かみ。ゼロから策定,最高,Phase 1,HEX値定義
+21,,,ニュートラル + セマンティック,gray10段階。success/warning/error/info各3段階,最高,Phase 1,カラー定義
+22,,,色使いルール,プライマリ面積10%以下。アクセント5%以下,最高,Phase 1,ガイドライン
+23,,,ダークモードトークン + CSS変数,全カラーのダーク版をPhase1で定義。globals.cssにライト/ダーク両方。Tailwind連動。切替UIはPhase2,最高,Phase 1,globals.css
+24,,タイポグラフィ,フォント選定・読込み,Inter+Noto Sans JP。next/fontセルフホスト。display:swap,最高,Phase 1,フォント設定
+25,,,スケール + 組版,h1:32px/bold(レタースペーシング)〜h4:16px。本文16px/1.8/680px。tabular-nums。句読点ぶら下げ/禁則,最高,Phase 1,タイポグラフィ定義
+26,,スペーシング・レイアウト,スペーシング + グリッド + BP,4px基準スケール。12カラム。sm:640〜xl:1280。非対称活用,最高,Phase 1,トークン定義
+27,,,余白リズム + コンテナ幅,不均一余白(重要=広/関連=狭)。本文680px/カード960px/フル1120px,高,Phase 1,レイアウトガイド
+28,,シャドウ・ボーダー・角丸,トークン定義,シャドウsm/md/lg。角丸sm:4〜full。ボーダー1px neutral-200控えめ,高,Phase 1,トークン定義
+29,,,アイコン(Lucide React),ストローク1.5px/サイズ16/20/24px/currentColor,高,Phase 1,アイコン設定
+30,,コピーライティング,UIコピーガイドライン,機械的表現全排除。「処理中」→「少々お待ちください」,最高,Phase 1,コピーガイド
+31,,,ボタンラベル + エラーメッセージ,汎用禁止(動詞+目的語)。全ケースに「何が起きた+どうすべき」,高,Phase 1,ラベル+エラー辞書
+32,,,空状態 + 通知文面,ページ別誘導コピー。notification type別パーソナライズテンプレート,高,Phase 1,コピー集
+33,,モーション,原則 + イージング + 禁止事項,動く要素5箇所/ページ以下。CSS transition。ease-out/ease-in-out。150ms/300ms。スクロールハイジャック禁止。prefers-reduced-motion対応,高,Phase 1,モーション定義
+34,,ビジュアルアセット,ファビコン + 通知アイコン,favicon.ico/svg/apple-touch-icon + 192x192 PNG,高,Phase 1,アセット一式
+35,,,OG画像 + イラスト方針,1200x630。ブランドカラー+タイポのみ。AI生成イラスト禁止,高,Phase 2,og-image.png + ガイド
+36,,Tailwind + shadcn/ui,設定 + 初期化,tailwind.config.ts(全トークン反映) + globals.css + shadcn/ui init(ブランドカスタマイズ),最高,Phase 1,設定ファイル群
+37,データベース設計・構築,スキーマ設計,ER図 + 命名規約,全テーブルER図。スネークケース/複数形/接頭辞ルール,最高,Phase 1,ER図+規約
+38,,,notification type列挙,connection_request/connection_accepted/match_mutual/event_reminder/referral_accepted/point_earned等。TypeScript enum + DB CHECK,最高,Phase 1,型定義+制約
+39,,コアテーブル,user_profiles,id(auth.users FK)/name/email/company/position/industry/bio/avatar_url/cover_url/contact_info(TEXTnullable:LINE ID/メール等)/is_admin/is_active/created_at/updated_at ※transcript_analysis_consent廃止(全員分析対象),最高,Phase 1,スキーマ
+40,,,connections,user_id/connected_user_id/status(pending/accepted/rejected/cancelled/removed/blocked/reaccepted)/created_at/updated_at。UNIQUE,最高,Phase 1,スキーマ+遷移図
+41,,,messages,sender_id/receiver_id/content/is_read/created_at ※Phase2で使用,高,Phase 2,スキーマ
+42,,,notifications,user_id/type(列挙)/title/message/link/actions(JSONB:allowedActionsホワイトリスト制御)/is_read/created_at,最高,Phase 1,スキーマ+actions構造
+43,,,activities,type/title/user_id/related_user_id/created_at ※Phase2で構築、ダッシュボードの「最近の動き」セクションで表示,高,Phase 2,スキーマ
+44,,マッチングテーブル,match_requests + match_connections,申請:requester/recipient/status/message。成立:user1/user2/score/reasons(JSONB),最高,Phase 1,スキーマ
+45,,,meeting_transcripts,tldv_meeting_id(UNIQUE)/title/meeting_date/full_text/status(pending/fetching/ready/analyzing/analyzed/error)/error_message/fetched_at/created_at,最高,Phase 1,スキーマ+遷移図
+46,,,meeting_participants,transcript_id/user_id(nullable)/speaker_name/email/speaking_ratio/is_linked/linked_method/created_at,最高,Phase 1,スキーマ
+47,,,transcript_insights,transcript_id/participant_id/demonstrated_skills[]/expressed_needs[]/offered_capabilities[]/communication_traits(JSONB)/key_statements[]/engagement_metrics(JSONB)/confidence_score/prompt_version/created_at,最高,Phase 1,スキーマ+JSONB構造
+48,,,member_ai_profiles_v2,user_id(UNIQUE)/aggregated_skills(JSONB[])/aggregated_needs(JSONB[])/aggregated_offerings(JSONB[])/communication_profile(JSONB)/analysis_count/last_analyzed_at/created_at/updated_at,最高,Phase 1,スキーマ
+49,,,matching_scores_v2,"viewer_id/target_id/5軸サブスコア(FLOAT)/total_score/weights(JSONB)/score_reasons(JSONB)/is_stale/calculated_at。UNIQUE(viewer_id,target_id)",最高,Phase 1,スキーマ
+50,,,mutual_match_notifications,user_a_id/user_b_id/notified_at。UNIQUE 通知重複防止,最高,Phase 1,スキーマ
+51,,イベントテーブル,event_items + event_participants,イベント情報+参加者。Phase2,高,Phase 2,スキーマ
+52,,紹介・ポイントテーブル,invite_links + invitations + referral_clicks,invitationsにverification_status追加(旧referral_details統合)。referral_clicksにinvitation_id追加(旧invite_history統合),高,Phase 2,スキーマ
+53,,,user_points + point_transactions,ポイント残高+履歴,高,Phase 2,スキーマ
+54,,予約テーブル,booking_sessions + bookings + tldv_meeting_records,bookingsにstatus(pending/confirmed/completed/cancelled)で旧meeting_confirmations吸収,高,Phase 2,スキーマ
+55,,ユーザー行動テーブル,profile_views,viewer_id/viewed_user_id/view_duration/viewed_at。データ蓄積Phase1、表示UIはPhase2。閲覧通知は飛ばさない(プライバシー配慮),高,Phase 1,スキーマ
+56,,,bookmarks,user_id/bookmarked_user_id/note/created_at,高,Phase 1,スキーマ
+57,,,user_activities,user_id/activity_type/related_id/created_at ※Phase2,高,Phase 2,スキーマ
+58,,不正検知,fraud_flags + ip_registration_stats,不正フラグ+IP統計,中,Phase 2,スキーマ
+59,,システムテーブル,settings,user_id/theme/notifications_enabled/created_at/updated_at,高,Phase 1,スキーマ
+60,,,contact_inquiries + news_items,問合せ(Phase2)。ニュース(Phase2テーブル、Phase1はマークダウンSSG),高,Phase 2,スキーマ
+61,,,login_sessions,user_id/device/browser/ip_address/created_at。記録Phase1、UI Phase3,中,Phase 2,スキーマ
+62,,,prompt_versions,name/version/template/is_active/created_at,高,Phase 1,スキーマ
+63,,ビュー,profiles / events / matchings,後方互換+ダッシュボード用,高,Phase 2,CREATE VIEW x3
+64,,,統計 + 紹介 + 予約ビュー,member_growth_stats/industry_distribution/event_stats/referral_statistics/v_referral_history/booking_details/booking_stats,高,Phase 2,7ビュー
+65,,DB関数,handle_new_user(),auth.users INSERT → user_profiles + user_points + settings 自動作成,最高,Phase 1,PL/pgSQL
+66,,,update_updated_at + protect_admin,汎用updated_at更新 + is_admin/is_active変更防止,最高,Phase 1,2関数
+67,,,ポイント操作関数群,add/deduct/add_referral/process_reward。SECURITY DEFINER+REVOKE,高,Phase 2,4関数
+68,,,招待関数群,create/accept/get_top_referrers/get_analytics/get_stats,高,Phase 2,5関数
+69,,,マッチング関数群,mark_cache_stale / get_public_ai_profiles(ニーズ非公開) / purge_ai_data_on_delete(退会時削除用),最高,Phase 1,3関数
+70,,トリガー,user_profiles + connections + user_points,updated_at自動更新(3テーブル) + admin保護。on_auth_user_created,最高,Phase 1,5トリガー
+71,,RLSポリシー,全パターン定義,自己データ/認証ユーザー閲覧/管理者全操作/公開コンテンツ/匿名書込み/service_role の6パターン。全テーブルRLS有効化,最高,Phase 1,ポリシー一式
+72,,Storage,avatars / covers,avatars:公開読取/認証書込/2MB/画像のみ。covers:同/5MB,最高,Phase 1,Storage設定
+73,,型生成,Supabase CLI型 + アプリ型 + Zod,supabase gen types typescript。CI連携(変更時自動再生成)。Profile/Connection等のアプリ型。Zod統合,最高,Phase 1,types + validations
+74,,インデックス,頻出クエリ + 全文検索,"connections(user_id,status)/notifications(user_id,is_read)/matching_scores_v2(viewer_id)/profile_views(viewed_user_id)。pg_trgm(name/company/bio)はPhase2",最高,Phase 1,CREATE INDEX
+75,,シードデータ,管理者 + マスター,初期管理者 / 業種リスト / FAQ(JSON),最高,Phase 1,seed.sql
+76,認証システム構築,Email/Password,登録フォーム + signUp,React Hook Form + Zod。name/email/password/会社名/役職。利用規約同意チェックボックス(必須:「AI分析を含むサービス利用に同意」)。signUp+on_auth_user_createdトリガー,最高,Phase 1,registerページ+認証Hook
+77,,,ログインフォーム + signIn,email/password + signInWithPassword。エラーメッセージ,最高,Phase 1,loginページ+認証Hook
+78,,,パスワードリセット,resetPasswordForEmail + リセットメール + 新パスワード設定ページ,最高,Phase 1,forgot-password + reset-password
+79,,,パスワード変更フォーム,設定ページ内。現在パスワード確認+新パスワード+確認。最低8文字Zod。updateUser({password}),最高,Phase 1,PasswordChangeForm
+80,,,メール確認フロー,Supabase Auth設定。確認リンクリダイレクト先,最高,Phase 1,Auth設定
+81,,Facebook OAuth,Supabase設定,Supabase Dashboard > Auth > Providers > Facebook 有効化。App ID/Secret登録,最高,Phase 1,Supabase設定
+82,,,ログインボタン実装,supabase.auth.signInWithOAuth({ provider: 'facebook' })。ログインページにボタン配置,最高,Phase 1,Facebookログインボタン
+83,,,コールバック処理,Supabase Authが自動処理。/auth/callback ページでセッション確立→ダッシュボードリダイレクト,最高,Phase 1,callback page
+84,,セッション管理,AuthProvider + onAuthStateChange,Provider内で管理。トークン自動リフレッシュ,最高,Phase 1,AuthProvider.tsx
+85,,,認証ガード middleware,未認証→/login。非管理者の/admin→/dashboard,最高,Phase 1,middleware.ts
+86,,,ログアウト,signOut + セッションクリア + /login,最高,Phase 1,ログアウトHook
+87,,,ログインセッション記録,ログイン成功時にlogin_sessions記録(device/browser/ip),高,Phase 1,記録ロジック
+88,フロントエンド構築,Next.js セットアップ,create-next-app + config + middleware,"Next.js 15+App Router+TS+Tailwind。next.config.ts(ヘッダー/リダイレクト/remotePatterns:*.supabase.co,ui-avatars.com)。middleware.ts(認証+CSP nonce)",最高,Phase 1,プロジェクト+設定
+89,,レイアウト,RootLayout,Providers(Supabase/Query/Theme) + フォント + metadata,最高,Phase 1,app/layout.tsx
+90,,,AuthLayout,サイドバー+ヘッダー+メイン+Realtime通知購読,最高,Phase 1,(auth)/layout.tsx
+91,,,PublicLayout,ヘッダー(ナビ+CTA)+フッター,最高,Phase 1,(public)/layout.tsx
+92,,,AdminLayout,AuthLayout拡張+is_adminチェック,高,Phase 2,(admin)/layout.tsx
+93,,状態管理,SupabaseProvider + QueryProvider,createBrowserClient Context。TanStack Query設定+devtools,最高,Phase 1,2 Provider
+94,,,Zustand ストア,UIStore(モーダル/サイドバー) / FilterStore(検索条件),最高,Phase 1,src/stores/*.ts
+95,,,データ取得Hooks,useProfile/useConnections/useNotifications/useEvents/useMembers/useMatchingScores/useBookmarks,最高,Phase 1,src/hooks/queries/*.ts
+96,,,ミューテーションHooks,useUpdateProfile/useRequestConnection/useMarkRead/useToggleBookmark等,最高,Phase 1,src/hooks/mutations/*.ts
+97,,,楽観的更新,コネクション承認・通知既読・ブックマークの楽観的更新+ロールバック,高,Phase 1,共通パターン
+98,,,エラーハンドリング統一,API/DBエラー→カスタムError→Toast,高,Phase 1,src/lib/errors.ts
+99,,Realtime,useRealtimeSubscription + RealtimeProvider,通知チャネルのグローバル購読。mount/unmountで自動管理,最高,Phase 1,Hook+Provider
+100,,,通知Realtime + ブラウザ通知,notifications INSERT→バッジ更新+トースト。バックグラウンド時Web Notification API。パーミッション要求UI(初回),最高,Phase 1,通知購読+Notification API
+101,,,接続状態管理,connected/reconnecting/disconnected表示+自動再接続,高,Phase 1,接続状態UI
+102,,Atoms,Button + フォーム要素,Button(variant/size/loading)。Input/Textarea/Select/Checkbox/Toggle/Radio,最高,Phase 1,shadcn/ui Atoms群
+103,,,Badge / Avatar / Skeleton / Spinner,Badge(variant/removable)。Avatar(xs〜xl/フォールバック)。ローディング系,最高,Phase 1,表示系Atoms
+104,,,Tooltip / Popover / DropdownMenu / Dialog / Sheet / Tabs,オーバーレイ系+タブ。キーボード操作対応。フォーカストラップ,最高,Phase 1,インタラクション系Atoms
+105,,Molecules,ProfileCard + ConnectionCard,プロフィール概要カード。コネクションステータス+アクション,最高,Phase 1,2コンポーネント
+106,,,NotificationToast + EmptyState + ConfirmDialog,トースト(auto消去+スタック)。空状態(ページ別)。確認ダイアログ,最高,Phase 1,3コンポーネント
+107,,,ScoreBar + BidirectionalScoreDisplay,5軸水平バー+ツールチップ。左右並列スコア表示,最高,Phase 1,2コンポーネント
+108,,,SearchBar + Pagination + ImageUploader,検索(300msデバウンス)。ページネーション+無限スクロール。画像選択→プレビュー→アップロード→進捗,高,Phase 1,3コンポーネント
+109,,Organisms,Header + Sidebar,ロゴ+ナビ+検索+通知ベル+ユーザーメニュー。モバイル:ハンバーガー/ドロワー,最高,Phase 1,2コンポーネント
+110,,,MatchCard,双方向スコア並列+理由+概要+CTA。非対称デザイン,最高,Phase 1,MatchCard.tsx
+111,,,ProfileModal,フルプロフィール+双方向スコア内訳+コネクションCTA+contact_info表示(コネクション成立後),最高,Phase 1,ProfileModal.tsx
+112,,,NotificationList + BookmarkList,通知一覧(actions ホワイトリスト実行+一括既読)。ブックマーク一覧+メモ+解除,最高,Phase 1,2コンポーネント
+113,,,MessageThread,メッセージバブル+タイムスタンプ+既読+入力+Realtime ※Phase2,高,Phase 2,MessageThread.tsx
+114,,,EventCard,タイトル+日時+タイプバッジ+参加+カバー ※Phase2,高,Phase 2,EventCard.tsx
+115,,公開ページ,ホームページ,ヒーロー+特徴+CTA+ニュースセクション(マークダウン読込)。SSG,最高,Phase 1,(public)/page.tsx
+116,,,ログイン,Email/Password + Facebookログインボタン,最高,Phase 1,login
+117,,,新規登録,フォーム+利用規約同意チェック(AI分析含む)+招待コード対応,最高,Phase 1,register
+118,,,パスワードリセット,メール送信+新パスワード設定,最高,Phase 1,forgot-password+reset-password
+119,,,Facebookコールバック,Supabase Auth自動処理→セッション確立→ダッシュボード,最高,Phase 1,auth/callback
+120,,,利用規約 / プライバシーポリシー,法的文書。AI分析の基本機能としての位置づけ+退会時削除を明記。SSG,高,Phase 1,terms+privacy
+121,,,招待受諾 / 会社概要 / ニュース / FAQ / お問い合わせ,招待コード検証。会社概要SSG。ニュース/FAQはマークダウン/JSON静的生成。問合せフォーム,高,Phase 2,5ページ
+122,,認証後ページ,ダッシュボード,統計カード+マッチング推薦。Rechartsチャートはユーザー増加後Phase2で追加,最高,Phase 1,dashboard
+123,,,プロフィール,表示+編集モーダル+ImageUploader(アバター/カバー)+contact_info編集,最高,Phase 1,profile
+124,,,コネクション,タブ(全て/承認待ち/送信済み)+検索+承認/拒否/ブロック/削除,最高,Phase 1,connections
+125,,,通知一覧,NotificationList。フィルター(未読/全て),最高,Phase 1,notifications
+126,,,マッチング,双方向カード一覧+相互おすすめ最上位+フィルター/ソート+?highlight=,最高,Phase 1,matching
+127,,,メンバー一覧,SearchBar+業種/スキルフィルター+一覧+ProfileModal+ブックマーク,最高,Phase 1,members
+128,,,設定,テーマ/通知設定/パスワード変更(PasswordChangeForm),高,Phase 1,settings
+129,,,メッセージ,会話リスト+MessageThread+Realtime ※Phase2,高,Phase 2,messages
+130,,,イベント,一覧+カレンダー+参加/キャンセル ※Phase2,高,Phase 2,events
+131,,,紹介プログラム,招待リンク+紹介履歴+ポイント残高+ランキング ※Phase2,高,Phase 2,referral
+132,,,相談予約+完了,TimeRex連携フォーム+booking-completeページ ※Phase2,高,Phase 2,consultation+complete
+133,,,プロフィール閲覧者一覧 / アクティビティ,閲覧者セクション(profile内)/アクティビティフィード ※Phase2,高,Phase 2,2セクション/ページ
+134,,,Rechartsチャート,会員成長/業種分布/イベント/紹介の4チャート ※Phase2,高,Phase 2,4チャートコンポーネント
+135,,管理者ページ,管理者ダッシュボード + スーパー管理者 + 紹介管理,会員統計/ユーザー管理/紹介統計/不正検知 ※Phase2,高,Phase 2,3管理者ページ
+136,,SEO・OGP,メタデータ + OGP + sitemap,静的metadata。next/og動的OGP。next-sitemap(認証ページnoindex),高,Phase 1,SEO設定一式
+137,,エラー・ローディング,error.tsx + not-found.tsx + loading.tsx,エラーバウンダリ+リトライ(Sentry連携Phase3)。カスタム404。Skeleton群,最高,Phase 1,3ページ
+138,,レスポンシブ,モバイルファースト + タッチターゲット,375px起点。全ページ全コンポーネント。48x48pxタッチ。テーブル→カード変換,最高,Phase 1,レスポンシブCSS
+139,,閲覧記録,送信ロジック,ProfileModal表示後3秒経過+IntersectionObserver→/api/profile-views POST。自分除外,高,Phase 1,Hook実装
+140,バックエンド構築,API基盤,ルーティング + レスポンス型 + 認証MW,"RESTful /api/v1/。{data,error,meta}共通型。withAuth()JWT検証。エラーハンドリング共通化",最高,Phase 1,基盤ファイル群
+141,,プロフィール系,/api/profiles/[id] GET + /me PATCH + /avatar POST + /consent廃止,プロフィール取得/更新/アバターアップロード。consent APIは不要(全員分析),最高,Phase 1,Route Handler群
+142,,,/api/profile-views POST + GET,閲覧記録保存(自分除外)。閲覧者一覧(直近30日) ※GETはPhase2,高,Phase 1,Route Handler
+143,,コネクション系,/api/connections GET/POST/PATCH,一覧(フィルタ)/申請(重複チェック+通知)/ステータス更新,最高,Phase 1,Route Handler群
+144,,マッチング系,/api/matching/scores GET + /[userId] GET + /mutual GET,一覧(フィルター/ソート/ページネーション)/詳細(5軸+理由)/相互(双方70%超),最高,Phase 1,Route Handler群
+145,,通知系,/api/notifications GET/PATCH + /read-all PATCH,一覧(未読フィルタ)/既読更新/一括既読,最高,Phase 1,Route Handler群
+146,,ブックマーク系,/api/bookmarks GET/POST/DELETE,一覧/追加/削除,高,Phase 1,Route Handler群
+147,,メンバー検索,/api/members GET,pg_trgm全文検索+業種/スキルフィルター+ページネーション,最高,Phase 1,Route Handler
+148,,メッセージ系,/api/messages GET/POST + /read PATCH,Phase2。会話リスト/送信(コネクション確認+通知)/既読,高,Phase 2,Route Handler群
+149,,イベント系,/api/events CRUD + participate,Phase2。管理者作成+参加(定員+通知),高,Phase 2,Route Handler群
+150,,紹介・ポイント系,/api/referrals + /api/points,Phase2。リンク生成/受諾(不正チェック)/ポイント残高・履歴,高,Phase 2,Route Handler群
+151,,予約系,/api/timerex-booking POST,Phase2。TimeRex予約セッション作成,高,Phase 2,Route Handler
+152,,管理者系,/api/admin/users + /stats + /fraud,Phase2。ユーザー管理/統計/不正フラグ。is_admin認可,高,Phase 2,Route Handler群
+153,,アクティビティ生成,共通関数 createActivity(),Phase2。コネクション承認/イベント参加/マッチング成立/招待受諾で呼出し,高,Phase 2,src/lib/activities.ts
+154,,その他,/api/contact POST + /api/health GET,問合せ(Phase2)。ヘルスチェック(DB疎通),高,Phase 1,Route Handler
+155,,Edge Functions,timerex-webhook + tldv-webhook,TimeRex:HMAC-SHA256署名検証(Phase2)。tl;dv:署名検証+transcripts更新,高,Phase 1,Deno/TS 2本
+156,,メール送信,Resend + React Email + Auth,Phase2。招待/マッチング通知/イベント通知。Auth確認/リセットメールカスタマイズ,高,Phase 2,テンプレート群
+157,,レート制限,メモリベース,Phase2。rate-limiter-flexible。認証:10/分、API:100/分、検索:30/分,高,Phase 2,ratelimit.ts
+158,双方向マッチング,tl;dv取得,Cron Job + APIクライアント + 保存,Render Cron(JST 9/12/15/18)。tl;dv REST呼出し。新規検出→transcripts+participants UPSERT,最高,Phase 1,Cron+client+保存
+159,,,多段階スピーカー紐付け,①メール直接 ②正規化名前 ③姓部分一致 ④過去リンク。全ユーザー対象(consent不要),最高,Phase 1,紐付けアルゴリズム
+160,,,手動リンクUI,自動失敗時の管理者手動紐付け ※Phase2,中,Phase 2,管理画面
+161,,トランスクリプト分析,プロンプト設計 + Zodスキーマ,Claude Sonnet 4.6用構造化抽出。日本語ビジネス会議最適化。出力をZodでパース保証,最高,Phase 1,プロンプト+スキーマ
+162,,,Claude API呼出し + 抽出,Anthropic SDK。発言者ごとにskills[]/needs[]/offerings[]/communication_traits{}/key_statements[]/engagement_metrics{}抽出。Render Worker,最高,Phase 1,analyze.ts
+163,,,insights保存 + リトライ,transcript_insights保存。status管理。指数バックオフ(max3)。error+理由保存,最高,Phase 1,保存+リトライ
+164,,,Worker起動時リカバリ,起動時にstatus=analyzingのレコード検出→リトライキューに投入,最高,Phase 1,リカバリロジック
+165,,AIプロフィール集約,差分マージ集約,複数会議→member_ai_profiles_v2。増分更新,最高,Phase 1,集約アルゴリズム
+166,,,頻度重み + 時間減衰,2回=confirmed(2.0)/1回=tentative(1.0)/3回=high(3.0)。3ヶ月:100%/6ヶ月:70%/超:40%,最高,Phase 1,重み+減衰
+167,,,communication_profile集約,全会議の加重平均。4軸安定プロフィール,高,Phase 1,集約ロジック
+168,,,退会時データ削除,purge_ai_data_on_delete: insights + ai_profiles + scores 削除。退会処理から呼出し,最高,Phase 1,削除関数
+169,,双方向スコアリング,バッチ処理(Worker),全アクティブペアの双方向。差分(is_stale=trueのみ),最高,Phase 1,Worker実装
+170,,,ミーティング未参加ユーザーのフォールバック,AI分析データなし→プロフィール(industry/position/bio)で簡易評価。重み: needs:50%/skill:30%/history:20%。transcript系3軸=50(中立),最高,Phase 1,フォールバックロジック
+171,,,needs_fulfillment (35%) + skill_complementarity (25%),ニーズ×提供セマンティック類似度。補完スキル保有度,最高,Phase 1,計算ロジック
+172,,,communication_compatibility (15%) + engagement_quality (15%),4軸相性。共同会議での関与品質,最高,Phase 1,計算ロジック
+173,,,interaction_history (10%),共同ミーティング逓減(20/15/10/5)。上限100,最高,Phase 1,計算ロジック
+174,,,score_reasons生成 + キャッシュ無効化,Claude Sonnet 4.6で理由テキスト。プロフィール更新/insights追加→is_stale=true,最高,Phase 1,理由生成+無効化
+175,,マッチングUI,相互おすすめ + カード一覧,双方70%超を最上位。双方向スコア高い順カード,最高,Phase 1,UI実装
+176,,,5軸内訳 + フィルター/ソート + ?highlight,ScoreBar×5。業種/スキル/スコアフィルタ。通知→ハイライト遷移,最高,Phase 1,詳細UI
+177,,,プロフィール遷移,カード→ProfileModal。contact_info表示(コネクション後)。コネクション申請CTA,最高,Phase 1,遷移ロジック
+178,,相互通知,閾値判定 + 通知生成 + Realtime,双方70%以上検出。mutual_match_notificationsでスキップ。パーソナライズ文面。Realtime配信+トースト,最高,Phase 1,通知パイプライン
+179,,プロンプト管理,prompt_versions運用,登録/バージョン管理/アクティブ切替,高,Phase 1,管理ロジック
+180,,,A/Bテスト + 再分析,2バージョン比較。更新時再分析オプション ※Phase2,高,Phase 2,A/B+再分析
+181,セキュリティ,CSP,nonce生成 + unsafe-inline排除,Phase2。middleware.tsでnonce→CSPヘッダー,高,Phase 2,CSP設定
+182,,,CSP違反レポート,Phase3。Report-To→Sentry,中,Phase 3,レポート
+183,,入力バリデーション,Zod集約 + サーバーサイド適用,Phase2。全入力Zod。全API RouteでZodパース→400。URL検証(http/httpsのみ),高,Phase 2,バリデーション
+184,,不正検知,招待受諾時ルール,Phase2。同一IP/24h/3件→score加算。使い捨てメールドメイン検出。閾値0.7→ブロック+flag,中,Phase 2,不正検知ロジック
+185,,プライバシー・法的,利用規約コンテンツ,AI分析を基本機能として明記。退会時データ削除保証。免責/禁止事項,高,Phase 1,テキスト
+186,,,プライバシーポリシーコンテンツ,個人情報保護法対応。AI分析の目的(マッチング)/対象(トランスクリプト)/内容(スキル等抽出)/公開範囲(ニーズ非公開)/退会時削除,高,Phase 1,テキスト
+187,,署名検証,tl;dv + TimeRex,tl;dv署名検証(Phase1)。TimeRex HMAC-SHA256(Phase2),高,Phase 1,検証ロジック
+188,インフラ・DevOps,Render,render.yaml + 全サービス,Web Service + Cron Job + Background Worker。IaC。Starter以上。ヘルスチェック(/api/health),最高,Phase 1,render.yaml+設定
+189,,Cloudflare,DNS + SSL + キャッシュ + 画像/動画,Phase2。A→Render。Full(Strict)。静的1年/HTML no-cache。Image Optimization self-host。動画キャッシュ,高,Phase 2,Cloudflare設定
+190,,CI/CD,GitHub Actions パイプライン,Phase2。lint+型チェック+テスト+プレビューデプロイ+本番デプロイ+ロールバック,高,Phase 2,ci.yml
+191,,環境管理,dev + prod,dev:Supabase Local Dev+Next.js dev。prod:Render+Supabase。.env.example整備。Render Environment Groups,最高,Phase 1,環境設定
+192,,監視,Sentry + Render Metrics + Supabase + AIパイプライン + アラート,Phase3。エラー捕捉+CPU/メモリ+DB+分析成功率。閾値超過→通知,中,Phase 3,監視設定一式
+193,,ログ,pino構造化ログ,Phase3。JSON。リクエストID。重要イベント必須(認証失敗/AI分析エラー/ポイント操作),中,Phase 3,ログ設定
+194,,バックアップ,PITR + 日次論理 + DR手順,Phase2。Supabase PITR。pg_dump→R2/30日。RPO:1h/RTO:4h,中,Phase 2,バックアップ+手順書
+195,テスト,Phase1テスト(最低限),スコア計算ユニットテスト,Vitest。5軸計算/フォールバック/重み配分/時間減衰のロジック検証。Phase1品質担保の最低ライン,最高,Phase 1,テストファイル群
+196,,,認証フローE2E,Playwright。Email登録→ログイン→ダッシュボード表示の基本パス,最高,Phase 1,e2eテスト
+197,,Phase2テスト,ユニット(Vitest),ポイント計算/招待処理/プロンプトパース/不正検知ロジック,高,Phase 2,テスト群
+198,,,コンポーネント(Testing Library),ProfileCard/MatchCard/NotificationToast/ImageUploader等,高,Phase 2,テスト群
+199,,,E2E(Playwright),コネクション/メッセージ/イベント/紹介の主要パス,高,Phase 2,e2eテスト群
+200,,,APIテスト,全Route Handlerリクエスト/レスポンス+認可,高,Phase 2,テスト群
+201,,,テストデータ,Supabaseシード。フィクスチャ。ファクトリ,高,Phase 2,ユーティリティ
+202,,パフォーマンス+a11y,Lighthouse CI + RUM + アクセシビリティ,Phase3。Performance:90/A11y:90。LCP<2.5s/INP<200ms/CLS<0.1。セマンティックHTML/キーボード/コントラスト,中,Phase 3,監査設定+レポート
+203,コンテンツ制作,サイトコンテンツ,ホームページコピー,ヒーロー/特徴/CTAコピー。ブランドトーン,最高,Phase 1,テキスト
+204,,,FAQ + 会社概要 + ニュース + メール文面,FAQ(JSON)。About。ローンチ告知md。確認/リセット/招待/マッチング通知メール ※Phase2,高,Phase 2,コンテンツ群
+205,リリース,計画,Phase 1 スコープ + ローンチ判定,登録(Email+Facebook)→プロフィール→メンバー検索→コネクション→マッチング(双方向)→通知 の全フロー動作確認。スコア計算テスト通過。DNS設定→Render稼働,最高,Phase 1,チェックリスト+判定基準
+206,,,Phase 2 / Phase 3 スコープ,Phase2:メッセージ/イベント/紹介/管理者/CI-CD/セキュリティ強化。Phase3:監視/ログ/a11y/パフォーマンス,高,Phase 2,チェックリスト
+207,,ドキュメント,双方向スコアリング仕様書,5軸計算ロジック・重み・閾値・フォールバック,高,Phase 1,仕様書
+208,,,CONTRIBUTING + 開発ガイド + 運用マニュアル,PRルール/環境構築/障害対応/バックアップ/デプロイ ※Phase2,中,Phase 2,3ドキュメント
+
+========== シート: 集計 ==========
+タスク集計,,,,
+大分類,Phase 1,Phase 2,Phase 3,合計
+プロジェクト基盤構築,14,2,1,17
+デザインシステム,18,1,0,19
+データベース設計・構築,25,14,0,39
+認証システム構築,12,0,0,12
+フロントエンド構築,41,11,0,52
+バックエンド構築,10,8,0,18
+双方向マッチング,21,2,0,23
+セキュリティ,3,3,1,7
+インフラ・DevOps,2,3,2,7
+テスト,2,5,1,8
+コンテンツ制作,1,1,0,2
+リリース,2,2,0,4
+合計,151,52,5,208
