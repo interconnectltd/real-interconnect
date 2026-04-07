@@ -53,8 +53,8 @@ export function FacebookLoginButton() {
   return (
     <Button
       type="button"
-      variant="ghost"
-      className="w-full text-muted-foreground"
+      variant="outline"
+      className="w-full"
       onClick={handleClick}
       disabled={loading}
     >
