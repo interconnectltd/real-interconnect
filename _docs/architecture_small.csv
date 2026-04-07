@@ -1,0 +1,103 @@
+大分類,中分類,小分類,説明,ファイル,状態
+システム全体像,フロントエンド,RootLayout,Inter+Noto Sans JP/metadata/Toaster,src/app/layout.tsx,完了
+システム全体像,フロントエンド,PublicLayout,ヘッダー(ロゴ+ログイン/登録)+フッター(利用規約/プライバシー),src/app/(public)/layout.tsx,完了
+システム全体像,フロントエンド,AuthLayout,SupabaseProvider+QueryProvider+Header+Sidebar+ProfileModal,src/app/(auth)/layout.tsx,完了
+システム全体像,フロントエンド,proxy.ts,認証ガード publicPaths判定→未認証リダイレクト→認証済み/login→dashboard,src/proxy.ts,完了
+システム全体像,フロントエンド,Header,ロゴ+ナビ+通知ベル(未読バッジ)+ユーザーメニュー+モバイルSheet,src/components/layouts/header.tsx,完了
+システム全体像,フロントエンド,Sidebar,6項目ナビ(Dashboard/Matching/Members/Connections/Notifications/Settings),src/components/layouts/sidebar.tsx,完了
+システム全体像,バックエンド,withAuth,Supabase getUser()認証+SupabaseClient返却,src/lib/api-helpers.ts,完了
+システム全体像,バックエンド,handleApiError,ApiError→適切なステータス+PostgreSQL 23505→409変換,src/lib/api-helpers.ts,完了
+システム全体像,バックエンド,apiClient,fetch wrapper+ApiResponse<T>パース+エラーthrow,src/lib/api-client.ts,完了
+システム全体像,バックエンド,sanitize,PostgRESTフィルタ値サニタイズ+UUID形式バリデーション,src/lib/sanitize.ts,完了
+システム全体像,データベース,Supabaseクライアント(browser),createBrowserClient+Database型,src/lib/supabase/client.ts,完了
+システム全体像,データベース,Supabaseクライアント(server),createServerClient+Cookie管理+createServiceClient,src/lib/supabase/server.ts,完了
+システム全体像,データベース,Supabaseミドルウェア,セッション更新+publicPaths判定+リダイレクト,src/lib/supabase/middleware.ts,完了
+システム全体像,データベース,マイグレーション初期,16テーブル+15インデックス+6関数+7トリガー+RLS+Storage+Seed,supabase/migrations/00001_initial_schema.sql,完了
+システム全体像,データベース,マイグレーションv3,matching_scores_v3+job_queue+transcript_insights変更+prompt v2.0.0,supabase/migrations/00002_scoring_v3.sql,完了
+双方向スコアリング,モデル設計,2軸定義,value_fit(60%)=ニーズ充足+スキル補完 relational_quality(40%)=コミュ相性+交流深さ,ARCHITECTURE.md §2.2,完了
+双方向スコアリング,モデル設計,非対称性,value_fit/engagement=非対称(viewer↔targetで異なる) comm/history=対称,ARCHITECTURE.md §2.2,完了
+双方向スコアリング,カテゴリタクソノミー,12大カテゴリ,sales/marketing/technology/finance/hr/legal/operations/strategy/design/industry/leadership/other,ARCHITECTURE.md §2.3,設計完了
+双方向スコアリング,カテゴリタクソノミー,38サブカテゴリ,各大カテゴリに3-5種のサブカテゴリ,ARCHITECTURE.md §2.3,設計完了
+双方向スコアリング,カテゴリタクソノミー,マッチ計算,完全一致=1.0/大カテゴリ一致=0.5/不一致=0.0 ×頻度×時間減衰×confidence,ARCHITECTURE.md §2.3,設計完了
+双方向スコアリング,スコア計算,Phase判定,count=0→attribute_only(α=0)/1-4→hybrid(α=0.2×count)/5+→ai_primary(α=0.85),src/lib/matching/score-compute.ts,完了
+双方向スコアリング,スコア計算,属性スコア,industryAffinity+roleComplement+bioKeywordOverlap bio空時動的重み(50/50/0),src/lib/matching/attribute-score.ts,完了
+双方向スコアリング,スコア計算,shrinkage,attribute_onlyではshrinkage迂回 hybrid/ai_primaryではAIスコアのみshrinkage適用,src/lib/matching/score-compute.ts,完了
+双方向スコアリング,スコア計算,双方向compute,viewer→target + target→viewer を同時計算してUPSERT,src/app/api/v1/matching/compute/route.ts,完了
+双方向スコアリング,スコア計算,レート制限,直近5分以内に計算済みなら早期リターン,src/app/api/v1/matching/compute/route.ts,完了
+双方向スコアリング,属性ベース,業種隣接マップ,16業種間の親和度(同一=1.0/高隣接=0.7/中=0.5/低=0.15/その他=0.25),src/lib/matching/attribute-score.ts,完了
+双方向スコアリング,属性ベース,職種補完性,14パターン正規化→12職種間の補完マトリクス(最高1.0/情報交換0.6/不明0.3),src/lib/matching/attribute-score.ts,完了
+双方向スコアリング,属性ベース,bioキーワード,12カテゴリ辞書(startup/ai_ml/saas/dx/global/investment/growth/product/data/hr_org/marketing/sales_biz),src/lib/matching/attribute-score.ts,完了
+双方向スコアリング,通知tier,判定ロジック,total≥0.75+conf≥0.6→high/total≥0.60+conf≥0.4→medium/total≥0.50→low,src/lib/matching/score-compute.ts,完了
+双方向スコアリング,通知tier,相互判定,双方のtierの低い方を採用 high→Realtime push medium→DB通知 low→一覧のみ,ARCHITECTURE.md §2.7,完了
+おすすめ理由テキストエンジン,Tier 1,属性ベース(7種),a01同業種/a02異業種/a03同職種/a04異職種/a05bioキーワード/a06会社名/a07bio充実,src/lib/matching/reason-templates.ts,完了
+おすすめ理由テキストエンジン,Tier 2,カテゴリマッチ(5種),c01 needs∩skills/c02 offerings/c03 skills重複/c04多彩スキル/c05活発活動,src/lib/matching/reason-templates.ts,完了
+おすすめ理由テキストエンジン,Tier 3,AI 2軸(6種),ai01-06 value_fit/relational_quality閾値 全てconfidence≥0.3ガード付き,src/lib/matching/reason-templates.ts,完了
+おすすめ理由テキストエンジン,Tier 4,関係性実績(4種),r01会議≥3/r02会議≥1/r03 history≥0.60/r04 rq≥0.80+会議≥2,src/lib/matching/reason-templates.ts,完了
+おすすめ理由テキストエンジン,選択ロジック,priority順位,Tier4(78-95)>Tier3(52-80)>Tier2(32-60)>Tier1(8-30),src/lib/matching/reason-templates.ts,完了
+おすすめ理由テキストエンジン,選択ロジック,重複抑制,usedTemplateIds(Set)でバッチ内同一ID最大3回,src/lib/matching/reason-templates.ts,完了
+おすすめ理由テキストエンジン,選択ロジック,フォールバック,0件時target.idハッシュで3種のデフォルト文から決定論的選択,src/lib/matching/reason-templates.ts,完了
+パイプライン,ジョブキュー,テーブル設計,job_queue(type/status/payload/priority/attempts/locked_at/locked_by),supabase/migrations/00002_scoring_v3.sql,完了
+パイプライン,ジョブキュー,ポーリング,SELECT FOR UPDATE SKIP LOCKED 5秒間隔,ARCHITECTURE.md §4.2,設計完了
+パイプライン,ジョブキュー,リトライ,指数バックオフ30s/120s/480s max3回→dead,ARCHITECTURE.md §4.2,設計完了
+パイプライン,ジョブキュー,ロックタイムアウト,5分超でstale lock自動解放,ARCHITECTURE.md §4.2,設計完了
+パイプライン,tl;dv取得,Cronポーリング,JST 9/12/15/18 新規meeting検出→transcripts UPSERT,ARCHITECTURE.md §4.1,設計完了
+パイプライン,tl;dv取得,スピーカー紐付け,①メール直接②正規化名前③姓部分一致④過去リンク,ARCHITECTURE.md §4.1,設計完了
+パイプライン,Claude分析,プロンプトv2.0.0,skills/needs(カテゴリタグ付)/offerings(カテゴリタグ付)/comm_traits/engagement,supabase/migrations/00002_scoring_v3.sql,完了
+パイプライン,Claude分析,Zodバリデーション,InsightSchema+TaggedItemLenient(不正カテゴリ→otherフォールバック),ARCHITECTURE.md §4,設計完了
+パイプライン,コスト管理,月額見積もり,100人~$4/500人~$22/1000人~$44(transcript分析+カテゴリタグ),ARCHITECTURE.md §4.3,確定
+パイプライン,コスト管理,上限ガード,月次analyze完了件数カウント→閾値超過で新規ジョブ停止,ARCHITECTURE.md §4.2,設計完了
+DBスキーマ,コアテーブル,user_profiles,id(auth.users FK)/name/email/company/position/industry/bio/avatar_url/cover_url/contact_info/is_admin/is_active,supabase/migrations/00001,完了
+DBスキーマ,コアテーブル,connections,user_id/connected_user_id/status(7種CHECK)/UNIQUE,supabase/migrations/00001,完了
+DBスキーマ,コアテーブル,notifications,user_id/type(notification_type ENUM)/title/message/link/actions(JSONB)/is_read,supabase/migrations/00001,完了
+DBスキーマ,コアテーブル,settings,user_id(UNIQUE)/theme/notifications_enabled,supabase/migrations/00001,完了
+DBスキーマ,マッチングテーブル,matching_scores_v3,viewer_id/target_id/value_fit/relational_quality/total_score/confidence/phase/score_reasons/notify_tier/is_stale,supabase/migrations/00002,完了
+DBスキーマ,マッチングテーブル,mutual_match_notifications,user_a_id/user_b_id/notified_at/UNIQUE,supabase/migrations/00001,完了
+DBスキーマ,AI分析テーブル,meeting_transcripts,tldv_meeting_id(UNIQUE)/title/meeting_date/full_text/status(6種)/meeting_type,supabase/migrations/00001+00002,完了
+DBスキーマ,AI分析テーブル,transcript_insights,transcript_id/participant_id/skills/needs(JSONB[])/offerings(JSONB[])/comm_traits/engagement,supabase/migrations/00001+00002,完了
+DBスキーマ,AI分析テーブル,member_ai_profiles_v2,user_id(UNIQUE)/aggregated_skills/needs/offerings(JSONB[])/communication_profile/analysis_count,supabase/migrations/00001,完了
+DBスキーマ,補助テーブル,job_queue,type(ENUM)/status(ENUM)/payload/priority/attempts/locked_at/locked_by,supabase/migrations/00002,完了
+DBスキーマ,補助テーブル,bookmarks,user_id/bookmarked_user_id/note/UNIQUE,supabase/migrations/00001,完了
+DBスキーマ,補助テーブル,profile_views,viewer_id/viewed_user_id/view_duration/viewed_at,supabase/migrations/00001,完了
+DBスキーマ,補助テーブル,prompt_versions,name/version(UNIQUE)/template/is_active v1.0.0+v2.0.0,supabase/migrations/00001+00002,完了
+DBスキーマ,RLS,パターン1自己データ,user_profiles/settings/bookmarks/notifications SELECT+UPDATE WHERE auth.uid()=id,supabase/migrations/00001,完了
+DBスキーマ,RLS,パターン2認証閲覧,user_profiles(active)/connections(参加者)/scores_v3(viewer)/ai_profiles/transcripts/participants,supabase/migrations/00001+00002,完了
+DBスキーマ,RLS,パターン3管理者,user_profiles/transcripts/prompt_versions FOR ALL WHERE is_admin,supabase/migrations/00001,完了
+DBスキーマ,RLS,パターン4-5公開+書込,prompt_versions公開読取/connections INSERT/profile_views INSERT/match_requests INSERT,supabase/migrations/00001,完了
+DBスキーマ,関数,handle_new_user,auth.users INSERT→user_profiles(name/email/company/position/industry/bio)+settings自動作成,supabase/migrations/00001,完了
+DBスキーマ,関数,protect_admin,is_admin/is_active変更をservice_roleのみに制限,supabase/migrations/00001,完了
+DBスキーマ,関数,mark_cache_stale,user_profiles UPDATE→matching_scores_v3のis_stale=trueに更新,supabase/migrations/00002,完了
+DBスキーマ,関数,purge_ai_data_on_delete,退会時insights/ai_profiles/scores削除+participants切断,supabase/migrations/00001,完了
+DBスキーマ,Storage,avatars,公開読取/認証書込/ユーザー別フォルダ/2MB/image/*,supabase/migrations/00001,完了
+DBスキーマ,Storage,covers,公開読取/認証書込/ユーザー別フォルダ/5MB/image/*,supabase/migrations/00001,完了
+ユーザー体験,Day 1,ホームページ,ヒーロー+特徴3つ(非対称レイアウト)+CTA,src/app/(public)/page.tsx,完了
+ユーザー体験,Day 1,登録フォーム,name/email/pw/company/position/industry(Select必須)/bio(textarea)/利用規約同意,src/components/features/auth/register-form.tsx,完了
+ユーザー体験,Day 1,メール確認,?confirmed=trueバナー+OAuthエラーバナー,src/app/(public)/login/page.tsx,完了
+ユーザー体験,Day 1,ダッシュボード,実データスタッツ4カード+おすすめTop3+新着メンバー+tl;dv CTA+双方向compute自動トリガー,src/app/(auth)/dashboard/page.tsx,完了
+ユーザー体験,Day 1,マッチング,2軸理由テキスト中心+conf≥0.5でバー+接続済みガード+申請ボタン+tl;dv CTA,src/app/(auth)/matching/page.tsx,完了
+ユーザー体験,Day 1,メンバー,検索+横スクロール業種フィルタ+カード(ブックマーク状態反映+申請ボタン)+ページネーション,src/app/(auth)/members/page.tsx,完了
+ユーザー体験,Day 1,ProfileModal,プロフィール+理由テキスト+スコアバー(conf≥0.5)+接続状態ガード+ブックマーク状態反映,src/components/features/profile/profile-modal.tsx,完了
+ユーザー体験,Day 1,コネクション,タブ(全て/承認待ち/送信済み)+承認/拒否+方向チェック,src/app/(auth)/connections/page.tsx,完了
+ユーザー体験,Day 1,通知,link遷移+actions(承認/拒否ボタン+connectionId連携)+一括既読,src/app/(auth)/notifications/page.tsx,完了
+ユーザー体験,Day 1,プロフィール,表示/編集モード+industry Select+bio textarea+contact_info(コネクション成立後公開),src/app/(auth)/profile/page.tsx,完了
+ユーザー体験,Day 1,設定,tl;dv CTA+通知設定(準備中)+テーマ(準備中),src/app/(auth)/settings/page.tsx,完了
+ユーザー体験,Day 2+,新着メンバー,ダッシュボードに直近7日の新規登録者(最大6人),src/app/(auth)/dashboard/page.tsx,完了
+ユーザー体験,Day 2+,双方向更新,再ログイン時のcompute再実行で新規ユーザーを含むスコア更新,src/app/api/v1/matching/compute/route.ts,完了
+セキュリティ,認証,JWT検証,getUser()(サーバー検証)を全API Routeで使用 getSession()不使用,src/lib/api-helpers.ts,完了
+セキュリティ,認証,方向チェック,accept/reject=受信者のみ cancel=送信者のみ,src/app/api/v1/connections/[id]/route.ts,完了
+セキュリティ,認証,OAuth,Facebook signInWithOAuth→/auth/callback route.ts→exchangeCodeForSession,src/app/(public)/auth/callback/route.ts,完了
+セキュリティ,入力検証,UUIDバリデーション,profiles/[id]でisValidUUID+connections POSTでUUID形式チェック,src/lib/sanitize.ts,完了
+セキュリティ,入力検証,industry,z.enum(INDUSTRIES)でINDUSTRIES定数以外を拒否,src/validations/profile.ts,完了
+セキュリティ,入力検証,PostgREST,sanitizeFilterValueで(),."'\を除去,src/lib/sanitize.ts,完了
+セキュリティ,データ保護,contact_info,API層でコネクションacceptedチェック→未接続はnull返却,src/app/api/v1/profiles/[id]/route.ts,完了
+セキュリティ,データ保護,XSS防止,React JSXデフォルトエスケープ dangerouslySetInnerHTML不使用,全コンポーネント,完了
+セキュリティ,レート制限,compute API,直近5分以内に計算済みなら早期リターン,src/app/api/v1/matching/compute/route.ts,完了
+セキュリティ,レート制限,UNIQUE制約,PostgreSQL 23505エラー→409 CONFLICT変換,src/lib/api-helpers.ts,完了
+セキュリティ,レート制限,ユーザー存在確認,connections POST前にuser_profiles存在+is_active確認,src/app/api/v1/connections/route.ts,完了
+UXシミュレーション,v1,P0 8件,5軸→2軸/ProfileModal/理由エンジン/属性スコア/登録フォーム/方向チェック/CTA/申請ボタン,全修正完了,完了
+UXシミュレーション,v2,データフロー3件,score_reasons→reasons/閾値0.70/mutual my_reasons,全修正完了,完了
+UXシミュレーション,v3,計算ロジック3件,shrinkage迂回/Tier3 confidenceガード/compute invalidation,全修正完了,完了
+UXシミュレーション,v4,認証+エッジ6件,sessionStorage/confirmed/ブックマーク/申請/UNIQUE 409/通知actions,全修正完了,完了
+UXシミュレーション,v5,3ペルソナ3件,connectionId/最低閾値/COMPLEMENT_MATRIX,全修正完了,完了
+UXシミュレーション,v6,視覚+操作5件,ProfileModalブックマーク/重複申請防止/disabled/モバイルフィルタ/接続済み表示,全修正完了,完了
+UXシミュレーション,v7,攻撃テスト4件,compute連打防止/ユーザー存在確認/industry enum/相互同時申請,全修正完了,完了
+UXシミュレーション,v8,プロダクト2件,双方向compute/新着メンバーセクション,全修正完了,完了

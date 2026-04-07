@@ -1,0 +1,194 @@
+#,大分類,中分類,小分類,説明,ファイル/参照,状態,Phase,備考
+1,システム全体像,,,Next.js 16 + Supabase + Render + Cloudflare のアーキテクチャ構成,,完了,1,
+2,システム全体像,フロントエンド,,Next.js 16 App Router + proxy.ts認証ガード + (public)/(auth)ルートグループ,,完了,1,
+3,システム全体像,フロントエンド,RootLayout,Inter+Noto Sans JP/metadata/Toaster,src/app/layout.tsx,完了,1,
+4,システム全体像,フロントエンド,PublicLayout,ヘッダー(ロゴ+ログイン/登録)+フッター(利用規約/プライバシー),src/app/(public)/layout.tsx,完了,1,
+5,システム全体像,フロントエンド,AuthLayout,SupabaseProvider+QueryProvider+Header+Sidebar+ProfileModal,src/app/(auth)/layout.tsx,完了,1,
+6,システム全体像,フロントエンド,proxy.ts,認証ガード publicPaths判定→未認証リダイレクト→認証済み/login→dashboard,src/proxy.ts,完了,1,
+7,システム全体像,フロントエンド,Header,ロゴ+通知ベル(未読バッジ)+ユーザーメニュー+モバイルSheet(base-ui render prop),src/components/layouts/header.tsx,完了,1,
+8,システム全体像,フロントエンド,Sidebar,6項目ナビ(Dashboard/Matching/Members/Connections/Notifications/Settings),src/components/layouts/sidebar.tsx,完了,1,
+9,システム全体像,バックエンド,,API Routes (/api/v1/*) + withAuth()認証 + RLS付きクエリ,,完了,1,
+10,システム全体像,バックエンド,withAuth,Supabase getUser()サーバー検証+SupabaseClient返却,src/lib/api-helpers.ts,完了,1,
+11,システム全体像,バックエンド,handleApiError,ApiError→適切なステータス+PostgreSQL 23505→409 CONFLICT変換,src/lib/api-helpers.ts,完了,1,
+12,システム全体像,バックエンド,apiClient,fetch wrapper+ApiResponse<T>パース+エラーthrow,src/lib/api-client.ts,完了,1,
+13,システム全体像,バックエンド,sanitize,PostgRESTフィルタ値サニタイズ+UUID形式バリデーション,src/lib/sanitize.ts,完了,1,
+14,システム全体像,データベース,,Supabase PostgreSQL + Auth + Realtime + Storage,,完了,1,
+15,システム全体像,データベース,Supabaseクライアント(browser),createBrowserClient+Database型,src/lib/supabase/client.ts,完了,1,
+16,システム全体像,データベース,Supabaseクライアント(server),createServerClient+Cookie管理+createServiceClient(service_role),src/lib/supabase/server.ts,完了,1,
+17,システム全体像,データベース,Supabaseミドルウェア,セッション更新+publicPaths判定+リダイレクト制御,src/lib/supabase/middleware.ts,完了,1,
+18,システム全体像,データベース,マイグレーション初期,16テーブル+15インデックス+6関数+7トリガー+RLS+Storage+Seed,supabase/migrations/00001_initial_schema.sql,完了,1,
+19,システム全体像,データベース,マイグレーションv3,matching_scores_v3+job_queue+transcript_insights JSONB化+prompt v2.0.0,supabase/migrations/00002_scoring_v3.sql,完了,1,
+20,システム全体像,ワーカー,,Render Worker(常駐) + Cron(JST 9/12/15/18),,設計完了,2,Worker実装はPhase 2
+21,システム全体像,外部サービス,,tl;dv API + Claude Sonnet 4.6 + Facebook OAuth,,設計完了,1-2,tl;dv/Claude接続はPhase 2
+22,双方向スコアリング,,,2軸モデル + カテゴリタグ + ベイズshrinkage + 段階的開示,,完了,1,
+23,双方向スコアリング,モデル設計,,2軸(value_fit 60% + relational_quality 40%) 旧5軸から9エージェント分析で移行,,完了,1,
+24,双方向スコアリング,モデル設計,2軸定義,value_fit=ニーズ充足+スキル補完 relational_quality=コミュ相性+交流深さ,ARCHITECTURE.md §2.2,完了,1,
+25,双方向スコアリング,モデル設計,非対称性,value_fit/engagement=非対称(viewer↔targetで異なる) comm/history=対称,ARCHITECTURE.md §2.2,完了,1,A→BとB→Aでスコアが異なる
+26,双方向スコアリング,カテゴリタクソノミー,,12大カテゴリ×38サブ=50種 Claude抽出時に付与 追加コスト+$1/月,,設計完了,2,Claude分析時に適用
+27,双方向スコアリング,カテゴリタクソノミー,12大カテゴリ,sales/marketing/technology/finance/hr/legal/operations/strategy/design/industry/leadership/other,ARCHITECTURE.md §2.3,設計完了,2,
+28,双方向スコアリング,カテゴリタクソノミー,38サブカテゴリ,各大カテゴリに3-5種のサブカテゴリ(例: marketing→digital_marketing/branding/content/analytics),ARCHITECTURE.md §2.3,設計完了,2,
+29,双方向スコアリング,カテゴリタクソノミー,マッチ計算,完全一致=1.0/大カテゴリ一致=0.5/不一致=0.0 ×頻度重み×時間減衰×confidence,ARCHITECTURE.md §2.3,設計完了,2,
+30,双方向スコアリング,スコア計算,,Phase判定→属性スコア→(AIスコア)→shrinkage→alpha混合→理由生成,,完了,1,
+31,双方向スコアリング,スコア計算,Phase判定,count=0→attribute_only(α=0) / 1-4→hybrid(α=0.2×count) / 5+→ai_primary(α=0.85),src/lib/matching/score-compute.ts,完了,1,min(viewer.count target.count)で判定
+32,双方向スコアリング,スコア計算,属性スコア,industryAffinity+roleComplement+bioKeywordOverlap bio空時動的重み(50/50/0),src/lib/matching/attribute-score.ts,完了,1,
+33,双方向スコアリング,スコア計算,shrinkage,attribute_onlyではshrinkage迂回 hybrid/ai_primaryではAIスコアのみshrinkage適用,src/lib/matching/score-compute.ts,完了,1,v3で修正:属性スコアを潰さない
+34,双方向スコアリング,スコア計算,双方向compute,viewer→target + target→viewer を同時計算してUPSERT,src/app/api/v1/matching/compute/route.ts,完了,1,v8で修正:新規ユーザー非対称性解消
+35,双方向スコアリング,スコア計算,レート制限,直近5分以内に計算済みなら早期リターン(API連打防止),src/app/api/v1/matching/compute/route.ts,完了,1,v7で追加
+36,双方向スコアリング,属性ベース,,業種隣接16種+職種補完12種+bioキーワード12カテゴリ,,完了,1,コールドスタート用
+37,双方向スコアリング,属性ベース,業種隣接マップ,16業種間の親和度(同一=1.0/高隣接=0.7/中=0.5/低=0.15/その他=0.25),src/lib/matching/attribute-score.ts,完了,1,仮説値 Phase 2でデータ駆動調整
+38,双方向スコアリング,属性ベース,職種補完性,14パターン正規表現→12職種間の補完マトリクス(CTO↔Sales=1.0/PM↔Engineer=0.9等),src/lib/matching/attribute-score.ts,完了,1,v5で欠落修正済み
+39,双方向スコアリング,属性ベース,bioキーワード,12カテゴリ辞書(startup/ai_ml/saas/dx/global/investment/growth/product/data/hr_org/marketing/sales_biz),src/lib/matching/attribute-score.ts,完了,1,形態素解析不要
+40,双方向スコアリング,通知tier,,high/medium/low の3段階通知制御,,完了,1,
+41,双方向スコアリング,通知tier,判定ロジック,total≥0.75+conf≥0.6→high / total≥0.60+conf≥0.4→medium / total≥0.50→low,src/lib/matching/score-compute.ts,完了,1,
+42,双方向スコアリング,通知tier,相互判定,双方のtierの低い方を採用 high→Realtime push medium→DB通知 low→一覧のみ,ARCHITECTURE.md §2.7,完了,1,
+43,おすすめ理由テキストエンジン,,,22テンプレート4Tier + バッチ重複抑制 + フォールバック,,完了,1,
+44,おすすめ理由テキストエンジン,Tier 1,,属性ベース理由(7種) priority 8-30,,完了,1,attribute_onlyで使用
+45,おすすめ理由テキストエンジン,Tier 1,a01 同業種,「{industry}で活躍されている方です」,src/lib/matching/reason-templates.ts,完了,1,priority 30
+46,おすすめ理由テキストエンジン,Tier 1,a02 異業種,「{industry}の知見を持つ方。異業種の視点が得られそうです」,src/lib/matching/reason-templates.ts,完了,1,priority 28
+47,おすすめ理由テキストエンジン,Tier 1,a03 同職種,「同じ{position}のポジション。共通の悩みを話し合えるかもしれません」,src/lib/matching/reason-templates.ts,完了,1,priority 25
+48,おすすめ理由テキストエンジン,Tier 1,a04 異職種,「{position}として活動中。あなたの仕事と補い合える関係です」,src/lib/matching/reason-templates.ts,完了,1,priority 20
+49,おすすめ理由テキストエンジン,Tier 1,a05 bioキーワード,「プロフィールに『{keyword}』という共通テーマがあります」,src/lib/matching/reason-templates.ts,完了,1,priority 22+重複数
+50,おすすめ理由テキストエンジン,Tier 1,a06 会社名,「{company}での経験をお持ちの方です」,src/lib/matching/reason-templates.ts,完了,1,priority 10
+51,おすすめ理由テキストエンジン,Tier 1,a07 bio充実,「幅広い経歴をお持ちの方。新たな視点が得られそうです」,src/lib/matching/reason-templates.ts,完了,1,priority 8
+52,おすすめ理由テキストエンジン,Tier 2,,カテゴリマッチ理由(5種) priority 32-60,,完了,1,hybrid以降で使用
+53,おすすめ理由テキストエンジン,Tier 2,c01 needs∩skills,「あなたが求めている『{need}』に関連するスキルをお持ちです」,src/lib/matching/reason-templates.ts,完了,1,priority 60
+54,おすすめ理由テキストエンジン,Tier 2,c02 offerings,「『{offering}』を提供できる方。あなたの活動の力になりそうです」,src/lib/matching/reason-templates.ts,完了,1,priority 50
+55,おすすめ理由テキストエンジン,Tier 2,c03 skills重複,「『{skill}』という共通の得意分野があります。話が弾みそうです」,src/lib/matching/reason-templates.ts,完了,1,priority 48
+56,おすすめ理由テキストエンジン,Tier 2,c04 多彩スキル,「多彩なスキルセットの持ち主。意外なコラボの可能性を秘めています」,src/lib/matching/reason-templates.ts,完了,1,priority 35 confidence≥0.3
+57,おすすめ理由テキストエンジン,Tier 2,c05 活発活動,「コミュニティで積極的に活動されている方です」,src/lib/matching/reason-templates.ts,完了,1,priority 32 confidence≥0.28
+58,おすすめ理由テキストエンジン,Tier 3,,AI 2軸理由(6種) priority 52-80 全てconfidence≥0.3ガード,,完了,1,v3で誤発火修正済み
+59,おすすめ理由テキストエンジン,Tier 3,ai01 高value_fit,「あなたのニーズと相手の強みが高い確度で一致しています」,src/lib/matching/reason-templates.ts,完了,1,vf≥0.70 priority 70+
+60,おすすめ理由テキストエンジン,Tier 3,ai02 中value_fit,「スキルの組み合わせに相乗効果がありそうです」,src/lib/matching/reason-templates.ts,完了,1,vf≥0.60 priority 62+
+61,おすすめ理由テキストエンジン,Tier 3,ai03 高relational,「コミュニケーションのスタイルが近く、打ち解けやすい相手です」,src/lib/matching/reason-templates.ts,完了,1,rq≥0.70 priority 65+
+62,おすすめ理由テキストエンジン,Tier 3,ai04 具体マッチ,「あなたの課題『{need}』に対して『{offering}』という解決策を持つ方です」,src/lib/matching/reason-templates.ts,完了,1,needs∩offerings priority 75
+63,おすすめ理由テキストエンジン,Tier 3,ai05 engagement,「会話の深まりが期待できる組み合わせです」,src/lib/matching/reason-templates.ts,完了,1,rq≥0.60 priority 55
+64,おすすめ理由テキストエンジン,Tier 3,ai06 バランス,「ニーズとスキルの双方でバランスよく噛み合っています」,src/lib/matching/reason-templates.ts,完了,1,vf≥0.50+rq≥0.50 priority 52
+65,おすすめ理由テキストエンジン,Tier 4,,関係性実績理由(4種) priority 78-95,,完了,1,tl;dv分析後に使用
+66,おすすめ理由テキストエンジン,Tier 4,r01 会議≥3回,「{count}回の会議を通じて、深い信頼関係が築かれています」,src/lib/matching/reason-templates.ts,完了,1,priority 90+count
+67,おすすめ理由テキストエンジン,Tier 4,r02 会議≥1回,「過去に同じ場で話した経験があり、次の対話がさらに実りあるものに」,src/lib/matching/reason-templates.ts,完了,1,priority 80
+68,おすすめ理由テキストエンジン,Tier 4,r03 交流パターン,「これまでの交流パターンから、相性の良さがうかがえます」,src/lib/matching/reason-templates.ts,完了,1,rq≥0.60+会議≥1 priority 78
+69,おすすめ理由テキストエンジン,Tier 4,r04 テンポ,「会話のテンポが合う方。議論が自然に深まる関係です」,src/lib/matching/reason-templates.ts,完了,1,rq≥0.80+会議≥2 priority 85
+70,おすすめ理由テキストエンジン,選択ロジック,,priority降順→最大3件→バッチ内重複抑制,,完了,1,
+71,おすすめ理由テキストエンジン,選択ロジック,priority順位,Tier4(78-95) > Tier3(52-80) > Tier2(32-60) > Tier1(8-30),src/lib/matching/reason-templates.ts,完了,1,
+72,おすすめ理由テキストエンジン,選択ロジック,重複抑制,usedTemplateIds(Set)でバッチ内同一ID最大3回,src/lib/matching/reason-templates.ts,完了,1,
+73,おすすめ理由テキストエンジン,選択ロジック,フォールバック,0件時target.idハッシュで3種のデフォルト文から決定論的選択,src/lib/matching/reason-templates.ts,完了,1,
+74,おすすめ理由テキストエンジン,文体ガイドライン,,AIっぽさゼロ 禁止:分析の結果/データに基づき/スコアが高い/AIが判断,ARCHITECTURE.md §3.1,完了,1,
+75,パイプライン,,,Cron→Worker→analyze→aggregate→score→notify のジョブチェーン,,設計完了,2,Worker実装はPhase 2
+76,パイプライン,ジョブキュー,,PostgreSQL SELECT FOR UPDATE SKIP LOCKED 4タイプ,,完了,2,テーブル定義済み
+77,パイプライン,ジョブキュー,テーブル設計,job_queue(type ENUM/status ENUM/payload JSONB/priority/attempts/locked_at/locked_by),supabase/migrations/00002_scoring_v3.sql,完了,2,
+78,パイプライン,ジョブキュー,ポーリング,SELECT FOR UPDATE SKIP LOCKED 5秒間隔 priority DESC,ARCHITECTURE.md §4.2,設計完了,2,
+79,パイプライン,ジョブキュー,リトライ,指数バックオフ 30s/120s/480s max3回超過→dead,ARCHITECTURE.md §4.2,設計完了,2,
+80,パイプライン,ジョブキュー,ロックタイムアウト,5分超でstale lock自動解放 Worker起動時にリカバリ,ARCHITECTURE.md §4.2,設計完了,2,
+81,パイプライン,tl;dv取得,,Cron→ポーリング→transcripts保存→スピーカー紐付け,,設計完了,2,
+82,パイプライン,tl;dv取得,Cronポーリング,JST 9/12/15/18 新規meeting検出→transcripts UPSERT(status遷移),ARCHITECTURE.md §4.1,設計完了,2,
+83,パイプライン,tl;dv取得,スピーカー紐付け,4段階: ①メール直接②正規化名前③姓部分一致④過去リンク履歴,ARCHITECTURE.md §4.1,設計完了,2,
+84,パイプライン,Claude分析,,transcript_insights抽出+カテゴリタグ付与+Zodバリデーション,,設計完了,2,
+85,パイプライン,Claude分析,プロンプトv2.0.0,skills/needs(カテゴリタグ付)/offerings(カテゴリタグ付)/comm_traits/engagement,supabase/migrations/00002_scoring_v3.sql,完了,2,DB登録済み
+86,パイプライン,Claude分析,Zodバリデーション,InsightSchema+TaggedItemLenient(不正カテゴリ→otherフォールバック),ARCHITECTURE.md §4,設計完了,2,
+87,パイプライン,スコアリングバッチ,,is_stale差分→500件/batch→双方向compute→相互マッチ判定,,完了,1,compute API実装済み
+88,パイプライン,コスト管理,,月次予算管理+レート制限,,完了,1,
+89,パイプライン,コスト管理,月額見積もり,100人~$4 / 500人~$22 / 1000人~$44 (transcript分析+カテゴリタグ),ARCHITECTURE.md §4.3,確定,1,
+90,パイプライン,コスト管理,上限ガード,月次analyze完了件数カウント→閾値超過で新規ジョブ停止,ARCHITECTURE.md §4.2,設計完了,2,
+91,DBスキーマ,,,16テーブル + matching_scores_v3 + job_queue + RLS + Storage,,完了,1,
+92,DBスキーマ,コアテーブル,,user_profiles/connections/notifications/settings,,完了,1,
+93,DBスキーマ,コアテーブル,user_profiles,id(auth.users FK CASCADE)/name/email/company/position/industry/bio/avatar_url/cover_url/contact_info/is_admin/is_active,supabase/migrations/00001,完了,1,
+94,DBスキーマ,コアテーブル,connections,user_id/connected_user_id/status(7種CHECK: pending~reaccepted)/UNIQUE,supabase/migrations/00001,完了,1,
+95,DBスキーマ,コアテーブル,notifications,user_id/type(notification_type ENUM 6種)/title/message/link/actions(JSONB)/is_read,supabase/migrations/00001,完了,1,
+96,DBスキーマ,コアテーブル,settings,user_id(UNIQUE)/theme(light/dark/system)/notifications_enabled,supabase/migrations/00001,完了,1,
+97,DBスキーマ,マッチングテーブル,,matching_scores_v3/mutual_match_notifications/match_requests/match_connections,,完了,1,
+98,DBスキーマ,マッチングテーブル,matching_scores_v3,viewer_id/target_id(UNIQUE)/value_fit/relational_quality/total_score/confidence/phase/score_reasons(JSONB)/notify_tier/is_stale,supabase/migrations/00002,完了,1,v2から移行
+99,DBスキーマ,マッチングテーブル,mutual_match_notifications,user_a_id/user_b_id(UNIQUE)/notified_at 通知重複防止,supabase/migrations/00001,完了,1,
+100,DBスキーマ,AI分析テーブル,,meeting_transcripts/meeting_participants/transcript_insights/member_ai_profiles_v2,,完了,1,
+101,DBスキーマ,AI分析テーブル,meeting_transcripts,tldv_meeting_id(UNIQUE)/title/meeting_date/full_text/status(6種CHECK)/meeting_type(5種)/error_message,supabase/migrations/00001+00002,完了,1,
+102,DBスキーマ,AI分析テーブル,meeting_participants,transcript_id(FK)/user_id(FK nullable)/speaker_name/email/speaking_ratio/is_linked/linked_method(5種CHECK),supabase/migrations/00001,完了,1,
+103,DBスキーマ,AI分析テーブル,transcript_insights,transcript_id/participant_id(FK)/skills(TEXT[])/needs(JSONB[])/offerings(JSONB[])/comm_traits(JSONB)/engagement(JSONB)/confidence_score,supabase/migrations/00001+00002,完了,1,v2でJSONB[]化
+104,DBスキーマ,AI分析テーブル,member_ai_profiles_v2,user_id(UNIQUE FK)/aggregated_skills/needs/offerings(JSONB[])/communication_profile(JSONB)/analysis_count/last_analyzed_at,supabase/migrations/00001,完了,1,
+105,DBスキーマ,補助テーブル,,job_queue/bookmarks/profile_views/prompt_versions/login_sessions,,完了,1,
+106,DBスキーマ,補助テーブル,job_queue,type(ENUM 4種)/status(ENUM 5種)/payload(JSONB)/priority/attempts/max_attempts/locked_at/locked_by,supabase/migrations/00002,完了,2,
+107,DBスキーマ,補助テーブル,bookmarks,user_id/bookmarked_user_id(UNIQUE)/note,supabase/migrations/00001,完了,1,
+108,DBスキーマ,補助テーブル,profile_views,viewer_id/viewed_user_id/view_duration/viewed_at,supabase/migrations/00001,完了,1,
+109,DBスキーマ,補助テーブル,prompt_versions,name/version(UNIQUE)/template(TEXT)/is_active v1.0.0(旧)+v2.0.0(カテゴリタグ対応),supabase/migrations/00001+00002,完了,1,
+110,DBスキーマ,補助テーブル,login_sessions,user_id(FK)/device/browser/ip_address(INET),supabase/migrations/00001,完了,1,
+111,DBスキーマ,RLS,,6パターン 全テーブルRLS有効化,,完了,1,
+112,DBスキーマ,RLS,パターン1 自己データ,user_profiles/settings/bookmarks/notifications WHERE auth.uid()=id,supabase/migrations/00001,完了,1,
+113,DBスキーマ,RLS,パターン2 認証閲覧,profiles(active)/connections(参加者)/scores_v3(viewer)/ai_profiles/transcripts/participants,supabase/migrations/00001+00002,完了,1,
+114,DBスキーマ,RLS,パターン3 管理者,user_profiles/transcripts/prompt_versions FOR ALL WHERE is_admin=true,supabase/migrations/00001,完了,1,
+115,DBスキーマ,RLS,パターン4-5 公開+書込,prompt_versions公開読取/connections INSERT/profile_views INSERT/match_requests INSERT,supabase/migrations/00001,完了,1,
+116,DBスキーマ,関数・トリガー,,6関数+7トリガー,,完了,1,
+117,DBスキーマ,関数・トリガー,handle_new_user,auth.users INSERT→user_profiles(name/email/company/position/industry/bio)+settings自動作成,supabase/migrations/00001,完了,1,signUpのmeta_dataから取得
+118,DBスキーマ,関数・トリガー,update_updated_at,汎用updated_at自動更新(user_profiles/connections/settings/member_ai_profiles_v2),supabase/migrations/00001,完了,1,4テーブルにトリガー
+119,DBスキーマ,関数・トリガー,protect_admin,is_admin/is_active変更をservice_roleのみに制限,supabase/migrations/00001,完了,1,
+120,DBスキーマ,関数・トリガー,mark_cache_stale,user_profiles UPDATE→matching_scores_v3のis_stale=trueに更新(既にstaleは除外),supabase/migrations/00002,完了,1,WAL節約
+121,DBスキーマ,関数・トリガー,get_public_ai_profiles,AI profiles取得(aggregated_needsを除外=プライバシー保護),supabase/migrations/00001,完了,1,
+122,DBスキーマ,関数・トリガー,purge_ai_data_on_delete,退会時 insights/ai_profiles/scores削除+participants user_id切断,supabase/migrations/00001,完了,1,
+123,DBスキーマ,Storage,,avatars + covers バケット,,完了,1,
+124,DBスキーマ,Storage,avatars,公開読取/認証書込/ユーザー別フォルダ/2MB/image/* (jpeg/png/webp/gif),supabase/migrations/00001,完了,1,
+125,DBスキーマ,Storage,covers,公開読取/認証書込/ユーザー別フォルダ/5MB/image/* (jpeg/png/webp),supabase/migrations/00001,完了,1,
+126,ユーザー体験,,,Day1属性ベース→Day7カテゴリタグ→Day30 2軸→Day90詳細開示,,完了,1,
+127,ユーザー体験,Day 1,,登録→compute→おすすめ→申請→承認→contact_info交換 の全フロー,,完了,1,
+128,ユーザー体験,Day 1,ホームページ,ヒーロー(キャッチコピー)+特徴3つ(非対称レイアウト Brain/Users/Shield)+CTA2つ,src/app/(public)/page.tsx,完了,1,
+129,ユーザー体験,Day 1,登録フォーム,name*/email*/pw*/company/position/industry*(Select 16業種)/bio(textarea 動機付けplaceholder)/利用規約同意*,src/components/features/auth/register-form.tsx,完了,1,zodResolver使用
+130,ユーザー体験,Day 1,メール確認,?confirmed=true→緑バナー「確認メールを送信しました」 ?error=auth→赤バナー,src/app/(public)/login/page.tsx,完了,1,v4で追加
+131,ユーザー体験,Day 1,ダッシュボード,実データスタッツ4カード(リンク付き)+おすすめTop3(理由テキスト)+新着メンバー(直近7日)+tl;dv CTA+双方向compute自動,src/app/(auth)/dashboard/page.tsx,完了,1,v3+v8で大幅改善
+132,ユーザー体験,Day 1,マッチング,2軸理由テキスト中心+conf≥0.5で言語ラベルバー+接続済みBadge+disabled申請ボタン+tl;dv CTA+min_score 0.35,src/app/(auth)/matching/page.tsx,完了,1,v1-v6で段階的改善
+133,ユーザー体験,Day 1,メンバー,検索(デバウンス)+横スクロール業種フィルタ+カード(ブックマーク状態fill反映+UserPlus申請)+ページネーション,src/app/(auth)/members/page.tsx,完了,1,v4+v6で改善
+134,ユーザー体験,Day 1,ProfileModal,プロフィール+理由テキスト(matchScore.reasons)+スコアバー(conf≥0.5)+接続済みガード+ブックマーク状態反映,src/components/features/profile/profile-modal.tsx,完了,1,v1で新規作成 v6で状態反映追加
+135,ユーザー体験,Day 1,コネクション,タブ3種(全て/承認待ち/送信済み)+承認/拒否ボタン+方向チェック+状態遷移バリデーション,src/app/(auth)/connections/page.tsx,完了,1,
+136,ユーザー体験,Day 1,通知,link遷移(router.push)+actionsボタン(accept/reject+connectionId連携)+一括既読+未読バッジ,src/app/(auth)/notifications/page.tsx,完了,1,v4+v5で段階的改善
+137,ユーザー体験,Day 1,プロフィール,表示/編集モード+industry Select(INDUSTRIES)+bio textarea+contact_info(コネクション成立後公開ラベル),src/app/(auth)/profile/page.tsx,完了,1,v2で業種Select化
+138,ユーザー体験,Day 1,設定,tl;dv CTA(localStorage dismiss)+通知設定(準備中)+テーマ(準備中),src/app/(auth)/settings/page.tsx,完了,1,v1で「Phase 2」除去
+139,ユーザー体験,Day 2+,,新着メンバー+双方向スコア更新,,完了,1,v8で追加
+140,ユーザー体験,Day 2+,新着メンバー,ダッシュボードに直近7日の新規登録者(最大6人 カード表示),src/app/(auth)/dashboard/page.tsx,完了,1,リテンション対策
+141,ユーザー体験,Day 2+,双方向更新,再ログイン時(sessionStorage未設定)にcompute再実行→新規ユーザー含むスコア更新,src/app/api/v1/matching/compute/route.ts,完了,1,5分レート制限付き
+142,セキュリティ,,,認証+入力検証+データ保護+レート制限,,完了,1,v1-v7で段階的強化
+143,セキュリティ,認証,,JWT検証+方向チェック+OAuth,,完了,1,
+144,セキュリティ,認証,JWT検証,全API RouteでgetUser()(サーバー検証)使用 getSession()不使用,src/lib/api-helpers.ts,完了,1,
+145,セキュリティ,認証,方向チェック,accept/reject=connected_user_id(受信者)のみ cancel=user_id(送信者)のみ,src/app/api/v1/connections/[id]/route.ts,完了,1,v1でCritical修正
+146,セキュリティ,認証,OAuth,Facebook signInWithOAuth→/auth/callback route.ts→exchangeCodeForSession→/dashboard,src/app/(public)/auth/callback/route.ts,完了,1,
+147,セキュリティ,入力検証,,UUID+industry+PostgREST+ユーザー存在,,完了,1,
+148,セキュリティ,入力検証,UUID,profiles/[id]でisValidUUID+connections POSTでUUID形式チェック,src/lib/sanitize.ts,完了,1,
+149,セキュリティ,入力検証,industry,z.enum(INDUSTRIES)でINDUSTRIES定数(16種)以外を拒否,src/validations/profile.ts,完了,1,v7で追加
+150,セキュリティ,入力検証,PostgREST,sanitizeFilterValueで () . " ' \ を除去,src/lib/sanitize.ts,完了,1,
+151,セキュリティ,入力検証,ユーザー存在確認,connections POST前にuser_profiles存在+is_active=true確認,src/app/api/v1/connections/route.ts,完了,1,v7で追加
+152,セキュリティ,データ保護,,contact_info制御+XSS防止,,完了,1,
+153,セキュリティ,データ保護,contact_info,API層でconnections accepted確認→未接続ユーザーにはnull返却,src/app/api/v1/profiles/[id]/route.ts,完了,1,
+154,セキュリティ,データ保護,XSS防止,React JSXデフォルトエスケープ dangerouslySetInnerHTML/innerHTML不使用,全コンポーネント,完了,1,
+155,セキュリティ,レート制限,,compute API+UNIQUE制約+ユーザー存在,,完了,1,
+156,セキュリティ,レート制限,compute API,直近5分以内にcalculated_at存在なら早期リターン(API連打防止),src/app/api/v1/matching/compute/route.ts,完了,1,v7で追加
+157,セキュリティ,レート制限,UNIQUE制約,PostgreSQL 23505エラー→handleApiErrorで409 CONFLICT変換,src/lib/api-helpers.ts,完了,1,v4で追加
+158,既知のリスクと対策,,,7項目のリスク認識,,認識済み,1-2,
+159,既知のリスクと対策,,tl;dv接続率が低い,属性ベース推薦で最低限の価値提供+tl;dv接続促進CTA,ARCHITECTURE.md §7,認識済み,1,
+160,既知のリスクと対策,,業種隣接マップが不正確,コネクション承認率データで重み調整予定,ARCHITECTURE.md §7,認識済み,2,仮説値
+161,既知のリスクと対策,,テンプレート繰り返し,テンプレート増加(22→40-50種)+上位ペアのみClaude生成,ARCHITECTURE.md §7,認識済み,2,
+162,既知のリスクと対策,,Claude分析ハルシネーション,analysis_count≥3でゲート+confidence shrinkage,ARCHITECTURE.md §7,認識済み,1,
+163,既知のリスクと対策,,O(n²)スコア計算,is_stale差分+業種フィルタリングでペア数削減,ARCHITECTURE.md §7,認識済み,2,
+164,既知のリスクと対策,,短い会議の分析精度,meeting_type分類+短時間会議の重み低減,ARCHITECTURE.md §7,認識済み,2,
+165,既知のリスクと対策,,confidence精度限界,Phase 2で meeting_type × duration を加味した品質スコアに拡張,ARCHITECTURE.md §7,認識済み,2,
+166,技術スタック,,,9技術の確定構成,,確定,1,
+167,技術スタック,,フレームワーク,Next.js 16.2.2 App Router + Turbopack,,確定,1,
+168,技術スタック,,UI,shadcn/ui v4 base-nova + Tailwind CSS v4 + oklchカラー(Teal Primary+Terracotta Accent+Warm Gray),,確定,1,
+169,技術スタック,,DB,Supabase PostgreSQL + Auth + Realtime + Storage (Pro),,確定,1,
+170,技術スタック,,ホスティング,Render Web Service + Worker + Cron (Starter+),,確定,1,
+171,技術スタック,,CDN,Cloudflare (Phase 2),,確定,2,
+172,技術スタック,,AI分析,Claude Sonnet 4.6 (Anthropic API),,確定,2,
+173,技術スタック,,状態管理,Zustand(UIStore/FilterStore) + TanStack Query(サーバーデータ staleTime 60s),,確定,1,
+174,技術スタック,,バリデーション,Zod v4 (zod/v4) + @hookform/resolvers/zod,,確定,1,
+175,技術スタック,,認証,Email/Password + Facebook OAuth (Supabase Auth) + proxy.ts,,確定,1,
+176,UXシミュレーション,,,8ラウンド完了 20+エージェント投入 全P0修正済み,,完了,1,
+177,UXシミュレーション,v1,P0 8件,5軸→2軸/ProfileModal/理由エンジン/属性スコア/登録フォーム/方向チェック/CTA/申請ボタン,,完了,1,全修正完了
+178,UXシミュレーション,v2,データフロー3件,score_reasons→reasons マッピング/閾値70→0.70/mutual my_reasons,,完了,1,全修正完了
+179,UXシミュレーション,v3,計算ロジック3件,shrinkage迂回/Tier3 confidenceガード/compute invalidation,,完了,1,全修正完了
+180,UXシミュレーション,v4,認証+エッジ6件,sessionStorage/confirmed/ブックマーク状態/メンバー申請/UNIQUE 409/通知actions,,完了,1,全修正完了
+181,UXシミュレーション,v5,3ペルソナ3件,connectionId payload/おすすめ最低閾値0.35/COMPLEMENT_MATRIX拡充,,完了,1,全修正完了
+182,UXシミュレーション,v6,視覚+操作5件,ProfileModalブックマーク/重複申請防止Badge/disabled制御/モバイルフィルタ/接続済み表示,,完了,1,全修正完了
+183,UXシミュレーション,v7,攻撃テスト4件,compute 5分レート制限/ユーザー存在確認/industry z.enum/23505→409,,完了,1,全修正完了
+184,UXシミュレーション,v8,プロダクト2件,双方向compute(A→B+B→A同時)/新着メンバーセクション(直近7日),,完了,1,全修正完了
+185,残存LOW,,,8件 MVP許容,,認識済み,2,
+186,残存LOW,,tl;dv接続placeholder,「接続する」ボタンが#tldv-connect OAuth実装は別タスク,,認識済み,2,
+187,残存LOW,,設定ページ準備中,通知設定/テーマが「準備中」表示,,認識済み,2,
+188,残存LOW,,Realtime未実装,通知がポーリング30秒間隔 機能的には動作,,認識済み,2,
+189,残存LOW,,自分自身ブックマーク,UIから到達しにくく実害なし,,認識済み,2,
+190,残存LOW,,同スコア帯ランダム性なし,DB insertion orderでタイブレーク,,認識済み,2,
+191,残存LOW,,通知量Day7+で0-1件,週次メール(Phase 2)で補完予定,,認識済み,2,
+192,残存LOW,,メール未確認アクセス,Supabase設定依存 middleware未チェック,,認識済み,2,
+193,残存LOW,,useQuery失敗時エラー表示,toast(mutation側)で最低限カバー 空状態表示で代替,,認識済み,2,

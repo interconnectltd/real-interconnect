@@ -1,0 +1,10 @@
+大分類,説明,状態
+システム全体像,Next.js 16 + Supabase + Render + Cloudflare のアーキテクチャ構成,完了
+双方向スコアリング,2軸モデル + カテゴリタグ + ベイズshrinkage + 段階的開示,完了
+おすすめ理由テキストエンジン,22テンプレート4Tier + バッチ重複抑制 + フォールバック,完了
+パイプライン,Cron→Worker→analyze→aggregate→score→notify のジョブチェーン,設計完了/実装Phase2
+DBスキーマ,16テーブル + matching_scores_v3 + job_queue + RLS + Storage,完了
+ユーザー体験の段階的進化,Day1属性ベース→Day7カテゴリタグ→Day30 2軸→Day90詳細開示,完了
+既知のリスクと対策,tl;dv接続率/業種マップ精度/テンプレート繰り返し/O(n²)等7項目,認識済み
+技術スタック,Next.js16/shadcn v4/Supabase/Render/Claude Sonnet/Zustand/TanStack Query/Zod,確定
+UXシミュレーション結果,8ラウンド完了 全P0修正済み 残存LOWのみ,完了

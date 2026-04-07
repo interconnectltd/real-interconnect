@@ -1,0 +1,38 @@
+大分類,中分類,説明,状態
+システム全体像,フロントエンド,Next.js 16 App Router + proxy.ts認証ガード + (public)/(auth)ルートグループ,完了
+システム全体像,バックエンド,API Routes (/api/v1/*) + withAuth()認証 + RLS付きクエリ,完了
+システム全体像,データベース,Supabase PostgreSQL + Auth + Realtime + Storage,完了
+システム全体像,ワーカー,Render Worker(常駐) + Cron(JST 9/12/15/18),設計完了
+システム全体像,外部サービス,tl;dv API + Claude Sonnet 4.6 + Facebook OAuth,設計完了
+双方向スコアリング,モデル設計,2軸(value_fit 60% + relational_quality 40%) 旧5軸から移行,完了
+双方向スコアリング,カテゴリタクソノミー,12大カテゴリ×38サブ=50種 Claude抽出時付与,設計完了
+双方向スコアリング,スコア計算フロー,Phase判定→属性スコア→AIスコア→shrinkage→alpha混合→理由生成,完了
+双方向スコアリング,属性ベースマッチング,業種隣接16種+職種補完12種+bioキーワード12カテゴリ,完了
+双方向スコアリング,ベイズshrinkage,confidence=min(count/7,1.0) attribute_onlyではshrinkage迂回,完了
+双方向スコアリング,通知tier,high(≥0.75+conf≥0.6)/medium(≥0.60+conf≥0.4)/low(≥0.50),完了
+おすすめ理由テキストエンジン,テンプレート体系,Tier1属性(7種)+Tier2カテゴリ(5種)+Tier3 AI(6種)+Tier4関係性(4種),完了
+おすすめ理由テキストエンジン,選択ロジック,priority降順→最大3件→バッチ内重複抑制(同一ID最大3回),完了
+おすすめ理由テキストエンジン,文体ガイドライン,AIっぽさゼロ 禁止:分析の結果/データに基づき/スコアが高い,完了
+パイプライン,ジョブキュー,PostgreSQL SELECT FOR UPDATE SKIP LOCKED 4タイプ(analyze/aggregate/score/notify),設計完了
+パイプライン,tl;dv取得,Cron→ポーリング→transcripts UPSERT→スピーカー紐付け4段階,設計完了
+パイプライン,Claude分析,transcript_insights抽出+カテゴリタグ付与+Zodバリデーション,設計完了
+パイプライン,スコアリングバッチ,is_stale差分→500件/batch→双方向compute→相互マッチ判定,完了
+パイプライン,コスト管理,月次上限ガード+5分レート制限+500人で~$22/月,完了
+DBスキーマ,コアテーブル,user_profiles/connections/notifications/settings/login_sessions,完了
+DBスキーマ,マッチングテーブル,match_requests/match_connections/matching_scores_v3,完了
+DBスキーマ,AI分析テーブル,meeting_transcripts/meeting_participants/transcript_insights/member_ai_profiles_v2,完了
+DBスキーマ,補助テーブル,profile_views/bookmarks/prompt_versions/mutual_match_notifications/job_queue,完了
+DBスキーマ,RLS,6パターン(自己/認証閲覧/管理者/公開/認証書込/service_role) 全テーブル有効,完了
+DBスキーマ,関数・トリガー,handle_new_user/update_updated_at/protect_admin/mark_cache_stale/get_public_ai_profiles/purge_ai_data_on_delete,完了
+ユーザー体験,Day 1,属性ベースおすすめ+理由テキスト+新着メンバー+tl;dv CTA,完了
+ユーザー体験,Day 7,カテゴリタグ由来の共通関心タグ+理由テキスト具体化,設計完了
+ユーザー体験,Day 30,「特におすすめ」セクション分離+箇条書き3点理由,設計完了
+ユーザー体験,Day 90,オプトイン2軸バー+言語ラベル(高い/中程度/これから),設計完了
+技術スタック,フレームワーク,Next.js 16.2.2 App Router + Turbopack,確定
+技術スタック,UI,shadcn/ui v4 base-nova + Tailwind CSS v4 + oklchカラー,確定
+技術スタック,状態管理,Zustand(UIStore/FilterStore) + TanStack Query(サーバーデータ),確定
+技術スタック,バリデーション,Zod v4 + @hookform/resolvers,確定
+技術スタック,認証,Supabase Auth(Email/Password + Facebook OAuth) + proxy.ts,確定
+UXシミュレーション,v1-v4(コード品質),P0 8件+データフロー3件+計算ロジック3件+認証/エッジ6件→全修正完了,完了
+UXシミュレーション,v5-v6(体験品質),3ペルソナ全フロー+視覚/インタラクション→全修正完了,完了
+UXシミュレーション,v7-v8(耐性+プロダクト),攻撃テスト+プロダクトレベルギャップ→全修正完了,完了

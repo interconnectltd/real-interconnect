@@ -655,7 +655,11 @@ async function getProfile(req, { params }) {
 
 ## 5. 双方向マッチングアルゴリズム
 
-### 5.1 パイプライン全体図
+> **注意**: このセクションは旧5軸設計のまま残されています。
+> 最新の設計は `/ARCHITECTURE.md` セクション2-4を参照してください。
+> 主な変更: 5軸→2軸、ビッグラムJaccard→カテゴリタグ、スコア数値非表示、ベイズshrinkage導入。
+
+### 5.1 パイプライン全体図 (旧設計 — ARCHITECTURE.md参照)
 
 ```
 [Render Cron: JST 9/12/15/18]
