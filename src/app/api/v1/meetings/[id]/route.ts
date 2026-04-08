@@ -1,5 +1,6 @@
 import { withAuth, json, jsonError, handleApiError } from "@/lib/api-helpers";
 import { isValidUUID } from "@/lib/sanitize";
+import { createServiceClient } from "@/lib/supabase/server";
 
 /** PATCH /api/v1/meetings/[id] — 会議ステータス更新 (confirm/cancel/complete) */
 export async function PATCH(
@@ -47,8 +48,9 @@ export async function PATCH(
         .eq("meeting_id", id)
         .neq("user_id", user.id);
 
+      const serviceClient = await createServiceClient();
       for (const p of allParticipants ?? []) {
-        await supabase.from("notifications").insert({
+        await serviceClient.from("notifications").insert({
           user_id: p.user_id,
           type: "meeting_confirmed",
           title: "会議が確定しました",

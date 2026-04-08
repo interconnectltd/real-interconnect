@@ -1,5 +1,6 @@
 import { withAuth, json, jsonError, handleApiError } from "@/lib/api-helpers";
 import { isValidUUID } from "@/lib/sanitize";
+import { createServiceClient } from "@/lib/supabase/server";
 import type { Database } from "@/types/database";
 
 export async function GET(request: Request) {
@@ -105,8 +106,9 @@ export async function POST(request: Request) {
 
     if (error) throw error;
 
-    // Create notification (no JSON.stringify — Supabase handles serialization)
-    await supabase.from("notifications").insert({
+    // Create notification via service role (RLS blocks cross-user insert)
+    const serviceClient = await createServiceClient();
+    await serviceClient.from("notifications").insert({
       user_id: connected_user_id,
       type: "connection_request",
       title: "コネクション申請",

@@ -1,4 +1,5 @@
 import { withAuth, json, jsonError, handleApiError } from "@/lib/api-helpers";
+import { createServiceClient } from "@/lib/supabase/server";
 
 const VALID_TRANSITIONS: Record<string, string[]> = {
   pending: ["accepted", "declined", "cancelled"],
@@ -74,7 +75,8 @@ export async function PATCH(
           ? connection.connected_user_id
           : connection.user_id;
 
-      await supabase.from("notifications").insert({
+      const serviceClient = await createServiceClient();
+      await serviceClient.from("notifications").insert({
         user_id: recipientId,
         type: "contact_exchange" as const,
         title: "つながりが成立しました",

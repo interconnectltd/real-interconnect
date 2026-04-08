@@ -1,5 +1,6 @@
 import { withAuth, json, jsonError, handleApiError } from "@/lib/api-helpers";
 import { isValidUUID } from "@/lib/sanitize";
+import { createServiceClient } from "@/lib/supabase/server";
 
 /** POST /api/v1/meetings/request — 会議リクエスト送信 */
 export async function POST(request: Request) {
@@ -42,7 +43,8 @@ export async function POST(request: Request) {
     if (error) throw error;
 
     // 通知
-    await supabase.from("notifications").insert({
+    const serviceClient = await createServiceClient();
+    await serviceClient.from("notifications").insert({
       user_id: body.target_id,
       type: "meeting_request",
       title: "会議リクエスト",
