@@ -28,7 +28,7 @@ export async function POST(request: Request) {
       return jsonError(404, "NOT_FOUND", "対象のユーザーが見つかりません");
     }
 
-    const { data, error } = await supabase
+    const { data: requestData, error: reqError } = await supabase
       .from("meeting_requests")
       .insert({
         requester_id: user.id,
@@ -40,19 +40,40 @@ export async function POST(request: Request) {
       .select()
       .single();
 
-    if (error) throw error;
+    if (reqError) throw reqError;
+
+    // Create meeting record linked to this request
+    const serviceClient = await createServiceClient();
+    const { data: meeting, error: meetingError } = await serviceClient
+      .from("meetings")
+      .insert({
+        request_id: requestData.id,
+        title: `${target.name}との会議`,
+        scheduled_at: new Date().toISOString(),
+        status: "proposed",
+        duration_min: 30,
+      })
+      .select()
+      .single();
+
+    if (meetingError) throw meetingError;
+
+    // Add both users as participants
+    await serviceClient.from("meeting_participants_v2").insert([
+      { meeting_id: meeting.id, user_id: user.id, role: "requester" },
+      { meeting_id: meeting.id, user_id: body.target_id, role: "target" },
+    ]);
 
     // 通知
-    const serviceClient = await createServiceClient();
     await serviceClient.from("notifications").insert({
       user_id: body.target_id,
       type: "meeting_request",
       title: "会議リクエスト",
-      message: "新しい会議リクエストが届いています",
+      message: `新しい会議リクエストが届いています`,
       link: "/meetings",
     });
 
-    return json(data, 201);
+    return json(requestData, 201);
   } catch (error) {
     return handleApiError(error);
   }
