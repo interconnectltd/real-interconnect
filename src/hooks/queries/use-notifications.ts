@@ -12,7 +12,8 @@ export function useNotifications(unreadOnly = false) {
       api.get<Notification[]>(
         `/notifications${unreadOnly ? "?unread=true" : ""}`,
       ),
-    refetchInterval: 30_000,
+    refetchInterval: 60_000,
+    refetchOnWindowFocus: true,
   });
 }
 
@@ -23,6 +24,7 @@ export function useUnreadCount() {
       const data = await api.get<Notification[]>("/notifications?unread=true");
       return data.length;
     },
-    refetchInterval: 15_000,
+    refetchInterval: 60_000,
+    refetchOnWindowFocus: true,
   });
 }

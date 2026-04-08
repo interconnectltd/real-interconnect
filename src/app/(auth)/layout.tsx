@@ -1,5 +1,3 @@
-export const dynamic = "force-dynamic";
-
 import { SupabaseProvider } from "@/providers/supabase-provider";
 import { QueryProvider } from "@/providers/query-provider";
 import { Header } from "@/components/layouts/header";

@@ -22,10 +22,33 @@ export function useToggleBookmark() {
       }
       return api.post("/bookmarks", { bookmarked_user_id: userId });
     },
+    onMutate: async ({ userId, isBookmarked }) => {
+      await queryClient.cancelQueries({ queryKey: queryKeys.bookmarks.all });
+      const previous = queryClient.getQueryData(queryKeys.bookmarks.all);
+      queryClient.setQueryData(queryKeys.bookmarks.all, (old: unknown) => {
+        if (!Array.isArray(old)) return old;
+        if (isBookmarked) {
+          return old.filter(
+            (b: Record<string, unknown>) => b.bookmarked_user_id !== userId,
+          );
+        }
+        return [...old, { bookmarked_user_id: userId }];
+      });
+      return { previous };
+    },
+    onError: (err, _vars, context) => {
+      if (context?.previous) {
+        queryClient.setQueryData(queryKeys.bookmarks.all, context.previous);
+      }
+      showErrorToast(err);
+    },
     onSuccess: (_data, { isBookmarked }) => {
       queryClient.invalidateQueries({ queryKey: queryKeys.bookmarks.all });
-      toast.success(isBookmarked ? "ブックマークを解除しました" : "ブックマークに追加しました");
+      toast.success(
+        isBookmarked
+          ? "ブックマークを解除しました"
+          : "ブックマークに追加しました",
+      );
     },
-    onError: showErrorToast,
   });
 }

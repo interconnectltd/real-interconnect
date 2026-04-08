@@ -12,6 +12,9 @@ export function useRequestConnection() {
   return useMutation({
     mutationFn: (connectedUserId: string) =>
       api.post("/connections", { connected_user_id: connectedUserId }),
+    onMutate: async () => {
+      await queryClient.cancelQueries({ queryKey: queryKeys.connections.all });
+    },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: queryKeys.connections.all });
       toast.success("コネクション申請を送信しました");
