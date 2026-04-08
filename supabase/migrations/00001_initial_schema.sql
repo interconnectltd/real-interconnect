@@ -453,10 +453,8 @@ CREATE POLICY "authenticated_view_participants" ON public.meeting_participants
   FOR SELECT USING (auth.role() = 'authenticated');
 
 -- Pattern 3: Admin full access
-CREATE POLICY "admin_all_profiles" ON public.user_profiles
-  FOR ALL USING (
-    EXISTS (SELECT 1 FROM public.user_profiles WHERE id = auth.uid() AND is_admin = true)
-  );
+-- admin_all_profiles は削除（自己参照で無限再帰を起こすため）
+-- 管理者操作は service_role キーを使用し RLS をバイパスする
 
 CREATE POLICY "admin_all_transcripts" ON public.meeting_transcripts
   FOR ALL USING (

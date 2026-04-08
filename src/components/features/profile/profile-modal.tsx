@@ -16,28 +16,11 @@ import { useBookmarks } from "@/hooks/queries/use-bookmarks";
 import { useConnections } from "@/hooks/queries/use-connections";
 import { useRequestConnection } from "@/hooks/mutations/use-request-connection";
 import { useToggleBookmark } from "@/hooks/mutations/use-toggle-bookmark";
-import { SCORE_AXIS_LABELS, scoreLabel } from "@/lib/constants";
+import { SCORE_AXIS_LABELS } from "@/lib/constants";
+import { ScoreBar, ReasonList } from "@/components/shared/score-bar";
 import { api } from "@/lib/api-client";
 import { toast } from "sonner";
 import type { MatchScore } from "@/types";
-
-function ScoreBar({ label, score }: { label: string; score: number }) {
-  const pct = Math.min(100, Math.round(score * 100));
-  return (
-    <div className="space-y-1">
-      <div className="flex justify-between text-xs text-muted-foreground">
-        <span>{label}</span>
-        <span>{scoreLabel(score)}</span>
-      </div>
-      <div className="h-1.5 rounded-full bg-muted">
-        <div
-          className="h-full rounded-full bg-primary transition-all"
-          style={{ width: `${pct}%` }}
-        />
-      </div>
-    </div>
-  );
-}
 
 export function ProfileModal() {
   const { profileModalUserId, closeProfileModal } = useUIStore();

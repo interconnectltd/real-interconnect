@@ -10,41 +10,9 @@ import { useRequestConnection } from "@/hooks/mutations/use-request-connection";
 import { useFilterStore } from "@/stores/filter-store";
 import { useUIStore } from "@/stores/ui-store";
 import { SCORE_AXIS_LABELS, scoreLabel } from "@/lib/constants";
-import { cn } from "@/lib/utils";
 import { TldvConnectCta } from "@/components/shared/tldv-connect-cta";
+import { ScoreBar, ReasonList } from "@/components/shared/score-bar";
 import type { MatchScore, MutualMatch, Profile } from "@/types";
-
-function ScoreBar({ label, score }: { label: string; score: number }) {
-  const pct = Math.min(100, Math.round(score * 100));
-  return (
-    <div className="space-y-1">
-      <div className="flex justify-between text-xs text-muted-foreground">
-        <span>{label}</span>
-        <span>{scoreLabel(score)}</span>
-      </div>
-      <div className="h-1.5 rounded-full bg-muted">
-        <div
-          className="h-full rounded-full bg-primary transition-all"
-          style={{ width: `${pct}%` }}
-        />
-      </div>
-    </div>
-  );
-}
-
-function ReasonList({ reasons }: { reasons: string[] }) {
-  if (!reasons.length) return null;
-  return (
-    <ul className="space-y-1.5">
-      {reasons.map((r, i) => (
-        <li key={i} className="flex gap-2 text-sm text-muted-foreground">
-          <span className="mt-1 h-1 w-1 shrink-0 rounded-full bg-primary" />
-          <span>{r}</span>
-        </li>
-      ))}
-    </ul>
-  );
-}
 
 export default function MatchingPage() {
   const { matchingSortBy, setMatchingSortBy } = useFilterStore();

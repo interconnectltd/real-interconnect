@@ -20,8 +20,8 @@ const GOAL_ICONS: Record<string, React.ElementType> = {
   partnership: Handshake,
   consulting: MessageCircle,
   investment: TrendingUp,
-  hiring: Users,
-  info_exchange: RefreshCw,
+  recruitment: Users,
+  information: RefreshCw,
   mentoring: GraduationCap,
 };
 
@@ -171,9 +171,11 @@ export default function OnboardingPage() {
         offerings: [...selectedOfferings].map((type) => ({ type })),
       });
 
-      router.push("/dashboard");
-      router.refresh();
-    } catch {
+      // 少し待ってからリダイレクト（Supabaseの書き込み反映を待つ）
+      await new Promise((r) => setTimeout(r, 500));
+      window.location.href = "/dashboard";
+    } catch (e) {
+      console.error("Onboarding error:", e);
       setSaving(false);
     }
   }

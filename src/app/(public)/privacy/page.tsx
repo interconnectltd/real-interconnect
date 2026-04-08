@@ -25,7 +25,7 @@ export default function PrivacyPage() {
         <h2 className="mt-6 text-lg font-semibold text-foreground">3. データの保存と削除</h2>
         <p>
           退会時には、AI分析に関連する全データを削除します。
-          具体的には、transcript_insights、member_ai_profiles_v2、matching_scores_v2 の
+          具体的には、transcript_insights、member_ai_profiles、matching_scores の
           当該ユーザーに関するレコードを完全に削除します。
         </p>
         <h2 className="mt-6 text-lg font-semibold text-foreground">4. 第三者提供</h2>

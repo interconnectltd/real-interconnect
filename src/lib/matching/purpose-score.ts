@@ -5,7 +5,7 @@
 
 import { GOAL_TYPES } from "@/lib/constants";
 
-interface GoalOffering {
+export interface GoalOffering {
   type: string;
   context?: string | null;
 }

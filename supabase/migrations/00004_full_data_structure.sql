@@ -66,7 +66,7 @@ CREATE TYPE public.introduction_status AS ENUM (
 ALTER TABLE public.job_queue ALTER COLUMN type TYPE TEXT;
 DROP TYPE IF EXISTS public.job_type;
 CREATE TYPE public.job_type AS ENUM (
-  'analyze', 'score', 'notify', 'ingest', 'calibrate'
+  'analyze', 'aggregate', 'score', 'notify', 'ingest', 'calibrate'
 );
 ALTER TABLE public.job_queue ALTER COLUMN type TYPE public.job_type USING type::public.job_type;
 

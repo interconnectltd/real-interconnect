@@ -282,47 +282,7 @@ export interface Database {
         Update: never;
         Relationships: [];
       };
-      match_requests: {
-        Row: {
-          id: string;
-          requester_id: string;
-          recipient_id: string;
-          status: string;
-          message: string | null;
-          created_at: string;
-          updated_at: string;
-        };
-        Insert: {
-          requester_id: string;
-          recipient_id: string;
-          status?: string;
-          message?: string | null;
-        };
-        Update: {
-          status?: string;
-        };
-        Relationships: [];
-      };
-      match_connections: {
-        Row: {
-          id: string;
-          user1_id: string;
-          user2_id: string;
-          score: number | null;
-          reasons: Json | null;
-          created_at: string;
-        };
-        Insert: {
-          user1_id: string;
-          user2_id: string;
-          score?: number | null;
-          reasons?: Json | null;
-        };
-        Update: Partial<
-          Database["public"]["Tables"]["match_connections"]["Insert"]
-        >;
-        Relationships: [];
-      };
+      // match_requests / match_connections は meeting_requests / connections に統合済み (削除)
       profile_views: {
         Row: {
           id: string;

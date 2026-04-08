@@ -8,15 +8,10 @@
  */
 
 import { calcAttributeScore } from "./attribute-score";
-import { calcPurposeScore, type PurposeScoreResult } from "./purpose-score";
+import { calcPurposeScore, type PurposeScoreResult, type GoalOffering } from "./purpose-score";
 import { generateReasons, type ReasonContext } from "./reason-templates";
 import { MATURITY_WEIGHTS } from "@/lib/constants";
 import type { ScorePhase, NotifyTier } from "@/types";
-
-interface GoalOffering {
-  type: string;
-  context?: string | null;
-}
 
 export interface ScoreInput {
   viewer: {
