@@ -9,6 +9,9 @@ import {
   useMarkAllNotificationsRead,
 } from "@/hooks/mutations/use-mark-notification-read";
 import { useUpdateConnection } from "@/hooks/mutations/use-update-connection";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { api } from "@/lib/api-client";
+import { queryKeys } from "@/hooks/queries/keys";
 import { cn } from "@/lib/utils";
 import { NOTIFICATION_ACTION_WHITELIST } from "@/lib/constants";
 import type { Notification, NotificationAction } from "@/types";
@@ -19,6 +22,15 @@ export default function NotificationsPage() {
   const markRead = useMarkNotificationRead();
   const markAllRead = useMarkAllNotificationsRead();
   const updateConnection = useUpdateConnection();
+  const queryClient = useQueryClient();
+  const updateMeeting = useMutation({
+    mutationFn: ({ id, status }: { id: string; status: string }) =>
+      api.patch(`/meetings/${id}`, { status }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["meetings"] });
+      queryClient.invalidateQueries({ queryKey: queryKeys.notifications.all });
+    },
+  });
 
   const unreadCount = notifications?.filter((n: Notification) => !n.is_read).length ?? 0;
 
@@ -97,6 +109,15 @@ export default function NotificationsPage() {
                               updateConnection.mutate({
                                 id: action.payload.connectionId,
                                 status: action.type === "accept" ? "accepted" : "declined",
+                              });
+                              markRead.mutate([n.id]);
+                            } else if (
+                              (action.type === "accept" || action.type === "reject") &&
+                              action.payload?.meetingId
+                            ) {
+                              updateMeeting.mutate({
+                                id: action.payload.meetingId,
+                                status: action.type === "accept" ? "confirmed" : "cancelled",
                               });
                               markRead.mutate([n.id]);
                             } else if (action.href) {

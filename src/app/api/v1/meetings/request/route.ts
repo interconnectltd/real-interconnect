@@ -16,13 +16,20 @@ export async function POST(request: Request) {
       return jsonError(400, "BAD_REQUEST", "自分自身には会議リクエストを送れません");
     }
 
-    // 対象ユーザー存在確認
-    const { data: target } = await supabase
-      .from("user_profiles")
-      .select("id, name")
-      .eq("id", body.target_id)
-      .eq("is_active", true)
-      .maybeSingle();
+    // 対象ユーザー・送信者情報取得
+    const [{ data: target }, { data: requester }] = await Promise.all([
+      supabase
+        .from("user_profiles")
+        .select("id, name")
+        .eq("id", body.target_id)
+        .eq("is_active", true)
+        .maybeSingle(),
+      supabase
+        .from("user_profiles")
+        .select("id, name")
+        .eq("id", user.id)
+        .maybeSingle(),
+    ]);
 
     if (!target) {
       return jsonError(404, "NOT_FOUND", "対象のユーザーが見つかりません");
@@ -64,13 +71,18 @@ export async function POST(request: Request) {
       { meeting_id: meeting.id, user_id: body.target_id, role: "target" },
     ]);
 
-    // 通知
+    // 通知（承認/辞退アクション付き）
+    const requesterName = requester?.name ?? "メンバー";
     await serviceClient.from("notifications").insert({
       user_id: body.target_id,
       type: "meeting_request",
       title: "会議リクエスト",
-      message: `新しい会議リクエストが届いています`,
+      message: `${requesterName}さんから会議リクエストが届いています`,
       link: "/meetings",
+      actions: [
+        { type: "accept", label: "承認する", payload: { meetingId: meeting.id } },
+        { type: "reject", label: "辞退する", payload: { meetingId: meeting.id } },
+      ],
     });
 
     return json(requestData, 201);

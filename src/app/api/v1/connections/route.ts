@@ -68,13 +68,20 @@ export async function POST(request: Request) {
       return jsonError(400, "BAD_REQUEST", "自分自身には接続申請できません");
     }
 
-    // 対象ユーザー存在チェック (Fix #7)
-    const { data: targetUser } = await supabase
-      .from("user_profiles")
-      .select("id")
-      .eq("id", connected_user_id)
-      .eq("is_active", true)
-      .maybeSingle();
+    // 対象ユーザー存在チェック + 送信者名取得
+    const [{ data: targetUser }, { data: requester }] = await Promise.all([
+      supabase
+        .from("user_profiles")
+        .select("id")
+        .eq("id", connected_user_id)
+        .eq("is_active", true)
+        .maybeSingle(),
+      supabase
+        .from("user_profiles")
+        .select("id, name")
+        .eq("id", user.id)
+        .maybeSingle(),
+    ]);
 
     if (!targetUser) {
       return jsonError(404, "NOT_FOUND", "対象のユーザーが見つかりません");
@@ -112,7 +119,7 @@ export async function POST(request: Request) {
       user_id: connected_user_id,
       type: "connection_request",
       title: "コネクション申請",
-      message: "新しいコネクション申請があります",
+      message: `${requester?.name ?? "メンバー"}さんからコネクション申請が届いています`,
       link: "/connections",
       actions: [
         { type: "accept", label: "承認する", payload: { connectionId: data.id } },
