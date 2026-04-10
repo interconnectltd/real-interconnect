@@ -123,6 +123,7 @@ export default function OnboardingPage() {
     name: user?.user_metadata?.name ?? "",
     company: user?.user_metadata?.company ?? "",
     position: user?.user_metadata?.position ?? "",
+    contact_info: "",
   });
 
   // Step 2: Goals & Offerings
@@ -157,6 +158,7 @@ export default function OnboardingPage() {
           name: profile.name,
           company: profile.company,
           position: profile.position,
+          contact_info: profile.contact_info || null,
           onboarding_step: 3,
         })
         .eq("id", user!.id);
@@ -225,6 +227,18 @@ export default function OnboardingPage() {
                       onChange={(e) => setProfile({ ...profile, position: e.target.value })}
                     />
                   </div>
+                </div>
+                <div className="space-y-1.5">
+                  <Label htmlFor="ob-contact">連絡先（マッチング後に相手に表示されます）</Label>
+                  <Input
+                    id="ob-contact"
+                    placeholder="例: LINE ID、電話番号、メールアドレスなど"
+                    value={profile.contact_info}
+                    onChange={(e) => setProfile({ ...profile, contact_info: e.target.value })}
+                  />
+                  <p className="text-xs text-muted-foreground">
+                    未登録の場合、アカウントのメールアドレスが自動的に表示されます
+                  </p>
                 </div>
               </div>
             </CardContent>
