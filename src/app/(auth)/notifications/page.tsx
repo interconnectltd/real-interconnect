@@ -12,6 +12,7 @@ import { useUpdateConnection } from "@/hooks/mutations/use-update-connection";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { api } from "@/lib/api-client";
 import { queryKeys } from "@/hooks/queries/keys";
+import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 import { NOTIFICATION_ACTION_WHITELIST } from "@/lib/constants";
 import type { Notification, NotificationAction } from "@/types";
@@ -26,9 +27,15 @@ export default function NotificationsPage() {
   const updateMeeting = useMutation({
     mutationFn: ({ id, status }: { id: string; status: string }) =>
       api.patch(`/meetings/${id}`, { status }),
-    onSuccess: () => {
+    onSuccess: (_data, { status }) => {
       queryClient.invalidateQueries({ queryKey: ["meetings"] });
       queryClient.invalidateQueries({ queryKey: queryKeys.notifications.all });
+      toast.success(
+        status === "confirmed" ? "会議を承認しました" : "会議を辞退しました",
+      );
+    },
+    onError: () => {
+      toast.error("更新に失敗しました");
     },
   });
 
@@ -90,8 +97,8 @@ export default function NotificationsPage() {
                 <p className="mt-1 text-xs text-muted-foreground/60">
                   {new Date(n.created_at).toLocaleString("ja-JP")}
                 </p>
-                {/* Action buttons (e.g. accept/reject connection) */}
-                {n.actions && Array.isArray(n.actions) && n.actions.length > 0 && (
+                {/* Action buttons — only show on unread notifications */}
+                {!n.is_read && n.actions && Array.isArray(n.actions) && n.actions.length > 0 && (
                   <div className="mt-2 flex gap-2">
                     {(n.actions as NotificationAction[])
                       .filter((a) => NOTIFICATION_ACTION_WHITELIST.has(a.type))
@@ -100,6 +107,7 @@ export default function NotificationsPage() {
                           key={action.type}
                           size="sm"
                           variant={action.type === "accept" ? "default" : "outline"}
+                          disabled={updateConnection.isPending || updateMeeting.isPending}
                           onClick={(e) => {
                             e.stopPropagation();
                             if (
