@@ -1,15 +1,16 @@
 "use client";
 
-import { Calendar, Video, Clock, Check, X } from "lucide-react";
+import { Calendar, Video, Clock, Check, X, User } from "lucide-react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { api } from "@/lib/api-client";
+import { useUIStore } from "@/stores/ui-store";
 import { toast } from "sonner";
 
 const STATUS_LABELS: Record<string, { label: string; color: string }> = {
-  proposed: { label: "提案中", color: "bg-yellow-100 text-yellow-800" },
+  proposed: { label: "リクエスト中", color: "bg-yellow-100 text-yellow-800" },
   confirmed: { label: "確定", color: "bg-green-100 text-green-800" },
   completed: { label: "完了", color: "bg-muted text-muted-foreground" },
   cancelled: { label: "キャンセル", color: "bg-red-100 text-red-800" },
@@ -18,6 +19,7 @@ const STATUS_LABELS: Record<string, { label: string; color: string }> = {
 
 export default function MeetingsPage() {
   const queryClient = useQueryClient();
+  const { openProfileModal } = useUIStore();
 
   const { data: meetings, isLoading } = useQuery({
     queryKey: ["meetings"],
@@ -27,9 +29,11 @@ export default function MeetingsPage() {
   const updateMeeting = useMutation({
     mutationFn: ({ id, status }: { id: string; status: string }) =>
       api.patch(`/meetings/${id}`, { status }),
-    onSuccess: () => {
+    onSuccess: (_data, { status }) => {
       queryClient.invalidateQueries({ queryKey: ["meetings"] });
-      toast.success("更新しました");
+      toast.success(
+        status === "confirmed" ? "会議を承認しました" : "会議を辞退しました",
+      );
     },
     onError: () => toast.error("更新に失敗しました"),
   });
@@ -53,67 +57,63 @@ export default function MeetingsPage() {
         <div className="space-y-3">
           {meetings.map((item: any) => {
             const meeting = item.meeting;
+            const otherParticipant = item.other_participant;
             if (!meeting) return null;
             const status = STATUS_LABELS[meeting.status] ?? { label: meeting.status, color: "bg-muted" };
 
             return (
               <Card key={meeting.id}>
-                <CardContent className="flex items-center justify-between p-4">
-                  <div className="space-y-1">
-                    <div className="flex items-center gap-2">
-                      <p className="font-medium">{meeting.title ?? "会議"}</p>
-                      <Badge className={`text-xs ${status.color}`}>{status.label}</Badge>
-                    </div>
-                    <div className="flex items-center gap-3 text-xs text-muted-foreground">
-                      <span className="flex items-center gap-1">
-                        <Calendar className="h-3 w-3" />
-                        {meeting.scheduled_at
-                          ? new Date(meeting.scheduled_at).toLocaleString("ja-JP", {
-                              month: "short", day: "numeric", hour: "2-digit", minute: "2-digit",
-                            })
-                          : "未定"}
-                      </span>
-                      <span className="flex items-center gap-1">
-                        <Clock className="h-3 w-3" />
-                        {meeting.duration_min ?? 30}分
-                      </span>
-                      {meeting.platform && (
-                        <span className="flex items-center gap-1">
-                          <Video className="h-3 w-3" />
-                          {meeting.platform}
-                        </span>
+                <CardContent className="p-4">
+                  <div className="flex items-center justify-between">
+                    <div className="space-y-1">
+                      <div className="flex items-center gap-2">
+                        <p className="font-medium">{meeting.title ?? "会議"}</p>
+                        <Badge className={`text-xs ${status.color}`}>{status.label}</Badge>
+                      </div>
+                      {otherParticipant && (
+                        <p className="text-xs text-muted-foreground">
+                          {otherParticipant.company && `${otherParticipant.company} / `}
+                          {otherParticipant.position ?? ""}
+                        </p>
                       )}
+                      <p className="text-xs text-muted-foreground/60">
+                        日程は連絡先を通じて調整してください
+                      </p>
                     </div>
-                  </div>
 
-                  <div className="flex gap-2">
-                    {meeting.status === "proposed" && (
-                      <>
-                        <Button
-                          size="sm"
-                          onClick={() => updateMeeting.mutate({ id: meeting.id, status: "confirmed" })}
-                          disabled={updateMeeting.isPending}
-                        >
-                          <Check className="mr-1 h-3.5 w-3.5" />
-                          確定
-                        </Button>
+                    <div className="flex gap-2">
+                      {meeting.status === "proposed" && (
+                        <>
+                          <Button
+                            size="sm"
+                            onClick={() => updateMeeting.mutate({ id: meeting.id, status: "confirmed" })}
+                            disabled={updateMeeting.isPending}
+                          >
+                            <Check className="mr-1 h-3.5 w-3.5" />
+                            承認
+                          </Button>
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            onClick={() => updateMeeting.mutate({ id: meeting.id, status: "cancelled" })}
+                            disabled={updateMeeting.isPending}
+                          >
+                            <X className="mr-1 h-3.5 w-3.5" />
+                            辞退
+                          </Button>
+                        </>
+                      )}
+                      {meeting.status === "confirmed" && otherParticipant && (
                         <Button
                           size="sm"
                           variant="outline"
-                          onClick={() => updateMeeting.mutate({ id: meeting.id, status: "cancelled" })}
-                          disabled={updateMeeting.isPending}
+                          onClick={() => openProfileModal(otherParticipant.id)}
                         >
-                          <X className="mr-1 h-3.5 w-3.5" />
-                          辞退
+                          <User className="mr-1 h-3.5 w-3.5" />
+                          プロフィールを見る
                         </Button>
-                      </>
-                    )}
-                    {meeting.status === "confirmed" && meeting.meeting_url && (
-                      <Button size="sm" render={<a href={meeting.meeting_url} target="_blank" rel="noopener" />}>
-                        <Video className="mr-1 h-3.5 w-3.5" />
-                        参加
-                      </Button>
-                    )}
+                      )}
+                    </div>
                   </div>
                 </CardContent>
               </Card>
