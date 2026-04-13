@@ -25,21 +25,23 @@ export async function GET(
       return jsonError(404, "NOT_FOUND", "プロフィールが見つかりません");
     }
 
-    // contact_info: only visible if connection is accepted OR shared confirmed meeting
-    if (id !== user.id) {
+    // contact_info の可視性判定
+    let canSeeContactInfo = id === user.id;
+
+    if (!canSeeContactInfo) {
       const { data: connection } = await supabase
         .from("connections")
         .select("status")
         .or(
           `and(user_id.eq.${user.id},connected_user_id.eq.${id}),and(user_id.eq.${id},connected_user_id.eq.${user.id})`,
         )
-        .eq("status", "accepted")
+        .in("status", ["accepted", "reaccepted"])
         .maybeSingle();
 
-      if (!connection) {
-        // Check if both users share a confirmed meeting
-        let hasSharedMeeting = false;
-
+      if (connection) {
+        canSeeContactInfo = true;
+      } else {
+        // 確認済み会議を共有しているかチェック
         const { data: myMeetings } = await supabase
           .from("meeting_participants_v2")
           .select("meeting_id")
@@ -58,20 +60,25 @@ export async function GET(
             .maybeSingle();
 
           if (sharedMeeting) {
-            hasSharedMeeting = true;
+            canSeeContactInfo = true;
           }
-        }
-
-        if (!hasSharedMeeting) {
-          profile.contact_info = null;
-          (profile as Record<string, unknown>).email = null;
         }
       }
     }
 
-    // contact_info が未設定ならメールアドレスをフォールバック
-    if (profile.contact_info === null && profile.email) {
-      profile.contact_info = profile.email;
+    if (canSeeContactInfo) {
+      // contact_info が未設定ならメールアドレスをフォールバック
+      if (!profile.contact_info && profile.email) {
+        profile.contact_info = profile.email;
+      }
+    } else {
+      // 連絡先を完全に隠す
+      profile.contact_info = null;
+    }
+
+    // email はフロントエンドに返さない（自分のプロフィール以外）
+    if (id !== user.id) {
+      delete (profile as Record<string, unknown>).email;
     }
 
     return json(profile);

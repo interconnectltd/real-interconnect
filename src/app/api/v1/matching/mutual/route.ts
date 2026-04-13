@@ -20,7 +20,7 @@ export async function GET() {
     // Get reverse scores where they also score me >= threshold
     const { data: theirScores, error: err2 } = await supabase
       .from("matching_scores_v3")
-      .select("viewer_id, total_score, target_profile:user_profiles!viewer_id(*)")
+      .select("viewer_id, total_score, target_profile:user_profiles!viewer_id(id, name, company, position, industry, bio, avatar_url)")
       .eq("target_id", user.id)
       .in("viewer_id", targetIds)
       .gte("total_score", MATCHING_MUTUAL_THRESHOLD)

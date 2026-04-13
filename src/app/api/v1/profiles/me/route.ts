@@ -15,7 +15,14 @@ export async function GET() {
       return jsonError(404, "NOT_FOUND", "プロフィールが見つかりません");
     }
 
-    return json(data);
+    // AI分析回数を取得
+    const { data: aiProfile } = await supabase
+      .from("member_ai_profiles_v2")
+      .select("analysis_count")
+      .eq("user_id", user.id)
+      .maybeSingle();
+
+    return json({ ...data, analysis_count: aiProfile?.analysis_count ?? 0 });
   } catch (error) {
     return handleApiError(error);
   }

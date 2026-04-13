@@ -32,6 +32,8 @@ export function useUpdateConnection() {
     onSuccess: (_data, { status }) => {
       queryClient.invalidateQueries({ queryKey: queryKeys.connections.all });
       queryClient.invalidateQueries({ queryKey: queryKeys.notifications.all });
+      // 接続状態の変更でcontact_infoの可視性が変わるため、プロフィールキャッシュも無効化
+      queryClient.invalidateQueries({ queryKey: queryKeys.profile.all });
       const messages: Record<string, string> = {
         accepted: "コネクションを承認しました",
         declined: "コネクション申請をお断りしました",

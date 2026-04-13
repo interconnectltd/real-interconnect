@@ -12,7 +12,7 @@ export async function GET(request: Request) {
 
     let query = supabase
       .from("matching_scores_v3")
-      .select("*, target_profile:user_profiles!target_id(*)", { count: "exact" })
+      .select("*, target_profile:user_profiles!target_id(id, name, company, position, industry, bio, avatar_url)", { count: "exact" })
       .eq("viewer_id", user.id)
       .gte("total_score", minScore);
 

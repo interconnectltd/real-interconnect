@@ -6,7 +6,7 @@ export async function GET() {
 
     const { data, error } = await supabase
       .from("bookmarks")
-      .select("*, profile:user_profiles!bookmarked_user_id(*)")
+      .select("*, profile:user_profiles!bookmarked_user_id(id, name, company, position, industry, bio, avatar_url)")
       .eq("user_id", user.id)
       .order("created_at", { ascending: false });
 

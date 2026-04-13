@@ -20,7 +20,7 @@ import { SCORE_AXIS_LABELS } from "@/lib/constants";
 import { ScoreBar, ReasonList } from "@/components/shared/score-bar";
 import { api } from "@/lib/api-client";
 import { toast } from "sonner";
-import type { MatchScore } from "@/types";
+import type { MatchScore, Connection } from "@/types";
 
 export function ProfileModal() {
   const { profileModalUserId, closeProfileModal } = useUIStore();
@@ -31,8 +31,10 @@ export function ProfileModal() {
   const requestConnection = useRequestConnection();
   const toggleBookmark = useToggleBookmark();
 
-  const isConnected = (connectionsData as { user_id: string; connected_user_id: string }[] | undefined)
-    ?.some((c) => c.user_id === profileModalUserId || c.connected_user_id === profileModalUserId) ?? false;
+  const connectionWithUser = (connectionsData as Connection[] | undefined)
+    ?.find((c) => c.user_id === profileModalUserId || c.connected_user_id === profileModalUserId);
+  const isConnected = connectionWithUser?.status === "accepted" || connectionWithUser?.status === "reaccepted";
+  const isPending = connectionWithUser?.status === "pending";
 
   const isBookmarked = (bookmarksData as { bookmarked_user_id: string }[] | undefined)
     ?.some((b) => b.bookmarked_user_id === profileModalUserId) ?? false;
@@ -95,28 +97,43 @@ export function ProfileModal() {
                       ))}
                     </ul>
                   )}
-                  {matchScore.confidence >= 0.5 && (
-                    <div className="space-y-2 pt-1">
-                      <ScoreBar
-                        label={SCORE_AXIS_LABELS.value_fit!}
-                        score={matchScore.value_fit}
-                      />
-                      <ScoreBar
-                        label={SCORE_AXIS_LABELS.relational_quality!}
-                        score={matchScore.relational_quality}
-                      />
-                    </div>
-                  )}
+                  <div className="space-y-2 pt-1">
+                    <ScoreBar
+                      label={SCORE_AXIS_LABELS.value_fit!}
+                      score={matchScore.value_fit}
+                      preliminary={matchScore.confidence < 0.5}
+                    />
+                    <ScoreBar
+                      label={SCORE_AXIS_LABELS.relational_quality!}
+                      score={matchScore.relational_quality}
+                      preliminary={matchScore.confidence < 0.5}
+                    />
+                    {matchScore.confidence < 0.3 && (
+                      <p className="text-xs text-muted-foreground/50">
+                        ミーティング分析が増えると精度が向上します
+                      </p>
+                    )}
+                  </div>
                   {matchScore.phase === "attribute_only" && (
                     <p className="text-xs text-muted-foreground/60">
                       プロフィール情報に基づくおすすめです
                     </p>
                   )}
+                  {matchScore.phase === "hybrid" && (
+                    <p className="text-xs text-muted-foreground/60">
+                      ミーティング分析を含むおすすめです
+                    </p>
+                  )}
+                  {matchScore.phase === "ai_primary" && (
+                    <p className="text-xs text-muted-foreground/60">
+                      ミーティング分析に基づく高精度なおすすめです
+                    </p>
+                  )}
                 </div>
               )}
 
-              {/* Contact info (only if connection accepted — API controls this) */}
-              {profile.contact_info && (
+              {/* Contact info — バックエンド + フロントエンド両方でガード */}
+              {isConnected && profile.contact_info && (
                 <div className="rounded-md bg-primary/5 p-3">
                   <p className="text-xs font-medium text-primary">連絡先</p>
                   <p className="mt-1 text-sm">{profile.contact_info}</p>
@@ -141,6 +158,10 @@ export function ProfileModal() {
                   >
                     <Calendar className="mr-1.5 h-4 w-4" />
                     会議をリクエスト
+                  </Button>
+                ) : isPending ? (
+                  <Button className="flex-1" variant="outline" disabled>
+                    申請中
                   </Button>
                 ) : (
                   <Button
