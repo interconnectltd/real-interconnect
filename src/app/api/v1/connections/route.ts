@@ -97,12 +97,37 @@ export async function POST(request: Request) {
       .maybeSingle();
 
     if (existing) {
-      if (existing.status === "pending" || existing.status === "accepted") {
+      if (existing.status === "pending" || existing.status === "accepted" || existing.status === "reaccepted") {
         return jsonError(409, "CONFLICT", "既に接続申請済みまたは接続済みです");
       }
       if (existing.status === "blocked") {
         return jsonError(403, "FORBIDDEN", "この操作は実行できません");
       }
+      // disconnected / declined / cancelled → 既存レコードを pending に戻す
+      const { data, error } = await supabase
+        .from("connections")
+        .update({ status: "pending", user_id: user.id, connected_user_id, updated_at: new Date().toISOString() })
+        .eq("id", existing.id)
+        .select()
+        .single();
+
+      if (error) throw error;
+
+      // 通知を作成
+      const serviceClient = await createServiceClient();
+      await serviceClient.from("notifications").insert({
+        user_id: connected_user_id,
+        type: "connection_request",
+        title: "コネクション申請",
+        message: `${requester?.name ?? "メンバー"}さんからコネクション申請が届いています`,
+        link: "/connections",
+        actions: [
+          { type: "accept", label: "承認する", payload: { connectionId: existing.id } },
+          { type: "reject", label: "お断りする", payload: { connectionId: existing.id } },
+        ],
+      });
+
+      return json(data, 201);
     }
 
     const { data, error } = await supabase
