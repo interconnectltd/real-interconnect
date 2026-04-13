@@ -13,6 +13,7 @@ import { useUnreadCount } from "@/hooks/queries/use-notifications";
 import { useMatchingScores, useMutualMatches } from "@/hooks/queries/use-matching-scores";
 import { useMembers } from "@/hooks/queries/use-members";
 import { useUIStore } from "@/stores/ui-store";
+import { useAnalysisCount } from "@/hooks/queries/use-ai-profile";
 import { TldvConnectCta } from "@/components/shared/tldv-connect-cta";
 import { api } from "@/lib/api-client";
 import type { MutualMatch, Profile } from "@/types";
@@ -57,8 +58,7 @@ export default function DashboardPage() {
   const matchCount = scores?.length ?? 0;
 
   // 成熟度 (設計書 1-08)
-  // TODO: 実際のanalysis_countをDBから取得。現時点は0固定
-  const analysisCount = 0;
+  const { data: analysisCount = 0 } = useAnalysisCount();
   const maturityLevel = analysisCount === 0 ? 1 : analysisCount <= 4 ? 2 : 3;
   const nextLevelAt = maturityLevel === 1 ? 1 : maturityLevel === 2 ? 5 : null;
   const remaining = nextLevelAt ? nextLevelAt - analysisCount : 0;
@@ -98,27 +98,27 @@ export default function DashboardPage() {
       </div>
 
       {/* 成熟度プログレス (設計書 1-08) */}
-      {nextLevelAt && (
-        <Card>
-          <CardContent className="p-4">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm font-medium">おすすめ精度: Lv{maturityLevel}</p>
-                <p className="mt-0.5 text-xs text-muted-foreground">
-                  あと{remaining}回のミーティング分析で精度がアップします
-                </p>
-              </div>
-              <Zap className="h-5 w-5 text-accent" />
+      <Card>
+        <CardContent className="p-4">
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-sm font-medium">おすすめ精度: Lv{maturityLevel}</p>
+              <p className="mt-0.5 text-xs text-muted-foreground">
+                {maturityLevel === 3
+                  ? "最高精度のAI分析に基づくおすすめです"
+                  : `あと${remaining}回のミーティング分析で精度がアップします`}
+              </p>
             </div>
-            <div className="mt-3 h-2 rounded-full bg-muted">
-              <div
-                className="h-full rounded-full bg-primary transition-all"
-                style={{ width: `${(analysisCount / nextLevelAt) * 100}%` }}
-              />
-            </div>
-          </CardContent>
-        </Card>
-      )}
+            <Zap className="h-5 w-5 text-accent" />
+          </div>
+          <div className="mt-3 h-2 rounded-full bg-muted">
+            <div
+              className="h-full rounded-full bg-primary transition-all"
+              style={{ width: `${maturityLevel === 3 ? 100 : nextLevelAt ? (analysisCount / nextLevelAt) * 100 : 0}%` }}
+            />
+          </div>
+        </CardContent>
+      </Card>
 
       {/* おすすめマッチング Top 3 */}
       <div>

@@ -51,7 +51,7 @@ export async function handleAnalyze(payload: {
 
   // Claude API 呼び出し
   const response = await anthropic.messages.create({
-    model: "claude-sonnet-4-6-20250514",
+    model: "claude-sonnet-4-6",
     max_tokens: 2000,
     messages: [
       {
