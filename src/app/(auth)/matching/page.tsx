@@ -12,7 +12,7 @@ import { useUIStore } from "@/stores/ui-store";
 import { SCORE_AXIS_LABELS, scoreLabel } from "@/lib/constants";
 import { TldvConnectCta } from "@/components/shared/tldv-connect-cta";
 import { ScoreBar, ReasonList } from "@/components/shared/score-bar";
-import type { MatchScore, MutualMatch, Profile } from "@/types";
+import type { MatchScore, MutualMatch, Profile, Connection } from "@/types";
 
 export default function MatchingPage() {
   const { matchingSortBy, setMatchingSortBy } = useFilterStore();
@@ -22,11 +22,18 @@ export default function MatchingPage() {
   const requestConnection = useRequestConnection();
   const { data: connections } = useConnections();
 
-  // 既にコネクション関係にあるユーザーIDのセット
+  // 接続済み（accepted / reaccepted）のユーザーIDセット
   const connectedIds = new Set(
-    connections?.map((c: { user_id: string; connected_user_id: string }) =>
-      c.user_id === undefined ? c.connected_user_id : c.connected_user_id,
-    ) ?? [],
+    (connections as Connection[] | undefined)
+      ?.filter((c) => c.status === "accepted" || c.status === "reaccepted")
+      .flatMap((c) => [c.user_id, c.connected_user_id]) ?? [],
+  );
+
+  // 申請中（pending）のユーザーIDセット
+  const pendingIds = new Set(
+    (connections as Connection[] | undefined)
+      ?.filter((c) => c.status === "pending")
+      .flatMap((c) => [c.user_id, c.connected_user_id]) ?? [],
   );
 
   return (
@@ -119,6 +126,8 @@ export default function MatchingPage() {
                     </div>
                     {connectedIds.has(score.target_id) ? (
                       <Badge variant="secondary" className="text-xs">接続済み</Badge>
+                    ) : pendingIds.has(score.target_id) ? (
+                      <Badge variant="outline" className="text-xs">申請中</Badge>
                     ) : (
                       <Button
                         size="sm"
@@ -144,24 +153,39 @@ export default function MatchingPage() {
                   {/* Reasons (primary display) */}
                   <ReasonList reasons={score.reasons ?? []} />
 
-                  {/* Score bars (only when confidence is sufficient) */}
-                  {score.confidence >= 0.5 && (
-                    <div className="space-y-2 pt-2">
-                      <ScoreBar
-                        label={SCORE_AXIS_LABELS.value_fit!}
-                        score={score.value_fit}
-                      />
-                      <ScoreBar
-                        label={SCORE_AXIS_LABELS.relational_quality!}
-                        score={score.relational_quality}
-                      />
-                    </div>
-                  )}
+                  {/* Score bars — 常時表示、低信頼度は薄い表示 */}
+                  <div className="space-y-2 pt-2">
+                    <ScoreBar
+                      label={SCORE_AXIS_LABELS.value_fit!}
+                      score={score.value_fit}
+                      preliminary={score.confidence < 0.5}
+                    />
+                    <ScoreBar
+                      label={SCORE_AXIS_LABELS.relational_quality!}
+                      score={score.relational_quality}
+                      preliminary={score.confidence < 0.5}
+                    />
+                    {score.confidence < 0.3 && (
+                      <p className="text-xs text-muted-foreground/50">
+                        ミーティング分析が増えると精度が向上します
+                      </p>
+                    )}
+                  </div>
 
                   {/* Phase indicator */}
                   {score.phase === "attribute_only" && (
                     <p className="text-xs text-muted-foreground/60">
                       プロフィール情報に基づくおすすめです
+                    </p>
+                  )}
+                  {score.phase === "hybrid" && (
+                    <p className="text-xs text-muted-foreground/60">
+                      ミーティング分析を含むおすすめです
+                    </p>
+                  )}
+                  {score.phase === "ai_primary" && (
+                    <p className="text-xs text-muted-foreground/60">
+                      ミーティング分析に基づく高精度なおすすめです
                     </p>
                   )}
                 </CardContent>

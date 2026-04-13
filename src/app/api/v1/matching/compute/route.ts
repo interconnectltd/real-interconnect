@@ -43,7 +43,7 @@ export async function POST() {
     // 自分のAIプロフィール取得（あれば）
     const { data: myAi } = await supabase
       .from("member_ai_profiles_v2")
-      .select("analysis_count")
+      .select("analysis_count, aggregated_needs, aggregated_offerings, aggregated_skills, communication_profile")
       .eq("user_id", user.id)
       .maybeSingle();
 
@@ -61,7 +61,7 @@ export async function POST() {
     const targetIds = targets.map((t) => t.id);
     const { data: targetAis } = await supabase
       .from("member_ai_profiles_v2")
-      .select("user_id, analysis_count")
+      .select("user_id, analysis_count, aggregated_needs, aggregated_offerings, aggregated_skills, communication_profile")
       .in("user_id", targetIds);
 
     const aiMap = new Map(targetAis?.map((a) => [a.user_id, a]) ?? []);
@@ -100,12 +100,77 @@ export async function POST() {
       offeringsMap.get(o.user_id)!.push({ type: o.type, context: o.context });
     }
 
+    // ── AI集約データからのスコア計算ヘルパー ──
+
+    // communication_profile の互換性スコア (0-1)
+    type CommProfile = { assertiveness: number; collaboration: number; analytical: number; empathy: number };
+    const calcConversationScore = (
+      a: CommProfile | null | undefined,
+      b: CommProfile | null | undefined,
+    ): number => {
+      if (!a || !b) return 0;
+      const traits: (keyof CommProfile)[] = ["assertiveness", "collaboration", "analytical", "empathy"];
+      let sum = 0;
+      let count = 0;
+      for (const t of traits) {
+        const va = typeof a[t] === "number" ? a[t] : null;
+        const vb = typeof b[t] === "number" ? b[t] : null;
+        if (va != null && vb != null) {
+          sum += 1 - Math.abs(va - vb) / 100;
+          count++;
+        }
+      }
+      return count > 0 ? sum / count : 0;
+    };
+
+    // aggregated items からテキスト配列を抽出
+    type AggItem = { text?: string };
+    const extractTexts = (items: unknown): string[] => {
+      if (!Array.isArray(items)) return [];
+      return items
+        .filter((i): i is AggItem => i != null && typeof (i as AggItem).text === "string")
+        .map((i) => (i.text as string).toLowerCase());
+    };
+
+    // テキストマッチ: viewerのneeds vs targetのofferings (部分一致)
+    const findMatches = (needsTexts: string[], offeringsTexts: string[]): string[] => {
+      const matched: string[] = [];
+      for (const need of needsTexts) {
+        for (const offering of offeringsTexts) {
+          if (need === offering || offering.includes(need) || need.includes(offering)) {
+            matched.push(need);
+            break;
+          }
+        }
+      }
+      return matched;
+    };
+
     // バッチ内重複抑制用
     const usedTemplateIds = new Set<string>();
+
+    // viewer の AI集約データ
+    const myCommProfile = myAi?.communication_profile as CommProfile | null;
+    const myAggNeeds = extractTexts(myAi?.aggregated_needs);
+    const myAggOfferings = extractTexts(myAi?.aggregated_offerings);
+    const myAggSkills = extractTexts(myAi?.aggregated_skills);
 
     // スコア計算
     const rows = targets.map((target) => {
       const targetAi = aiMap.get(target.id);
+
+      // AI会話スコア計算
+      const targetCommProfile = targetAi?.communication_profile as CommProfile | null;
+      const conversationScore = calcConversationScore(myCommProfile, targetCommProfile);
+
+      // needs/offerings/skills マッチ
+      const targetAggNeeds = extractTexts(targetAi?.aggregated_needs);
+      const targetAggOfferings = extractTexts(targetAi?.aggregated_offerings);
+      const targetAggSkills = extractTexts(targetAi?.aggregated_skills);
+
+      const matchedNeeds = findMatches(myAggNeeds, targetAggOfferings);
+      const matchedOfferings = findMatches(myAggOfferings, targetAggNeeds);
+      const matchedSkills = findMatches(myAggSkills, targetAggSkills);
 
       const input: ScoreInput = {
         viewer: {
@@ -128,6 +193,10 @@ export async function POST() {
           goals: goalsMap.get(target.id) ?? [],
           offerings: offeringsMap.get(target.id) ?? [],
         },
+        aiScores: conversationScore > 0 ? { conversation: conversationScore } : undefined,
+        matchedNeeds,
+        matchedOfferings,
+        matchedSkills,
         sharedMeetingCount: 0,
         usedTemplateIds,
       };
@@ -136,6 +205,10 @@ export async function POST() {
 
       // 逆方向スコアも計算 (target → viewer)
       const reverseUsedIds = new Set<string>();
+      const reverseMatchedNeeds = findMatches(targetAggNeeds, myAggOfferings);
+      const reverseMatchedOfferings = findMatches(targetAggOfferings, myAggNeeds);
+      const reverseMatchedSkills = findMatches(targetAggSkills, myAggSkills);
+
       const reverseInput: ScoreInput = {
         viewer: {
           id: target.id,
@@ -157,6 +230,10 @@ export async function POST() {
           goals: myGoals ?? [],
           offerings: myOfferings ?? [],
         },
+        aiScores: conversationScore > 0 ? { conversation: conversationScore } : undefined,
+        matchedNeeds: reverseMatchedNeeds,
+        matchedOfferings: reverseMatchedOfferings,
+        matchedSkills: reverseMatchedSkills,
         sharedMeetingCount: 0,
         usedTemplateIds: reverseUsedIds,
       };

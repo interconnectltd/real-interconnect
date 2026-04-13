@@ -2,17 +2,17 @@
 
 import { scoreLabel } from "@/lib/constants";
 
-export function ScoreBar({ label, score }: { label: string; score: number }) {
+export function ScoreBar({ label, score, preliminary = false }: { label: string; score: number; preliminary?: boolean }) {
   const pct = Math.min(100, Math.round(score * 100));
   return (
     <div className="space-y-1">
-      <div className="flex justify-between text-xs text-muted-foreground">
+      <div className={`flex justify-between text-xs ${preliminary ? "text-muted-foreground/50" : "text-muted-foreground"}`}>
         <span>{label}</span>
         <span>{scoreLabel(score)}</span>
       </div>
       <div className="h-1.5 rounded-full bg-muted">
         <div
-          className="h-full rounded-full bg-primary transition-all"
+          className={`h-full rounded-full transition-all ${preliminary ? "bg-primary/30" : "bg-primary"}`}
           style={{ width: `${pct}%` }}
         />
       </div>
