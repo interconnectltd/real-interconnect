@@ -1,0 +1,96 @@
+#,大分類,中分類,小分類,説明,ファイル/参照,状態,Phase,V1差分,精度影響,備考
+■ Opus構造化抽出（レイヤー1）,,,,,,,,,,
+1,Opus構造化,モデル選択,Opus 4.6採用,Sonnetでは暗黙ニーズ推論が弱い。日本語婉曲表現の読取にOpusの高度文脈理解が必要。MT1回きり分析でコスト許容。月$300-450(1000人),SCORING_V2 §1.1,確定,2,変更,+5点,V1:Sonnet$44→V2:Opus$300-450
+2,Opus構造化,プロンプト設計,explicit/implicitフラグ,各ニーズ・オファーに「明示的/推論」フラグ。explicit:trueは即使用。implicit:falseはconfidence低減だがweight下限1.0保証+confidence下限0.5保証,新規設計,確定,2,新規,+3点,implicit needの過小評価を防止
+3,Opus構造化,プロンプト設計,signals検出,推論根拠を構造化。同トピック2回言及→重要/具体的数字→高信頼/質問の具体性→ニーズvs社交辞令/発言の長さ→関心度,新規設計,確定,2,新規,+2点,Opusの推論をトレース可能に
+4,Opus構造化,プロンプト設計,日本語婉曲対策,「ちょっと気になって」→重要課題/「もしよかったら」→明確ニーズ/「まあ一応」→謙遜=実績/「いいですよね」→社交辞令。プロンプトに明示,新規設計,確定,2,新規,+2点,日本語ビジネス会話特有
+5,Opus構造化,プロンプト設計,conversation_dynamics,rapport(信頼関係)/information_asymmetry(情報非対称)/unspoken_tensions(回避トピック)/follow_up_potential(次のアクション有無),新規設計,確定,2,新規,+1点,ペア間会話品質をスコア補正に使用
+6,Opus構造化,プロンプト設計,solver_profile,各ニーズに「このニーズに応えられる人はどういう人か」を自然言語で詳細記述。Haiku判定の入力精度を劇的に向上。embedding化時にオファーと同空間で比較可能,新規設計,確定,2,新規,+3-5点,精度向上の核心。カテゴリの壁を超える
+7,Opus構造化,プロンプト設計,beneficiary_profile,各オファーに「このオファーが役立つ人はどういう人か」を自然言語で詳細記述。solver_profileとクロスマッチでカテゴリ横断の解決関係を捕捉,新規設計,確定,2,新規,+3-5点,solver_profileと対になる設計
+8,Opus構造化,プロンプト設計,日英バイリンガル,各テキストを日本語+英語で出力。Phase3 embedding化時に英語版使用(英語embeddingモデルが成熟),新規設計,確定,3,新規,Phase3用,Phase2では日本語のみ
+9,Opus構造化,出力構造,needs,"text/explicit/confidence/evidence[]/signals[]/solver_profile/urgency_signals[]/category/subcategory。V1の{text,cat,subcat,conf}から大幅拡張",§1.1拡張,確定,2,変更,,categoryは残すが将来廃止前提
+10,Opus構造化,出力構造,offers,"text/explicit/confidence/evidence[]/signals[]/beneficiary_profile/credibility(""実績""/""自己申告""/""推論"")/category/subcategory",§1.1拡張,確定,2,変更,,credibilityでオファー信頼性を段階評価
+11,Opus構造化,出力構造,topic_depth/engagement_behaviors/evidence_quotes/key_statements,"topic:{topic,category,depth}[]/engagement:5つのbool/evidence:{field,index,quote}[]/key_statements:string[]",§1.1,確定,2,新規,,V2設計書のまま
+12,Opus構造化,品質対策,tl;dv文字起こし品質,話者分離エラー対策:矛盾検出→confidence低下+フラグ。スペース正規化。固有名詞誤認識はevidence_quotesで検証可能,新規設計,確定,2,新規,+1点,全アーキテクチャの最上流リスク
+13,Opus構造化,品質対策,バリデーション+フォールバック,Zodスキーマで必須フィールド/テキスト長/confidence範囲チェック。失敗→再試行→フォールバックプロンプト。モデル更新時の出力変化も検出,新規設計,確定,2,新規,,Opus依存リスクの緩和
+14,Opus構造化,品質対策,会議品質重み,meeting_type(5種)×durationでconfidence係数。10分雑談→全体0.5-0.7。60分深い議論→1.0。集約時にweightに反映,新規設計,確定,2,新規,+1点,短時間会議の過大評価を防止
+15,Opus構造化,コスト,月間見積もり,1000人×月3回=3000分析。$0.10-0.15/回。solver/beneficiary_profile追加で+$30-50。合計月$330-500。max_tokens:3000,§4-7,確定,2,変更,,V1:$44→V2:$330-500
+■ 集約エンジン（レイヤー1.5）,,,,,,,,,,
+16,集約,複数MT統合,基本ロジック,同一ユーザーの複数MT分析結果を統合。explicit即統合、implicit confidence累積。user_conversation_vectorsに書込,§8,確定,2,変更,,member_ai_profiles_v2と並行書込
+17,集約,複数MT統合,Haiku重複判定,既存ニーズ一覧と新規抽出を比較し同一/新規を判定。「エンジニア採用」vs「CTO探し」の区別にLLM必要。月$5-10,新規設計,確定,2,新規,+2点,embedding距離では不十分
+18,集約,時間軸管理,ニーズdecay,last_mentionedフィールド。3ヶ月言及なしでweight半減。明示的「解決済み」言及→即除去。/settings/ai-profileで手動も可,新規設計,確定,2,新規,+1点,古いニーズ残存問題を解消
+19,集約,時間軸管理,urgency推定,複数MTでの言及頻度。3回中3回→high/3回中1回→low。単一MT推論より精度高,新規設計,確定,2,新規,+1点,
+20,集約,低参加者,聞き専対策,participation_rate低→/settings/ai-profileで「関連トピック」任意選択可能。沈黙≠無関心,新規設計,確定,2,新規,,
+■ Haiku LLM判定（レイヤー4）★精度+10点の核心,,,,,,,,,,
+21,Haiku判定,設計思想,カテゴリの壁を超える,カテゴリベースでは「マーケ分析ニーズ×データ基盤オファー」=0.0。Haikuは「因果的に解決可能か」を判定→0.58-0.82。精度70→80点の原動力,新規設計,確定,2,新規,+10点,月$110-130の追加コスト
+22,Haiku判定,入力設計,4テキストクロスマッチ,need.text×offer.text / solver_profile×offer.text / need.text×beneficiary_profile / solver_profile×beneficiary_profileの4組の最大値,新規設計,確定,2,新規,,solver/beneficiary_profileが精度を決定
+23,Haiku判定,出力設計,2軸判定（将来）,Phase2: score(0-1)+reason(15字)の1軸。Phase3: 直接性(0-1)+確実性(0-1)の2軸。間接的価値の評価がさらに精緻化,新規設計,確定,2-3,新規,+1-2点,Phase3で追加。出力+20トークン程度
+24,Haiku判定,適用範囲,上位候補のみ,全100万ペアではなく、カテゴリベースorembeddingで上位50件に絞った後のリランキングに使用。コスト250回/ユーザー,新規設計,確定,2,新規,,全ペアLLM判定はコスト破綻
+25,Haiku判定,バッチ処理,非同期+キャッシュ,差分更新:staleなペアのみ再判定。バッチAPI(50%off)+プロンプトキャッシュ(90%off)。結果はmatching_scores_v4にキャッシュ。夜間バッチ,新規設計,確定,2,新規,,レイテンシ問題なし
+26,Haiku判定,コスト,月間見積もり,日50人再計算×250回×$0.00065=月$243。バッチ50%off→$122。キャッシュ併用→$110-130/月,新規設計,確定,2,新規,,
+■ スコアリングモデル（5次元+動的重み+ブースト）,,,,,,,,,,
+27,モデル,5次元,概要,need_offer(Haiku判定)+reverse_match+expertise_fit+topic_alignment+engagement_value。V1の2軸を完全置換,§2.1,確定,2,新規,,
+28,モデル,動的重み,need_offer高時,h_no≥0.80→(0.50/0.10/0.08/0.08/0.24)。need_offerが高ければそれを信じて集中。完璧マッチを0.8台に押上げ,新規設計,確定,2,新規,+3点,固定重みの限界を突破
+29,モデル,動的重み,need_offer中時,h_no≥0.60→(0.40/0.12/0.10/0.10/0.28)。バランス型,新規設計,確定,2,新規,,
+30,モデル,動的重み,need_offer低時,h_no<0.60→(0.28/0.12/0.14/0.12/0.34)。engagement重視。紹介力の高い人を評価,新規設計,確定,2,新規,+2点,名コネクター問題を解消
+31,モデル,ブースト,非線形ブースト,h_no≥0.85→conv+0.08 / h_no≥0.70→conv+0.04。高need_offerのスコア天井を引上げ,新規設計,確定,2,新規,+1点,
+32,モデル,ブースト,surprise_bonus,attr<0.45かつconv>0.45→最大+0.06。属性低×会話高=「意外な発見」=INTERCONNECTの最大価値,新規設計,確定,2,新規,+1点,カテゴリ横断マッチの評価改善
+33,モデル,alpha,一本化+積極化,0回→0.00/1回→0.50/2回→0.75/3回→0.88/4+回→0.95。V1のshrinkage二重減衰廃止。片側0.20,§2.3改,確定,2,変更,+2点,初回影響6%→50%
+34,モデル,合成,方向性付き単調保証,"conv>0.40→total=max(blended,attr)。conv≤0.40→total=blended。良い会議は下げない、悪い会議は正直に下げる",§2.3改,確定,2,変更,,閾値0.50→0.40に引下げ
+■ データモデル,,,,,,,,,,
+35,DB,user_conversation_vectors,テーブル定義,user_id(UNIQUE)/need_vectors(JSONB)/offer_vectors(JSONB)/expertise_vectors/topic_vectors/engagement_signature/evidence_index/hidden_items/analysis_count/meeting_ids/last_analyzed_at,§1.2,確定,2,新規,,各ベクトルにexplicit/signals/last_mentioned/decay_weight/solver_profile追加
+36,DB,matching_scores_v4,テーブル定義,viewer_id/target_id(UNIQUE)/need_offer_score/reverse_match/expertise_fit/topic_alignment/engagement_value/history_score/total_score/confidence/phase/score_reasons(JSONB)/notify_tier/is_stale/config_version/algorithm_version/calculated_at,§1.3,確定,2,新規,,config_version+algorithm_version追加(段階ロールアウト+A/Bテスト用)
+37,DB,correction_log,テーブル定義(新),user_id/vector_id/correction_type(ENUM:resolved/nuance_wrong/not_mine/not_my_need/other)/correction_text/original_text/created_at,新規設計,確定,2,新規,,プロンプト改善の教師データ
+38,DB,feedback_log,テーブル定義(新),viewer_id/target_id/rating(1-5)/value_tags(JSONB:advice/connection/insight/shared_challenge/none)/haiku_no_at_time/haiku_rv_at_time/config_version/created_at,新規設計,確定,2,新規,,次元レベルの重み検証用。判定時スコアも記録
+39,DB,scoring_config,テーブル定義(新),version_id/weights_json/alpha_table_json/boost_params_json/validated_accuracy/validation_details(JSONB)/is_active/applied_at/created_at,新規設計,確定,2,新規,,重み配分の履歴管理+ロールバック用
+40,DB,prompt_versions,拡張,v3.0.0(Opus)/v3.0.x(Haiku auto-versioned)追加。model_version/validated_accuracy/few_shot_count/is_active。v2.0.0維持,§1.1,確定,2,変更,,Haikuプロンプト自動バージョニング対応
+■ 同席者管理・プライバシー,,,,,,,,,,
+41,同席者,検出,meeting_ids重複,推薦一覧から除外ではなく「以前お会いした方」セクション分離。Phase3で再会推薦ロジック追加,新規設計,確定,2,新規,,
+42,プライバシー,証拠引用,内部専用,evidence_quotesは内部スコアリングのみ。viewerのニーズを理由テキストに明示しない。逆推論防止のため理由をターゲット視点に限定,§11,確定,2,維持,,
+43,プライバシー,AIプロフィール,/settings/ai-profile,抽出データ確認・非表示化・修正理由記録(correction_log)。任意のUI。ミーティングから吸い出すのが基本,§11.2,確定,2,新規,,強制フォームではない
+■ 推薦理由テキストエンジン V2,,,,,,,,,,
+44,理由V2,原則,ニーズ非明示,viewerの推論ニーズは理由に明示しない。V1のc01「あなたが求めている{need}」廃止。ターゲットの能力のみ記述,§3,確定,2,変更,,プライバシー強化
+45,理由V2,Tier構成,4Tier維持,"Tier1:属性(a01-a07維持)/Tier2:会話(新規5種,ターゲット視点)/Tier3:AI(ニーズ明示系を修正)/Tier4:関係(r01-r04維持)。最大3件、priority降順",§3,確定,2,変更,,
+■ パイプライン,,,,,,,,,,
+46,パイプ,全体フロー,7段階,Cron(9/12/15/18)→tl;dv取得→Opus分析(solver/beneficiary含)→Haiku集約→ベクトル書込→stale→カテゴリスコア+Haiku判定バッチ→通知,§4-7,確定,2,変更,,Opus+Haiku集約+Haiku判定の3段LLM
+47,パイプ,通知tier,閾値再設定,V2スコア分布に合わせて再調整必要。Phase2-3実装時にシミュレーション。相互マッチ判定(低い方採用)は維持,,要対応,2,変更,,high→Realtime/medium→DB/low→一覧
+48,パイプ,コスト,合計,Opus$330-500+Haiku集約$5-10+Haiku判定$110-130=月$445-640。ユーザーあたり$0.45-0.64,,確定,2,変更,,V1:$44→V2:$445-640
+■ 自動フィードバックループ（使うほど良くなる仕組み）,,,,,,,,,,
+49,FBループ,フィードバック収集,2段階FB UI,1段階目(必須):5段階★評価。2段階目(任意):価値タグ選択(アドバイス/紹介/気づき/共通課題/なし)。コネクション成立1週間後にpush,新規設計,確定,2,新規,+3-5点,次元レベルの重み検証用
+50,FBループ,フィードバック収集,暗黙シグナル活用,profile_viewsのview_duration/コネクション申請率/申請後承認率。全ユーザーから自動取得。FBの偏りを補完,新規設計,確定,2,新規,+1点,既存テーブル活用。追加実装は集計のみ
+51,FBループ,Haiku自動改善,候補生成(自動),"FB正解/不正解ペアを自動抽出。不正解50件ごとにfew-shot examples候補を生成。prompt_versionsにv3.0.1,v3.0.2と自動バージョニング",新規設計,確定,2,新規,+2-3点,自動なのは候補生成のみ。適用は承認制
+52,FBループ,Haiku自動改善,A/Bテスト検証(自動),現行プロンプト(A)と候補(B)で同一ペアセットを判定。時系列バリデーション(前半3ヶ月で生成→後半1ヶ月で検証)で過学習防止,新規設計,確定,2,新規,,A/Bテスト実行にFB4ヶ月分必要
+53,FBループ,Haiku自動改善,承認→適用(半自動),改善幅+2%以上のみ候補に。管理画面に「精度+X%の改善候補あり」通知。承認で適用。自動適用はしない,新規設計,確定,2,新規,,一番良い精度を失うリスク防止
+54,FBループ,重み最適化,月次自動チューニング,FB100件以上で起動。グリッドサーチで最適パラメータ探索。scoring_configに保存。段階ロールアウト(10%→50%→100%),新規設計,確定,2,新規,+1-2点,自動探索→承認→段階適用
+55,FBループ,属性スコア,自動調整,コネクション承認率を業種×職種ペアで集計→隣接マップ親和度を自動更新。最低30件/ペアで更新。完全自動化可能,新規設計,確定,2,新規,+1点,コールドスタート精度の漸進的改善
+56,FBループ,Opusプロンプト,半自動改善,correction_log100件でクラスタリング→上位パターンを管理画面提示→承認で適用。完全自動ではなく提案→承認→適用,新規設計,確定,2.5,新規,+1-2点,
+■ セーフガード（精度劣化防止）,,,,,,,,,,
+57,安全策,ロールバック,prompt_versions,各バージョンにvalidated_accuracy記録。is_activeフラグ管理。ロールバック=1つ前のis_active=true,新規設計,確定,2,新規,,
+58,安全策,ロールバック,scoring_config,version_id管理。matching_scores_v4のconfig_versionで追跡。特定バージョンのみロールバック可能,新規設計,確定,2,新規,,
+59,安全策,異常検出,行動指標ベース,日次コネクション申請率/プロフィール閲覧数/クリック率を監視。前週比-20%でアラート→手動ロールバック判断,新規設計,確定,2,新規,,FBベースの検出は統計力不足のため行動指標を使用
+60,安全策,段階ロールアウト,config更新時,scoring_config変更は10%→50%→100%で段階適用。matching_scores_v4のconfig_versionで追跡,新規設計,確定,2,新規,,全ペア一斉変更による混乱防止
+61,安全策,モデル更新,Opus/Haiku更新対策,model_versionを記録。Zodバリデーション失敗率急増で自動アラート。年2-3回の手動再検証,新規設計,確定,2,新規,,完全自動化不可。手動対応
+62,安全策,過学習防止,時系列バリデーション,A/Bテストデータを時間分割(生成期間/検証期間)。過去ペア最適化が未知ペアで有効か検証,新規設計,確定,2,新規,,
+63,安全策,FBバイアス,サイレントマジョリティ対策,FB回収率30-40%。残り60%は暗黙シグナル(view_duration/申請率/承認率)でカバー。声の大きい層への偏り防止,新規設計,確定,2,新規,,
+■ リスクと対策,,,,,,,,,,
+64,リスク,tl;dv品質,話者分離エラー,AのニーズがBに誤帰属。対策:Opusで矛盾検出+confidence低下+/settings/ai-profileで修正,,認識済み,2,新規,,最上流リスク
+65,リスク,構造化精度,1回MTの限界,urgency/stageが1回では不正確。対策:unknown許容+縦断分析+alphaフォールバック,,認識済み,2,新規,,
+66,リスク,カテゴリ体系,分類限界,新話題がotherに。対策:Haiku判定がカテゴリ不一致でも解決関係を検出。Phase3でembedding移行判断,,認識済み,2,新規,,Haiku導入でリスク大幅軽減
+67,リスク,コスト増,月$445-640,V1の$44から10倍。対策:MT1回きり分析でスケーリング線形。ユーザーあたり$0.45-0.64は許容範囲,,認識済み,2,新規,,
+68,リスク,コールドスタート,MT前ユーザー,ベクトルなし。対策:属性100%(alpha=0)+オンボーディングで任意入力→初期ノード,,認識済み,2,変更,,
+69,リスク,ライト層離脱,月0-1回MT,推薦精度低→使わない→データ溜まらない悪循環。対策:アクティブ層の「メンター型」を優先推薦して良い体験を提供,,認識済み,2,新規,,プロダクト設計で対応
+70,リスク,競合,技術調査未了,Lunchclub/Shapr/Bizzabo/Gripの技術調査。Phase2前に実施,,認識済み,2,新規,,
+■ マイグレーションパス,,,,,,,,,,
+71,Migration,Step1,テーブル+プロンプト,prompt_versions v3.0.0+user_conversation_vectors+matching_scores_v4+correction_log+feedback_log+scoring_config作成,,未着手,2,,,
+72,Migration,Step1.5,既存再分析,既存21件をOpus+v3.0.0(solver/beneficiary含)で再分析,,未着手,2,,,
+73,Migration,Step2,集約拡張,Haiku重複判定+user_conversation_vectors並行書込+decay管理,,未着手,2,,,
+74,Migration,Step3,V2スコアリング,5次元+動的重み+ブースト+Haiku判定バッチ+推薦理由V2,,未着手,2,,,
+75,Migration,Step4,UI更新,/settings/ai-profile+2段階FB UI+同席者セクション+マッチング画面V2,,未着手,2,,,
+76,Migration,Step5,FB基盤,feedback_log収集開始+暗黙シグナル集計+管理画面(改善候補表示),,未着手,2,,,
+77,Migration,Step6,V1クリーンアップ,v3→v4完全移行確認後にv3削除。member_ai_profiles_v2は当面維持,,未着手,2,,,
+■ 将来拡張（Phase 3-4、データドリブン判断）,,,,,,,,,,
+78,将来,embedding,pgvector,solver_profile×beneficiary_profileをembedding化。HNSW近傍探索でカテゴリ体系を完全廃止,,検討中,3,新規,+2-3点,other率>30%で判断
+79,将来,GraphRAG,ナレッジグラフ,ニーズ-オファー-スキルをグラフノード化。「解決可能」関係エッジ。embeddingより意味的に正確,,検討中,4,新規,,embedding精度不足時に検討
+80,将来,Gemini,長文コンテキスト,候補100人のプロフィール全文を1Mコンテキストに。情報圧縮損失ゼロ。月$300-650,,検討中,4,新規,,コスト高だが精度最高
+81,将来,量子,組合せ最適化,グループマッチング/イベントスケジューリングでQUBO。古典ソルバー→SQA→D-Wave差替IF,,検討中,4,新規,,スコアリングではなく最適化に量子
+82,将来,ML,XGBoost,FB350件以上でマッチ成功確率を予測。構造化フィールドを特徴量に,,検討中,3,新規,+2-3点,A/Bテストで有意差検出

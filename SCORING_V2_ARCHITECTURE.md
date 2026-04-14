@@ -1,343 +1,488 @@
-# INTERCONNECT スコアリング V2 設計書（改訂版）
+# INTERCONNECT スコアリング V2 設計書（最終完全版）
 
-> 会話内容に基づくビジネスマッチング — 完全設計
-> 初版: 2026-04-13 / 改訂: 2026-04-13（精査フィードバック全20項目反映）
-
----
-
-## 0. なぜ V2 が必要か
-
-### 現行システム（V1）の致命的欠陥
-
-INTERCONNECTの価値は「ミーティングで実際に語られた内容に基づくマッチング」。
-しかし V1 では、Claude が抽出した豊富なデータの **90% が捨てられている**。
-
-| Claude が抽出するもの | V1 での利用 |
-|---|---|
-| demonstrated_skills（実証されたスキル） | 文字列部分一致でテンプレート理由に使用 |
-| expressed_needs（表明されたニーズ） | 文字列部分一致でテンプレート理由に使用 |
-| offered_capabilities（提供できる能力） | 文字列部分一致でテンプレート理由に使用 |
-| communication_traits（4つの数値） | **スコア計算の唯一のAI入力**（類似度） |
-| key_statements（印象的な発言） | **未使用** |
-| engagement_metrics（参加度） | **未使用** |
-
-V1 のスコア計算は「コミュニケーションスタイルが似ている人 = 良いマッチ」という誤った前提に立っている。
-実際は：
-- 積極的なCEO × 分析的なCTO = スタイルは違うが最高の組み合わせ
-- 全ペアの会話スコアが 0.80〜0.96 に集中 → **差別化不能**
-- 分析 0回→1回でスコアが**下がる**（離散的重み遷移 + 過剰な二重縮小）
-
-### V2 の設計原則
-
-1. **会話内容が王** — プロフィール属性ではなく、実際に語られた内容がスコアの根幹
-2. **非対称** — 「AにとってBの価値」≠「BにとってAの価値」
-3. **プライバシー最優先** — 証拠引用は内部スコアリング専用。ユーザーのニーズを他者に明示しない
-4. **正直なシグナル** — 良い会議はスコアを上げ、悪い会議はスコアを下げる
-5. **漸進的** — 1回のミーティングでも意味のある結果。データが増えるほど精度向上
-6. **コスト効率** — スコア計算時にLLM呼び出しゼロ。事前抽出データの純粋な計算
+> 会話内容に基づくビジネスマッチング — Opus構造化抽出 + Haiku LLM判定 + 自動改善ループ
+> 参照: SCORING_V2_DESIGN.csv（機能設計82項目）
 
 ---
 
-## 1. データモデル
-
-### 1.1 Claude 抽出の強化（プロンプト v3.0.0）
-
-現行 v2.0.0 の 6 フィールドを拡張。**破壊的変更を含む。**
+## 0. アーキテクチャ概観
 
 ```
-v2.0.0 (現行):
-  demonstrated_skills: string[]                           ← v3で構造変更
-  expressed_needs: {text, category, subcategory, confidence}[]
-  offered_capabilities: {text, category, subcategory, confidence}[]
-  communication_traits: {assertiveness, collaboration, analytical, empathy}
-  key_statements: string[]
-  engagement_metrics: {participation_rate, question_frequency, response_quality}
-
-v3.0.0 (変更点):
-  demonstrated_skills: {text, category, subcategory, confidence}[]  ← string[]から構造体に変更
-  (追加) topic_depth: {topic, category, depth: "mentioned"|"discussed"|"deep"}[]
-  (追加) engagement_behaviors: {
-    gives_actionable_advice: boolean,
-    asks_deep_questions: boolean,
-    shares_connections: boolean,
-    offers_resources: boolean,
-    challenges_ideas: boolean
-  }
-  (追加) evidence_quotes: {field: "need"|"offer"|"skill", index: number, quote: string}[]
+┌─────────────────────────────────────────────────────────────────────┐
+│                      4レイヤー構成                                   │
+├─────────────────────────────────────────────────────────────────────┤
+│                                                                     │
+│  Layer 1: Opus 構造化抽出                                           │
+│  ├─ 会議書き起こし → Opus 4.6 で深層分析                            │
+│  ├─ solver_profile / beneficiary_profile（精度の核心）              │
+│  ├─ explicit/implicit フラグ + signals + 日本語婉曲対策             │
+│  └─ conversation_dynamics（ペア間会話品質）                          │
+│                                                                     │
+│  Layer 1.5: 集約エンジン                                            │
+│  ├─ Haiku 重複判定（「エンジニア採用」≈「CTO探し」）               │
+│  ├─ explicit 即統合 / implicit confidence 累積                      │
+│  ├─ 時間軸管理（decay + urgency + 解決済み除去）                    │
+│  └─ user_conversation_vectors に書き込み                            │
+│                                                                     │
+│  Layer 2-3: 5次元スコアリング + 動的重み + ブースト                  │
+│  ├─ カテゴリベース事前スコア（O(N²)、LLMなし）                     │
+│  ├─ 上位50件を Haiku LLM 判定でリランキング（+10点の核心）         │
+│  ├─ 動的重み（need_offer高→集中 / 低→engagement重視）              │
+│  └─ surprise_bonus（属性低×会話高 = INTERCONNECTの最大価値）       │
+│                                                                     │
+│  Layer 4: 自動フィードバックループ                                   │
+│  ├─ 2段階FB UI + 暗黙シグナル                                      │
+│  ├─ Haiku プロンプト自動改善（候補生成→A/Bテスト→承認適用）        │
+│  ├─ 重み月次自動チューニング（scoring_config）                      │
+│  └─ 属性スコア隣接マップ自動更新                                    │
+│                                                                     │
+│  セーフガード: ロールバック / 異常検出 / 段階ロールアウト / 過学習防止 │
+└─────────────────────────────────────────────────────────────────────┘
 ```
 
-**破壊的変更: demonstrated_skills**
-- v2: `["プレゼンテーション能力", "資金調達"]`
-- v3: `[{"text":"プレゼンテーション能力", "category":"leadership", "subcategory":"communication", "confidence":0.9}]`
-- 集約ハンドラーは両形式を検出して処理する（§8.1 参照）
+---
 
-**コスト影響**: +500〜1,200 出力トークン/分析 ≈ +$0.015/分析 ≈ +$45/月（3000分析時）
-**max_tokens**: 2000 → 3000 に引き上げ
+## 1. Opus 構造化抽出（レイヤー1）
 
-**トランスクリプト前処理の注意**:
-tl;dvが文字間スペース付きテキストを返す場合がある。
-evidence_quotes にこのアーティファクトが入るため、集約時にスペース正規化を適用する。
+### 1.1 モデル選択: Opus 4.6
 
-### 1.2 ユーザー会話ベクトル（新テーブル）
+Sonnet では暗黙ニーズの推論が弱い。日本語婉曲表現（「ちょっと気になって」= 重要課題）の読み取りに
+Opus の高度な文脈理解が必要。1ミーティング1回きりの分析なのでコスト許容。
 
-スコアリング専用のデータ構造。移行期間中は `member_ai_profiles_v2` と並行して書き込む（§8 参照）。
+| 項目 | V1 (Sonnet) | V2 (Opus) |
+|---|---|---|
+| モデル | claude-sonnet-4-6 | claude-opus-4-6 |
+| 月間コスト (1000人) | $44 | $330-500 |
+| 暗黙ニーズ検出 | 弱い | 強い |
+| 日本語婉曲理解 | 基本的 | 高度 |
 
-```sql
-CREATE TABLE public.user_conversation_vectors (
-  id                    UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  user_id               UUID NOT NULL UNIQUE REFERENCES public.user_profiles(id) ON DELETE CASCADE,
-  need_vectors          JSONB NOT NULL DEFAULT '[]',
-  offer_vectors         JSONB NOT NULL DEFAULT '[]',
-  expertise_vectors     JSONB NOT NULL DEFAULT '[]',
-  topic_vectors         JSONB NOT NULL DEFAULT '[]',
-  engagement_signature  JSONB NOT NULL DEFAULT '{}',
-  evidence_index        JSONB NOT NULL DEFAULT '{}',
-  hidden_items          JSONB NOT NULL DEFAULT '[]',
-  analysis_count        INT NOT NULL DEFAULT 0,
-  meeting_ids           UUID[] DEFAULT '{}',
-  last_analyzed_at      TIMESTAMPTZ,
-  created_at            TIMESTAMPTZ NOT NULL DEFAULT now(),
-  updated_at            TIMESTAMPTZ NOT NULL DEFAULT now()
-);
+### 1.2 プロンプト設計（v3.0.0）
 
-ALTER TABLE public.user_conversation_vectors ENABLE ROW LEVEL SECURITY;
-CREATE POLICY "users_own_vectors" ON public.user_conversation_vectors
-  FOR ALL USING (auth.uid() = user_id);
-CREATE POLICY "service_role_all" ON public.user_conversation_vectors
-  FOR ALL USING (auth.role() = 'service_role');
+#### explicit/implicit フラグ
+各ニーズ・オファーに「明示的/推論」フラグを付与。
+- `explicit: true` → 即使用（高信頼）
+- `explicit: false` → confidence 低減だが **weight 下限 1.0 保証** + **confidence 下限 0.5 保証**
+- implicit need の過小評価を防止
+
+#### signals 検出（推論根拠の構造化）
+```
+同トピック2回言及 → 重要
+具体的数字の言及 → 高信頼
+質問の具体性     → ニーズ vs 社交辞令の判別
+発言の長さ       → 関心度
+```
+Opus の推論をトレース可能にする。
+
+#### 日本語婉曲対策（プロンプトに明示）
+```
+「ちょっと気になって」  → 重要課題
+「もしよかったら」      → 明確ニーズ
+「まあ一応」            → 謙遜 = 実績
+「いいですよね」        → 社交辞令（除外）
 ```
 
-#### 各ベクトルの構造
+#### solver_profile（精度向上の核心）
+各ニーズに「このニーズに応えられる人はどういう人か」を自然言語で詳細記述。
+Haiku 判定の入力精度を劇的に向上。embedding 化時にオファーと同空間で比較可能。
 
-**need_vectors / offer_vectors:**
+**例:**
 ```json
 {
-  "id": "uuid-v4",
-  "text": "エンジニア採用に困っている",
-  "category": "hr",
-  "subcategory": "recruitment",
-  "confidence": 0.92,
-  "weight": 2.0,
-  "source_count": 2,
-  "last_seen": "2026-04-11T05:00:00Z",
-  "evidence": ["内部参照用の引用テキスト"]
+  "text": "シリーズAの資金調達を検討中",
+  "solver_profile": "ITスタートアップ投資経験のあるVC/CVC。特にSaaS領域のシリーズA実績がある投資家。経営支援も含めたハンズオン型が理想。"
 }
 ```
 
-**evidence_index:** スコアリング精度向上のための**内部データ**。ユーザーには表示しない（§11参照）。
+#### beneficiary_profile（solver_profile と対）
+各オファーに「このオファーが役立つ人はどういう人か」を自然言語で詳細記述。
+solver_profile とクロスマッチでカテゴリ横断の解決関係を捕捉。
 
-### 1.3 マッチングスコア V4（新テーブル）
-
-```sql
-CREATE TABLE public.matching_scores_v4 (
-  id                UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  viewer_id         UUID NOT NULL REFERENCES public.user_profiles(id) ON DELETE CASCADE,
-  target_id         UUID NOT NULL REFERENCES public.user_profiles(id) ON DELETE CASCADE,
-  need_offer_score  FLOAT NOT NULL DEFAULT 0.0,
-  reverse_match     FLOAT NOT NULL DEFAULT 0.0,
-  expertise_fit     FLOAT NOT NULL DEFAULT 0.0,
-  topic_alignment   FLOAT NOT NULL DEFAULT 0.0,
-  engagement_value  FLOAT NOT NULL DEFAULT 0.0,
-  history_score     FLOAT NOT NULL DEFAULT 0.0,
-  total_score       FLOAT NOT NULL DEFAULT 0.0,
-  confidence        FLOAT NOT NULL DEFAULT 0.0,
-  phase             TEXT NOT NULL DEFAULT 'attribute_only'
-                    CHECK (phase IN ('attribute_only','hybrid','ai_primary')),
-  score_reasons     JSONB DEFAULT '[]',
-  notify_tier       TEXT CHECK (notify_tier IN ('high','medium','low')),
-  is_stale          BOOLEAN NOT NULL DEFAULT true,
-  calculated_at     TIMESTAMPTZ DEFAULT now(),
-  UNIQUE(viewer_id, target_id)
-);
-
-CREATE INDEX idx_scores_v4_viewer ON matching_scores_v4(viewer_id) WHERE NOT is_stale;
-
-ALTER TABLE public.matching_scores_v4 ENABLE ROW LEVEL SECURITY;
-CREATE POLICY "users_own_scores" ON public.matching_scores_v4
-  FOR SELECT USING (auth.uid() = viewer_id);
-CREATE POLICY "service_role_all" ON public.matching_scores_v4
-  FOR ALL USING (auth.role() = 'service_role');
-
-CREATE OR REPLACE FUNCTION mark_scores_v4_stale()
-RETURNS TRIGGER AS $$
-BEGIN
-  UPDATE matching_scores_v4 SET is_stale = true
-  WHERE viewer_id = NEW.user_id OR target_id = NEW.user_id;
-  RETURN NEW;
-END;
-$$ LANGUAGE plpgsql;
-
-CREATE TRIGGER trg_stale_scores_v4
-  AFTER UPDATE ON user_conversation_vectors
-  FOR EACH ROW EXECUTE FUNCTION mark_scores_v4_stale();
+**例:**
+```json
+{
+  "text": "SaaS企業の成長戦略コンサルティング",
+  "beneficiary_profile": "ARR 1-10億円のSaaSスタートアップ経営者。PMF達成後のスケール期に課題を抱えている。組織拡大やGTM戦略に悩んでいる人。"
+}
 ```
 
-**フェーズ名: V1互換。** `"attribute_only" | "hybrid" | "ai_primary"` をそのまま使用。
+#### conversation_dynamics（ペア間会話品質）
+```json
+{
+  "rapport": 0.8,                  // 信頼関係
+  "information_asymmetry": 0.6,    // 情報非対称（一方が教える側）
+  "unspoken_tensions": ["予算"],   // 回避されたトピック
+  "follow_up_potential": true      // 次のアクションの有無
+}
+```
+
+### 1.3 出力構造
+
+**needs:**
+```json
+{
+  "text": "シリーズAの資金調達を検討中",
+  "explicit": true,
+  "confidence": 0.95,
+  "evidence": ["来年の春までにシリーズAを..."],
+  "signals": ["具体的時期の言及", "2回目の言及"],
+  "solver_profile": "ITスタートアップ投資経験のあるVC...",
+  "urgency_signals": ["来年の春まで"],
+  "category": "finance",
+  "subcategory": "fundraising"
+}
+```
+
+**offers:**
+```json
+{
+  "text": "SaaS企業の成長戦略コンサルティング",
+  "explicit": true,
+  "confidence": 0.90,
+  "evidence": ["ARR 3億から10億に持っていった..."],
+  "signals": ["具体的数字", "実績ベース"],
+  "beneficiary_profile": "ARR 1-10億円のSaaSスタートアップ経営者...",
+  "credibility": "実績",
+  "category": "strategy",
+  "subcategory": "business_development"
+}
+```
+
+### 1.4 品質対策
+
+- **tl;dv 文字起こし品質**: 話者分離エラー → 矛盾検出 → confidence 低下 + フラグ。スペース正規化。
+- **バリデーション**: Zod スキーマで必須フィールド/テキスト長/confidence 範囲チェック。失敗 → 再試行 → フォールバックプロンプト。
+- **会議品質重み**: meeting_type × duration で confidence 係数。10分雑談 → 0.5-0.7。60分深い議論 → 1.0。
+
+### 1.5 コスト
+
+1000人 × 月3回 = 3000分析。$0.10-0.15/回。solver/beneficiary_profile 追加で +$30-50。
+**合計: 月 $330-500。** max_tokens: 3000。
 
 ---
 
-## 2. スコアリングアルゴリズム
+## 2. 集約エンジン（レイヤー1.5）
 
-### 2.1 5次元モデル（履歴は属性スコアにのみ含む）
+### 2.1 基本ロジック
 
-| 次元 | 意味 | 重み |
+同一ユーザーの複数 MT 分析結果を統合。
+- `explicit: true` → 即統合
+- `explicit: false` → confidence 累積（複数回言及で信頼度上昇）
+- `user_conversation_vectors` に書き込み（`member_ai_profiles_v2` と並行書込）
+
+### 2.2 Haiku 重複判定
+
+既存ニーズ一覧と新規抽出を比較し同一/新規を判定。
+「エンジニア採用」vs「CTO探し」の区別に LLM が必要（embedding 距離では不十分）。
+月 $5-10。
+
+### 2.3 時間軸管理
+
+**ニーズ decay:**
+- `last_mentioned` フィールド追跡
+- 3ヶ月言及なし → weight 半減
+- 明示的「解決済み」言及 → 即除去
+- `/settings/ai-profile` で手動除去も可能
+
+**urgency 推定:**
+- 複数 MT での言及頻度: 3回中3回 → high / 3回中1回 → low
+- 単一 MT 推論より精度高
+
+### 2.4 低参加者対策
+
+participation_rate 低（聞き専）→ `/settings/ai-profile` で「関連トピック」任意選択可能。
+沈黙 ≠ 無関心。
+
+---
+
+## 3. Haiku LLM 判定（レイヤー4）★精度+10点の核心
+
+### 3.1 設計思想: カテゴリの壁を超える
+
+カテゴリベースでは「マーケ分析ニーズ × データ基盤オファー」= 0.0。
+Haiku は「因果的に解決可能か」を判定 → 0.58-0.82。
+**精度 70点 → 80点の原動力。月 $110-130 の追加コスト。**
+
+### 3.2 入力設計: 4テキストクロスマッチ
+
+```
+① need.text × offer.text
+② solver_profile × offer.text
+③ need.text × beneficiary_profile
+④ solver_profile × beneficiary_profile
+
+→ 4組のスコアの最大値を採用
+```
+
+solver/beneficiary_profile が精度を決定する。
+
+### 3.3 出力設計
+
+**Phase 2:** score(0-1) + reason(15字) の1軸
+**Phase 3:** 直接性(0-1) + 確実性(0-1) の2軸
+
+### 3.4 適用範囲
+
+全ペアではなく、カテゴリベース or embedding で**上位50件に絞った後のリランキング**に使用。
+コスト: 250回/ユーザー。
+
+### 3.5 バッチ処理
+
+- 差分更新: stale なペアのみ再判定
+- バッチ API (50% off) + プロンプトキャッシュ (90% off)
+- 結果は matching_scores_v4 にキャッシュ
+- 夜間バッチ → レイテンシ問題なし
+
+### 3.6 コスト
+
+日50人再計算 × 250回 × $0.00065 = 月 $243。バッチ 50% off → $122。キャッシュ併用 → **月 $110-130。**
+
+---
+
+## 4. スコアリングモデル（5次元 + 動的重み + ブースト）
+
+### 4.1 5次元
+
+| 次元 | 説明 | データソース |
 |---|---|---|
-| need_offer_score | 相手が自分のニーズに応えられるか（非対称） | 0.40 |
-| reverse_match | 自分が相手のニーズに応えられるか（互恵性） | 0.18 |
-| expertise_fit | 専門性が補完的か | 0.18 |
-| topic_alignment | 深く議論するテーマが共通しているか | 0.12 |
-| engagement_value | 相手の行動的価値 | 0.12 |
+| need_offer_score | Haiku LLM 判定による解決関係スコア | solver/beneficiary_profile クロスマッチ |
+| reverse_match | 逆方向（互恵性） | 同上、viewer↔target 入替 |
+| expertise_fit | 補完的専門知識 | expertise_vectors カテゴリ照合 |
+| topic_alignment | 深い共通テーマ | topic_vectors depth×depth |
+| engagement_value | 行動的価値 | engagement_signature |
 
-合計: 1.00。**history_score は属性スコアにのみ含む（二重計上防止）。**
+### 4.2 動的重み
 
-### 2.2 各次元の計算
+need_offer のスコア（h_no）に応じて重み配分が変化。
 
-#### Dimension 1: ニーズ×オファーマッチ（need_offer_score）
+| 条件 | need_offer | reverse | expertise | topic | engagement |
+|---|---|---|---|---|---|
+| h_no ≥ 0.80 | **0.50** | 0.10 | 0.08 | 0.08 | 0.24 |
+| h_no ≥ 0.60 | **0.40** | 0.12 | 0.10 | 0.10 | 0.28 |
+| h_no < 0.60 | 0.28 | 0.12 | 0.14 | 0.12 | **0.34** |
 
-```
-viewer の各 need について target の offers からマッチを探索:
-  a. カテゴリマッチ:
-     subcategory 完全一致 → 1.0 / category 一致 → 0.5 / 隣接カテゴリ → 0.4 / 不一致 → 0.0
-  b. テキスト類似フォールバック:
-     カテゴリマッチ 0.0 の場合、テキスト共通キーワード2語以上 → 0.2
+**設計根拠:**
+- h_no 高 → それを信じて集中。完璧マッチを 0.8 台に押し上げ。
+- h_no 低 → engagement 重視。紹介力の高い「コネクター型」人材を評価。
 
-  マッチ強度 = max(カテゴリマッチ, テキスト類似) × min(need.confidence, offer.confidence)
-  score = Σ(need.weight × match_strength) / Σ(need.weight)
-```
-
-#### Dimension 2: 逆方向マッチ（reverse_match）
+### 4.3 非線形ブースト
 
 ```
-calcNeedOfferScore(target.need_vectors, viewer.offer_vectors)
+h_no ≥ 0.85 → conv_score + 0.08
+h_no ≥ 0.70 → conv_score + 0.04
+
+surprise_bonus:
+  attr_score < 0.45 かつ conv_score > 0.45 → 最大 +0.06
+  属性低 × 会話高 = 「意外な発見」= INTERCONNECT の最大価値
 ```
 
-×0.7 割引は廃止。次元重み（0.18）が相対的重要度を表現。
+### 4.4 alpha（一本化 + 積極化）
 
-#### Dimension 3: 専門性適合（expertise_fit）
-
-```
-同subcategory → 0.5 / 同category異subcategory → 1.0 / 隣接 → 0.4 / 異category → 0.1
-score = Σ(value × target.weight) / Σ(target.weight)
-```
-
-#### Dimension 4: トピック親和性（topic_alignment）
+shrinkage 二重減衰を廃止。alpha のみで制御。
 
 ```
-alignment += catMatch × viewer.depth × target.depth × viewer.weight
-score = alignment / Σ(viewer.weight)
-  depth: mentioned=0.3, discussed=0.6, deep=1.0
+分析 0回 → 0.00（純粋な属性）
+分析 1回 → 0.50（初回から50%反映）
+分析 2回 → 0.75
+分析 3回 → 0.88
+分析 4回+ → 0.95
+片側データ → 0.20
 ```
 
-#### Dimension 5: エンゲージメント価値（engagement_value）
+V1: 初回影響 6% → **V2: 50%。** 1回のミーティングで即座に意味のある変化。
+
+### 4.5 方向性付き単調保証
 
 ```
-advice:0.30 / connections:0.25 / resources:0.20 / questions:0.15 / challenges:0.10
-score = Σ(behavior × weight)
+conv_score > 0.40 → total = max(blended, attr_score)  // 良い会議は下げない
+conv_score ≤ 0.40 → total = blended                   // 悪い会議は正直に下げる
 ```
 
-Phase 2 でコンテキスト依存重みに拡張予定（viewer の need カテゴリに基づく）。
-
-### 2.3 合成スコア計算
-
-#### 信頼制御: alpha 一本化（shrinkage 廃止）
-
-```
-min_analysis = min(viewer.analysis_count, target.analysis_count)
-
-alpha:  0→0.00 / 1→0.35 / 2→0.60 / 3→0.80 / ≥4→0.92
-
-confidence（通知ティア判定用のみ）: min(min_analysis / 5, 1.0)
-
-片側会話: viewer有 & target無 → alpha_one_sided = 0.15
-```
-
-#### 最終スコア
-
-```
-conv_score = 0.40×need_offer + 0.18×reverse + 0.18×expertise + 0.12×topic + 0.12×engagement
-attr_score = 0.60×attribute + 0.25×purpose + 0.15×history
-blended = alpha × conv_score + (1 - alpha) × attr_score
-
-方向性付き単調保証:
-  conv_score > 0.50 → total = max(blended, attr_score)  // 良い会議は絶対にスコアを下げない
-  conv_score ≤ 0.50 → total = blended                   // 悪い会議は正直に下げる
-```
-
-**数値例（analysis=1, conv=0.80, attr=0.50）:**
-`blended = 0.65×0.50 + 0.35×0.80 = 0.605 → max(0.605, 0.50) = 0.605` (+21%)
-
-**数値例（analysis=1, conv=0.30, attr=0.50）:**
-`blended = 0.65×0.50 + 0.35×0.30 = 0.430` (正しく下降)
+閾値を 0.50 → 0.40 に引き下げ。中立に近い会議でもスコアを維持。
 
 ---
 
-## 3. 推薦理由生成
+## 5. データモデル
 
-**原則: ユーザーの推論されたニーズは理由テキストに明示しない。ランキングにのみ使用。**
+### 5.1 user_conversation_vectors
 
 ```
-Tier 1: 「{name}さんは{capability}の実績をお持ちです」（ターゲット視点のみ）
-Tier 2: 「{name}さんも{category}の領域で課題をお持ちです。お互いに力になれる関係です」
-Tier 3: 「{topic}について深い知見をお持ちです」
-Tier 4: 「ミーティングで具体的なアドバイスを提供してくれる方です」
-Tier 5: 「{industry}で活躍されている方です」（属性フォールバック）
+user_id(UNIQUE) / need_vectors(JSONB) / offer_vectors(JSONB) /
+expertise_vectors / topic_vectors / engagement_signature / evidence_index /
+hidden_items / analysis_count / meeting_ids / last_analyzed_at
 ```
 
-最大3件。evidence_quote は他ユーザーに**表示しない**（§11参照）。
+各ベクトルに追加フィールド: `explicit` / `signals` / `last_mentioned` / `decay_weight` / `solver_profile` or `beneficiary_profile`
+
+### 5.2 matching_scores_v4
+
+V2 設計書の定義に加え: `config_version` + `algorithm_version`（段階ロールアウト + A/Bテスト用）
+
+### 5.3 新規テーブル
+
+| テーブル | 目的 |
+|---|---|
+| correction_log | ユーザーの修正記録（プロンプト改善の教師データ） |
+| feedback_log | マッチング後の評価（5段階 + 価値タグ + 判定時スコア記録） |
+| scoring_config | 重み配分の履歴管理 + ロールバック + 段階ロールアウト |
+
+### 5.4 prompt_versions 拡張
+
+v3.0.0 (Opus) / v3.0.x (Haiku auto-versioned) 追加。
+`model_version` / `validated_accuracy` / `few_shot_count` / `is_active` 列追加。
 
 ---
 
-## 4-7. パイプライン・カテゴリ・冷間起動・コスト
+## 6. 同席者管理・プライバシー
 
-（§1-3の変更に伴う更新。主要な変更点:）
-- aggregate は member_ai_profiles_v2 と user_conversation_vectors に**並行書き込み**
-- v2形式スキルは `{category:"other"}` に自動変換
-- max_tokens: 3000
-- 月間コスト: V1 $72 → V2 $102 (+$30)
-- 隣接カテゴリマップ: 11ペア、全て双方向
-- 「高精度」ラベル廃止。データソースのみ表示
+### 6.1 同席者検出
 
----
+meeting_ids の重複で検出。推薦一覧から**除外ではなく「以前お会いした方」セクション分離**。
 
-## 8. マイグレーションパス
+### 6.2 プライバシー
 
-Step 1: プロンプト+テーブル作成 → Step 1.5: 既存21件の再分析（推奨） → Step 2: 集約拡張（並行書込） → Step 3: V2スコアリング実装 → Step 4: フロントエンド更新 → Step 5: V1クリーンアップ
+- evidence_quotes は内部スコアリングのみ
+- viewer のニーズを理由テキストに明示しない
+- 逆推論防止のため理由をターゲット視点に限定
 
-### 8.1 後方互換性
+### 6.3 AI プロフィール管理 (/settings/ai-profile)
 
-```
-- topic_depth null → topic_vectors = []、topic_alignment = 0
-- engagement_behaviors null → engagement_signature = {}、engagement_value = 0
-- evidence_quotes null → evidence_index = {}
-- demonstrated_skills が string[] → {text, category:"other", subcategory:"general", confidence:0.5}
-- 全次元関数は空配列で 0 を返す
-```
+抽出データ確認・非表示化・修正理由記録 (correction_log)。
+任意の UI。ミーティングから吸い出すのが基本。強制フォームではない。
 
 ---
 
-## 9-10. シミュレーション・将来拡張
+## 7. 推薦理由テキストエンジン V2
 
-（主要変更: pgvector Phase 2、エンゲージメント重みコンテキスト化、ユーザー手動入力によるベクトル補完）
+### 7.1 原則
+
+viewer の推論ニーズは理由に明示しない。ターゲットの能力のみ記述。
+
+### 7.2 Tier 構成
+
+```
+Tier 1: 属性（a01-a07 維持）
+Tier 2: 会話（新規5種、ターゲット視点）
+Tier 3: AI（ニーズ明示系を修正）
+Tier 4: 関係（r01-r04 維持）
+```
+
+最大3件、priority 降順。
 
 ---
 
-## 11. プライバシー設計
+## 8. パイプライン
 
-### 11.1 証拠引用の取り扱い
+### 8.1 全体フロー（7段階）
 
 ```
-禁止: 他ユーザーに証拠引用を表示 / viewer のニーズを理由テキストに明示 / ミーティングの存在を推測可能にする
-許可: 内部スコアリング精度向上 / 抽象化された能力記述としてテンプレートに反映 / ユーザー本人が自分のプロフィールで確認
+Cron (9/12/15/18 JST)
+  → tl;dv 取得
+  → Opus 分析 (solver/beneficiary 含)
+  → Haiku 集約 (重複判定)
+  → ベクトル書込 (user_conversation_vectors)
+  → stale フラグ
+  → カテゴリスコア + Haiku 判定バッチ
+  → 通知
 ```
 
-### 11.2 ユーザーの AI プロフィール管理
+**3段 LLM**: Opus (抽出) + Haiku (集約) + Haiku (判定)
 
-`/settings/ai-profile` ページ（新規）で自分の抽出データを確認・非表示化可能。
-`hidden_items` に追加された項目はスコアリングから除外。
+### 8.2 コスト合計
 
-### 11.3 プライバシーポリシーとの整合
+```
+Opus 分析:   $330-500/月
+Haiku 集約:  $5-10/月
+Haiku 判定:  $110-130/月
+───────────────────────
+合計:        $445-640/月（ユーザーあたり $0.45-0.64）
+```
 
-現行ポリシー「ニーズ情報は非公開」に完全準拠。テンプレートはターゲットの能力のみ記述。
+V1: $44/月 → V2: $445-640/月（精度 +30点以上と引き換え）
+
+---
+
+## 9. 自動フィードバックループ（使うほど良くなる仕組み）
+
+### 9.1 フィードバック収集
+
+**2段階 FB UI:**
+- 1段階目（必須）: 5段階★評価
+- 2段階目（任意）: 価値タグ選択（アドバイス/紹介/気づき/共通課題/なし）
+- コネクション成立 1週間後に push
+
+**暗黙シグナル活用:**
+- profile_views の view_duration
+- コネクション申請率 / 申請後承認率
+- 全ユーザーから自動取得。FB の偏りを補完。
+
+### 9.2 Haiku 自動改善（候補生成→A/Bテスト→承認適用）
+
+1. **候補生成（自動）**: FB 正解/不正解ペアを自動抽出。不正解50件ごとに few-shot examples 候補を生成。prompt_versions に v3.0.1, v3.0.2 と自動バージョニング。
+2. **A/Bテスト検証（自動）**: 現行プロンプト(A) と候補(B) で同一ペアセットを判定。時系列バリデーション（前半3ヶ月で生成→後半1ヶ月で検証）で過学習防止。
+3. **承認→適用（半自動）**: 改善幅 +2% 以上のみ候補に。管理画面に通知。**自動適用はしない**。
+
+### 9.3 重み最適化
+
+FB 100件以上で起動。グリッドサーチで最適パラメータ探索。scoring_config に保存。
+段階ロールアウト (10% → 50% → 100%)。
+
+### 9.4 属性スコア自動調整
+
+コネクション承認率を業種×職種ペアで集計 → 隣接マップ親和度を自動更新。
+最低 30件/ペアで更新。完全自動化可能。
+
+---
+
+## 10. セーフガード（精度劣化防止）
+
+| 仕組み | 詳細 |
+|---|---|
+| **ロールバック (prompt)** | prompt_versions に validated_accuracy 記録。is_active フラグ管理。 |
+| **ロールバック (config)** | scoring_config の version_id 管理。matching_scores_v4 の config_version で追跡。 |
+| **異常検出** | 日次コネクション申請率/閲覧数/クリック率を監視。前週比 -20% でアラート。 |
+| **段階ロールアウト** | scoring_config 変更は 10% → 50% → 100% で段階適用。 |
+| **モデル更新対策** | model_version 記録。Zod バリデーション失敗率急増で自動アラート。 |
+| **過学習防止** | A/Bテストデータを時間分割（生成期間/検証期間）。 |
+| **FB バイアス対策** | 回収率 30-40%。残り 60% は暗黙シグナルでカバー。 |
+
+---
+
+## 11. リスクと対策
+
+| リスク | 対策 |
+|---|---|
+| tl;dv 話者分離エラー | Opus で矛盾検出 + confidence 低下 + /settings/ai-profile で修正 |
+| 1回MTの限界 | unknown 許容 + 縦断分析 + alpha フォールバック |
+| カテゴリ分類限界 | Haiku 判定がカテゴリ不一致でも解決関係を検出。Phase 3 で embedding |
+| コスト増 ($445-640/月) | MT1回きり分析でスケーリング線形。ユーザーあたり $0.45-0.64 |
+| コールドスタート | 属性 100% (alpha=0) + オンボーディングで任意入力 → 初期ノード |
+| ライト層離脱 | アクティブ層の「メンター型」を優先推薦して良い体験を提供 |
+
+---
+
+## 12. マイグレーションパス
+
+| Step | 内容 |
+|---|---|
+| **1** | テーブル作成 (user_conversation_vectors / matching_scores_v4 / correction_log / feedback_log / scoring_config) + prompt_versions v3.0.0 |
+| **1.5** | 既存21件を Opus + v3.0.0 (solver/beneficiary 含) で再分析 |
+| **2** | Haiku 重複判定 + user_conversation_vectors 並行書込 + decay 管理 |
+| **3** | 5次元 + 動的重み + ブースト + Haiku 判定バッチ + 推薦理由 V2 |
+| **4** | /settings/ai-profile + 2段階 FB UI + 同席者セクション + マッチング画面 V2 |
+| **5** | feedback_log 収集開始 + 暗黙シグナル集計 + 管理画面（改善候補表示） |
+| **6** | v3 → v4 完全移行確認後に v3 削除。member_ai_profiles_v2 は当面維持 |
+
+---
+
+## 13. 将来拡張（Phase 3-4、データドリブン判断）
+
+| Phase | 技術 | 条件 | 期待効果 |
+|---|---|---|---|
+| 3 | pgvector embedding | other 率 > 30% で判断 | +2-3点 |
+| 3 | XGBoost ML | FB 350件以上 | +2-3点 |
+| 4 | GraphRAG | embedding 精度不足時 | 意味的に正確 |
+| 4 | Gemini 長文コンテキスト | コスト許容時 | 情報圧縮損失ゼロ |
+| 4 | 量子最適化 (QUBO) | グループマッチング時 | 組合せ最適化 |
 
 ---
 
@@ -345,11 +490,14 @@ Step 1: プロンプト+テーブル作成 → Step 1.5: 既存21件の再分析
 
 | 側面 | V1 | V2 |
 |---|---|---|
-| AI データ利用率 | ~10% | ~95% |
-| 主入力 | 4トレイト類似度 | 5次元意味的マッチング |
-| 推薦理由 | 汎用テンプレート | ターゲット視点の具体的理由 |
-| 初回分析インパクト | 6%（二重減衰） | 35%（alpha一本化） |
-| 単調保証 | なし/全方向（負を抹殺） | 方向性付き（良↑悪↓） |
-| プライバシー | 証拠引用表示（違反） | 内部データのみ |
-| 履歴の扱い | 二重計上 | 属性スコアのみ |
-| ユーザー制御 | なし | AIプロフィール確認・非表示 |
+| 分析モデル | Sonnet | **Opus 4.6** |
+| AI データ利用率 | ~10% | **~95%** |
+| 主入力 | 4トレイト類似度 | **solver/beneficiary_profile + Haiku 判定** |
+| カテゴリの壁 | 超えられない (0.0) | **Haiku で因果的判定 (0.58-0.82)** |
+| 重み | 固定 | **動的（need_offer 依存）** |
+| 初回分析インパクト | 6%（二重減衰） | **50%（alpha 一本化）** |
+| 単調保証 | なし/全方向 | **方向性付き（良↑悪↓）** |
+| フィードバック | なし | **2段階FB + 暗黙シグナル + 自動改善** |
+| セーフガード | なし | **ロールバック + 異常検出 + 段階ロールアウト** |
+| プライバシー | 証拠引用表示 | **内部データのみ + ターゲット視点理由** |
+| 月間コスト | $44 | **$445-640（精度+30点以上）** |
