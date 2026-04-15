@@ -73,55 +73,27 @@ const opusOutputSchema = z.object({
 type OpusOutput = z.infer<typeof opusOutputSchema>;
 
 // Opus v3.0.0 プロンプト
-const PROMPT_V3 = `あなたはビジネスミーティングの高度な構造化分析エキスパートです。
-以下のトランスクリプトから、指定された発言者について分析結果をJSONのみで出力してください。
+const PROMPT_V3 = `あなたはビジネスミーティングの構造化分析エキスパートです。
+指定された発言者について分析結果をJSONのみで出力してください。簡潔に。
 
 【出力フィールド】
-1. needs[] — ニーズ・課題
-   各項目: text, explicit(boolean), confidence(0-1), evidence[], signals[], solver_profile(50-200字), urgency_signals[], category, subcategory
-   - solver_profile: 「このニーズに応えられる人はどういう人か」を自然言語で詳細記述
-   - explicit: true=直接言及, false=文脈から推論
-   - implicit(explicit:false)のconfidence下限: 0.5
+1. needs[] — text, explicit(bool), confidence(0-1), evidence[](max2), signals[], solver_profile(50-150字), urgency_signals[], category, subcategory
+   solver_profile: このニーズに応えられる人はどういう人か
+2. offers[] — text, explicit(bool), confidence(0-1), evidence[](max2), signals[], beneficiary_profile(50-150字), credibility("実績"|"自己申告"|"推論"), category, subcategory
+   beneficiary_profile: このオファーが役立つ人はどういう人か
+3. conversation_dynamics — rapport(0-1), information_asymmetry(0-1), unspoken_tensions[], follow_up_potential(bool)
+4. topic_depth[] — topic, category, depth(0-1)
+5. engagement_behaviors — asks_clarifying_questions, references_own_experience, shows_active_listening, contributes_solutions, expresses_interest_follow_up (全bool)
+6. evidence_quotes[] — field, index, quote (max3件)
+7. key_statements[] — max3件
 
-2. offers[] — 提供可能な価値
-   各項目: text, explicit(boolean), confidence(0-1), evidence[], signals[], beneficiary_profile(50-200字), credibility("実績"|"自己申告"|"推論"), category, subcategory
-   - beneficiary_profile: 「このオファーが役立つ人はどういう人か」を自然言語で詳細記述
+【ルール】
+- explicit:true→conf0.9+ / false→conf0.5-0.8
+- credibility: 実績=具体数字あり / 自己申告=本人のみ / 推論=文脈から
+- 日本語婉曲: 「ちょっと気になって」=重要課題 / 「もしよかったら」=明確ニーズ / 「まあ一応」=謙遜=実績 / 「いいですよね」=社交辞令(conf0.4以下)
+- カテゴリ: sales,marketing,technology,finance,hr,legal,operations,strategy,design,industry,leadership,other
 
-3. conversation_dynamics — ペア間会話品質
-   rapport(0-1), information_asymmetry(0-1), unspoken_tensions[], follow_up_potential(boolean)
-
-4. topic_depth[] — トピック深度
-   各項目: topic, category, depth(0-1: 0.3=言及, 0.6=議論, 1.0=深掘り)
-
-5. engagement_behaviors — 参加行動
-   asks_clarifying_questions(bool), references_own_experience(bool), shows_active_listening(bool), contributes_solutions(bool), expresses_interest_follow_up(bool)
-
-6. evidence_quotes[] — 根拠引用（内部用）
-   各項目: field("needs"|"offers"|"dynamics"), index(number), quote(原文引用)
-
-7. key_statements[] — 重要発言の要約（最大5件）
-
-【日本語ビジネス婉曲対策】
-- 「ちょっと気になって」→ 重要課題。explicit:true, confidence:0.85+
-- 「もしよかったら」→ 明確ニーズ。explicit:true
-- 「まあ一応」→ 謙遜=実績。credibility:"推論"
-- 「いいですよね」→ 社交辞令。explicit:false, confidence:0.4以下
-
-【signals（推論根拠）】
-同トピック2回言及→重要 / 具体的数字→高信頼 / 質問の具体性→ニーズvs社交辞令 / 発言の長さ→関心度
-
-【confidence基準】
-explicit:true → 0.9-1.0 / explicit:false → 0.5-0.8（下限0.5保証）
-
-【credibility（offersの信頼性）】
-"実績": 成功事例・具体数字あり / "自己申告": 本人申告のみ / "推論": 文脈から推測
-
-【カテゴリ】
-大: sales, marketing, technology, finance, hr, legal, operations, strategy, design, industry, leadership, other
-小: sales_strategy, sales_channel, sales_management, digital_marketing, branding, content, analytics, software_dev, infrastructure, data_ai, security, accounting, fundraising, financial_planning, recruiting, talent_dev, labor_mgmt, culture, corporate_law, ip, compliance, supply_chain, quality, project_mgmt, business_dev, m_and_a, international, ux_ui, product_design, creative, healthcare, realestate, manufacturing, education, energy, executive, mentoring, change_mgmt, other
-
-矛盾を検出したら該当項目のconfidenceを低下させてください。
-JSONのみ出力してください。`;
+JSONのみ出力。説明不要。`;
 
 /**
  * 会議品質係数: meeting_type × duration で confidence を調整
@@ -198,7 +170,7 @@ export async function handleAnalyze(payload: {
   // Claude Opus 4.6 呼び出し
   const response = await anthropic.messages.create({
     model: "claude-opus-4-6",
-    max_tokens: 3000,
+    max_tokens: 4096,
     messages: [
       {
         role: "user",
@@ -233,7 +205,7 @@ export async function handleAnalyze(payload: {
     // フォールバック: 再試行
     const retryResponse = await anthropic.messages.create({
       model: "claude-opus-4-6",
-      max_tokens: 3000,
+      max_tokens: 4096,
       messages: [
         {
           role: "user",
