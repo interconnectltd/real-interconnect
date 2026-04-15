@@ -29,6 +29,15 @@ interface AggItem {
   frequency: number;
   weight: number;
   last_seen: string;
+  // V2 fields
+  solver_profile?: string;
+  beneficiary_profile?: string;
+  explicit?: boolean;
+  confidence?: number;
+  signals?: string[];
+  credibility?: number;
+  urgency_signals?: string[];
+  evidence?: string[];
 }
 
 export async function handleAggregate(payload: {
@@ -81,37 +90,83 @@ export async function handleAggregate(payload: {
     }
 
     // Needs (JSONB[])
-    for (const need of (insight.expressed_needs ?? []) as { text?: string; category?: string; subcategory?: string }[]) {
+    for (const need of (insight.expressed_needs ?? []) as {
+      text?: string; category?: string; subcategory?: string;
+      solver_profile?: string; explicit?: boolean; confidence?: number;
+      signals?: string[]; urgency_signals?: string[]; evidence?: string[];
+    }[]) {
       const key = typeof need === "string" ? need : need.text ?? JSON.stringify(need);
       const existing = needsMap.get(key);
       if (existing) {
         existing.frequency++;
         existing.weight = freqWeight(existing.frequency) * timeDecay(meetingDate);
-        existing.last_seen = meetingDate > existing.last_seen ? meetingDate : existing.last_seen;
+        if (meetingDate > existing.last_seen) {
+          existing.last_seen = meetingDate;
+          // Keep the most recent V2 fields
+          if (typeof need === "object") {
+            if (need.solver_profile) existing.solver_profile = need.solver_profile;
+            if (need.explicit != null) existing.explicit = need.explicit;
+            if (need.confidence != null && (existing.confidence == null || need.confidence > existing.confidence)) existing.confidence = need.confidence;
+            if (need.signals?.length) existing.signals = need.signals;
+            if (need.urgency_signals?.length) existing.urgency_signals = need.urgency_signals;
+            if (need.evidence?.length) existing.evidence = [...(existing.evidence ?? []), ...need.evidence];
+          }
+        }
       } else {
         needsMap.set(key, {
           text: key,
           category: typeof need === "object" ? need.category : undefined,
           subcategory: typeof need === "object" ? need.subcategory : undefined,
           frequency: 1, weight: 1.0 * timeDecay(meetingDate), last_seen: meetingDate,
+          ...(typeof need === "object" ? {
+            solver_profile: need.solver_profile,
+            explicit: need.explicit,
+            confidence: need.confidence,
+            signals: need.signals,
+            urgency_signals: need.urgency_signals,
+            evidence: need.evidence,
+          } : {}),
         });
       }
     }
 
     // Offerings (同様)
-    for (const off of (insight.offered_capabilities ?? []) as { text?: string; category?: string; subcategory?: string }[]) {
+    for (const off of (insight.offered_capabilities ?? []) as {
+      text?: string; category?: string; subcategory?: string;
+      beneficiary_profile?: string; explicit?: boolean; confidence?: number;
+      signals?: string[]; credibility?: number; evidence?: string[];
+    }[]) {
       const key = typeof off === "string" ? off : off.text ?? JSON.stringify(off);
       const existing = offeringsMap.get(key);
       if (existing) {
         existing.frequency++;
         existing.weight = freqWeight(existing.frequency) * timeDecay(meetingDate);
-        existing.last_seen = meetingDate > existing.last_seen ? meetingDate : existing.last_seen;
+        if (meetingDate > existing.last_seen) {
+          existing.last_seen = meetingDate;
+          // Keep the most recent V2 fields
+          if (typeof off === "object") {
+            if (off.beneficiary_profile) existing.beneficiary_profile = off.beneficiary_profile;
+            if (off.explicit != null) existing.explicit = off.explicit;
+            if (off.confidence != null && (existing.confidence == null || off.confidence > existing.confidence)) existing.confidence = off.confidence;
+            if (off.signals?.length) existing.signals = off.signals;
+            if (off.credibility != null) existing.credibility = off.credibility;
+            if (off.evidence?.length) existing.evidence = [...(existing.evidence ?? []), ...off.evidence];
+          }
+        }
       } else {
         offeringsMap.set(key, {
           text: key,
           category: typeof off === "object" ? off.category : undefined,
           subcategory: typeof off === "object" ? off.subcategory : undefined,
           frequency: 1, weight: 1.0 * timeDecay(meetingDate), last_seen: meetingDate,
+          ...(typeof off === "object" ? {
+            beneficiary_profile: off.beneficiary_profile,
+            explicit: off.explicit,
+            confidence: off.confidence,
+            signals: off.signals,
+            credibility: off.credibility,
+            evidence: off.evidence,
+          } : {}),
         });
       }
     }

@@ -183,8 +183,8 @@ export interface Database {
           transcript_id: string;
           participant_id: string;
           demonstrated_skills: string[];
-          expressed_needs: string[];
-          offered_capabilities: string[];
+          expressed_needs: Json[];
+          offered_capabilities: Json[];
           communication_traits: Json;
           key_statements: string[];
           engagement_metrics: Json;
@@ -196,8 +196,8 @@ export interface Database {
           transcript_id: string;
           participant_id: string;
           demonstrated_skills?: string[];
-          expressed_needs?: string[];
-          offered_capabilities?: string[];
+          expressed_needs?: Json[];
+          offered_capabilities?: Json[];
           communication_traits?: Json;
           key_statements?: string[];
           engagement_metrics?: Json;

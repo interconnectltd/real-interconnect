@@ -23,7 +23,7 @@ const needSchema = z.object({
   confidence: z.number().min(0).max(1).default(0.7),
   evidence: z.array(z.string()).default([]),
   signals: z.array(z.string()).default([]),
-  solver_profile: z.string().default(""),
+  solver_profile: z.string().min(5).max(500).default(""),
   urgency_signals: z.array(z.string()).default([]),
   category: z.enum(CATEGORIES).default("other"),
   subcategory: z.string().default("other"),
@@ -35,7 +35,7 @@ const offerSchema = z.object({
   confidence: z.number().min(0).max(1).default(0.7),
   evidence: z.array(z.string()).default([]),
   signals: z.array(z.string()).default([]),
-  beneficiary_profile: z.string().default(""),
+  beneficiary_profile: z.string().min(5).max(500).default(""),
   credibility: z.enum(["実績", "自己申告", "推論"]).default("推論"),
   category: z.enum(CATEGORIES).default("other"),
   subcategory: z.string().default("other"),
@@ -183,7 +183,7 @@ export async function handleAnalyze(payload: {
     .limit(1)
     .maybeSingle();
 
-  const promptTemplate = promptVersion?.template === "V3_OPUS_PROMPT"
+  const promptTemplate = promptVersion?.template?.startsWith("V3_OPUS_PROMPT")
     ? PROMPT_V3
     : promptVersion?.template ?? PROMPT_V3;
 
@@ -276,7 +276,7 @@ export async function handleAnalyze(payload: {
     {
       transcript_id,
       participant_id,
-      demonstrated_skills: insights.key_statements,
+      demonstrated_skills: [],
       expressed_needs: needs,
       offered_capabilities: offers,
       communication_traits: {
