@@ -38,7 +38,7 @@ export default function DashboardPage() {
       return;
     }
     api
-      .post<{ computed: number }>("/matching/compute")
+      .post<{ computed: number }>("/matching/compute-v2")
       .then((res) => {
         sessionStorage.setItem(key, "1");
         if (res.computed > 0) {

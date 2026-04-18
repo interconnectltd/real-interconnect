@@ -9,7 +9,7 @@ import { useConnections } from "@/hooks/queries/use-connections";
 import { useRequestConnection } from "@/hooks/mutations/use-request-connection";
 import { useFilterStore } from "@/stores/filter-store";
 import { useUIStore } from "@/stores/ui-store";
-import { SCORE_AXIS_LABELS, scoreLabel } from "@/lib/constants";
+import { scoreLabel } from "@/lib/constants";
 import { TldvConnectCta } from "@/components/shared/tldv-connect-cta";
 import { ScoreBar, ReasonList } from "@/components/shared/score-bar";
 import type { MatchScore, MutualMatch, Profile, Connection } from "@/types";
@@ -153,16 +153,11 @@ export default function MatchingPage() {
                   {/* Reasons (primary display) */}
                   <ReasonList reasons={score.reasons ?? []} />
 
-                  {/* Score bars — 常時表示、低信頼度は薄い表示 */}
+                  {/* Score bar — おすすめ度 */}
                   <div className="space-y-2 pt-2">
                     <ScoreBar
-                      label={SCORE_AXIS_LABELS.value_fit!}
-                      score={score.value_fit}
-                      preliminary={score.confidence < 0.5}
-                    />
-                    <ScoreBar
-                      label={SCORE_AXIS_LABELS.relational_quality!}
-                      score={score.relational_quality}
+                      label="おすすめ度"
+                      score={score.total_score}
                       preliminary={score.confidence < 0.5}
                     />
                     {score.confidence < 0.3 && (

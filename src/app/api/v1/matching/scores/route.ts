@@ -10,8 +10,9 @@ export async function GET(request: Request) {
     const limit = 20;
     const offset = (page - 1) * limit;
 
-    let query = supabase
-      .from("matching_scores_v3")
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    let query = (supabase as any)
+      .from("matching_scores_v4")
       .select("*, target_profile:user_profiles!target_id(id, name, company, position, industry, bio, avatar_url)", { count: "exact" })
       .eq("viewer_id", user.id)
       .gte("total_score", minScore);
@@ -24,11 +25,11 @@ export async function GET(request: Request) {
 
     query = query.range(offset, offset + limit - 1);
 
-    const { data, error, count } = await query;
+    const { data, error, count } = await query as { data: Record<string, unknown>[] | null; error: Error | null; count: number | null };
     if (error) throw error;
 
     // Remap score_reasons (DB column) → reasons (frontend field)
-    const mapped = (data ?? []).map((row) => ({
+    const mapped = (data ?? []).map((row: Record<string, unknown>) => ({
       ...row,
       reasons: Array.isArray(row.score_reasons) ? row.score_reasons : [],
     }));

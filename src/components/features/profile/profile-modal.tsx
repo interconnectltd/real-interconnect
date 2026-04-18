@@ -16,7 +16,7 @@ import { useBookmarks } from "@/hooks/queries/use-bookmarks";
 import { useConnections } from "@/hooks/queries/use-connections";
 import { useRequestConnection } from "@/hooks/mutations/use-request-connection";
 import { useToggleBookmark } from "@/hooks/mutations/use-toggle-bookmark";
-import { SCORE_AXIS_LABELS } from "@/lib/constants";
+// V2: SCORE_AXIS_LABELS 不要（おすすめ度のみ表示）
 import { ScoreBar, ReasonList } from "@/components/shared/score-bar";
 import { api } from "@/lib/api-client";
 import { toast } from "sonner";
@@ -99,13 +99,8 @@ export function ProfileModal() {
                   )}
                   <div className="space-y-2 pt-1">
                     <ScoreBar
-                      label={SCORE_AXIS_LABELS.value_fit!}
-                      score={matchScore.value_fit}
-                      preliminary={matchScore.confidence < 0.5}
-                    />
-                    <ScoreBar
-                      label={SCORE_AXIS_LABELS.relational_quality!}
-                      score={matchScore.relational_quality}
+                      label="おすすめ度"
+                      score={matchScore.total_score}
                       preliminary={matchScore.confidence < 0.5}
                     />
                     {matchScore.confidence < 0.3 && (
