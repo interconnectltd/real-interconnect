@@ -1,0 +1,15 @@
+services:
+  - type: worker
+    name: interconnect-worker
+    runtime: node
+    buildCommand: pnpm install
+    startCommand: pnpm tsx worker/src/index.ts
+    envVars:
+      - key: NEXT_PUBLIC_SUPABASE_URL
+        sync: false
+      - key: SUPABASE_SERVICE_ROLE_KEY
+        sync: false
+      - key: AI_API_KEY
+        sync: false
+      - key: NODE_ENV
+        value: production
