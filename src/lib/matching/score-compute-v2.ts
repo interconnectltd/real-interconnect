@@ -1,0 +1,358 @@
+/**
+ * V2 スコア計算エンジン
+ * SCORING_V2_ARCHITECTURE.md §4 — 5次元 + 動的重み + ブースト + alpha + 単調保証
+ */
+
+import { calcAttributeScore } from "./attribute-score";
+import { calcPurposeScore } from "./purpose-score";
+
+// --- 隣接カテゴリマップ (§5.3, 11ペア双方向) ---
+const ADJACENT: Record<string, string[]> = {
+  technology: ["strategy", "design", "operations"],
+  strategy: ["technology", "finance", "leadership", "hr"],
+  finance: ["strategy", "legal"],
+  legal: ["finance", "operations"],
+  hr: ["leadership", "strategy"],
+  leadership: ["hr", "strategy"],
+  marketing: ["sales", "design"],
+  sales: ["marketing"],
+  design: ["technology", "marketing"],
+  operations: ["technology", "legal"],
+};
+
+function isAdjacent(catA: string, catB: string): boolean {
+  return ADJACENT[catA]?.includes(catB) || ADJACENT[catB]?.includes(catA) || false;
+}
+
+// --- 型定義 ---
+export interface NeedVector {
+  text: string;
+  category?: string;
+  subcategory?: string;
+  solver_profile?: string;
+  confidence?: number;
+  weight?: number;
+  frequency?: number;
+  decay_weight?: number;
+  urgency?: string;
+}
+
+export interface OfferVector {
+  text: string;
+  category?: string;
+  subcategory?: string;
+  beneficiary_profile?: string;
+  confidence?: number;
+  weight?: number;
+  frequency?: number;
+  decay_weight?: number;
+  credibility?: string;
+}
+
+export interface TopicVector {
+  topic: string;
+  category?: string;
+  depth: number;
+  mention_count?: number;
+  decay_weight?: number;
+}
+
+export interface EngagementSignature {
+  asks_clarifying_questions?: number;
+  references_own_experience?: number;
+  shows_active_listening?: number;
+  contributes_solutions?: number;
+  expresses_interest_follow_up?: number;
+}
+
+export interface ScoringConfig {
+  weights_json: {
+    high: Record<string, number>;
+    medium: Record<string, number>;
+    low: Record<string, number>;
+    thresholds: { high: number; medium: number };
+  };
+  alpha_table_json: Record<string, number>;
+  boost_params_json: Record<string, number>;
+}
+
+export interface ScoreV2Input {
+  viewer: {
+    id: string;
+    industry?: string | null;
+    position?: string | null;
+    bio?: string | null;
+    analysisCount: number;
+    goals?: { type: string }[];
+    offerings?: { type: string }[];
+    needVectors: NeedVector[];
+    offerVectors: OfferVector[];
+    topicVectors: TopicVector[];
+    engagementSignature: EngagementSignature;
+  };
+  target: {
+    id: string;
+    name?: string | null;
+    industry?: string | null;
+    position?: string | null;
+    bio?: string | null;
+    company?: string | null;
+    analysisCount: number;
+    goals?: { type: string }[];
+    offerings?: { type: string }[];
+    needVectors: NeedVector[];
+    offerVectors: OfferVector[];
+    topicVectors: TopicVector[];
+    engagementSignature: EngagementSignature;
+  };
+  sharedMeetingCount: number;
+  config: ScoringConfig;
+}
+
+export interface ScoreV2Result {
+  needOfferScore: number;
+  reverseMatch: number;
+  expertiseFit: number;
+  topicAlignment: number;
+  engagementValue: number;
+  historyScore: number;
+  totalScore: number;
+  confidence: number;
+  phase: "attribute_only" | "hybrid" | "ai_primary";
+  reasons: string[];
+  notifyTier: "high" | "medium" | "low" | null;
+}
+
+// =====================================================================
+// Dimension 1: ニーズ×オファーマッチ（カテゴリベース）
+// =====================================================================
+function calcNeedOfferScore(needs: NeedVector[], offers: OfferVector[]): number {
+  if (needs.length === 0) return 0;
+
+  let totalWeight = 0;
+  let matchedWeight = 0;
+
+  for (const need of needs) {
+    const w = need.weight ?? 1;
+    totalWeight += w;
+
+    let bestMatch = 0;
+    for (const offer of offers) {
+      let catMatch = 0;
+      if (need.subcategory && offer.subcategory && need.subcategory === offer.subcategory) {
+        catMatch = 1.0;
+      } else if (need.category && offer.category && need.category === offer.category) {
+        catMatch = 0.5;
+      } else if (need.category && offer.category && isAdjacent(need.category, offer.category)) {
+        catMatch = 0.4;
+      }
+
+      // テキスト類似フォールバック
+      if (catMatch === 0 && need.text && offer.text) {
+        const needWords = need.text.toLowerCase().split(/[\s、。,./]+/).filter(w => w.length >= 2);
+        const offerWords = offer.text.toLowerCase().split(/[\s、。,./]+/).filter(w => w.length >= 2);
+        const common = needWords.filter(w => offerWords.some(ow => ow.includes(w) || w.includes(ow)));
+        if (common.length >= 2) catMatch = 0.2;
+      }
+
+      const matchStrength = catMatch * Math.min(need.confidence ?? 0.7, offer.confidence ?? 0.7);
+      if (matchStrength > bestMatch) bestMatch = matchStrength;
+    }
+
+    matchedWeight += w * bestMatch;
+  }
+
+  return totalWeight > 0 ? matchedWeight / totalWeight : 0;
+}
+
+// =====================================================================
+// Dimension 3: 専門性適合
+// =====================================================================
+function calcExpertiseFit(viewerNeeds: NeedVector[], targetOffers: OfferVector[]): number {
+  if (targetOffers.length === 0) return 0;
+
+  let totalWeight = 0;
+  let fitScore = 0;
+
+  for (const offer of targetOffers) {
+    const w = offer.weight ?? 1;
+    totalWeight += w;
+
+    let bestFit = 0.1; // 無関係のベース
+    for (const need of viewerNeeds) {
+      if (need.subcategory && offer.subcategory && need.subcategory === offer.subcategory) {
+        bestFit = Math.max(bestFit, 0.5); // ピア
+      } else if (need.category && offer.category && need.category === offer.category) {
+        bestFit = Math.max(bestFit, 1.0); // 補完的（最高）
+      } else if (need.category && offer.category && isAdjacent(need.category, offer.category)) {
+        bestFit = Math.max(bestFit, 0.4);
+      }
+    }
+
+    fitScore += w * bestFit;
+  }
+
+  return totalWeight > 0 ? Math.min(fitScore / totalWeight, 1.0) : 0;
+}
+
+// =====================================================================
+// Dimension 4: トピック親和性
+// =====================================================================
+function calcTopicAlignment(viewerTopics: TopicVector[], targetTopics: TopicVector[]): number {
+  if (viewerTopics.length === 0 || targetTopics.length === 0) return 0;
+
+  let totalWeight = 0;
+  let alignment = 0;
+
+  for (const vt of viewerTopics) {
+    const w = vt.decay_weight ?? 1;
+    totalWeight += w;
+
+    for (const tt of targetTopics) {
+      let catMatch = 0;
+      if (vt.category && tt.category) {
+        if (vt.category === tt.category) catMatch = 0.5;
+        // トピックテキスト部分一致
+        if (vt.topic && tt.topic && (vt.topic.includes(tt.topic) || tt.topic.includes(vt.topic))) {
+          catMatch = 1.0;
+        }
+      }
+
+      if (catMatch > 0) {
+        alignment += catMatch * (vt.depth ?? 0.5) * (tt.depth ?? 0.5) * w;
+      }
+    }
+  }
+
+  return totalWeight > 0 ? Math.min(alignment / totalWeight, 1.0) : 0;
+}
+
+// =====================================================================
+// Dimension 5: エンゲージメント価値
+// =====================================================================
+function calcEngagementValue(signature: EngagementSignature): number {
+  const weights: Record<string, number> = {
+    contributes_solutions: 0.30,
+    expresses_interest_follow_up: 0.25,
+    references_own_experience: 0.20,
+    asks_clarifying_questions: 0.15,
+    shows_active_listening: 0.10,
+  };
+
+  let score = 0;
+  for (const [key, weight] of Object.entries(weights)) {
+    score += (signature[key as keyof EngagementSignature] ?? 0) * weight;
+  }
+
+  return Math.min(score, 1.0);
+}
+
+// =====================================================================
+// History Score（V1互換）
+// =====================================================================
+function calcHistoryScore(sharedMeetings: number): number {
+  if (sharedMeetings >= 4) return Math.min(1.0, (20 + 15 + 10 + (sharedMeetings - 3) * 5) / 100);
+  if (sharedMeetings === 3) return 0.45;
+  if (sharedMeetings === 2) return 0.35;
+  if (sharedMeetings === 1) return 0.20;
+  return 0;
+}
+
+// =====================================================================
+// メイン: computeScoreV2
+// =====================================================================
+export function computeScoreV2(input: ScoreV2Input): ScoreV2Result {
+  const { viewer, target, sharedMeetingCount, config } = input;
+
+  // --- 5次元計算 ---
+  const needOfferScore = calcNeedOfferScore(viewer.needVectors, target.offerVectors);
+  const reverseMatch = calcNeedOfferScore(target.needVectors, viewer.offerVectors);
+  const expertiseFit = calcExpertiseFit(viewer.needVectors, target.offerVectors);
+  const topicAlignment = calcTopicAlignment(viewer.topicVectors, target.topicVectors);
+  const engagementValue = calcEngagementValue(target.engagementSignature);
+  const historyScore = calcHistoryScore(sharedMeetingCount);
+
+  // --- 動的重み ---
+  const thresholds = config.weights_json.thresholds;
+  let weightTier: "high" | "medium" | "low";
+  if (needOfferScore >= thresholds.high) weightTier = "high";
+  else if (needOfferScore >= thresholds.medium) weightTier = "medium";
+  else weightTier = "low";
+
+  const w = config.weights_json[weightTier];
+
+  let convScore =
+    (w.need_offer ?? 0.40) * needOfferScore +
+    (w.reverse_match ?? 0.18) * reverseMatch +
+    (w.expertise_fit ?? 0.18) * expertiseFit +
+    (w.topic_alignment ?? 0.12) * topicAlignment +
+    (w.engagement_value ?? 0.12) * engagementValue;
+
+  // --- ブースト ---
+  const bp = config.boost_params_json;
+  if (needOfferScore >= (bp.threshold_85 ?? 0.85)) convScore += bp.threshold_85 ?? 0.08;
+  else if (needOfferScore >= (bp.threshold_70 ?? 0.70)) convScore += bp.threshold_70 ?? 0.04;
+
+  // --- 属性スコア（V1関数を再利用） ---
+  const attr = calcAttributeScore(
+    { industry: viewer.industry, position: viewer.position, bio: viewer.bio },
+    { industry: target.industry, position: target.position, bio: target.bio },
+  );
+  const purpose = calcPurposeScore(
+    viewer.goals ?? [], viewer.offerings ?? [],
+    target.goals ?? [], target.offerings ?? [],
+  );
+  const attrScore = 0.60 * attr.valueFit + 0.25 * purpose.score + 0.15 * historyScore;
+
+  // --- Surprise bonus ---
+  if (attrScore < (bp.surprise_attr_max ?? 0.45) && convScore > (bp.surprise_conv_min ?? 0.45)) {
+    convScore += Math.min(bp.surprise_bonus_max ?? 0.06, (convScore - 0.45) * 0.12);
+  }
+
+  // --- Alpha ---
+  const minAnalysis = Math.min(viewer.analysisCount, target.analysisCount);
+  const alphaTable = config.alpha_table_json;
+  let alpha: number;
+  if (minAnalysis === 0) {
+    // 片側データチェック
+    if (viewer.analysisCount > 0 || target.analysisCount > 0) {
+      alpha = alphaTable.partial ?? 0.20;
+    } else {
+      alpha = 0;
+    }
+  } else {
+    alpha = alphaTable[String(Math.min(minAnalysis, 4))] ?? 0.95;
+  }
+
+  // --- ブレンド ---
+  let totalScore = alpha * convScore + (1 - alpha) * attrScore;
+
+  // --- 方向性付き単調保証 ---
+  const monotonicThreshold = bp.monotonic_threshold ?? 0.40;
+  if (minAnalysis > 0 && convScore > monotonicThreshold) {
+    totalScore = Math.max(totalScore, attrScore);
+  }
+
+  // --- フェーズ ---
+  let phase: "attribute_only" | "hybrid" | "ai_primary";
+  if (minAnalysis === 0) phase = "attribute_only";
+  else if (minAnalysis <= 3) phase = "hybrid";
+  else phase = "ai_primary";
+
+  // --- 信頼度（通知用のみ） ---
+  const confidence = Math.min(minAnalysis / 5, 1.0);
+
+  // --- 通知tier ---
+  let notifyTier: "high" | "medium" | "low" | null = null;
+  if (totalScore >= 0.75 && confidence >= 0.6) notifyTier = "high";
+  else if (totalScore >= 0.60 && confidence >= 0.4) notifyTier = "medium";
+  else if (totalScore >= 0.50) notifyTier = "low";
+
+  // --- 理由生成は外部で ---
+  return {
+    needOfferScore, reverseMatch, expertiseFit, topicAlignment,
+    engagementValue, historyScore, totalScore, confidence, phase,
+    reasons: [], // compute-v2/route.ts で生成
+    notifyTier,
+  };
+}
