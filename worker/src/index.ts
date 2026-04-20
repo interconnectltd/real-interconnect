@@ -9,6 +9,37 @@ import { handleAggregate } from "./handlers/aggregate";
 
 const WORKER_ID = `worker-${process.pid}-${Date.now()}`;
 const POLL_INTERVAL = 5000;
+let isShuttingDown = false;
+
+// --- 起動時バリデーション ---
+function validateEnv(): void {
+  const required = [
+    "NEXT_PUBLIC_SUPABASE_URL",
+    "SUPABASE_SERVICE_ROLE_KEY",
+    "AI_API_KEY",
+  ];
+  const missing = required.filter((k) => !process.env[k]);
+  if (missing.length > 0) {
+    console.error(`[${WORKER_ID}] Missing required env vars: ${missing.join(", ")}`);
+    process.exit(1);
+  }
+}
+
+// --- グレースフルシャットダウン ---
+function setupShutdownHandlers(): void {
+  const shutdown = (signal: string) => {
+    console.log(`[${WORKER_ID}] ${signal} received, shutting down gracefully...`);
+    isShuttingDown = true;
+    // 現在のジョブが完了するまで最大30秒待機
+    setTimeout(() => {
+      console.log(`[${WORKER_ID}] Forced exit after timeout`);
+      process.exit(0);
+    }, 30000);
+  };
+
+  process.on("SIGTERM", () => shutdown("SIGTERM"));
+  process.on("SIGINT", () => shutdown("SIGINT"));
+}
 
 async function processJob(): Promise<boolean> {
   const job = await claimJobDirect(WORKER_ID);
@@ -25,13 +56,9 @@ async function processJob(): Promise<boolean> {
         await handleAggregate(job.payload as { user_id: string });
         break;
       case "score":
-        // compute API を HTTP で呼ぶか、直接 computeScore を呼ぶ
-        // Phase 1 では compute API がダッシュボードから自動呼び出しされるため
-        // Worker 側の score ジョブは軽量版として is_stale のみ更新
         console.log(`[${WORKER_ID}] Score job for user ${(job.payload as { user_id: string }).user_id} — delegating to compute API`);
         break;
       case "notify":
-        // 相互マッチ通知 — Phase 2 で Realtime 連携
         console.log(`[${WORKER_ID}] Notify job — placeholder`);
         break;
       default:
@@ -45,12 +72,17 @@ async function processJob(): Promise<boolean> {
     const message = error instanceof Error ? error.message : String(error);
     console.error(`[${WORKER_ID}] Failed job ${job.id}:`, message);
     await failJob(job.id, message, job.attempts, job.max_attempts);
-    return true; // ジョブは存在した
+    return true;
   }
 }
 
 async function main(): Promise<void> {
+  validateEnv();
+  setupShutdownHandlers();
+
   console.log(`[${WORKER_ID}] Starting worker...`);
+  console.log(`[${WORKER_ID}] Supabase: ${process.env.NEXT_PUBLIC_SUPABASE_URL}`);
+  console.log(`[${WORKER_ID}] AI API key: ${process.env.AI_API_KEY ? "set" : "MISSING"}`);
 
   // 起動時にstale lock解放
   const released = await releaseStaleJobs();
@@ -58,21 +90,29 @@ async function main(): Promise<void> {
     console.log(`[${WORKER_ID}] Released ${released} stale jobs`);
   }
 
+  console.log(`[${WORKER_ID}] Polling every ${POLL_INTERVAL / 1000}s...`);
+
   // メインループ
-  while (true) {
+  while (!isShuttingDown) {
     try {
       let hadJob = true;
-      // ジョブがある限り連続処理
-      while (hadJob) {
+      while (hadJob && !isShuttingDown) {
         hadJob = await processJob();
       }
     } catch (error) {
       console.error(`[${WORKER_ID}] Poll error:`, error);
     }
 
-    // ジョブがなければ待機
-    await new Promise((resolve) => setTimeout(resolve, POLL_INTERVAL));
+    if (!isShuttingDown) {
+      await new Promise((resolve) => setTimeout(resolve, POLL_INTERVAL));
+    }
   }
+
+  console.log(`[${WORKER_ID}] Worker stopped.`);
+  process.exit(0);
 }
 
-main().catch(console.error);
+main().catch((err) => {
+  console.error(`[${WORKER_ID}] Fatal error:`, err);
+  process.exit(1);
+});
