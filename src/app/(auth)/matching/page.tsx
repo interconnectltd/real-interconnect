@@ -11,7 +11,6 @@ import { useDismissedUsers } from "@/hooks/use-dismissed-users";
 import { useMyProfile } from "@/hooks/queries/use-profile";
 import { useFilterStore } from "@/stores/filter-store";
 import { useUIStore } from "@/stores/ui-store";
-import { scoreLabel } from "@/lib/constants";
 import { TldvConnectCta } from "@/components/shared/tldv-connect-cta";
 import { ScoreBar, ReasonList } from "@/components/shared/score-bar";
 import { toast } from "sonner";

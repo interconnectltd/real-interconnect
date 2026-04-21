@@ -58,8 +58,13 @@ export type NotifyTier = "high" | "medium" | "low";
 export interface MatchScore {
   viewer_id: string;
   target_id: string;
-  value_fit: number;
-  relational_quality: number;
+  value_fit?: number;
+  relational_quality?: number;
+  need_offer_score?: number;
+  reverse_match?: number;
+  expertise_fit?: number;
+  topic_alignment?: number;
+  engagement_value?: number;
   total_score: number;
   confidence: number;
   phase: ScorePhase;

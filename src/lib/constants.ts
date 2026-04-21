@@ -43,11 +43,6 @@ export const MATCHING_WEIGHTS = {
   relational_quality: 0.40,
 } as const;
 
-export const SCORE_AXIS_LABELS: Record<string, string> = {
-  value_fit: "価値適合度",
-  relational_quality: "関係性の質",
-};
-
 export const MATCHING_MUTUAL_THRESHOLD = 0.70;
 
 // ── Goals/Offerings 6カテゴリ ──

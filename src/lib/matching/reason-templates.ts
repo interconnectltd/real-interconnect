@@ -247,30 +247,3 @@ export function generateReasons(ctx: ReasonContext): string[] {
   return selected;
 }
 
-export function generateReasonsForBatch(
-  viewer: ReasonContext["viewer"],
-  targets: {
-    target: ReasonContext["target"];
-    valueFit: number;
-    relationalQuality: number;
-    confidence: number;
-    sharedMeetingCount: number;
-    matchedNeeds?: string[];
-    matchedSkills?: string[];
-    matchedOfferings?: string[];
-  }[],
-): Map<string, string[]> {
-  const usedTemplateIds = new Set<string>();
-  const result = new Map<string, string[]>();
-
-  for (const t of targets) {
-    const reasons = generateReasons({
-      viewer,
-      ...t,
-      usedTemplateIds,
-    });
-    result.set(t.target.id, reasons);
-  }
-
-  return result;
-}

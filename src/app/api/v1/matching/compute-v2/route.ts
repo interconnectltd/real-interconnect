@@ -35,7 +35,7 @@ export async function POST() {
 
     const configRow = configRows?.[0] as { weights_json: unknown; alpha_table_json: unknown; boost_params_json: unknown; version_id: string } | undefined;
     if (!configRow) {
-      return json({ error: "No active scoring config" }, 500);
+      return jsonError(500, "CONFIG_ERROR", "スコアリング設定が見つかりません");
     }
 
     const config: ScoringConfig = {
@@ -103,6 +103,27 @@ export async function POST() {
       offeringsMap.get(o.user_id)!.push({ type: o.type });
     }
 
+    // --- 共有ミーティング数を取得 ---
+    const { data: viewerParticipations } = await supabase
+      .from("meeting_participants_v2")
+      .select("meeting_id")
+      .eq("user_id", user.id);
+
+    const viewerMeetingIds = (viewerParticipations ?? []).map((p) => p.meeting_id);
+
+    const sharedMeetingMap = new Map<string, number>();
+    if (viewerMeetingIds.length > 0) {
+      const { data: targetParticipations } = await supabase
+        .from("meeting_participants_v2")
+        .select("user_id, meeting_id")
+        .in("user_id", targetIds)
+        .in("meeting_id", viewerMeetingIds);
+
+      for (const tp of targetParticipations ?? []) {
+        sharedMeetingMap.set(tp.user_id, (sharedMeetingMap.get(tp.user_id) ?? 0) + 1);
+      }
+    }
+
     // --- ペアごとにスコア計算 ---
     const rows: Record<string, unknown>[] = [];
 
@@ -139,17 +160,18 @@ export async function POST() {
           topicVectors: (tv?.topic_vectors as unknown[] ?? []) as import("@/lib/matching/score-compute-v2").TopicVector[],
           engagementSignature: (tv?.engagement_signature ?? {}) as import("@/lib/matching/score-compute-v2").EngagementSignature,
         },
-        sharedMeetingCount: 0, // TODO: 共有ミーティング数を取得
+        sharedMeetingCount: sharedMeetingMap.get(target.id) ?? 0,
         config,
       });
 
       // 理由生成
       const topOffer = (tv?.offer_vectors as { text?: string }[] | null)?.[0];
       const topTopic = (tv?.topic_vectors as { topic?: string }[] | null)?.[0];
+      const sharedCount = sharedMeetingMap.get(target.id) ?? 0;
       const fwdReasons = generateReasonsV2({
         target: { name: target.name, industry: target.industry, position: target.position, company: target.company },
         ...fwd,
-        sharedMeetingCount: 0,
+        sharedMeetingCount: sharedCount,
         topOfferText: topOffer?.text,
         topTopicText: topTopic?.topic,
       });
@@ -204,7 +226,7 @@ export async function POST() {
           topicVectors: (myVectors?.topic_vectors as unknown[]) as import("@/lib/matching/score-compute-v2").TopicVector[] ?? [],
           engagementSignature: (myVectors?.engagement_signature ?? {}) as import("@/lib/matching/score-compute-v2").EngagementSignature,
         },
-        sharedMeetingCount: 0,
+        sharedMeetingCount: sharedCount,
         config,
       });
 
@@ -213,7 +235,7 @@ export async function POST() {
       const revReasons = generateReasonsV2({
         target: { name: myProfile?.name, industry: myProfile?.industry, position: myProfile?.position, company: myProfile?.company },
         ...rev,
-        sharedMeetingCount: 0,
+        sharedMeetingCount: sharedCount,
         topOfferText: myTopOffer?.text,
         topTopicText: myTopTopic?.topic,
       });
