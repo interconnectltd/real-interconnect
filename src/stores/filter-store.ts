@@ -1,11 +1,16 @@
 import { create } from "zustand";
+import type { MemberSortBy } from "@/lib/constants";
 
 interface FilterStore {
   // Member search
   memberSearch: string;
   memberIndustryFilter: string[];
+  memberSortBy: MemberSortBy;
+  memberPositionFilter: string;
   setMemberSearch: (q: string) => void;
   setMemberIndustryFilter: (industries: string[]) => void;
+  setMemberSortBy: (sort: MemberSortBy) => void;
+  setMemberPositionFilter: (position: string) => void;
   resetMemberFilters: () => void;
 
   // Matching filters
@@ -22,11 +27,15 @@ interface FilterStore {
 export const useFilterStore = create<FilterStore>((set) => ({
   memberSearch: "",
   memberIndustryFilter: [],
+  memberSortBy: "score",
+  memberPositionFilter: "",
   setMemberSearch: (q) => set({ memberSearch: q }),
   setMemberIndustryFilter: (industries) =>
     set({ memberIndustryFilter: industries }),
+  setMemberSortBy: (sort) => set({ memberSortBy: sort }),
+  setMemberPositionFilter: (position) => set({ memberPositionFilter: position }),
   resetMemberFilters: () =>
-    set({ memberSearch: "", memberIndustryFilter: [] }),
+    set({ memberSearch: "", memberIndustryFilter: [], memberSortBy: "score", memberPositionFilter: "" }),
 
   matchingSortBy: "score",
   matchingMinScore: 0,

@@ -10,6 +10,7 @@ import { Badge } from "@/components/ui/badge";
 import { useMyProfile } from "@/hooks/queries/use-profile";
 import { INDUSTRIES } from "@/lib/constants";
 import { useUpdateProfile } from "@/hooks/mutations/use-update-profile";
+import { ProfileCompleteness } from "@/components/shared/profile-completeness";
 
 export default function ProfilePage() {
   const { data: profile, isLoading } = useMyProfile();
@@ -65,6 +66,8 @@ export default function ProfilePage() {
           </Button>
         )}
       </div>
+
+      <ProfileCompleteness profile={profile} hideLink />
 
       <Card>
         <CardHeader>

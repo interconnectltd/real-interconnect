@@ -12,17 +12,23 @@ import { useToggleBookmark } from "@/hooks/mutations/use-toggle-bookmark";
 import { useRequestConnection } from "@/hooks/mutations/use-request-connection";
 import { useFilterStore } from "@/stores/filter-store";
 import { useUIStore } from "@/stores/ui-store";
-import { INDUSTRIES } from "@/lib/constants";
+import { INDUSTRIES, POSITIONS, MEMBER_SORT_OPTIONS } from "@/lib/constants";
 import type { Profile } from "@/types";
 
 export default function MembersPage() {
-  const { memberSearch, setMemberSearch, memberIndustryFilter, setMemberIndustryFilter } =
-    useFilterStore();
+  const {
+    memberSearch, setMemberSearch,
+    memberIndustryFilter, setMemberIndustryFilter,
+    memberSortBy, setMemberSortBy,
+    memberPositionFilter, setMemberPositionFilter,
+  } = useFilterStore();
   const [page, setPage] = useState(1);
   const selectedIndustry = memberIndustryFilter[0] ?? undefined;
 
   const { data, isLoading } = useMembers(memberSearch, {
     industry: selectedIndustry,
+    position: memberPositionFilter || undefined,
+    sort: memberSortBy,
     page,
   });
   const { data: bookmarksData } = useBookmarks();
@@ -52,7 +58,7 @@ export default function MembersPage() {
       <div className="relative">
         <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
         <Input
-          placeholder="名前、会社名で検索..."
+          placeholder="名前、会社名、自己紹介で検索..."
           value={memberSearch}
           onChange={(e) => {
             setMemberSearch(e.target.value);
@@ -60,6 +66,21 @@ export default function MembersPage() {
           }}
           className="pl-9"
         />
+      </div>
+
+      {/* Sort options */}
+      <div className="flex items-center gap-2">
+        <span className="text-xs text-muted-foreground shrink-0">並び替え:</span>
+        {MEMBER_SORT_OPTIONS.map((opt) => (
+          <Button
+            key={opt.value}
+            variant={memberSortBy === opt.value ? "default" : "outline"}
+            size="sm"
+            onClick={() => { setMemberSortBy(opt.value); setPage(1); }}
+          >
+            {opt.label}
+          </Button>
+        ))}
       </div>
 
       {/* Industry filter */}
@@ -79,6 +100,27 @@ export default function MembersPage() {
             onClick={() => { setMemberIndustryFilter([ind]); setPage(1); }}
           >
             {ind}
+          </Button>
+        ))}
+      </div>
+
+      {/* Position filter */}
+      <div className="flex gap-2 overflow-x-auto pb-2">
+        <Button
+          variant={!memberPositionFilter ? "default" : "outline"}
+          size="sm"
+          onClick={() => { setMemberPositionFilter(""); setPage(1); }}
+        >
+          全役職
+        </Button>
+        {POSITIONS.map((pos) => (
+          <Button
+            key={pos}
+            variant={memberPositionFilter === pos ? "default" : "outline"}
+            size="sm"
+            onClick={() => { setMemberPositionFilter(pos); setPage(1); }}
+          >
+            {pos}
           </Button>
         ))}
       </div>

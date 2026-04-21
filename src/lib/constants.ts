@@ -17,6 +17,27 @@ export const INDUSTRIES = [
   "その他",
 ] as const;
 
+export const POSITIONS = [
+  "代表取締役",
+  "取締役",
+  "執行役員",
+  "部長",
+  "マネージャー",
+  "リーダー",
+  "エンジニア",
+  "デザイナー",
+  "コンサルタント",
+  "フリーランス",
+] as const;
+
+export const MEMBER_SORT_OPTIONS = [
+  { value: "score", label: "おすすめ順" },
+  { value: "newest", label: "新着順" },
+  { value: "name", label: "名前順" },
+] as const;
+
+export type MemberSortBy = (typeof MEMBER_SORT_OPTIONS)[number]["value"];
+
 export const MATCHING_WEIGHTS = {
   value_fit: 0.60,
   relational_quality: 0.40,

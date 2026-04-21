@@ -12,11 +12,13 @@ interface MembersResponse {
 
 export function useMembers(
   search: string,
-  filters: { industry?: string; page?: number } = {},
+  filters: { industry?: string; position?: string; sort?: string; page?: number } = {},
 ) {
   const params = new URLSearchParams();
   if (search) params.set("q", search);
   if (filters.industry) params.set("industry", filters.industry);
+  if (filters.position) params.set("position", filters.position);
+  if (filters.sort) params.set("sort", filters.sort);
   if (filters.page) params.set("page", String(filters.page));
   const qs = params.toString();
 

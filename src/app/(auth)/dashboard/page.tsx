@@ -15,13 +15,16 @@ import { useMembers } from "@/hooks/queries/use-members";
 import { useUIStore } from "@/stores/ui-store";
 import { useAnalysisCount } from "@/hooks/queries/use-ai-profile";
 import { TldvConnectCta } from "@/components/shared/tldv-connect-cta";
+import { ProfileCompleteness } from "@/components/shared/profile-completeness";
 import { api } from "@/lib/api-client";
+import { useMyProfile } from "@/hooks/queries/use-profile";
 import type { MutualMatch, Profile } from "@/types";
 
 export default function DashboardPage() {
   const { user } = useSupabase();
   const queryClient = useQueryClient();
   const [computeDone, setComputeDone] = useState(false);
+  const { data: myProfile } = useMyProfile();
   const { data: connections } = useConnections();
   const { data: unreadCount } = useUnreadCount();
   const { data: scores } = useMatchingScores({});
@@ -119,6 +122,9 @@ export default function DashboardPage() {
           </div>
         </CardContent>
       </Card>
+
+      {/* プロフィール完成度メーター (A16) */}
+      {myProfile && <ProfileCompleteness profile={myProfile} />}
 
       {/* おすすめマッチング Top 3 */}
       <div>
