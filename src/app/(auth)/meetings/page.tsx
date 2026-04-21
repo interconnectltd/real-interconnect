@@ -1,13 +1,57 @@
 "use client";
 
-import { Calendar, Video, Clock, Check, X, User } from "lucide-react";
+import {
+  Calendar,
+  Video,
+  Clock,
+  Check,
+  X,
+  User,
+  ExternalLink,
+  Ban,
+  CheckCircle2,
+} from "lucide-react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { api } from "@/lib/api-client";
 import { useUIStore } from "@/stores/ui-store";
 import { toast } from "sonner";
+
+/* ---------- types ---------- */
+
+interface Meeting {
+  id: string;
+  title: string | null;
+  scheduled_at: string | null;
+  duration_min: number | null;
+  platform: string | null;
+  meeting_url: string | null;
+  status: string;
+  request: {
+    requester_id: string;
+    target_id: string;
+    message: string | null;
+  }[] | null;
+}
+
+interface OtherParticipant {
+  id: string;
+  name: string | null;
+  company: string | null;
+  position: string | null;
+}
+
+interface MeetingItem {
+  meeting_id: string;
+  role: string;
+  meeting: Meeting;
+  other_participant: OtherParticipant | null;
+}
+
+/* ---------- constants ---------- */
 
 const STATUS_LABELS: Record<string, { label: string; color: string }> = {
   proposed: { label: "リクエスト中", color: "bg-yellow-100 text-yellow-800" },
@@ -17,13 +61,47 @@ const STATUS_LABELS: Record<string, { label: string; color: string }> = {
   no_show: { label: "不参加", color: "bg-red-100 text-red-800" },
 };
 
+const PLATFORM_LABELS: Record<string, string> = {
+  zoom: "Zoom",
+  google_meet: "Google Meet",
+  teams: "Microsoft Teams",
+  other: "その他",
+};
+
+type TabValue = "proposed" | "confirmed" | "done";
+
+/* ---------- helpers ---------- */
+
+function formatDate(iso: string | null): string {
+  if (!iso) return "未定";
+  const d = new Date(iso);
+  return d.toLocaleDateString("ja-JP", {
+    year: "numeric",
+    month: "long",
+    day: "numeric",
+    weekday: "short",
+  });
+}
+
+function formatTime(iso: string | null): string {
+  if (!iso) return "";
+  const d = new Date(iso);
+  return d.toLocaleTimeString("ja-JP", { hour: "2-digit", minute: "2-digit" });
+}
+
+function getPlatformIcon(platform: string | null) {
+  return <Video className="h-3.5 w-3.5" />;
+}
+
+/* ---------- component ---------- */
+
 export default function MeetingsPage() {
   const queryClient = useQueryClient();
   const { openProfileModal } = useUIStore();
 
   const { data: meetings, isLoading } = useQuery({
     queryKey: ["meetings"],
-    queryFn: () => api.get<unknown[]>("/meetings"),
+    queryFn: () => api.get<MeetingItem[]>("/meetings"),
   });
 
   const updateMeeting = useMutation({
@@ -31,12 +109,263 @@ export default function MeetingsPage() {
       api.patch(`/meetings/${id}`, { status }),
     onSuccess: (_data, { status }) => {
       queryClient.invalidateQueries({ queryKey: ["meetings"] });
-      toast.success(
-        status === "confirmed" ? "会議を承認しました" : "会議を辞退しました",
-      );
+      const msgs: Record<string, string> = {
+        confirmed: "会議を承認しました",
+        cancelled: "会議をキャンセルしました",
+        completed: "会議を完了にしました",
+      };
+      toast.success(msgs[status] ?? "更新しました");
     },
     onError: () => toast.error("更新に失敗しました"),
   });
+
+  // Categorise meetings
+  const proposed = (meetings ?? []).filter(
+    (m) => m.meeting?.status === "proposed",
+  );
+  const confirmed = (meetings ?? []).filter(
+    (m) => m.meeting?.status === "confirmed",
+  );
+  const done = (meetings ?? []).filter(
+    (m) =>
+      m.meeting?.status === "completed" ||
+      m.meeting?.status === "cancelled" ||
+      m.meeting?.status === "no_show",
+  );
+
+  /* ---------- render helpers ---------- */
+
+  function renderEmpty(tab: TabValue) {
+    const messages: Record<TabValue, { title: string; sub: string }> = {
+      proposed: {
+        title: "提案中の会議はありません",
+        sub: "マッチングページから会議をリクエストできます",
+      },
+      confirmed: {
+        title: "確定済みの会議はありません",
+        sub: "提案が承認されるとここに表示されます",
+      },
+      done: {
+        title: "完了した会議はありません",
+        sub: "過去の会議履歴がここに表示されます",
+      },
+    };
+    const msg = messages[tab];
+    return (
+      <div className="rounded-lg border border-dashed p-12 text-center">
+        <Calendar className="mx-auto h-8 w-8 text-muted-foreground/40" />
+        <p className="mt-3 text-sm font-medium">{msg.title}</p>
+        <p className="mt-1 text-xs text-muted-foreground">{msg.sub}</p>
+      </div>
+    );
+  }
+
+  function renderMeetingCard(item: MeetingItem) {
+    const meeting = item.meeting;
+    const otherParticipant = item.other_participant;
+    if (!meeting) return null;
+
+    const status =
+      STATUS_LABELS[meeting.status] ?? {
+        label: meeting.status,
+        color: "bg-muted",
+      };
+    const isRequester = item.role === "requester";
+    const isTarget = item.role === "target";
+    const isDone =
+      meeting.status === "completed" ||
+      meeting.status === "cancelled" ||
+      meeting.status === "no_show";
+
+    return (
+      <Card key={meeting.id}>
+        <CardContent className="p-4">
+          {/* Header: title + badge */}
+          <div className="flex items-start justify-between gap-3">
+            <div className="min-w-0 flex-1 space-y-2">
+              <div className="flex items-center gap-2">
+                <p className="truncate font-medium">
+                  {meeting.title ?? "会議"}
+                </p>
+                <Badge className={`shrink-0 text-xs ${status.color}`}>
+                  {status.label}
+                </Badge>
+              </div>
+
+              {/* Other participant */}
+              {otherParticipant && (
+                <button
+                  type="button"
+                  className="flex items-center gap-1.5 text-xs text-muted-foreground hover:text-foreground transition-colors"
+                  onClick={() => openProfileModal(otherParticipant.id)}
+                >
+                  <User className="h-3.5 w-3.5" />
+                  <span>
+                    {otherParticipant.name ??
+                      ([otherParticipant.company, otherParticipant.position]
+                        .filter(Boolean)
+                        .join(" / ") ||
+                      "相手")}
+                  </span>
+                  {otherParticipant.company && (
+                    <span className="text-muted-foreground/60">
+                      ({otherParticipant.company}
+                      {otherParticipant.position &&
+                        ` / ${otherParticipant.position}`}
+                      )
+                    </span>
+                  )}
+                </button>
+              )}
+
+              {/* Details row */}
+              <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-muted-foreground">
+                {/* Date & time */}
+                <span className="flex items-center gap-1">
+                  <Calendar className="h-3.5 w-3.5" />
+                  {formatDate(meeting.scheduled_at)}
+                  {meeting.scheduled_at && (
+                    <span className="ml-1">{formatTime(meeting.scheduled_at)}</span>
+                  )}
+                </span>
+
+                {/* Duration */}
+                {meeting.duration_min && (
+                  <span className="flex items-center gap-1">
+                    <Clock className="h-3.5 w-3.5" />
+                    {meeting.duration_min}分
+                  </span>
+                )}
+
+                {/* Platform */}
+                {meeting.platform && (
+                  <span className="flex items-center gap-1">
+                    {getPlatformIcon(meeting.platform)}
+                    {PLATFORM_LABELS[meeting.platform] ?? meeting.platform}
+                  </span>
+                )}
+              </div>
+
+              {/* Meeting URL (only for confirmed meetings with a URL) */}
+              {meeting.status === "confirmed" && meeting.meeting_url && (
+                <a
+                  href={meeting.meeting_url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center gap-1.5 rounded-md bg-primary/10 px-2.5 py-1 text-xs font-medium text-primary hover:bg-primary/20 transition-colors"
+                >
+                  {getPlatformIcon(meeting.platform)}
+                  ミーティングリンク
+                  <ExternalLink className="h-3 w-3" />
+                </a>
+              )}
+            </div>
+
+            {/* Action buttons */}
+            <div className="flex shrink-0 flex-col gap-2 sm:flex-row">
+              {/* Proposed as target: accept / decline */}
+              {meeting.status === "proposed" && isTarget && (
+                <>
+                  <Button
+                    size="sm"
+                    onClick={() =>
+                      updateMeeting.mutate({
+                        id: meeting.id,
+                        status: "confirmed",
+                      })
+                    }
+                    disabled={updateMeeting.isPending}
+                  >
+                    <Check className="mr-1 h-3.5 w-3.5" />
+                    承認
+                  </Button>
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    onClick={() =>
+                      updateMeeting.mutate({
+                        id: meeting.id,
+                        status: "cancelled",
+                      })
+                    }
+                    disabled={updateMeeting.isPending}
+                  >
+                    <X className="mr-1 h-3.5 w-3.5" />
+                    辞退
+                  </Button>
+                </>
+              )}
+
+              {/* Proposed as requester: cancel */}
+              {meeting.status === "proposed" && isRequester && (
+                <Button
+                  size="sm"
+                  variant="outline"
+                  onClick={() =>
+                    updateMeeting.mutate({
+                      id: meeting.id,
+                      status: "cancelled",
+                    })
+                  }
+                  disabled={updateMeeting.isPending}
+                >
+                  <Ban className="mr-1 h-3.5 w-3.5" />
+                  キャンセル
+                </Button>
+              )}
+
+              {/* Confirmed: join + complete + cancel */}
+              {meeting.status === "confirmed" && (
+                <>
+                  {meeting.meeting_url && (
+                    <a
+                      href={meeting.meeting_url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="inline-flex h-7 shrink-0 items-center justify-center gap-1 rounded-[min(var(--radius-md),12px)] border border-transparent bg-primary px-2.5 text-[0.8rem] font-medium text-primary-foreground transition-all hover:bg-primary/80"
+                    >
+                      <Video className="h-3.5 w-3.5" />
+                      参加する
+                    </a>
+                  )}
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    onClick={() =>
+                      updateMeeting.mutate({
+                        id: meeting.id,
+                        status: "completed",
+                      })
+                    }
+                    disabled={updateMeeting.isPending}
+                  >
+                    <CheckCircle2 className="mr-1 h-3.5 w-3.5" />
+                    完了にする
+                  </Button>
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    onClick={() =>
+                      updateMeeting.mutate({
+                        id: meeting.id,
+                        status: "cancelled",
+                      })
+                    }
+                    disabled={updateMeeting.isPending}
+                  >
+                    <Ban className="mr-1 h-3.5 w-3.5" />
+                    キャンセル
+                  </Button>
+                </>
+              )}
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+    );
+  }
+
+  /* ---------- main render ---------- */
 
   return (
     <div className="space-y-6">
@@ -53,81 +382,65 @@ export default function MeetingsPage() {
             <div key={i} className="h-24 animate-pulse rounded-lg bg-muted" />
           ))}
         </div>
-      ) : meetings && meetings.length > 0 ? (
-        <div className="space-y-3">
-          {meetings.map((item: any) => {
-            const meeting = item.meeting;
-            const otherParticipant = item.other_participant;
-            if (!meeting) return null;
-            const status = STATUS_LABELS[meeting.status] ?? { label: meeting.status, color: "bg-muted" };
-
-            return (
-              <Card key={meeting.id}>
-                <CardContent className="p-4">
-                  <div className="flex items-center justify-between">
-                    <div className="space-y-1">
-                      <div className="flex items-center gap-2">
-                        <p className="font-medium">{meeting.title ?? "会議"}</p>
-                        <Badge className={`text-xs ${status.color}`}>{status.label}</Badge>
-                      </div>
-                      {otherParticipant && (
-                        <p className="text-xs text-muted-foreground">
-                          {otherParticipant.company && `${otherParticipant.company} / `}
-                          {otherParticipant.position ?? ""}
-                        </p>
-                      )}
-                      <p className="text-xs text-muted-foreground/60">
-                        日程は連絡先を通じて調整してください
-                      </p>
-                    </div>
-
-                    <div className="flex gap-2">
-                      {meeting.status === "proposed" && (
-                        <>
-                          <Button
-                            size="sm"
-                            onClick={() => updateMeeting.mutate({ id: meeting.id, status: "confirmed" })}
-                            disabled={updateMeeting.isPending}
-                          >
-                            <Check className="mr-1 h-3.5 w-3.5" />
-                            承認
-                          </Button>
-                          <Button
-                            size="sm"
-                            variant="outline"
-                            onClick={() => updateMeeting.mutate({ id: meeting.id, status: "cancelled" })}
-                            disabled={updateMeeting.isPending}
-                          >
-                            <X className="mr-1 h-3.5 w-3.5" />
-                            辞退
-                          </Button>
-                        </>
-                      )}
-                      {meeting.status === "confirmed" && otherParticipant && (
-                        <Button
-                          size="sm"
-                          variant="outline"
-                          onClick={() => openProfileModal(otherParticipant.id)}
-                        >
-                          <User className="mr-1 h-3.5 w-3.5" />
-                          プロフィールを見る
-                        </Button>
-                      )}
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-            );
-          })}
-        </div>
       ) : (
-        <div className="rounded-lg border border-dashed p-12 text-center">
-          <Calendar className="mx-auto h-8 w-8 text-muted-foreground/40" />
-          <p className="mt-3 text-sm font-medium">会議はまだありません</p>
-          <p className="mt-1 text-xs text-muted-foreground">
-            マッチングページから会議をリクエストできます
-          </p>
-        </div>
+        <Tabs defaultValue="proposed">
+          <TabsList>
+            <TabsTrigger value="proposed">
+              提案中
+              {proposed.length > 0 && (
+                <span className="ml-1.5 inline-flex h-5 min-w-5 items-center justify-center rounded-full bg-yellow-200 px-1.5 text-xs font-semibold text-yellow-900">
+                  {proposed.length}
+                </span>
+              )}
+            </TabsTrigger>
+            <TabsTrigger value="confirmed">
+              確定済み
+              {confirmed.length > 0 && (
+                <span className="ml-1.5 inline-flex h-5 min-w-5 items-center justify-center rounded-full bg-green-200 px-1.5 text-xs font-semibold text-green-900">
+                  {confirmed.length}
+                </span>
+              )}
+            </TabsTrigger>
+            <TabsTrigger value="done">
+              完了
+              {done.length > 0 && (
+                <span className="ml-1.5 inline-flex h-5 min-w-5 items-center justify-center rounded-full bg-muted px-1.5 text-xs font-semibold text-muted-foreground">
+                  {done.length}
+                </span>
+              )}
+            </TabsTrigger>
+          </TabsList>
+
+          <TabsContent value="proposed">
+            {proposed.length > 0 ? (
+              <div className="space-y-3">
+                {proposed.map((item) => renderMeetingCard(item))}
+              </div>
+            ) : (
+              renderEmpty("proposed")
+            )}
+          </TabsContent>
+
+          <TabsContent value="confirmed">
+            {confirmed.length > 0 ? (
+              <div className="space-y-3">
+                {confirmed.map((item) => renderMeetingCard(item))}
+              </div>
+            ) : (
+              renderEmpty("confirmed")
+            )}
+          </TabsContent>
+
+          <TabsContent value="done">
+            {done.length > 0 ? (
+              <div className="space-y-3">
+                {done.map((item) => renderMeetingCard(item))}
+              </div>
+            ) : (
+              renderEmpty("done")
+            )}
+          </TabsContent>
+        </Tabs>
       )}
     </div>
   );

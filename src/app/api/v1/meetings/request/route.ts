@@ -41,7 +41,9 @@ export async function POST(request: Request) {
         requester_id: user.id,
         target_id: body.target_id,
         message: body.message ?? null,
-        proposed_times: body.proposed_times ?? [],
+        proposed_times: body.proposed_times
+          ? (Array.isArray(body.proposed_times) ? body.proposed_times : [body.proposed_times])
+          : [],
         status: "proposed",
       })
       .select()
@@ -77,7 +79,9 @@ export async function POST(request: Request) {
       user_id: body.target_id,
       type: "meeting_request",
       title: "会議リクエスト",
-      message: `${requesterName}さんから会議リクエストが届いています`,
+      message: body.proposed_times
+        ? `${requesterName}さんから会議リクエストが届いています（希望日時: ${Array.isArray(body.proposed_times) ? body.proposed_times.join(", ") : body.proposed_times}）`
+        : `${requesterName}さんから会議リクエストが届いています`,
       link: "/meetings",
       actions: [
         { type: "accept", label: "承認する", payload: { meetingId: meeting.id } },

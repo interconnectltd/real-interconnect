@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import { UserPlus, Bookmark, Calendar } from "lucide-react";
 import {
   Dialog,
@@ -9,6 +10,7 @@ import {
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { Input } from "@/components/ui/input";
 import { useUIStore } from "@/stores/ui-store";
 import { useProfile } from "@/hooks/queries/use-profile";
 import { useMatchingScores } from "@/hooks/queries/use-matching-scores";
@@ -16,10 +18,9 @@ import { useBookmarks } from "@/hooks/queries/use-bookmarks";
 import { useConnections } from "@/hooks/queries/use-connections";
 import { useRequestConnection } from "@/hooks/mutations/use-request-connection";
 import { useToggleBookmark } from "@/hooks/mutations/use-toggle-bookmark";
+import { useRequestMeeting } from "@/hooks/mutations/use-request-meeting";
 // V2: SCORE_AXIS_LABELS 不要（おすすめ度のみ表示）
 import { ScoreBar, ReasonList } from "@/components/shared/score-bar";
-import { api } from "@/lib/api-client";
-import { toast } from "sonner";
 import type { MatchScore, Connection } from "@/types";
 
 export function ProfileModal() {
@@ -30,6 +31,11 @@ export function ProfileModal() {
   const { data: connectionsData } = useConnections();
   const requestConnection = useRequestConnection();
   const toggleBookmark = useToggleBookmark();
+  const requestMeeting = useRequestMeeting();
+
+  const [showMeetingForm, setShowMeetingForm] = useState(false);
+  const [meetingMessage, setMeetingMessage] = useState("");
+  const [proposedTimes, setProposedTimes] = useState("");
 
   const connectionWithUser = (connectionsData as Connection[] | undefined)
     ?.find((c) => c.user_id === profileModalUserId || c.connected_user_id === profileModalUserId);
@@ -135,21 +141,70 @@ export function ProfileModal() {
                 </div>
               )}
 
+              {/* Meeting request inline form */}
+              {isConnected && showMeetingForm && (
+                <div className="space-y-2 rounded-md border p-3">
+                  <p className="text-xs font-medium">会議リクエスト</p>
+                  <textarea
+                    className="w-full rounded-md border border-input bg-transparent px-2.5 py-1.5 text-sm placeholder:text-muted-foreground focus-visible:border-ring focus-visible:outline-none focus-visible:ring-3 focus-visible:ring-ring/50"
+                    rows={2}
+                    placeholder="メッセージ（任意）"
+                    value={meetingMessage}
+                    onChange={(e) => setMeetingMessage(e.target.value)}
+                  />
+                  <Input
+                    placeholder="希望日時（例: 来週水曜午後）"
+                    value={proposedTimes}
+                    onChange={(e) => setProposedTimes(e.target.value)}
+                  />
+                  <div className="flex gap-2">
+                    <Button
+                      size="sm"
+                      className="flex-1"
+                      disabled={requestMeeting.isPending}
+                      onClick={() => {
+                        if (profileModalUserId) {
+                          requestMeeting.mutate(
+                            {
+                              target_id: profileModalUserId,
+                              message: meetingMessage || undefined,
+                              proposed_times: proposedTimes || undefined,
+                            },
+                            {
+                              onSuccess: () => {
+                                setShowMeetingForm(false);
+                                setMeetingMessage("");
+                                setProposedTimes("");
+                              },
+                            },
+                          );
+                        }
+                      }}
+                    >
+                      {requestMeeting.isPending ? "送信中..." : "送信"}
+                    </Button>
+                    <Button
+                      size="sm"
+                      variant="ghost"
+                      onClick={() => {
+                        setShowMeetingForm(false);
+                        setMeetingMessage("");
+                        setProposedTimes("");
+                      }}
+                    >
+                      キャンセル
+                    </Button>
+                  </div>
+                </div>
+              )}
+
               {/* Actions */}
               <div className="flex gap-2 pt-2">
                 {isConnected ? (
                   <Button
                     className="flex-1"
                     variant="outline"
-                    onClick={() => {
-                      if (profileModalUserId) {
-                        api.post("/meetings/request", {
-                          target_id: profileModalUserId,
-                          message: "",
-                        }).then(() => toast.success("会議リクエストを送信しました"))
-                          .catch(() => toast.error("送信に失敗しました"));
-                      }
-                    }}
+                    onClick={() => setShowMeetingForm((v) => !v)}
                   >
                     <Calendar className="mr-1.5 h-4 w-4" />
                     会議をリクエスト

@@ -34,9 +34,37 @@ export async function PATCH(
     // Use service client for UPDATE (no UPDATE RLS policy on meetings table)
     const serviceClient = await createServiceClient();
 
+    // Build update payload
+    const updatePayload: Record<string, unknown> = {
+      status: newStatus,
+      updated_at: new Date().toISOString(),
+    };
+
+    // Accept optional fields when confirming
+    if (newStatus === "confirmed") {
+      if (body.meeting_url) {
+        try {
+          new URL(body.meeting_url);
+          updatePayload.meeting_url = body.meeting_url;
+        } catch {
+          return jsonError(400, "BAD_REQUEST", "meeting_urlは有効なURLを指定してください");
+        }
+      }
+      const validPlatforms = ["zoom", "google_meet", "teams", "slack", "other"];
+      if (body.platform) {
+        if (!validPlatforms.includes(body.platform)) {
+          return jsonError(400, "BAD_REQUEST", `platformは${validPlatforms.join(", ")}のいずれかを指定してください`);
+        }
+        updatePayload.platform = body.platform;
+      }
+      if (body.scheduled_at) {
+        updatePayload.scheduled_at = body.scheduled_at;
+      }
+    }
+
     const { data, error } = await serviceClient
       .from("meetings")
-      .update({ status: newStatus, updated_at: new Date().toISOString() })
+      .update(updatePayload)
       .eq("id", id)
       .select()
       .single();

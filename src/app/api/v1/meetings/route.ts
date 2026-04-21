@@ -13,7 +13,7 @@ export async function GET() {
         role,
         meeting:meetings(
           id, title, scheduled_at, duration_min, platform, meeting_url, status,
-          request:meeting_requests(requester_id, target_id, message)
+          request:meeting_requests(requester_id, target_id, message, proposed_times)
         )
       `)
       .eq("user_id", user.id)
