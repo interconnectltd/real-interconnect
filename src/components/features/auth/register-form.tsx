@@ -36,6 +36,7 @@ export function RegisterForm() {
     setError(null);
 
     // 招待コード検証
+    let invitationId: string | null = null;
     try {
       const res = await fetch("/api/v1/invitation", {
         method: "POST",
@@ -48,6 +49,8 @@ export function RegisterForm() {
         setLoading(false);
         return;
       }
+      const result = await res.json();
+      invitationId = result.data?.invitation_id ?? null;
     } catch {
       setError("招待コードの検証に失敗しました");
       setLoading(false);
@@ -73,6 +76,17 @@ export function RegisterForm() {
       setError(authError.message);
       setLoading(false);
       return;
+    }
+
+    // Increment invitation use_count after successful signup
+    if (invitationId) {
+      await fetch("/api/v1/invitation", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ invitation_id: invitationId }),
+      }).catch(() => {
+        // Non-critical: don't block registration if increment fails
+      });
     }
 
     router.push("/login?confirmed=true");

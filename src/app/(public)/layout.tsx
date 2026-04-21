@@ -39,6 +39,9 @@ export default function PublicLayout({
               <Link href="/privacy" className="hover:text-foreground">
                 プライバシーポリシー
               </Link>
+              <Link href="/tokushoho" className="hover:text-foreground">
+                特定商取引法
+              </Link>
             </nav>
           </div>
         </div>

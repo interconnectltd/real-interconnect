@@ -28,6 +28,49 @@ export default function PrivacyPage() {
           具体的には、transcript_insights、member_ai_profiles、matching_scores の
           当該ユーザーに関するレコードを完全に削除します。
         </p>
+        <h2 className="mt-6 text-lg font-semibold text-foreground">3-2. データ保持期間</h2>
+        <p>各データは以下の期間保持された後、自動的に削除または無効化されます。</p>
+        <table className="mt-3 w-full text-left text-sm">
+          <thead>
+            <tr className="border-b">
+              <th className="pb-2 pr-4 font-semibold text-foreground">データ種別</th>
+              <th className="pb-2 pr-4 font-semibold text-foreground">保持期間</th>
+              <th className="pb-2 font-semibold text-foreground">処理</th>
+            </tr>
+          </thead>
+          <tbody className="divide-y">
+            <tr>
+              <td className="py-2 pr-4">ミーティング文字起こし（全文）</td>
+              <td className="py-2 pr-4">分析完了後90日</td>
+              <td className="py-2">全文を無効化（null化）</td>
+            </tr>
+            <tr>
+              <td className="py-2 pr-4">ジョブキュー（完了/失敗）</td>
+              <td className="py-2 pr-4">30日</td>
+              <td className="py-2">削除</td>
+            </tr>
+            <tr>
+              <td className="py-2 pr-4">既読通知</td>
+              <td className="py-2 pr-4">90日</td>
+              <td className="py-2">削除</td>
+            </tr>
+            <tr>
+              <td className="py-2 pr-4">ログインセッション</td>
+              <td className="py-2 pr-4">1年</td>
+              <td className="py-2">削除</td>
+            </tr>
+            <tr>
+              <td className="py-2 pr-4">ユーザーシグナル</td>
+              <td className="py-2 pr-4">180日</td>
+              <td className="py-2">削除</td>
+            </tr>
+            <tr>
+              <td className="py-2 pr-4">その他のユーザーデータ</td>
+              <td className="py-2 pr-4">退会時まで</td>
+              <td className="py-2">退会時に削除</td>
+            </tr>
+          </tbody>
+        </table>
         <h2 className="mt-6 text-lg font-semibold text-foreground">4. 第三者提供</h2>
         <p>法令に基づく場合を除き、個人情報を第三者に提供することはありません。</p>
         <h2 className="mt-6 text-lg font-semibold text-foreground">5. お問い合わせ</h2>

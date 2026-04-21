@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import { ApiError } from "@/lib/errors";
+import { checkGeneralRateLimit } from "@/lib/rate-limit";
 import type { ApiResponse } from "@/types";
 import type { SupabaseClient, User } from "@supabase/supabase-js";
 import type { Database } from "@/types/database";
@@ -29,6 +30,12 @@ export async function withAuth(): Promise<{
 
   if (error || !user) {
     throw new ApiError(401, "UNAUTHORIZED", "認証が必要です");
+  }
+
+  // General API rate limit: 60 req/min per user
+  const rl = checkGeneralRateLimit(user.id);
+  if (!rl.allowed) {
+    throw new ApiError(429, "RATE_LIMITED", "リクエストが多すぎます。しばらくしてから再試行してください");
   }
 
   return { user, supabase };

@@ -1,5 +1,6 @@
-import { withAuth, json, handleApiError } from "@/lib/api-helpers";
+import { withAuth, json, jsonError, handleApiError } from "@/lib/api-helpers";
 import { computeScore, type ScoreInput } from "@/lib/matching";
+import { checkMatchingRateLimit } from "@/lib/rate-limit";
 import type { Profile } from "@/types";
 
 /**
@@ -14,6 +15,12 @@ import type { Profile } from "@/types";
 export async function POST() {
   try {
     const { user, supabase } = await withAuth();
+
+    // Matching compute rate limit: 5 req per 5 min per user
+    const rl = checkMatchingRateLimit(user.id);
+    if (!rl.allowed) {
+      return jsonError(429, "RATE_LIMITED", "マッチング計算のリクエストが多すぎます。しばらくしてから再試行してください");
+    }
 
     // レート制限: 直近5分以内に計算済みなら早期リターン
     const { data: recentScore } = await supabase

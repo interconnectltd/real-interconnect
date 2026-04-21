@@ -7,15 +7,23 @@
  * user_conversation_vectors を読み、matching_scores_v4 に書く。
  */
 
-import { withAuth, json, handleApiError } from "@/lib/api-helpers";
+import { withAuth, json, jsonError, handleApiError } from "@/lib/api-helpers";
 import { createServiceClient } from "@/lib/supabase/server";
 import { computeScoreV2 } from "@/lib/matching/score-compute-v2";
 import { generateReasonsV2 } from "@/lib/matching/reason-templates-v2";
+import { checkMatchingRateLimit } from "@/lib/rate-limit";
 import type { ScoringConfig } from "@/lib/matching/score-compute-v2";
 
 export async function POST() {
   try {
     const { user } = await withAuth();
+
+    // Matching compute rate limit: 5 req per 5 min per user
+    const rl = checkMatchingRateLimit(user.id);
+    if (!rl.allowed) {
+      return jsonError(429, "RATE_LIMITED", "マッチング計算のリクエストが多すぎます。しばらくしてから再試行してください");
+    }
+
     const supabase = await createServiceClient();
 
     // --- scoring_config 取得 ---

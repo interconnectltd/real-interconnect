@@ -41,6 +41,7 @@ export async function updateSession(request: NextRequest) {
     "/auth/callback",
     "/terms",
     "/privacy",
+    "/tokushoho",
     "/api/v1/health",
   ];
 
