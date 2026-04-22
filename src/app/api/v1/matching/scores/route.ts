@@ -10,8 +10,7 @@ export async function GET(request: Request) {
     const limit = 20;
     const offset = (page - 1) * limit;
 
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    let query = (supabase as any)
+    let query = supabase
       .from("matching_scores_v4")
       .select("*, target_profile:user_profiles!target_id(id, name, company, position, industry, bio, avatar_url)", { count: "exact" })
       .eq("viewer_id", user.id)

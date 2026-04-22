@@ -236,35 +236,159 @@ export interface Database {
         >;
         Relationships: [];
       };
-      matching_scores_v3: {
+      matching_scores_v4: {
         Row: {
           id: string;
           viewer_id: string;
           target_id: string;
-          value_fit: number;
-          relational_quality: number;
+          need_offer_score: number;
+          reverse_match: number;
+          expertise_fit: number;
+          topic_alignment: number;
+          engagement_value: number;
+          history_score: number;
           total_score: number;
           confidence: number;
           phase: string;
           score_reasons: Json;
           notify_tier: string | null;
           is_stale: boolean;
+          config_version: string;
+          algorithm_version: string;
           calculated_at: string;
         };
         Insert: {
           viewer_id: string;
           target_id: string;
-          value_fit?: number;
-          relational_quality?: number;
+          need_offer_score?: number;
+          reverse_match?: number;
+          expertise_fit?: number;
+          topic_alignment?: number;
+          engagement_value?: number;
+          history_score?: number;
           total_score?: number;
           confidence?: number;
           phase?: string;
           score_reasons?: Json;
           notify_tier?: string | null;
           is_stale?: boolean;
+          config_version?: string;
+          algorithm_version?: string;
+          calculated_at?: string;
         };
         Update: Partial<
-          Database["public"]["Tables"]["matching_scores_v3"]["Insert"]
+          Database["public"]["Tables"]["matching_scores_v4"]["Insert"]
+        >;
+        Relationships: [];
+      };
+      user_conversation_vectors: {
+        Row: {
+          id: string;
+          user_id: string;
+          need_vectors: Json;
+          offer_vectors: Json;
+          expertise_vectors: Json;
+          topic_vectors: Json;
+          engagement_signature: Json;
+          evidence_index: Json;
+          hidden_items: Json;
+          analysis_count: number;
+          meeting_ids: string[];
+          last_analyzed_at: string | null;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          user_id: string;
+          need_vectors?: Json;
+          offer_vectors?: Json;
+          expertise_vectors?: Json;
+          topic_vectors?: Json;
+          engagement_signature?: Json;
+          evidence_index?: Json;
+          hidden_items?: Json;
+          analysis_count?: number;
+          meeting_ids?: string[];
+          last_analyzed_at?: string | null;
+        };
+        Update: Partial<
+          Database["public"]["Tables"]["user_conversation_vectors"]["Insert"]
+        >;
+        Relationships: [];
+      };
+      scoring_config: {
+        Row: {
+          id: string;
+          version_id: string;
+          weights_json: Json;
+          alpha_table_json: Json;
+          boost_params_json: Json;
+          validated_accuracy: number | null;
+          validation_details: Json;
+          is_active: boolean;
+          applied_at: string | null;
+          created_at: string;
+        };
+        Insert: {
+          version_id: string;
+          weights_json?: Json;
+          alpha_table_json?: Json;
+          boost_params_json?: Json;
+          validated_accuracy?: number | null;
+          validation_details?: Json;
+          is_active?: boolean;
+          applied_at?: string | null;
+        };
+        Update: Partial<
+          Database["public"]["Tables"]["scoring_config"]["Insert"]
+        >;
+        Relationships: [];
+      };
+      correction_log: {
+        Row: {
+          id: string;
+          user_id: string;
+          vector_id: string | null;
+          correction_type: string;
+          correction_text: string | null;
+          original_text: string;
+          created_at: string;
+        };
+        Insert: {
+          user_id: string;
+          vector_id?: string | null;
+          correction_type: string;
+          correction_text?: string | null;
+          original_text: string;
+        };
+        Update: Partial<
+          Database["public"]["Tables"]["correction_log"]["Insert"]
+        >;
+        Relationships: [];
+      };
+      feedback_log: {
+        Row: {
+          id: string;
+          viewer_id: string;
+          target_id: string;
+          rating: number;
+          value_tags: Json;
+          haiku_no_at_time: number | null;
+          haiku_rv_at_time: number | null;
+          config_version: string | null;
+          created_at: string;
+        };
+        Insert: {
+          viewer_id: string;
+          target_id: string;
+          rating: number;
+          value_tags?: Json;
+          haiku_no_at_time?: number | null;
+          haiku_rv_at_time?: number | null;
+          config_version?: string | null;
+        };
+        Update: Partial<
+          Database["public"]["Tables"]["feedback_log"]["Insert"]
         >;
         Relationships: [];
       };

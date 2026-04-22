@@ -6,8 +6,7 @@ export async function GET() {
     const { user, supabase } = await withAuth();
 
     // Get scores where I score them >= threshold
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const { data: myScores, error: err1 } = await (supabase as any)
+    const { data: myScores, error: err1 } = await supabase
       .from("matching_scores_v4")
       .select("target_id, total_score, score_reasons")
       .eq("viewer_id", user.id)
@@ -19,8 +18,7 @@ export async function GET() {
     const targetIds = myScores.map((s) => s.target_id);
 
     // Get reverse scores where they also score me >= threshold
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const { data: theirScores, error: err2 } = await (supabase as any)
+    const { data: theirScores, error: err2 } = await supabase
       .from("matching_scores_v4")
       .select("viewer_id, total_score, target_profile:user_profiles!viewer_id(id, name, company, position, industry, bio, avatar_url)")
       .eq("target_id", user.id)

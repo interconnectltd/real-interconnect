@@ -27,8 +27,7 @@ export async function PATCH(request: Request) {
     const serviceClient = await createServiceClient();
 
     // Get current hidden_items
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const { data: current, error: fetchError } = await (serviceClient as any)
+    const { data: current, error: fetchError } = await serviceClient
       .from("user_conversation_vectors")
       .select("id, hidden_items")
       .eq("user_id", user.id)
@@ -41,7 +40,7 @@ export async function PATCH(request: Request) {
     }
 
     const hiddenItems: string[] = Array.isArray(current.hidden_items)
-      ? current.hidden_items
+      ? (current.hidden_items as string[])
       : [];
 
     let updatedItems: string[];
@@ -55,8 +54,7 @@ export async function PATCH(request: Request) {
     }
 
     // Update hidden_items
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const { error: updateError } = await (serviceClient as any)
+    const { error: updateError } = await serviceClient
       .from("user_conversation_vectors")
       .update({ hidden_items: updatedItems, updated_at: new Date().toISOString() })
       .eq("user_id", user.id);
@@ -64,8 +62,7 @@ export async function PATCH(request: Request) {
     if (updateError) throw updateError;
 
     // Log to correction_log
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    await (serviceClient as any).from("correction_log").insert({
+    await serviceClient.from("correction_log").insert({
       user_id: user.id,
       vector_id: current.id,
       correction_type: action === "hide" ? "not_mine" : "other",

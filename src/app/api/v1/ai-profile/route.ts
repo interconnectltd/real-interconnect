@@ -6,8 +6,7 @@ export async function GET() {
     const { user } = await withAuth();
     const serviceClient = await createServiceClient();
 
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const { data, error } = await (serviceClient as any)
+    const { data, error } = await serviceClient
       .from("user_conversation_vectors")
       .select(
         "need_vectors, offer_vectors, topic_vectors, hidden_items, analysis_count, last_analyzed_at"

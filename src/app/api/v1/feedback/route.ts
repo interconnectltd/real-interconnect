@@ -8,8 +8,7 @@ export async function GET() {
   try {
     const { user, supabase } = await withAuth();
 
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const { data, error } = await (supabase as any)
+    const { data, error } = await supabase
       .from("feedback_log")
       .select("target_id")
       .eq("viewer_id", user.id);
@@ -57,8 +56,7 @@ export async function POST(request: Request) {
     const serviceClient = await createServiceClient();
 
     // Look up current matching_scores_v4 for this pair
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const { data: score } = await (serviceClient as any)
+    const { data: score } = await serviceClient
       .from("matching_scores_v4")
       .select("need_offer_score, reverse_match, config_version")
       .eq("viewer_id", user.id)
@@ -66,8 +64,7 @@ export async function POST(request: Request) {
       .maybeSingle();
 
     // Insert into feedback_log
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const { data, error } = await (serviceClient as any)
+    const { data, error } = await serviceClient
       .from("feedback_log")
       .insert({
         viewer_id: user.id,

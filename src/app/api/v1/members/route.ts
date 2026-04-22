@@ -16,8 +16,7 @@ export async function GET(request: Request) {
 
     // For score sort, use matching_scores_v4 join
     if (sort === "score") {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      let scoreQuery = (supabase as any)
+      let scoreQuery = supabase
         .from("matching_scores_v4")
         .select(
           "total_score, target_profile:user_profiles!target_id(id, name, company, position, industry, bio, avatar_url)",

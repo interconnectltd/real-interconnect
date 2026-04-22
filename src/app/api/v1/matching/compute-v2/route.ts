@@ -13,6 +13,7 @@ import { computeScoreV2 } from "@/lib/matching/score-compute-v2";
 import { generateReasonsV2 } from "@/lib/matching/reason-templates-v2";
 import { checkMatchingRateLimit } from "@/lib/rate-limit";
 import type { ScoringConfig } from "@/lib/matching/score-compute-v2";
+import type { Database } from "@/types/database";
 
 export async function POST() {
   try {
@@ -125,7 +126,8 @@ export async function POST() {
     }
 
     // --- ペアごとにスコア計算 ---
-    const rows: Record<string, unknown>[] = [];
+    type ScoreRow = Database["public"]["Tables"]["matching_scores_v4"]["Insert"];
+    const rows: ScoreRow[] = [];
 
     for (const target of targets) {
       const tv = vectorMap.get(target.id);
@@ -265,8 +267,7 @@ export async function POST() {
     let computed = 0;
     for (let i = 0; i < rows.length; i += 50) {
       const batch = rows.slice(i, i + 50);
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const { error } = await (supabase as any)
+      const { error } = await supabase
         .from("matching_scores_v4")
         .upsert(batch, { onConflict: "viewer_id,target_id" });
 
