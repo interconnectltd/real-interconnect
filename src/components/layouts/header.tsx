@@ -14,6 +14,8 @@ import {
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { useSupabase } from "@/providers/supabase-provider";
 import { useUnreadCount } from "@/hooks/queries/use-notifications";
+import { useMyProfile } from "@/hooks/queries/use-profile";
+import { UserAvatar } from "@/components/shared/user-avatar";
 import { Sidebar } from "./sidebar";
 import { useUIStore } from "@/stores/ui-store";
 
@@ -21,6 +23,7 @@ export function Header() {
   const { supabase } = useSupabase();
   const router = useRouter();
   const { data: unreadCount } = useUnreadCount();
+  const { data: myProfile } = useMyProfile();
   const { sidebarOpen, setSidebarOpen } = useUIStore();
 
   async function handleSignOut() {
@@ -76,9 +79,17 @@ export function Header() {
         {/* User menu — render prop merges DropdownMenuTrigger onto Button */}
         <DropdownMenu>
           <DropdownMenuTrigger
-            render={<Button variant="ghost" size="icon" />}
+            render={<Button variant="ghost" size="icon" className="rounded-full" />}
           >
-            <User className="h-5 w-5" />
+            {myProfile?.avatar_url ? (
+              <UserAvatar
+                name={myProfile.name}
+                avatarUrl={myProfile.avatar_url}
+                size="sm"
+              />
+            ) : (
+              <User className="h-5 w-5" />
+            )}
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end" className="w-48">
             <DropdownMenuItem render={<Link href="/profile" />}>

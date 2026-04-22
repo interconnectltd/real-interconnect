@@ -13,6 +13,7 @@ import { useFilterStore } from "@/stores/filter-store";
 import { useUIStore } from "@/stores/ui-store";
 import { TldvConnectCta } from "@/components/shared/tldv-connect-cta";
 import { ScoreBar, ReasonList } from "@/components/shared/score-bar";
+import { UserAvatar } from "@/components/shared/user-avatar";
 import { toast } from "sonner";
 import type { MatchScore, MutualMatch, Profile, Connection } from "@/types";
 
@@ -82,10 +83,15 @@ export default function MatchingPage() {
                     <X className="h-3.5 w-3.5" />
                   </button>
                   <CardContent className="p-4 pr-8">
-                    <p className="font-medium">{p?.name ?? "ユーザー"}</p>
-                    <p className="text-xs text-muted-foreground">
-                      {p?.company}{p?.position ? ` / ${p.position}` : ""}
-                    </p>
+                    <div className="flex items-center gap-3">
+                      <UserAvatar name={p?.name} avatarUrl={p?.avatar_url} size="sm" />
+                      <div>
+                        <p className="font-medium">{p?.name ?? "ユーザー"}</p>
+                        <p className="text-xs text-muted-foreground">
+                          {p?.company}{p?.position ? ` / ${p.position}` : ""}
+                        </p>
+                      </div>
+                    </div>
                     {m.my_reasons?.length > 0 && (
                       <p className="mt-2 text-xs text-muted-foreground">
                         {m.my_reasons[0]}
@@ -136,13 +142,16 @@ export default function MatchingPage() {
               >
                 <CardHeader className="pb-2">
                   <div className="flex items-start justify-between">
-                    <div>
-                      <CardTitle className="text-base">
-                        {p?.name ?? "ユーザー"}
-                      </CardTitle>
-                      <p className="text-xs text-muted-foreground">
-                        {p?.company}{p?.position ? ` / ${p.position}` : ""}
-                      </p>
+                    <div className="flex items-center gap-3">
+                      <UserAvatar name={p?.name} avatarUrl={p?.avatar_url} size="md" />
+                      <div>
+                        <CardTitle className="text-base">
+                          {p?.name ?? "ユーザー"}
+                        </CardTitle>
+                        <p className="text-xs text-muted-foreground">
+                          {p?.company}{p?.position ? ` / ${p.position}` : ""}
+                        </p>
+                      </div>
                     </div>
                     <div className="flex items-center gap-1">
                     {connectedIds.has(score.target_id) ? (

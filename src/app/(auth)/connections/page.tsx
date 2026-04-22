@@ -1,11 +1,14 @@
 "use client";
 
-import { UserCheck, Clock, Send } from "lucide-react";
+import { useState } from "react";
+import { UserCheck, Clock, Send, Star } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { useConnections } from "@/hooks/queries/use-connections";
 import { useUpdateConnection } from "@/hooks/mutations/use-update-connection";
+import { useFeedbackStatus } from "@/hooks/queries/use-feedback-status";
+import { FeedbackModal } from "@/components/shared/feedback-modal";
 import { useFilterStore } from "@/stores/filter-store";
 import { useSupabase } from "@/providers/supabase-provider";
 import type { Connection } from "@/types";
@@ -23,6 +26,10 @@ const STATUS_LABELS: Record<string, string> = {
 export default function ConnectionsPage() {
   const { user } = useSupabase();
   const { connectionTab, setConnectionTab } = useFilterStore();
+  const [feedbackTarget, setFeedbackTarget] = useState<{
+    id: string;
+    name: string;
+  } | null>(null);
 
   const statusFilter =
     connectionTab === "pending" ? "pending"
@@ -31,6 +38,7 @@ export default function ConnectionsPage() {
 
   const { data: connections, isLoading } = useConnections(statusFilter);
   const updateConnection = useUpdateConnection();
+  const { data: feedbackMap } = useFeedbackStatus();
 
   // Filter sent vs received pending
   const filtered = connections?.filter((c: Connection & { profile?: unknown }) => {
@@ -110,13 +118,31 @@ export default function ConnectionsPage() {
                     </div>
                   )}
                   {conn.status === "accepted" && (
-                    <Button
-                      size="sm"
-                      variant="outline"
-                      onClick={() => updateConnection.mutate({ id: conn.id, status: "disconnected" })}
-                    >
-                      解除
-                    </Button>
+                    <div className="flex gap-2">
+                      {!feedbackMap?.[conn.user_id === user?.id ? conn.connected_user_id : conn.user_id] && (
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          onClick={() => {
+                            const targetId = conn.user_id === user?.id ? conn.connected_user_id : conn.user_id;
+                            setFeedbackTarget({
+                              id: targetId,
+                              name: profile?.name ?? "ユーザー",
+                            });
+                          }}
+                        >
+                          <Star className="mr-1 h-3.5 w-3.5" />
+                          評価する
+                        </Button>
+                      )}
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        onClick={() => updateConnection.mutate({ id: conn.id, status: "disconnected" })}
+                      >
+                        解除
+                      </Button>
+                    </div>
                   )}
                 </CardContent>
               </Card>
@@ -132,6 +158,17 @@ export default function ConnectionsPage() {
               : "コネクションがまだありません"}
           </p>
         </div>
+      )}
+
+      {feedbackTarget && (
+        <FeedbackModal
+          open={!!feedbackTarget}
+          onOpenChange={(open) => {
+            if (!open) setFeedbackTarget(null);
+          }}
+          targetId={feedbackTarget.id}
+          targetName={feedbackTarget.name}
+        />
       )}
     </div>
   );

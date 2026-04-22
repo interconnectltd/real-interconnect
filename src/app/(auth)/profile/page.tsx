@@ -1,7 +1,7 @@
 "use client";
 
-import { useState } from "react";
-import { Pencil } from "lucide-react";
+import { useState, useRef } from "react";
+import { Pencil, Camera, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -10,12 +10,17 @@ import { Badge } from "@/components/ui/badge";
 import { useMyProfile } from "@/hooks/queries/use-profile";
 import { INDUSTRIES } from "@/lib/constants";
 import { useUpdateProfile } from "@/hooks/mutations/use-update-profile";
+import { useUploadAvatar } from "@/hooks/mutations/use-upload-avatar";
 import { ProfileCompleteness } from "@/components/shared/profile-completeness";
+import { UserAvatar } from "@/components/shared/user-avatar";
 
 export default function ProfilePage() {
   const { data: profile, isLoading } = useMyProfile();
   const updateProfile = useUpdateProfile();
+  const uploadAvatar = useUploadAvatar();
+  const fileInputRef = useRef<HTMLInputElement>(null);
   const [editing, setEditing] = useState(false);
+  const [avatarPreview, setAvatarPreview] = useState<string | null>(null);
   const [form, setForm] = useState({
     name: "",
     company: "",
@@ -42,6 +47,25 @@ export default function ProfilePage() {
     updateProfile.mutate(form, {
       onSuccess: () => setEditing(false),
     });
+  }
+
+  function handleAvatarSelect(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    // Show preview
+    const reader = new FileReader();
+    reader.onload = (ev) => setAvatarPreview(ev.target?.result as string);
+    reader.readAsDataURL(file);
+
+    // Upload
+    uploadAvatar.mutate(file, {
+      onSuccess: () => setAvatarPreview(null),
+      onError: () => setAvatarPreview(null),
+    });
+
+    // Reset input so same file can be selected again
+    e.target.value = "";
   }
 
   if (isLoading) {
@@ -71,10 +95,53 @@ export default function ProfilePage() {
 
       <Card>
         <CardHeader>
-          <CardTitle className="text-lg">{profile.name}</CardTitle>
-          {profile.industry && (
-            <Badge variant="secondary">{profile.industry}</Badge>
-          )}
+          <div className="flex items-center gap-4">
+            <button
+              type="button"
+              className="group relative"
+              onClick={() => fileInputRef.current?.click()}
+              disabled={uploadAvatar.isPending}
+            >
+              {avatarPreview ? (
+                <img
+                  src={avatarPreview}
+                  alt="プレビュー"
+                  className="h-16 w-16 rounded-full object-cover"
+                />
+              ) : (
+                <UserAvatar
+                  name={profile.name}
+                  avatarUrl={profile.avatar_url}
+                  size="lg"
+                />
+              )}
+              <div className="absolute inset-0 flex items-center justify-center rounded-full bg-black/40 opacity-0 transition-opacity group-hover:opacity-100">
+                {uploadAvatar.isPending ? (
+                  <Loader2 className="h-5 w-5 animate-spin text-white" />
+                ) : (
+                  <Camera className="h-5 w-5 text-white" />
+                )}
+              </div>
+              {uploadAvatar.isPending && (
+                <div className="absolute inset-0 flex items-center justify-center rounded-full bg-black/40">
+                  <Loader2 className="h-5 w-5 animate-spin text-white" />
+                </div>
+              )}
+            </button>
+            <input
+              ref={fileInputRef}
+              type="file"
+              accept="image/jpeg,image/png,image/webp,image/gif"
+              className="hidden"
+              onChange={handleAvatarSelect}
+            />
+            <div>
+              <CardTitle className="text-lg">{profile.name}</CardTitle>
+              {profile.industry && (
+                <Badge variant="secondary" className="mt-1">{profile.industry}</Badge>
+              )}
+            </div>
+          </div>
         </CardHeader>
         <CardContent className="space-y-4">
           {editing ? (

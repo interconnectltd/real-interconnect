@@ -21,6 +21,7 @@ import { useToggleBookmark } from "@/hooks/mutations/use-toggle-bookmark";
 import { useRequestMeeting } from "@/hooks/mutations/use-request-meeting";
 // V2: SCORE_AXIS_LABELS 不要（おすすめ度のみ表示）
 import { ScoreBar, ReasonList } from "@/components/shared/score-bar";
+import { UserAvatar } from "@/components/shared/user-avatar";
 import type { MatchScore, Connection } from "@/types";
 
 export function ProfileModal() {
@@ -64,21 +65,30 @@ export function ProfileModal() {
         ) : profile ? (
           <>
             <DialogHeader>
-              <DialogTitle className="text-xl">{profile.name}</DialogTitle>
-              <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                {profile.company && <span>{profile.company}</span>}
-                {profile.position && (
-                  <>
-                    <span className="text-border">/</span>
-                    <span>{profile.position}</span>
-                  </>
-                )}
+              <div className="flex items-center gap-4">
+                <UserAvatar
+                  name={profile.name}
+                  avatarUrl={profile.avatar_url}
+                  size="lg"
+                />
+                <div>
+                  <DialogTitle className="text-xl">{profile.name}</DialogTitle>
+                  <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                    {profile.company && <span>{profile.company}</span>}
+                    {profile.position && (
+                      <>
+                        <span className="text-border">/</span>
+                        <span>{profile.position}</span>
+                      </>
+                    )}
+                  </div>
+                  {profile.industry && (
+                    <Badge variant="secondary" className="mt-1 w-fit text-xs">
+                      {profile.industry}
+                    </Badge>
+                  )}
+                </div>
               </div>
-              {profile.industry && (
-                <Badge variant="secondary" className="w-fit text-xs">
-                  {profile.industry}
-                </Badge>
-              )}
             </DialogHeader>
 
             <div className="space-y-4 pt-2">

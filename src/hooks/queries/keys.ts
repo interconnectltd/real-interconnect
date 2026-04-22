@@ -39,4 +39,8 @@ export const queryKeys = {
     all: ["meetings"] as const,
     list: () => ["meetings", "list"] as const,
   },
+  feedback: {
+    all: ["feedback"] as const,
+    byTarget: (targetId: string) => ["feedback", targetId] as const,
+  },
 } as const;
