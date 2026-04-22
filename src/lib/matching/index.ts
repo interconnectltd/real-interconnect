@@ -1,4 +1,6 @@
-export { computeScore, type ScoreInput, type ScoreResult } from "./score-compute";
-export { calcAttributeScore, industryAffinity, roleComplement, bioKeywordOverlap } from "./attribute-score";
+// V2 スコアリングモジュール
+// V1 (score-compute.ts, reason-templates.ts) は削除済み — Step 6 完了
+export { computeScoreV2, type ScoreV2Input, type ScoreV2Result, type ScoringConfig } from "./score-compute-v2";
+export { calcAttributeScore } from "./attribute-score";
 export { calcPurposeScore, type PurposeScoreResult } from "./purpose-score";
-export { generateReasons, type ReasonContext } from "./reason-templates";
+export { generateReasonsV2 } from "./reason-templates-v2";

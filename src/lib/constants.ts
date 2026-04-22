@@ -38,11 +38,6 @@ export const MEMBER_SORT_OPTIONS = [
 
 export type MemberSortBy = (typeof MEMBER_SORT_OPTIONS)[number]["value"];
 
-export const MATCHING_WEIGHTS = {
-  value_fit: 0.60,
-  relational_quality: 0.40,
-} as const;
-
 export const MATCHING_MUTUAL_THRESHOLD = 0.70;
 
 // ── Goals/Offerings 6カテゴリ ──
@@ -56,15 +51,7 @@ export const GOAL_TYPES = [
   { value: "mentoring", label: "メンタリング", description: "メンターを探している、またはメンターになりたい" },
 ] as const;
 
-export type GoalType = (typeof GOAL_TYPES)[number]["value"];
-
-// ── 成熟度モデル (設計書 1-08) ──
-
-export const MATURITY_WEIGHTS = {
-  1: { attribute: 0.70, purpose: 0.20, conversation: 0.00, history: 0.10 },
-  2: { attribute: 0.25, purpose: 0.20, conversation: 0.40, history: 0.15 },
-  3: { attribute: 0.10, purpose: 0.15, conversation: 0.45, history: 0.30 },
-} as const;
+// V2: 重みは scoring_config テーブルで管理（MATURITY_WEIGHTS は削除済み）
 
 export const NOTIFICATION_ACTION_WHITELIST = new Set([
   "accept",
