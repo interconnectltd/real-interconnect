@@ -27,7 +27,7 @@ import type { MatchScore, Connection } from "@/types";
 export function ProfileModal() {
   const { profileModalUserId, closeProfileModal } = useUIStore();
   const { data: profile, isLoading } = useProfile(profileModalUserId ?? undefined);
-  const { data: allScores } = useMatchingScores({});
+  const { data: allScores } = useMatchingScores({ minScore: 0 });
   const { data: bookmarksData } = useBookmarks();
   const { data: connectionsData } = useConnections();
   const requestConnection = useRequestConnection();
