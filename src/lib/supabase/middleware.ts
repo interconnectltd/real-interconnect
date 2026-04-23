@@ -46,7 +46,7 @@ export async function updateSession(request: NextRequest) {
   ];
 
   const isPublicPath = publicPaths.some(
-    (p) => pathname === p || pathname.startsWith("/api/v1/health"),
+    (p) => pathname === p || pathname.startsWith("/api/v1/health") || pathname.startsWith("/lp"),
   );
 
   // Redirect unauthenticated users to login
