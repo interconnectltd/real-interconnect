@@ -7,23 +7,27 @@ export default function HomePage() {
   return (
     <div>
       {/* Hero — 旧デザイン準拠: ダーク背景 + 都市スカイライン */}
-      <section className="relative flex min-h-[100vh] items-center justify-center overflow-hidden">
-        {/* 背景動画 */}
+      <section
+        className="relative flex min-h-[100vh] items-center justify-center overflow-hidden"
+        style={{ backgroundImage: "url('/img/fv-poster.jpg')", backgroundSize: "cover", backgroundPosition: "center" }}
+      >
+        {/* 背景動画（ポスター画像の上に重ねる） */}
+        {/* eslint-disable-next-line jsx-a11y/media-has-caption */}
         <video
           autoPlay
           muted
           loop
           playsInline
-          poster="/img/fv-poster.jpg"
-          className="absolute inset-0 h-full w-full object-cover"
+          preload="auto"
+          className="absolute inset-0 z-0 h-full w-full object-cover"
         >
           <source src="/img/interconnect-bg.mp4" type="video/mp4" />
         </video>
         {/* 暗いオーバーレイ */}
-        <div className="absolute inset-0 bg-black/60" />
+        <div className="absolute inset-0 z-[1] bg-black/60" />
 
         {/* コンテンツ */}
-        <div className="relative z-10 px-4 text-center text-white">
+        <div className="relative z-[2] px-4 text-center text-white">
           <h1 className="text-4xl font-bold leading-tight tracking-tight md:text-5xl lg:text-6xl">
             ビジネスの出会いを、
             <br />
