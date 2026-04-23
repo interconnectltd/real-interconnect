@@ -14,7 +14,7 @@ interface MatchFilter extends Record<string, unknown> {
 export function useMatchingScores(filter: MatchFilter = {}) {
   const params = new URLSearchParams();
   if (filter.sort) params.set("sort", filter.sort);
-  if (filter.minScore) params.set("min_score", String(filter.minScore));
+  if (filter.minScore != null) params.set("min_score", String(filter.minScore));
   if (filter.page) params.set("page", String(filter.page));
   const qs = params.toString();
 
