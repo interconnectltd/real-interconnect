@@ -1,1 +1,2630 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 40 40" width="40" height="40"><path d="M0,40 L0,0 L40,0" fill="none" stroke="rgba(255,255,255,0.3)" stroke-width="1"/></svg>
+<!DOCTYPE html>
+
+<html class="no-js wf-source-han-sans-japanese-n5-active wf-source-han-sans-japanese-n4-active wf-active mdl-js" lang="ja"><!--<![endif]--><head prefix="og: https://ogp.me/ns# fb: http://ogp.me/ns/fb# article: http://ogp.me/ns/article#"><meta http-equiv="Content-Type" content="text/html; charset=UTF-8"><style>body {transition: opacity ease-in 0.2s; } 
+body[unresolved] {opacity: 0; display: block; overflow: hidden; position: relative; } 
+</style>
+
+		<meta http-equiv="X-UA-Compatible" content="IE=edge">
+		<meta name="viewport" content="width=device-width,initial-scale=1.0">
+		<link rel="stylesheet" href="css/style.css">
+		<link rel="stylesheet" href="css/style202309.css">
+
+		<script src="js/jquery.min.js"></script>
+
+		<!--  -->
+		<link rel="stylesheet" href="css/slick.css">
+		<link rel="stylesheet" href="css/lity.css">
+		<script src="js/lazysizes.min.js"></script>
+		<script src="js/ls.unveilhooks.min.js"></script>
+		<script src="js/jquery.inview.min.js"></script>
+		<script src="js/slick.min.js"></script>
+		<script src="js/three.min.js"></script>
+		<script src="js/gsap.min.js"></script>
+		<script src="js/scrolltrigger.min.js"></script>
+		<script src="js/lity.js"></script>
+		<script src="js/script.js"></script>
+
+				<!-- splideをheadに移動 -->
+		<link rel="stylesheet" href="css/splide-core.min.css">
+		<link rel="stylesheet" href="css/splide.min.css">
+		<script src="js/splide.min.js"></script>
+		<script src="js/splide-extension-grid.min.js"></script>
+		<link rel="stylesheet" href="css/swiper-bundle.min.css">
+		<script type="text/javascript">
+		$(function() {
+			var windowWidth = $(window).width();
+			var windowSwitch = 960;
+			setTimeout('stopload()', 5000);
+			$('html,body').animate({
+				scrollTop: 0
+			}, '1');
+			var windowHeight = $(window).height();
+			$('#js-loadingcontent').height(windowHeight);
+		});
+
+		function stopload() {
+			$('#js-loadingcontent').addClass('is_show');
+			$('#js-loading').delay(900).fadeOut(800);
+			$('#first_view .fv_title').delay(1200).queue(function() {
+				$(this).addClass('is_show').dequeue();
+			});
+		}
+		</script>
+		<title>INTER CONNECT | ビジネスの出会いを、成果に変える - ビジネスコミュニティプラットフォーム</title>
+	<meta name="description" content="ビジネスの成功の85%は人のつながりが決める。AIが200以上のパラメータで最適なパートナーを厳選提案し、イベント・面談・メッセージで出会いを成果に変えるビジネスコミュニティプラットフォーム INTER CONNECT">
+	<meta name="robots" content="max-image-preview:large">
+	<link rel="canonical" href="https://interconnect-system.netlify.app/">
+		<meta property="og:locale" content="ja_JP">
+		<meta property="og:site_name" content="INTER CONNECT | ビジネスコミュニティプラットフォーム">
+		<meta property="og:type" content="website">
+		<meta property="og:title" content="INTER CONNECT | ビジネスの出会いを、成果に変える">
+		<meta property="og:description" content="業界・職種を超えた質の高いビジネスマッチング。AIが最適なパートナーを提案し、イベント・面談・メッセージで深い関係構築を実現するビジネスコミュニティプラットフォーム">
+		<meta property="og:url" content="https://interconnect-system.netlify.app/">
+		<meta name="twitter:card" content="summary_large_image">
+		<meta name="twitter:title" content="INTER CONNECT | ビジネスの出会いを、成果に変える">
+		<meta name="twitter:description" content="業界・職種を超えた質の高いビジネスマッチング。AIが最適なパートナーを提案し、イベント・面談・メッセージで深い関係構築を実現するビジネスコミュニティプラットフォーム">
+		<script type="application/ld+json">
+			{"@context":"https://schema.org","@graph":[{"@type":"WebSite","@id":"https://interconnect-system.netlify.app/#website","url":"https://interconnect-system.netlify.app/","name":"INTER CONNECT | ビジネスコミュニティプラットフォーム","description":"業界・職種を超えた質の高いビジネスマッチング。AIが最適なパートナーを提案し、イベント・面談・メッセージで深い関係構築を実現","inLanguage":"ja","publisher":{"@id":"https://interconnect-system.netlify.app/#organization"}},{"@type":"Organization","@id":"https://interconnect-system.netlify.app/#organization","name":"INTER CONNECT","description":"ビジネスの出会いを成果に変えるコミュニティプラットフォーム","url":"https://interconnect-system.netlify.app/"},{"@type":"WebPage","@id":"https://interconnect-system.netlify.app/#webpage","url":"https://interconnect-system.netlify.app/","name":"INTER CONNECT | ビジネスの出会いを、成果に変える","isPartOf":{"@id":"https://interconnect-system.netlify.app/#website"},"about":{"@id":"https://interconnect-system.netlify.app/#organization"},"inLanguage":"ja"}]}
+		</script>
+
+	<link rel="stylesheet" id="wp-block-library-css" href="css/style.min.css" type="text/css" media="all">
+<link rel="stylesheet" id="aioseo/css/src/vue/standalone/blocks/table-of-contents/global.scss-css" href="css/global.css" type="text/css" media="all">
+<style id="safe-svg-svg-icon-style-inline-css" type="text/css">
+.safe-svg-cover{text-align:center}.safe-svg-cover .safe-svg-inside{display:inline-block;max-width:100%}.safe-svg-cover svg{height:100%;max-height:100%;max-width:100%;width:100%}
+
+</style>
+<style id="global-styles-inline-css" type="text/css">
+body{--wp--preset--color--black: #000000;--wp--preset--color--cyan-bluish-gray: #abb8c3;--wp--preset--color--white: #ffffff;--wp--preset--color--pale-pink: #f78da7;--wp--preset--color--vivid-red: #cf2e2e;--wp--preset--color--luminous-vivid-orange: #ff6900;--wp--preset--color--luminous-vivid-amber: #fcb900;--wp--preset--color--light-green-cyan: #7bdcb5;--wp--preset--color--vivid-green-cyan: #00d084;--wp--preset--color--pale-cyan-blue: #8ed1fc;--wp--preset--color--vivid-cyan-blue: #0693e3;--wp--preset--color--vivid-purple: #9b51e0;--wp--preset--gradient--vivid-cyan-blue-to-vivid-purple: linear-gradient(135deg,rgba(6,147,227,1) 0%,rgb(155,81,224) 100%);--wp--preset--gradient--light-green-cyan-to-vivid-green-cyan: linear-gradient(135deg,rgb(122,220,180) 0%,rgb(0,208,130) 100%);--wp--preset--gradient--luminous-vivid-amber-to-luminous-vivid-orange: linear-gradient(135deg,rgba(252,185,0,1) 0%,rgba(255,105,0,1) 100%);--wp--preset--gradient--luminous-vivid-orange-to-vivid-red: linear-gradient(135deg,rgba(255,105,0,1) 0%,rgb(207,46,46) 100%);--wp--preset--gradient--very-light-gray-to-cyan-bluish-gray: linear-gradient(135deg,rgb(238,238,238) 0%,rgb(169,184,195) 100%);--wp--preset--gradient--cool-to-warm-spectrum: linear-gradient(135deg,rgb(74,234,220) 0%,rgb(151,120,209) 20%,rgb(207,42,186) 40%,rgb(238,44,130) 60%,rgb(251,105,98) 80%,rgb(254,248,76) 100%);--wp--preset--gradient--blush-light-purple: linear-gradient(135deg,rgb(255,206,236) 0%,rgb(152,150,240) 100%);--wp--preset--gradient--blush-bordeaux: linear-gradient(135deg,rgb(254,205,165) 0%,rgb(254,45,45) 50%,rgb(107,0,62) 100%);--wp--preset--gradient--luminous-dusk: linear-gradient(135deg,rgb(255,203,112) 0%,rgb(199,81,192) 50%,rgb(65,88,208) 100%);--wp--preset--gradient--pale-ocean: linear-gradient(135deg,rgb(255,245,203) 0%,rgb(182,227,212) 50%,rgb(51,167,181) 100%);--wp--preset--gradient--electric-grass: linear-gradient(135deg,rgb(202,248,128) 0%,rgb(113,206,126) 100%);--wp--preset--gradient--midnight: linear-gradient(135deg,rgb(2,3,129) 0%,rgb(40,116,252) 100%);--wp--preset--duotone--dark-grayscale: url('#wp-duotone-dark-grayscale');--wp--preset--duotone--grayscale: url('#wp-duotone-grayscale');--wp--preset--duotone--purple-yellow: url('#wp-duotone-purple-yellow');--wp--preset--duotone--blue-red: url('#wp-duotone-blue-red');--wp--preset--duotone--midnight: url('#wp-duotone-midnight');--wp--preset--duotone--magenta-yellow: url('#wp-duotone-magenta-yellow');--wp--preset--duotone--purple-green: url('#wp-duotone-purple-green');--wp--preset--duotone--blue-orange: url('#wp-duotone-blue-orange');--wp--preset--font-size--small: 13px;--wp--preset--font-size--medium: 20px;--wp--preset--font-size--large: 36px;--wp--preset--font-size--x-large: 42px;}.has-black-color{color: var(--wp--preset--color--black) !important;}.has-cyan-bluish-gray-color{color: var(--wp--preset--color--cyan-bluish-gray) !important;}.has-white-color{color: var(--wp--preset--color--white) !important;}.has-pale-pink-color{color: var(--wp--preset--color--pale-pink) !important;}.has-vivid-red-color{color: var(--wp--preset--color--vivid-red) !important;}.has-luminous-vivid-orange-color{color: var(--wp--preset--color--luminous-vivid-orange) !important;}.has-luminous-vivid-amber-color{color: var(--wp--preset--color--luminous-vivid-amber) !important;}.has-light-green-cyan-color{color: var(--wp--preset--color--light-green-cyan) !important;}.has-vivid-green-cyan-color{color: var(--wp--preset--color--vivid-green-cyan) !important;}.has-pale-cyan-blue-color{color: var(--wp--preset--color--pale-cyan-blue) !important;}.has-vivid-cyan-blue-color{color: var(--wp--preset--color--vivid-cyan-blue) !important;}.has-vivid-purple-color{color: var(--wp--preset--color--vivid-purple) !important;}.has-black-background-color{background-color: var(--wp--preset--color--black) !important;}.has-cyan-bluish-gray-background-color{background-color: var(--wp--preset--color--cyan-bluish-gray) !important;}.has-white-background-color{background-color: var(--wp--preset--color--white) !important;}.has-pale-pink-background-color{background-color: var(--wp--preset--color--pale-pink) !important;}.has-vivid-red-background-color{background-color: var(--wp--preset--color--vivid-red) !important;}.has-luminous-vivid-orange-background-color{background-color: var(--wp--preset--color--luminous-vivid-orange) !important;}.has-luminous-vivid-amber-background-color{background-color: var(--wp--preset--color--luminous-vivid-amber) !important;}.has-light-green-cyan-background-color{background-color: var(--wp--preset--color--light-green-cyan) !important;}.has-vivid-green-cyan-background-color{background-color: var(--wp--preset--color--vivid-green-cyan) !important;}.has-pale-cyan-blue-background-color{background-color: var(--wp--preset--color--pale-cyan-blue) !important;}.has-vivid-cyan-blue-background-color{background-color: var(--wp--preset--color--vivid-cyan-blue) !important;}.has-vivid-purple-background-color{background-color: var(--wp--preset--color--vivid-purple) !important;}.has-black-border-color{border-color: var(--wp--preset--color--black) !important;}.has-cyan-bluish-gray-border-color{border-color: var(--wp--preset--color--cyan-bluish-gray) !important;}.has-white-border-color{border-color: var(--wp--preset--color--white) !important;}.has-pale-pink-border-color{border-color: var(--wp--preset--color--pale-pink) !important;}.has-vivid-red-border-color{border-color: var(--wp--preset--color--vivid-red) !important;}.has-luminous-vivid-orange-border-color{border-color: var(--wp--preset--color--luminous-vivid-orange) !important;}.has-luminous-vivid-amber-border-color{border-color: var(--wp--preset--color--luminous-vivid-amber) !important;}.has-light-green-cyan-border-color{border-color: var(--wp--preset--color--light-green-cyan) !important;}.has-vivid-green-cyan-border-color{border-color: var(--wp--preset--color--vivid-green-cyan) !important;}.has-pale-cyan-blue-border-color{border-color: var(--wp--preset--color--pale-cyan-blue) !important;}.has-vivid-cyan-blue-border-color{border-color: var(--wp--preset--color--vivid-cyan-blue) !important;}.has-vivid-purple-border-color{border-color: var(--wp--preset--color--vivid-purple) !important;}.has-vivid-cyan-blue-to-vivid-purple-gradient-background{background: var(--wp--preset--gradient--vivid-cyan-blue-to-vivid-purple) !important;}.has-light-green-cyan-to-vivid-green-cyan-gradient-background{background: var(--wp--preset--gradient--light-green-cyan-to-vivid-green-cyan) !important;}.has-luminous-vivid-amber-to-luminous-vivid-orange-gradient-background{background: var(--wp--preset--gradient--luminous-vivid-amber-to-luminous-vivid-orange) !important;}.has-luminous-vivid-orange-to-vivid-red-gradient-background{background: var(--wp--preset--gradient--luminous-vivid-orange-to-vivid-red) !important;}.has-very-light-gray-to-cyan-bluish-gray-gradient-background{background: var(--wp--preset--gradient--very-light-gray-to-cyan-bluish-gray) !important;}.has-cool-to-warm-spectrum-gradient-background{background: var(--wp--preset--gradient--cool-to-warm-spectrum) !important;}.has-blush-light-purple-gradient-background{background: var(--wp--preset--gradient--blush-light-purple) !important;}.has-blush-bordeaux-gradient-background{background: var(--wp--preset--gradient--blush-bordeaux) !important;}.has-luminous-dusk-gradient-background{background: var(--wp--preset--gradient--luminous-dusk) !important;}.has-pale-ocean-gradient-background{background: var(--wp--preset--gradient--pale-ocean) !important;}.has-electric-grass-gradient-background{background: var(--wp--preset--gradient--electric-grass) !important;}.has-midnight-gradient-background{background: var(--wp--preset--gradient--midnight) !important;}.has-small-font-size{font-size: var(--wp--preset--font-size--small) !important;}.has-medium-font-size{font-size: var(--wp--preset--font-size--medium) !important;}.has-large-font-size{font-size: var(--wp--preset--font-size--large) !important;}.has-x-large-font-size{font-size: var(--wp--preset--font-size--x-large) !important;}
+</style>
+
+ 
+
+
+			<link rel="icon" href="img/favicon-interconnect.png" sizes="32x32">
+<link rel="icon" href="img/favicon-interconnect.png" sizes="192x192">
+<link rel="apple-touch-icon" href="img/favicon-interconnect.png">
+<meta name="msapplication-TileImage" content="img/favicon-interconnect.png">
+	<style type="text/css">
+.getmdl-select .mdl-icon-toggle__label {
+  float: right;
+  margin-top: -30px;
+  color: rgba(0, 0, 0, 0.4);
+}
+.getmdl-select.is-focused .mdl-icon-toggle__label {
+  color: #3f51b5;
+}
+.getmdl-select .mdl-menu__container {
+  width: 100% !important;
+  overflow: hidden;
+}
+.getmdl-select .mdl-menu__container .mdl-menu .mdl-menu__item {
+  font-size: 16px;
+}
+.getmdl-select .mdl-menu {
+  /* Remove the 2px border */
+  width: calc(100% - 2px);
+}
+.getmdl-select--fixed-height .mdl-menu__container {
+  overflow-y: auto;
+  max-height: 300px !important;
+}
+</style><style type="text/css">
+.mdl-dialog-container {
+  position: fixed;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content:center;
+  align-items: center;
+  top:0;
+  left: 0;
+  z-index: 10000;
+  background: rgba(0,0,0,0.3);
+}
+.mdl-dialog-container .mdl-dialog {
+  background-color:white;
+  padding: 1em;
+  color: black;
+  width: initial;
+  min-width: 280px;
+}
+</style><style type="text/css">@import url('https://fonts.googleapis.com/css2?family=Work+Sans:ital,wght@0,100..900;1,100..900&display=swap');</style><style>.tk-source-han-sans-japanese{font-family:"source-han-sans-japanese",sans-serif;}</style>
+<style type="text/css">
+/* =========================================
+   INTER CONNECT カスタムCSS
+   カスタム変更した部分のみレスポンシブ対応
+   元CSS対応済みの部分は上書きしない
+   ========================================= */
+
+/* ------- PC デフォルト ------- */
+
+/* ヘッダー高さ (元:124px → 72px) */
+header { height: 72px !important; }
+
+/* ロゴサイズ (元:100px → 180px) */
+header .logo { width: 180px !important; }
+
+/* スクロール前: ロゴを白に */
+header .logo img {
+  filter: brightness(0) invert(1);
+  transition: filter 0.6s;
+}
+header.scrolled .logo img {
+  filter: none;
+}
+
+/* ヘッダー「無料で始める」ボタン */
+header .h_menu .h_btn_wrap .p_btn_document {
+  width: auto !important;
+  padding: 0 !important;
+  height: 36px !important;
+  line-height: 36px !important;
+  font-size: 13px !important;
+  background: transparent !important;
+  border: 1px solid rgba(255, 255, 255, 0.7) !important;
+}
+header .h_menu .h_btn_wrap .p_btn_document .border_top,
+header .h_menu .h_btn_wrap .p_btn_document .border_bottom {
+  display: none !important;
+}
+header .h_menu .h_btn_wrap .p_btn_document span {
+  padding: 0 28px 0 14px !important;
+  font-size: 13px;
+}
+header .h_menu .h_btn_wrap .p_btn_document svg {
+  right: 10px;
+  width: 5px;
+}
+header .h_menu .h_btn_wrap .p_btn_document:hover {
+  background: rgba(255, 255, 255, 0.15) !important;
+  border-color: #fff !important;
+}
+
+/* ヘッダー「Contact」ボタン */
+header .h_menu .h_btn_wrap .p_btn_contact {
+  width: auto !important;
+  height: 36px !important;
+  line-height: 36px !important;
+  font-size: 13px !important;
+  background-color: #fff !important;
+  box-shadow: none !important;
+}
+header .h_menu .h_btn_wrap .p_btn_contact:before {
+  display: none !important;
+}
+header .h_menu .h_btn_wrap .p_btn_contact span {
+  padding: 0 28px 0 14px !important;
+  font-size: 13px;
+  color: #1a1a1a;
+}
+header .h_menu .h_btn_wrap .p_btn_contact svg {
+  right: 10px;
+  width: 5px;
+}
+header .h_menu .h_btn_wrap .p_btn_contact svg path {
+  fill: #1a1a1a;
+}
+header .h_menu .h_btn_wrap .p_btn_contact:hover {
+  background-color: #e8e8e8 !important;
+}
+
+/* スクロール時ヘッダー白背景 */
+header.scrolled {
+  background: rgba(255, 255, 255, 0.97);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  box-shadow: 0 1px 6px rgba(0, 0, 0, 0.06);
+}
+header.scrolled .h_menu ul li.menu_list a,
+header.scrolled .h_menu ul li.menu_list span {
+  color: #1a1a1a;
+}
+header.scrolled .h_menu ul li.menu_list a:after {
+  background-color: rgba(0, 0, 0, 0.3);
+}
+header.scrolled .h_menu ul li.with_submenu .plus_wrap:after {
+  filter: invert(1);
+}
+header.scrolled .h_menu ul li.with_submenu ul.submenu li a,
+header.scrolled .h_menu ul li.with_submenu ul.submenu li span {
+  color: #333;
+}
+header.scrolled .h_menu ul li.with_submenu ul.submenu li a:hover {
+  color: #4b01d7;
+}
+header.scrolled .h_menu .h_btn_wrap .p_btn_document {
+  border-color: rgba(0, 0, 0, 0.3) !important;
+  color: #1a1a1a;
+}
+header.scrolled .h_menu .h_btn_wrap .p_btn_document span { color: #1a1a1a; }
+header.scrolled .h_menu .h_btn_wrap .p_btn_document svg path { fill: #1a1a1a; }
+header.scrolled .h_menu .h_btn_wrap .p_btn_document:hover {
+  background: rgba(0, 0, 0, 0.05) !important;
+  border-color: rgba(0, 0, 0, 0.5) !important;
+}
+header.scrolled .h_menu .h_btn_wrap .p_btn_contact {
+  background-color: #1a1a1a !important;
+}
+header.scrolled .h_menu .h_btn_wrap .p_btn_contact span { color: #fff; }
+header.scrolled .h_menu .h_btn_wrap .p_btn_contact svg path { fill: #fff; }
+header.scrolled .h_menu .h_btn_wrap .p_btn_contact:hover {
+  background-color: #333 !important;
+}
+
+/* ハンバーガーメニュー線の色 (scrolled時) */
+header.scrolled .hamburger_btn .menu_trigger span:nth-of-type(1) {
+  border-right-color: #999;
+  border-left-color: #1a1a1a;
+}
+header.scrolled .hamburger_btn .menu_trigger span:nth-of-type(2) {
+  background-color: #1a1a1a;
+}
+header.scrolled .hamburger_btn .menu_trigger span:nth-of-type(3) {
+  border-right-color: #1a1a1a;
+  border-left-color: #999;
+}
+
+/* フッターロゴ白色化 */
+footer .bottom_block .img_block img {
+  filter: brightness(0) invert(1);
+  transition: filter 0.3s;
+}
+
+/* ebookカードロゴ白色化 */
+.c_ebook_inro .logo {
+  filter: brightness(0) invert(1);
+}
+
+/* ── SNS共通: アイコンボタン視認性 ── */
+/* PC: News内 .sns_block のアイコンに枠付き円形ボタン */
+#newsblog .sns_block .sns_list li a {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  border: 1px solid rgba(255,255,255,0.25);
+  border-radius: 50%;
+  transition: border-color 0.3s, background-color 0.3s;
+}
+#newsblog .sns_block .sns_list li a:hover {
+  background-color: rgba(255,255,255,0.1);
+  border-color: rgba(255,255,255,0.5);
+}
+#newsblog .sns_block .sns_list li a img {
+  width: 18px;
+  height: 18px;
+}
+
+/* SP: #sp_snslink 背景を区別 + アイコン円形ボタン */
+#sp_snslink {
+  background-color: rgba(255,255,255,0.06);
+  border-top: 1px solid rgba(255,255,255,0.1);
+  border-bottom: 1px solid rgba(255,255,255,0.1);
+}
+#sp_snslink .sns_list li a {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  border: 1px solid rgba(255,255,255,0.25);
+  border-radius: 50%;
+}
+#sp_snslink .sns_list li a img {
+  width: 18px;
+  height: 18px;
+}
+
+/* ── Compare: 従来 vs INTER CONNECT ── */
+#compare {
+  color: #fff;
+  padding: 100px 0;
+}
+.compare_ttl {
+  font-size: 30px;
+  line-height: 1.7;
+  text-align: center;
+  margin-bottom: 20px;
+}
+.compare_sub {
+  font-size: 16px;
+  line-height: 2;
+  text-align: center;
+  color: rgba(255,255,255,0.6);
+  margin-bottom: 56px;
+}
+.compare_grid {
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  gap: 0;
+  align-items: start;
+}
+.compare_col {
+  padding: 40px;
+}
+.compare_col_label {
+  display: inline-block;
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: 0.05em;
+  padding: 6px 16px;
+  margin-bottom: 32px;
+}
+.compare_old .compare_col_label {
+  border: 1px solid rgba(255,255,255,0.2);
+  color: rgba(255,255,255,0.5);
+}
+.compare_new .compare_col_label {
+  background-color: rgba(59,130,246,0.15);
+  border: 1px solid rgba(59,130,246,0.4);
+  color: #3b82f6;
+}
+.compare_stat {
+  margin-bottom: 32px;
+}
+.compare_stat_num {
+  font-size: 72px;
+  font-weight: 700;
+  line-height: 1;
+  letter-spacing: -0.03em;
+}
+.compare_stat_num small {
+  font-size: 36px;
+}
+.compare_old .compare_stat_num {
+  color: rgba(255,255,255,0.25);
+}
+.compare_new .compare_stat_num {
+  color: #3b82f6;
+}
+.compare_stat_label {
+  font-size: 14px;
+  color: rgba(255,255,255,0.5);
+  margin-top: 8px;
+}
+.compare_list {
+  list-style: none;
+  padding: 0;
+}
+.compare_list li {
+  font-size: 14px;
+  line-height: 1.8;
+  padding: 10px 0;
+  padding-left: 20px;
+  position: relative;
+}
+.compare_list li:not(:last-child) {
+  border-bottom: 1px solid rgba(255,255,255,0.06);
+}
+.compare_list li::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 6px;
+  height: 6px;
+}
+.compare_old .compare_list li {
+  color: rgba(255,255,255,0.45);
+}
+.compare_old .compare_list li::before {
+  background-color: rgba(255,255,255,0.15);
+}
+.compare_new .compare_list li {
+  color: rgba(255,255,255,0.85);
+}
+.compare_new .compare_list li::before {
+  background-color: #3b82f6;
+}
+.compare_divider {
+  width: 1px;
+  background-color: rgba(255,255,255,0.1);
+  align-self: stretch;
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.compare_divider_vs {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  font-size: 12px;
+  font-weight: 700;
+  color: rgba(255,255,255,0.3);
+  background-color: #0a0a0a;
+  padding: 12px 8px;
+  letter-spacing: 0.1em;
+}
+.compare_cost {
+  text-align: center;
+  margin-top: 56px;
+  padding: 32px 0;
+  border-top: 1px solid rgba(255,255,255,0.08);
+}
+.compare_cost_num {
+  display: block;
+  font-size: 64px;
+  font-weight: 700;
+  color: #3b82f6;
+  line-height: 1;
+  letter-spacing: -0.02em;
+}
+.compare_cost_label {
+  display: block;
+  font-size: 15px;
+  color: rgba(255,255,255,0.5);
+  margin-top: 12px;
+}
+.compare_bottom {
+  text-align: center;
+  font-size: 16px;
+  color: rgba(255,255,255,0.6);
+  margin-top: 16px;
+}
+.compare_bottom strong {
+  color: #fff;
+}
+
+@media screen and (max-width: 960px) {
+  .compare_ttl { font-size: 24px; }
+  .compare_col { padding: 32px 24px; }
+  .compare_stat_num { font-size: 56px; }
+  .compare_stat_num small { font-size: 28px; }
+}
+
+@media screen and (max-width: 560px) {
+  #compare { padding: 64px 0; }
+  .compare_ttl { font-size: 22px; }
+  .compare_sub {
+    font-size: 14px;
+    text-align: left;
+    margin-bottom: 40px;
+  }
+  .compare_grid {
+    grid-template-columns: 1fr;
+  }
+  .compare_col {
+    padding: 32px 0;
+  }
+  .compare_divider {
+    width: 100%;
+    height: 1px;
+    align-self: auto;
+  }
+  .compare_divider_vs {
+    top: 50%;
+    padding: 8px 16px;
+  }
+  .compare_stat_num { font-size: 56px; }
+  .compare_stat_num small { font-size: 28px; }
+  .compare_cost_num { font-size: 48px; }
+  .compare_cost_label { font-size: 13px; }
+  .compare_cost { margin-top: 40px; padding: 24px 0; }
+  .compare_bottom {
+    font-size: 14px;
+    margin-top: 16px;
+  }
+}
+
+/* ── About動画: モバイルで3D回転無効 ── */
+@media screen and (max-width: 560px) {
+  #dim_movie.p_dim_movie {
+    transform: none !important;
+  }
+}
+
+/* ── Task: エディトリアル・レイアウト ── */
+#task {
+  background-color: rgba(255,255,255,0.025);
+  border-top: 1px solid rgba(255,255,255,0.06);
+  border-bottom: 1px solid rgba(255,255,255,0.06);
+  margin-top: 160px;
+}
+#task .task_ttl {
+  text-align: left !important;
+  font-size: 28px !important;
+  margin-bottom: 32px;
+}
+.task_lead {
+  font-size: 16px;
+  line-height: 2.1;
+  color: rgba(255,255,255,0.6);
+  text-align: left;
+  margin-bottom: 48px;
+}
+
+/* ── Task 3つの限界: カード化 ── */
+.task_items {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 0;
+  margin-bottom: 24px;
+}
+.task_item {
+  padding: 28px 24px;
+  position: relative;
+}
+.task_item:not(:last-child) {
+  border-right: 1px solid rgba(255,255,255,0.12);
+}
+.task_item_num {
+  display: block;
+  font-size: 48px;
+  font-weight: 700;
+  line-height: 1;
+  color: rgba(255,255,255,0.08);
+  margin-bottom: 16px;
+  letter-spacing: -0.02em;
+}
+.task_item_title {
+  font-size: 17px;
+  font-weight: 600;
+  line-height: 1.5;
+  margin-bottom: 12px;
+  color: #fff;
+}
+.task_item_desc {
+  font-size: 14px;
+  line-height: 1.9;
+  color: rgba(255,255,255,0.6);
+}
+.task_resolve {
+  text-align: center;
+  padding-top: 24px;
+  border-top: 1px solid rgba(255,255,255,0.12);
+  margin-top: 0;
+}
+
+/* Tablet */
+@media screen and (max-width: 960px) {
+  .task_items {
+    grid-template-columns: repeat(3, 1fr);
+  }
+  .task_item {
+    padding: 20px 16px;
+  }
+  .task_item_num {
+    font-size: 40px;
+    margin-bottom: 12px;
+  }
+  .task_item_title {
+    font-size: 15px;
+  }
+  .task_item_desc {
+    font-size: 13px;
+  }
+}
+
+/* Mobile */
+@media screen and (max-width: 560px) {
+  .task_items {
+    grid-template-columns: 1fr;
+    gap: 0;
+  }
+  .task_item {
+    padding: 20px 0;
+    display: grid;
+    grid-template-columns: 48px 1fr;
+    grid-template-rows: auto auto;
+    column-gap: 12px;
+  }
+  .task_item:not(:last-child) {
+    border-right: none;
+    border-bottom: 1px solid rgba(255,255,255,0.08);
+  }
+  .task_item_num {
+    font-size: 32px;
+    margin-bottom: 0;
+    grid-row: 1 / 3;
+    align-self: center;
+  }
+  .task_item_title {
+    font-size: 15px;
+    margin-bottom: 6px;
+  }
+  .task_item_desc {
+    font-size: 13px;
+    line-height: 1.7;
+  }
+  .task_resolve {
+    text-align: left;
+    font-size: 13px !important;
+  }
+  #task .task_ttl {
+    font-size: 22px !important;
+  }
+  .task_lead {
+    font-size: 14px;
+    line-height: 1.9;
+    text-align: left;
+    margin-bottom: 32px;
+  }
+}
+
+/* Point画像: 少し小さく + 余白 */
+.point_img {
+  max-width: 500px !important;
+  margin: 0 auto 40px;
+}
+
+/* イベント詳細ボタン (p_btn_shadow) リデザイン */
+.p_btn_shadow {
+  background-color: transparent !important;
+  border: 1px solid #1a1a1a !important;
+  color: #1a1a1a !important;
+  font-size: 13px !important;
+  font-weight: 600 !important;
+  height: 40px !important;
+  line-height: 40px !important;
+  width: 148px !important;
+  letter-spacing: 0.04em;
+}
+.p_btn_shadow:before {
+  display: none !important;
+}
+.p_btn_shadow span {
+  padding: 0 36px 0 16px !important;
+  font-size: 13px;
+}
+.p_btn_shadow svg {
+  fill: #1a1a1a !important;
+  right: 14px !important;
+  width: 5px !important;
+}
+.p_btn_shadow:hover {
+  background-color: #1a1a1a !important;
+  border-color: #1a1a1a !important;
+  color: #fff !important;
+}
+.p_btn_shadow:hover svg {
+  fill: #fff !important;
+}
+.c_event_card:hover .p_btn_shadow {
+  background-color: #1a1a1a !important;
+  border-color: #1a1a1a !important;
+  color: #fff !important;
+}
+.c_event_card:hover .p_btn_shadow svg {
+  fill: #fff !important;
+}
+
+/* E-bookカードロゴ (元:53px → 100px) */
+.c_ebook_inro .logo {
+  width: 100px !important;
+  height: auto;
+}
+
+/* actual セクション: 2枚→1枚に変更したのでセンター化 */
+#actual .actual_lsit {
+  justify-content: center;
+}
+#actual .actual_lsit_item {
+  flex: 0 0 auto;
+  max-width: 100%;
+}
+#actual .actual_lsit_item .img img {
+  width: 100%;
+  height: auto;
+  display: block;
+}
+
+/* ------- 1300px: PC小 / ナビ項目増加対応 ------- */
+@media screen and (max-width: 1300px) {
+  /* ヘッダー高さ (元:80px → 60px) */
+  header { height: 60px !important; }
+  /* ロゴ (元:72px → 130px) */
+  header .logo { width: 130px !important; }
+  /* ナビ項目にE-booksが追加されたので間隔を詰める */
+  header .h_menu ul li.menu_list {
+    margin-right: 1.2rem !important;
+  }
+  header .h_menu ul li.menu_list a,
+  header .h_menu ul li.menu_list span {
+    font-size: 15px !important;
+  }
+  /* ボタン縮小 */
+  header .h_menu .h_btn_wrap .p_btn_document,
+  header .h_menu .h_btn_wrap .p_btn_contact {
+    height: 32px !important;
+    line-height: 32px !important;
+  }
+  header .h_menu .h_btn_wrap .p_btn_document span,
+  header .h_menu .h_btn_wrap .p_btn_contact span {
+    padding: 0 22px 0 12px !important;
+    font-size: 12px;
+  }
+}
+
+/* ------- 960px: SPメニューに切替わる ------- */
+@media screen and (max-width: 960px) {
+  /* ヘッダー高さ */
+  header { height: 56px !important; }
+  /* ロゴ */
+  header .logo { width: 110px !important; }
+
+  /* SPメニュー内ボタン: border_top/bottom非表示 + :before非表示 */
+  .sp_menu_btn .p_btn_document .border_top,
+  .sp_menu_btn .p_btn_document .border_bottom {
+    display: none !important;
+  }
+  .sp_menu_btn .p_btn_document {
+    background: transparent !important;
+    border: 1px solid rgba(255, 255, 255, 0.7) !important;
+    color: #fff !important;
+  }
+  .sp_menu_btn .p_btn_document:before {
+    display: none !important;
+  }
+  .sp_menu_btn .p_btn_contact {
+    background-color: #fff !important;
+    box-shadow: none !important;
+  }
+  .sp_menu_btn .p_btn_contact:before {
+    display: none !important;
+  }
+  .sp_menu_btn .p_btn_contact span {
+    color: #1a1a1a !important;
+  }
+
+  /* E-bookカードロゴ縮小 */
+  .c_ebook_inro .logo {
+    width: 80px !important;
+  }
+}
+
+/* ------- 560px: スマートフォン ------- */
+@media screen and (max-width: 560px) {
+  /* ヘッダー高さ */
+  header { height: 52px !important; }
+  /* ロゴ */
+  header .logo { width: 100px !important; }
+
+  /* E-bookカードロゴ縮小 */
+  .c_ebook_inro .logo {
+    width: 70px !important;
+  }
+
+  /* unit8200: 元CSS 32px→20pxに縮小 */
+  #unit8200 .main_inner {
+    padding-left: 20px !important;
+    padding-right: 20px !important;
+  }
+
+  /* task: 元CSS 30px→20pxに縮小 */
+  .task_contents {
+    padding: 20px !important;
+  }
+
+  /* campaign: カードテキスト 18px→15px */
+  .bl_campaign_link_content p {
+    font-size: 15px !important;
+  }
+
+  /* 1行強制: はみ出さないようフォント縮小 */
+  #unit8200 .text_block .title {
+    font-size: 20px !important;
+  }
+  .task_head {
+    font-size: 14px !important;
+  }
+}
+
+/* ------- 380px: 小型スマートフォン ------- */
+@media screen and (max-width: 380px) {
+  header .logo { width: 85px !important; }
+
+  .c_ebook_inro .logo {
+    width: 60px !important;
+  }
+
+  /* unit8200: さらに縮小 */
+  #unit8200 .main_inner {
+    padding-left: 15px !important;
+    padding-right: 15px !important;
+  }
+  #unit8200 .text_block .title {
+    font-size: 17px !important;
+  }
+
+  /* task: さらに縮小 */
+  .task_contents {
+    padding: 16px !important;
+  }
+  .task_head {
+    font-size: 12px !important;
+  }
+
+  /* campaign: さらに縮小 */
+  .bl_campaign_link_content p {
+    font-size: 14px !important;
+  }
+}
+
+/* ------- アニメーション補強 ------- */
+
+/* fadeInLeft / fadeInRight のtransition-delayをJSスタガーと統合 */
+footer .top_block .left_block.fade {
+  transition-delay: 0s !important;
+}
+footer .top_block .right_block.fade {
+  transition-delay: 0.2s !important;
+}
+footer .bottom_block.fade {
+  transition-delay: 0.3s !important;
+}
+
+/* point_list_item のスタガー */
+#point .point_list_item:nth-child(1) { transition-delay: 0s !important; }
+#point .point_list_item:nth-child(2) { transition-delay: 0.15s !important; }
+#point .point_list_item:nth-child(3) { transition-delay: 0.3s !important; }
+#point .point_list_item:nth-child(4) { transition-delay: 0.45s !important; }
+
+/* client_list のスタガー */
+.c_client_list li:nth-child(1) { transition-delay: 0s !important; }
+.c_client_list li:nth-child(2) { transition-delay: 0.15s !important; }
+.c_client_list li:nth-child(3) { transition-delay: 0.3s !important; }
+
+
+/* ヒーローテキスト: PC位置上げ */
+#first_view .fv_title {
+  bottom: 38svh !important;
+}
+/* ヒーローロゴ: PCのみ下げる */
+#first_view .fv_title .title_logo {
+  bottom: -40px !important;
+}
+@media screen and (max-width: 560px) {
+  /* モバイル: bottom配置→top配置に変更してセンター上寄せ */
+  #first_view .main_inner .fv_title {
+    bottom: auto !important;
+    top: 42% !important;
+    transform: translateY(-50%) !important;
+    padding-bottom: 16px !important;
+  }
+  /* ロゴを絶対配置→通常フローに変更 */
+  #first_view .fv_title .title_logo {
+    position: relative !important;
+    bottom: auto !important;
+    margin-top: 16px !important;
+  }
+}
+
+/* ------- ヒーローエントランス ------- */
+/* 全要素を非表示 (is_showを!importantで上書き) */
+#first_view .fv_title .title,
+#first_view .fv_title .subtitle,
+#first_view .fv_title .title_logo {
+  opacity: 0 !important;
+  transform: translateY(30px) !important;
+  transition: opacity 1.5s cubic-bezier(0.22, 1, 0.36, 1),
+              transform 1.5s cubic-bezier(0.22, 1, 0.36, 1) !important;
+}
+#first_view .bl_mvCampaignCTA {
+  opacity: 0 !important;
+  transform: translateY(20px) !important;
+  transition: opacity 1.125s cubic-bezier(0.22, 1, 0.36, 1),
+              transform 1.125s cubic-bezier(0.22, 1, 0.36, 1) !important;
+}
+
+/* hero-revealed: スタガー表示 */
+#first_view.hero-revealed .fv_title .title {
+  opacity: 1 !important;
+  transform: translateY(0) !important;
+  transition-delay: 0s !important;
+}
+#first_view.hero-revealed .fv_title .subtitle {
+  opacity: 1 !important;
+  transform: translateY(0) !important;
+  transition-delay: 0.225s !important;
+}
+#first_view.hero-revealed .fv_title .title_logo {
+  opacity: 1 !important;
+  transform: translateY(0) !important;
+  transition-delay: 0.525s !important;
+}
+#first_view.hero-revealed .bl_mvCampaignCTA {
+  opacity: 1 !important;
+  transform: translateY(0) !important;
+  transition-delay: 0.825s !important;
+}
+/* CTA hover復元 */
+#first_view.hero-revealed .bl_mvCampaignCTA:hover {
+  opacity: 0.8 !important;
+}
+
+/* アクセシビリティ: モーション軽減設定の尊重 */
+@media (prefers-reduced-motion: reduce) {
+  .fade,
+  #first_view .fv_title .title,
+  #first_view .fv_title .subtitle,
+  #first_view .fv_title .title_logo,
+  #first_view .bl_mvCampaignCTA {
+    transition-duration: 0.01s !important;
+    transition-delay: 0s !important;
+  }
+}
+
+/* --- Prevent horizontal overflow --- */
+body {
+  overflow-x: hidden;
+}
+
+/* --- Hero video: object-fit cover (replaces JS pixel calculation) --- */
+#first_view {
+  height: 100vh !important;
+  height: 100dvh !important;
+  width: 100%;
+  overflow: hidden;
+}
+.video_wrap {
+  width: 100% !important;
+  height: 100% !important;
+  position: absolute !important;
+  top: 0 !important;
+  left: 0 !important;
+}
+#fv_video {
+  position: absolute !important;
+  top: 0 !important;
+  left: 0 !important;
+  width: 100% !important;
+  height: 100% !important;
+  margin: 0 !important;
+  object-fit: cover !important;
+  transform: none !important;
+}
+
+/* --- Event: slide mode reset --- */
+#event .event_block {
+  width: 100% !important;
+  margin: 0 !important;
+  overflow: hidden;
+}
+#event .event_block .c_event_card {
+  width: 100% !important;
+  margin: 0 !important;
+}
+#event .event_block .swiper-slide {
+  width: 100% !important;
+}
+#event .event_block .swiper-wrapper {
+  transform-style: flat !important;
+}
+
+/* --- Event card redesign --- */
+/* ヘッダー装飾・角折りを削除 */
+.c_event_card .top_heading { display: none !important; }
+.c_event_card:after { display: none !important; }
+
+/* カードベース: ガラス風 */
+.c_event_card {
+  border: 1px solid rgba(255,255,255,0.06) !important;
+  background: rgba(255,255,255,0.03) !important;
+  overflow: hidden !important;
+}
+.c_event_card:hover {
+  border-color: rgba(255,255,255,0.15) !important;
+}
+
+/* flexで画像を上、コンテンツを下に */
+.c_event_card .content_inner {
+  display: flex !important;
+  flex-direction: column !important;
+  padding: 0 !important;
+}
+.c_event_card .content_inner .p_thumb {
+  order: -1 !important;
+  margin: 0 !important;
+}
+.c_event_card .content_inner .p_thumb .bg {
+  padding-top: 50% !important;
+}
+.c_event_card .content_inner .top_block {
+  padding: 24px 28px 0 !important;
+  flex-direction: column !important;
+  align-items: flex-start !important;
+}
+.c_event_card .content_inner .bottom_block {
+  padding: 16px 28px 28px !important;
+}
+
+/* 日付: 巨大数字→コンパクトな水平レイアウト */
+.c_event_card .p_event_info {
+  flex-direction: column !important;
+  align-items: flex-start !important;
+  width: 100%;
+}
+.c_event_card .p_event_info .date_group {
+  margin-right: 0 !important;
+  margin-bottom: 16px !important;
+  padding: 6px 16px !important;
+  border: 1px solid rgba(255,255,255,0.12);
+  display: inline-flex !important;
+  align-items: center !important;
+}
+.c_event_card .p_event_info .date_group .date {
+  font-size: 22px !important;
+  font-weight: 700 !important;
+  margin-right: 6px !important;
+}
+.c_event_card .p_event_info .date_group .month_year {
+  display: flex !important;
+  flex-direction: row !important;
+  gap: 4px;
+  align-items: baseline !important;
+}
+.c_event_card .p_event_info .date_group .month_year p {
+  font-size: 13px !important;
+  font-weight: 600 !important;
+  line-height: 1 !important;
+}
+
+/* ボタンを下に移動 */
+.c_event_card .content_inner .top_block .p_btn_shadow {
+  margin-top: 20px !important;
+  align-self: flex-start;
+}
+
+/* ステータスタグ */
+.c_event_card .p_taxo_list01 { margin-top: 14px !important; }
+.c_event_card .p_taxo_list01 .taxo {
+  display: inline-block;
+  padding: 4px 12px;
+  border: 1px solid rgba(255,255,255,0.15);
+  font-size: 12px;
+  letter-spacing: 0.04em;
+}
+
+/* タイトル */
+.c_event_card .content_inner .bottom_block .title {
+  font-size: 16px !important;
+  line-height: 1.8 !important;
+  font-weight: 400 !important;
+}
+
+/* レスポンシブ */
+@media screen and (max-width: 560px) {
+  .c_event_card .content_inner .top_block {
+    padding: 20px 20px 0 !important;
+  }
+  .c_event_card .content_inner .bottom_block {
+    padding: 12px 20px 24px !important;
+  }
+  .c_event_card .p_event_info .date_group .date {
+    font-size: 20px !important;
+  }
+}
+
+/* --- What is INTER CONNECT --- */
+#whatisic {
+  padding: 72px 0 56px;
+  text-align: center;
+}
+#whatisic .ic-whatisic-lead {
+  font-size: 14px;
+  letter-spacing: 0.15em;
+  color: rgba(255,255,255,0.4);
+  margin-bottom: 20px;
+}
+#whatisic .ic-whatisic-headline {
+  font-size: 26px;
+  font-weight: 700;
+  line-height: 1.7;
+  color: #fff;
+  margin-bottom: 28px;
+}
+#whatisic .ic-whatisic-desc {
+  max-width: 680px;
+  margin: 0 auto;
+  font-size: 15px;
+  line-height: 2.1;
+  color: rgba(255,255,255,0.55);
+}
+@media (max-width: 768px) {
+  #whatisic { padding: 56px 0 40px; }
+  #whatisic .ic-whatisic-headline { font-size: 19px; }
+  #whatisic .ic-whatisic-desc { font-size: 14px; padding: 0 20px; }
+}
+
+/* --- How it Works --- */
+#howto { padding: 100px 0 80px; }
+#howto .heading_block { text-align: center; margin-bottom: 56px; }
+.ic-steps { display: flex; gap: 32px; }
+.ic-step {
+  flex: 1;
+  padding: 40px 28px 36px;
+  border: 1px solid rgba(255,255,255,0.08);
+  position: relative;
+}
+.ic-step-num {
+  display: block;
+  font-size: 56px;
+  font-weight: 800;
+  color: rgba(255,255,255,0.05);
+  line-height: 1;
+  margin-bottom: 20px;
+}
+.ic-step-title {
+  font-size: 17px;
+  font-weight: 600;
+  margin-bottom: 14px;
+  color: #fff;
+}
+.ic-step-desc {
+  font-size: 14px;
+  line-height: 1.9;
+  color: rgba(255,255,255,0.55);
+}
+@media (max-width: 768px) {
+  #howto { padding: 72px 0 56px; }
+  .ic-steps { flex-direction: column; gap: 20px; }
+  .ic-step { padding: 28px 20px; }
+}
+
+/* --- Numbers --- */
+#numbers { padding: 80px 0; }
+.ic-numbers {
+  display: flex;
+  justify-content: center;
+  gap: 0;
+}
+.ic-number-item {
+  text-align: center;
+  flex: 1;
+  padding: 40px 0;
+  border-right: 1px solid rgba(255,255,255,0.06);
+}
+.ic-number-item:last-child { border-right: none; }
+.ic-number-value {
+  display: block;
+  font-size: 52px;
+  font-weight: 700;
+  color: #fff;
+  line-height: 1.1;
+}
+.ic-number-value small {
+  font-size: 0.55em;
+  font-weight: 400;
+}
+.ic-number-label {
+  display: block;
+  font-size: 13px;
+  color: rgba(255,255,255,0.4);
+  margin-top: 10px;
+  letter-spacing: 0.04em;
+}
+@media (max-width: 768px) {
+  #numbers { padding: 56px 0; }
+  .ic-numbers { flex-wrap: wrap; }
+  .ic-number-item {
+    width: 50%;
+    flex: none;
+    padding: 28px 0;
+    border-right: none;
+  }
+  .ic-number-item:nth-child(1),
+  .ic-number-item:nth-child(2) {
+    border-bottom: 1px solid rgba(255,255,255,0.06);
+  }
+  .ic-number-value { font-size: 40px; }
+}
+</style>
+<link rel="preload" as="image" href="img/interconnect-logo-header.png">
+<link rel="preload" as="image" href="img/k6b4gOfB4ntKVvB1772448174_1772448476.png">
+<link rel="preload" as="video" href="img/interconnect-bg.mp4">
+</head>
+
+	<body id="top" style="">
+
+		<script src="js/swiper-bundle.min.js"></script>
+
+<!-- === カスタムローディング === -->
+<div id="ic-loading">
+  <div class="ic-loading-inner">
+    <p class="ic-loading-text eng">INTER CONNECT</p>
+    <div class="ic-loading-bar"><div class="ic-loading-bar-fill"></div></div>
+  </div>
+</div>
+<style>
+#ic-loading {
+  position: fixed;
+  top: 0; left: 0;
+  width: 100%; height: 100%;
+  background: rgba(0,0,0,0.75);
+  z-index: 99999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 1;
+  transition: opacity 0.8s ease;
+}
+#ic-loading.is-done {
+  opacity: 0;
+  pointer-events: none;
+}
+.ic-loading-inner {
+  text-align: center;
+}
+.ic-loading-text {
+  color: #fff;
+  font-size: 18px;
+  font-weight: 600;
+  letter-spacing: 0.35em;
+  opacity: 0;
+  transform: translateY(8px);
+  animation: ic-text 0.8s ease 0.4s forwards;
+}
+@keyframes ic-text {
+  to { opacity: 1; transform: translateY(0); }
+}
+.ic-loading-bar {
+  width: 120px;
+  height: 1px;
+  background: rgba(255,255,255,0.15);
+  margin: 24px auto 0;
+  overflow: hidden;
+  opacity: 0;
+  animation: ic-bar-show 0.3s ease 0.8s forwards;
+}
+@keyframes ic-bar-show {
+  to { opacity: 1; }
+}
+.ic-loading-bar-fill {
+  width: 0;
+  height: 100%;
+  background: #fff;
+  animation: ic-fill 2s ease 0.9s forwards;
+}
+@keyframes ic-fill {
+  to { width: 100%; }
+}
+</style>
+<script>
+setTimeout(function() {
+  var el = document.getElementById('ic-loading');
+  if (el) {
+    el.classList.add('is-done');
+    setTimeout(function() {
+      el.remove();
+      // ローディング完全消去後 0.1秒 → ヒーロー登場
+      setTimeout(function() {
+        var fv = document.getElementById('first_view');
+        if (fv) fv.classList.add('hero-revealed');
+      }, 100);
+    }, 600);
+  }
+}, 3000);
+</script>
+
+												<div class="loading" id="js-loading" style="display: none;">
+							<div id="js-loadingcontent" style="height: 100vh;" class="is_show">
+								<div class="logo_wrap">
+									<div class="logo_mask"></div><img src="img/interconnect-logo-header.png" class="logo">
+								</div>
+							</div>
+						</div>
+
+						<div id="wrap">
+
+							<header>
+								<h1 class="logo"><a href="/"><img src="img/interconnect-logo-header.png" alt="INTER CONNECT | ビジネスコミュニティプラットフォーム" loading="eager" fetchpriority="high"></a></h1>								<nav class="h_menu">
+									<ul class="h_menu_wrap">
+                    <li class="menu_list with_submenu">
+                      <a href="#service" title="Service"><span class="plus_wrap eng">Service</span></a>
+                      <ul class="submenu">
+                        <li><a href="#point" class="">コア機能</a></li>
+                        <li><a href="#mission" class="">INTER CONNECTの強み</a></li>
+                      </ul>
+                    </li>
+										<li class="menu_list eng"><a href="#our_clients" title="Works">Works</a></li>
+										<li class="menu_list eng"><a href="#aboutus" title="About us">About us</a></li>
+										<li class="menu_list eng"><a href="#event" title="Event">Event</a></li>
+										<li class="menu_list eng"><a href="#e-books" title="E-books">E-books</a></li>
+										<li class="menu_list eng"><a href="#newsblog" title="News">News</a></li>
+									</ul>
+									<div class="h_btn_wrap">
+										<a href="#campaign" class="p_btn_document">
+											<div class="border_top"></div>
+											<div class="border_bottom"></div><span>無料で始める</span><svg xmlns="http://www.w3.org/2000/svg" width="6" height="11.999" viewBox="0 0 6 11.999">
+												<path d="M45.255,12h0V9.22L48.475,6l-3.22-3.22V0l6,6-6,6Z" transform="translate(-45.255 -0.001)"></path>
+											</svg>
+										</a>
+										<a href="#contact" class="p_btn_contact"><span class="eng">Contact</span><svg xmlns="http://www.w3.org/2000/svg" width="6" height="11.999" viewBox="0 0 6 11.999">
+												<path d="M45.255,12h0V9.22L48.475,6l-3.22-3.22V0l6,6-6,6Z" transform="translate(-45.255 -0.001)"></path>
+											</svg></a>
+									</div>
+								</nav>
+								<nav class="sp_menu">
+									<div class="sp_menu_bg"></div>
+									<div class="sp_menu_block">
+										<ul class="sp_menu_wrap">
+                      <li class="sp_menu_list">
+                        <a href="#service" title="Service" class="eng">Service</a>
+                        <ul class="sp_menu_list_sub">
+                          <li class="sp_menu_list_sub_txt">
+                            <a href="#point">コア機能</a>
+                          </li>
+                          <li class="sp_menu_list_sub_txt">
+                            <a href="#mission">INTER CONNECTの強み</a>
+                          </li>
+                        </ul>
+                      </li>
+											<li class="sp_menu_list eng"><a href="#our_clients" title="Works">Works</a></li>
+											<li class="sp_menu_list eng"><a href="#aboutus" title="About us">About us</a></li>
+											<li class="sp_menu_list eng"><a href="#event" title="Event">Event</a></li>
+											<li class="sp_menu_list eng"><a href="#e-books" title="E-books">E-books</a></li>
+											<li class="sp_menu_list eng"><a href="#newsblog" title="News">News</a></li>
+										</ul>
+										<div class="sp_menu_btn">
+											<a href="#campaign" class="p_btn_document">
+												<div class="border_top"></div>
+												<div class="border_bottom"></div><span>無料で始める</span><svg xmlns="http://www.w3.org/2000/svg" width="6" height="11.999" viewBox="0 0 6 11.999">
+													<path d="M45.255,12h0V9.22L48.475,6l-3.22-3.22V0l6,6-6,6Z" transform="translate(-45.255 -0.001)"></path>
+												</svg>
+											</a>
+											<a href="#contact" class="p_btn_contact eng"><span>Contact</span><svg xmlns="http://www.w3.org/2000/svg" width="6" height="11.999" viewBox="0 0 6 11.999">
+													<path d="M45.255,12h0V9.22L48.475,6l-3.22-3.22V0l6,6-6,6Z" transform="translate(-45.255 -0.001)"></path>
+												</svg></a>
+										</div>
+									</div>
+								</nav>
+								<div class="hamburger_btn">
+									<a class="menu_trigger" href="/">
+										<span></span>
+										<span></span>
+										<span></span>
+									</a>
+								</div>
+							</header><main id="main">
+
+	<section id="first_view">
+		<div class="bg_mask"></div>
+		<div class="main_inner">
+			<div class="fv_title is_show">
+				<h2 class="title">
+          ビジネスの出会いを、<br class="pc">成果に変える
+        </h2>
+				<p class="subtitle">AI x コミュニティで、ビジネスの出会いを次のステージへ</p>
+				<img src="img/k6b4gOfB4ntKVvB1772448174_1772448476.png" alt="INTER CONNECT" class="title_logo" loading="eager" fetchpriority="high">
+			</div>
+			<a href="#campaign" class="bl_mvCampaignCTA">
+	<div class="bl_mvCampaignCTA_info">
+		<p class="bl_mvCampaignCTA_info_category eng">Campaign</p>
+		<p class="bl_mvCampaignCTA_info_date eng">2026/03/01</p>
+	</div>
+	<h2 class="bl_mvCampaignCTA_title">
+		今なら無料登録で500ポイントプレゼント。3分の登録で、AIがあなたに最適なビジネスパートナーを即座に提案します。	</h2>
+</a>
+		</div>
+		<div class="video_wrap">
+			<video id="fv_video" autoplay="" loop="" muted="" playsinline="" preload="auto" poster="img/fv-poster.jpg">
+				<source type="video/mp4" src="img/interconnect-bg.mp4">
+			</video>
+		</div>
+	</section>
+	<section id="banner" class="splide fade fadeInUp splide--loop splide--ltr splide--draggable is-active is-overflow is-initialized is_inview" aria-roledescription="carousel">
+		<div class="splide__track splide__track--loop splide__track--ltr splide__track--draggable" id="banner-track" style="padding-left: 0px; padding-right: 0px;" aria-live="off" aria-atomic="true" aria-busy="false">
+			<ul class="splide__list" id="banner-list" role="presentation" style="transform: translateX(-3337.5px);">
+																<li class="splide__slide splide__slide--clone" id="banner-clone01" role="group" aria-roledescription="slide" aria-label="1 of 5" style="margin-right: 16px;" aria-hidden="true">
+					<img src="img/mitetsu-logo.png" alt="名鉄">
+				</li><li class="splide__slide splide__slide--clone" id="banner-clone02" role="group" aria-roledescription="slide" aria-label="2 of 5" style="margin-right: 16px;" aria-hidden="true">
+					<img src="img/gmoaozora-logo.png" alt="GMOあおぞらネット銀行">
+				</li><li class="splide__slide splide__slide--clone" id="banner-clone03" role="group" aria-roledescription="slide" aria-label="3 of 5" style="margin-right: 16px;" aria-hidden="true">
+					<img src="img/med-logo.png" alt="ME Digital">
+				</li><li class="splide__slide splide__slide--clone" id="banner-clone04" role="group" aria-roledescription="slide" aria-label="4 of 5" style="margin-right: 16px;" aria-hidden="true">
+					<img src="img/tver-logo.png" alt="Tver">
+				</li><li class="splide__slide splide__slide--clone is-active" id="banner-clone05" role="group" aria-roledescription="slide" aria-label="5 of 5" style="margin-right: 16px;" aria-hidden="true">
+					<img src="img/kintetsu-logo.png" alt="Kintetsu">
+				</li><li class="splide__slide" id="banner-slide01" role="group" aria-roledescription="slide" aria-label="1 of 5" style="margin-right: 16px;" aria-hidden="true">
+					<img src="img/mitetsu-logo.png" alt="名鉄">
+				</li>
+								<li class="splide__slide" id="banner-slide02" role="group" aria-roledescription="slide" aria-label="2 of 5" style="margin-right: 16px;" aria-hidden="true">
+					<img src="img/gmoaozora-logo.png" alt="GMOあおぞらネット銀行">
+				</li>
+								<li class="splide__slide" id="banner-slide03" role="group" aria-roledescription="slide" aria-label="3 of 5" style="margin-right: 16px;" aria-hidden="true">
+					<img src="img/med-logo.png" alt="ME Digital">
+				</li>
+								<li class="splide__slide is-visible is-prev" id="banner-slide04" role="group" aria-roledescription="slide" aria-label="4 of 5" style="margin-right: 16px;">
+					<img src="img/tver-logo.png" alt="Tver">
+				</li>
+								<li class="splide__slide is-visible is-active" id="banner-slide05" role="group" aria-roledescription="slide" aria-label="5 of 5" style="margin-right: 16px;">
+					<img src="img/kintetsu-logo.png" alt="Kintetsu">
+				</li>
+															<li class="splide__slide splide__slide--clone is-visible is-next" id="banner-clone06" role="group" aria-roledescription="slide" aria-label="1 of 5" style="margin-right: 16px;">
+					<img src="img/mitetsu-logo.png" alt="名鉄">
+				</li><li class="splide__slide splide__slide--clone" id="banner-clone07" role="group" aria-roledescription="slide" aria-label="2 of 5" style="margin-right: 16px;" aria-hidden="true">
+					<img src="img/gmoaozora-logo.png" alt="GMOあおぞらネット銀行">
+				</li><li class="splide__slide splide__slide--clone" id="banner-clone08" role="group" aria-roledescription="slide" aria-label="3 of 5" style="margin-right: 16px;" aria-hidden="true">
+					<img src="img/med-logo.png" alt="ME Digital">
+				</li><li class="splide__slide splide__slide--clone" id="banner-clone09" role="group" aria-roledescription="slide" aria-label="4 of 5" style="margin-right: 16px;" aria-hidden="true">
+					<img src="img/tver-logo.png" alt="Tver">
+				</li><li class="splide__slide splide__slide--clone is-active" id="banner-clone10" role="group" aria-roledescription="slide" aria-label="5 of 5" style="margin-right: 16px;" aria-hidden="true">
+					<img src="img/kintetsu-logo.png" alt="Kintetsu">
+				</li></ul>
+		</div>
+	</section>
+	<script>
+	const video = document.getElementById('fv_video');
+	let isLoad = false;
+
+	function initPage() {
+		if (isLoad) return;
+		isLoad = true;
+		$('#js-loadingcontent').addClass('is_show');
+		$('#js-loading').delay(900).fadeOut(800);
+		$('#first_view .fv_title').delay(1200).queue(function() {
+			$(this).addClass('is_show').dequeue();
+		});
+
+		const splide = new Splide('.splide', {
+			type: 'loop',
+			drag: true,
+			focus: 'center',
+			autoWidth: true,
+			autoplay: true,
+			speed: 1000,
+			arrows: false,
+			grid: false,
+			pagination: false,
+			gap: '16px',
+			lazyload: true,
+			interval: 2000,
+			grid: {
+				rows: 1,
+				gap: {
+					row: '16px',
+				},
+			},
+		});
+
+		splide.mount(window.splide.Extensions);
+	}
+
+	video.addEventListener('loadedmetadata', initPage);
+	video.addEventListener('error', initPage);
+	setTimeout(initPage, 3000);
+	</script>
+	<section id="whatisic">
+		<div class="main_inner">
+			<p class="ic-whatisic-lead eng fade fadeInUp">What is INTER CONNECT?</p>
+			<h2 class="ic-whatisic-headline fade fadeInUp">
+				AIが「会うべき人」を見つけ、<br class="pc">
+				出会いから協業までを一気通貫で支援する<br class="pc">
+				ビジネスマッチングプラットフォーム
+			</h2>
+			<p class="ic-whatisic-desc fade fadeInUp">
+				業界・スキル・事業課題・成長フェーズをAIが多角的に分析し、<br class="pc">
+				ビジネスシナジーの高い相手だけを厳選提案。<br class="pc">
+				メッセージ・面談・イベントを通じて関係を深め、成果につなげます。
+			</p>
+		</div>
+	</section>
+  
+  
+  <section id="task">
+    <div class="main_inner">
+      <h2 class="task_ttl fade fadeInUp is_inview">
+        紹介の質は、紹介者の<br class="sp">「記憶」で決まっている
+      </h2>
+      <p class="task_lead fade fadeInUp is_inview">
+        経営者コミュニティ、営業顧問、ビジネス交流会──<br class="pc">どの紹介も、紹介者の「記憶」がマッチングの上限になっている。<br>
+        最近会った人。印象が強かった人。たまたま同じ会にいた人。<br class="pc">つなげられるのは、"覚えている相手" だけだ。<br>
+        あなたに本当に最適なパートナーは、紹介者の記憶の外にいるかもしれない。
+      </p>
+      <div class="task_contents fade fadeInUp is_inview">
+        <h3 class="task_head">
+          「記憶ベースの紹介」が抱える3つの限界
+        </h3>
+        <div class="task_items">
+          <div class="task_item">
+            <span class="task_item_num">01</span>
+            <h4 class="task_item_title">印象で決まる紹介</h4>
+            <p class="task_item_desc">「最近会った」「話が面白かった」── 紹介者の印象で相手が決まり、事業シナジーは二の次になる。</p>
+          </div>
+          <div class="task_item">
+            <span class="task_item_num">02</span>
+            <h4 class="task_item_title">つないで終わり</h4>
+            <p class="task_item_desc">紹介後のフォローアップは当事者任せ。関係構築の仕組みがなく、大半が自然消滅する。</p>
+          </div>
+          <div class="task_item">
+            <span class="task_item_num">03</span>
+            <h4 class="task_item_title">成果が見えない</h4>
+            <p class="task_item_desc">何件の紹介が売上や提携につながったのか、誰も把握していない。改善のしようがない。</p>
+          </div>
+        </div>
+        <p class="task_txt task_resolve">
+          もし、全メンバーの事業内容・課題・強みを完璧に記憶できたら？<br>
+          INTER CONNECTのAIは、それを実現する。記憶の限界を超えた、本来あるべきマッチングを。
+        </p>
+      </div>
+    </div>
+  </section>
+
+  <section id="compare">
+    <div class="main_inner">
+      <h2 class="compare_ttl fade fadeInUp">
+        100件のアポで、<br class="sp">成約はわずか5件
+      </h2>
+      <p class="compare_sub fade fadeInUp">
+        経営者コミュニティに通い、営業顧問を活用し、リファラルだけで営業しても<br class="pc">CVR 5%が「良い方」とされる現実。問題は努力の量ではなく、マッチングの質にある。
+      </p>
+      <div class="compare_grid fade fadeInUp">
+        <div class="compare_col compare_old">
+          <span class="compare_col_label">従来のリファラル営業</span>
+          <div class="compare_stat">
+            <span class="compare_stat_num eng">5<small>%</small></span>
+            <p class="compare_stat_label">平均成約率（CVR）</p>
+          </div>
+          <ul class="compare_list">
+            <li>紹介者が「覚えている人」しかつなげない</li>
+            <li>紹介後のフォローは当事者任せ</li>
+            <li>何件の紹介が成果につながったか追えない</li>
+            <li>相性ではなく印象で相手が決まる</li>
+          </ul>
+        </div>
+        <div class="compare_divider">
+          <span class="compare_divider_vs eng">VS</span>
+        </div>
+        <div class="compare_col compare_new">
+          <span class="compare_col_label">INTER CONNECT</span>
+          <div class="compare_stat">
+            <span class="compare_stat_num eng">78<small>%</small></span>
+            <p class="compare_stat_label">3ヶ月以内の協業開始率</p>
+          </div>
+          <ul class="compare_list">
+            <li>AIが全メンバーの事業データを完璧に記憶</li>
+            <li>マッチング〜関係構築〜成果まで一気通貫</li>
+            <li>成果をリアルタイムで可視化・改善</li>
+            <li>200以上のパラメータで事業シナジーを分析</li>
+          </ul>
+        </div>
+      </div>
+      <div class="compare_cost fade fadeInUp">
+        <span class="compare_cost_num eng">1/15</span>
+        <span class="compare_cost_label">同じ成果を出すための獲得コスト</span>
+      </div>
+      <p class="compare_bottom fade fadeInUp">
+        成約率が15倍なら、必要なアポ数は15分の1。<strong>コストも15分の1になる。</strong>
+      </p>
+    </div>
+  </section>
+
+	<section id="about">
+		<div class="main_inner">
+			<div class="heading_block">
+				<h3 class="subtitle lh_normal fade fadeInUp eng is_inview">Our Belief</h3>
+				<h3 class="title lh_normal fade fadeInUp is_inview">ビジネスの成功の85%は、人のつながりが決める</h3>
+			</div>
+			<div class="content_block">
+				<div class="text_block">
+					<h2 class="title eng fade fadeInUp is_inview"><span class="p_borderbox inview is_inview"><span>INTER CONNECT</span></span></h2>
+					<p class="p_text fade fadeInUp is_inview">
+            LinkedInの調査によれば、転職の80%は紹介経由で実現し、新規事業の提携先もその大半が人的紹介から生まれています。にもかかわらず、多くのビジネスパーソンが「名刺は増えるが、ビジネスにつながらない」という課題を抱えています。INTER CONNECTは、AIが業界構造・スキルセット・事業フェーズを多角的に分析し、「会うべき人」だけを提案。イベント・1on1面談・リアルタイムメッセージを通じて、出会いから信頼関係の構築、そしてビジネス成果の創出まで、一気通貫でサポートします。
+          </p>
+				</div>
+				<div class="movie_block fade fadeInUp is_inview">
+					<div id="dim_movie" class="p_dim_movie" style="transform: perspective(1000px) scale3d(1, 1, 1) rotateY(-8deg) rotateX(4deg)">
+						<a href="https://jp.aironworks.com/wp-content/themes/aironworks/video/service-animation.mp4" class="fullvideo_btn" data-lity=""><img data-src="img/fullvideo-btn.svg" class=" lazyloaded" src="img/fullvideo-btn.svg"></a>
+						<video class="video" autoplay="" loop="" muted="" playsinline="" id="service_video" preload="none">
+							<source type="video/mp4" src="https://jp.aironworks.com/wp-content/themes/aironworks/video/service-animation.mp4">
+						</video>
+					</div>
+				</div>
+			</div>
+		</div>
+		<img src="img/about-bg-letter.svg" alt="INTER CONNECT" class="about_bg_letter" loading="lazy" style="transform: translate(300px, 0px);">
+	</section>
+
+  <section id="point">
+    <div class="main_inner">
+      <div class="point_img fade fadeInUp is_inview">
+        <img data-src="img/point-hero.jpg" class=" lazyloaded" loading="lazy" alt="INTER CONNECT" src="img/point-hero.jpg">
+      </div>
+      <div class="point_contents">
+        <h2 class="point_ttl fade fadeInUp is_inview">4つのコア機能</h2>
+        <ul class="point_list">
+          <li class="point_list_item fade fadeInUp is_inview">
+            <span class="point_list_item_num eng">01</span>
+            <h3 class="point_list_item-ttl">AIマッチング</h3>
+            200以上のパラメータで業界・スキル・事業課題・成長フェーズを多角分析。「会うべき人」だけを厳選提案し、マッチング精度92%を実現
+          </li>
+          <li class="point_list_item fade fadeInUp is_inview">
+            <span class="point_list_item_num eng">02</span>
+            <h3 class="point_list_item-ttl">ダイレクトメッセージ</h3>
+            マッチング成立と同時に専用チャットが開設。リアルタイム配信・既読確認で、商談準備から日程調整までプラットフォーム内で完結。個人の連絡先を交換せずに、安全な環境でやり取りを始められる
+          </li>
+          <li class="point_list_item fade fadeInUp is_inview">
+            <span class="point_list_item_num eng">03</span>
+            <h3 class="point_list_item-ttl">イベント & 面談</h3>
+            業界特化型イベントと1on1面談予約をワンストップで。オンライン・オフライン対応、カレンダー連携で日程調整の手間をゼロに
+          </li>
+          <li class="point_list_item fade fadeInUp is_inview">
+            <span class="point_list_item_num eng">04</span>
+            <h3 class="point_list_item-ttl">紹介プログラム</h3>
+            信頼のチェーンが価値を生む。紹介成立で双方にポイント付与、紹介経由のマッチングは成約率が従来比15倍以上
+          </li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+	<section id="howto">
+		<div class="main_inner">
+			<div class="heading_block">
+				<h3 class="subtitle lh_normal fade fadeInUp eng">How it Works</h3>
+				<h2 class="title lh_normal fade fadeInUp">3ステップで、ビジネスが動き出す</h2>
+			</div>
+			<div class="ic-steps fade fadeInUp">
+				<div class="ic-step">
+					<span class="ic-step-num eng">01</span>
+					<h4 class="ic-step-title">無料登録 & プロフィール作成</h4>
+					<p class="ic-step-desc">業界・スキル・事業課題を入力。3分で完了。AIがあなたのビジネスプロフィールを理解し、最適なマッチングの準備を始めます。</p>
+				</div>
+				<div class="ic-step">
+					<span class="ic-step-num eng">02</span>
+					<h4 class="ic-step-title">AIが最適なパートナーを厳選提案</h4>
+					<p class="ic-step-desc">200以上のパラメータで分析し、登録24時間以内にビジネスシナジーの高い相手を厳選してお届け。肩書きではなく、事業の相性で選びます。</p>
+				</div>
+				<div class="ic-step">
+					<span class="ic-step-num eng">03</span>
+					<h4 class="ic-step-title">面談・イベントで関係を深め、成果へ</h4>
+					<p class="ic-step-desc">メッセージ、1on1面談予約、業界特化イベントで関係を構築。プラットフォーム上で協業・取引の実現までサポートします。</p>
+				</div>
+			</div>
+		</div>
+	</section>
+
+	<section id="numbers">
+		<div class="main_inner">
+			<div class="ic-numbers fade fadeInUp">
+				<div class="ic-number-item">
+					<span class="ic-number-value eng">200<small>+</small></span>
+					<span class="ic-number-label">登録企業数</span>
+				</div>
+				<div class="ic-number-item">
+					<span class="ic-number-value eng">92<small>%</small></span>
+					<span class="ic-number-label">マッチング精度</span>
+				</div>
+				<div class="ic-number-item">
+					<span class="ic-number-value eng">78<small>%</small></span>
+					<span class="ic-number-label">3ヶ月以内に協業開始</span>
+				</div>
+				<div class="ic-number-item">
+					<span class="ic-number-value eng">月4<small>回+</small></span>
+					<span class="ic-number-label">業界特化イベント開催</span>
+				</div>
+			</div>
+		</div>
+	</section>
+
+			<section id="our_clients" class="c_client_listsection">
+		<div class="main_inner">
+			<div class="p_main_heading">
+				<h2 class="title eng fade fadeInUp is_inview">Our Clients</h2>
+				<img data-src="img/customer-voice-letter.svg" alt="Customer Voice" class="p_bg_letter fade fadeInUp lazyloaded is_inview" src="img/customer-voice-letter.svg">
+			</div>
+			<ul class="c_client_list">
+								<li class="fade fadeInUp is_inview">
+					<a href="#" class="c_client_card thumb_zoom">
+	<div class="p_thumb r-16-9"><div class="bg lazyloaded" data-bg="img/actual01.png" style="background-image: url('img/actual01.png');"></div></div>
+	<div class="text_group">
+		<h3 class="title txt_ovf_01" style="visibility: visible;">IT企業経営者 x 製造業マネージャー ── マッチングから6週間で3,200万円の共同開発プロジェクト始動</h3>
+		<p class="com_name">IT / 製造業</p>
+	</div>
+</a>				</li>
+								<li class="fade fadeInUp is_inview">
+					<a href="#" class="c_client_card thumb_zoom">
+	<div class="p_thumb r-16-9"><div class="bg lazyloaded" data-bg="img/actual02.png" style="background-image: url('img/actual02.png');"></div></div>
+	<div class="text_group">
+		<h3 class="title txt_ovf_01" style="visibility: visible;">SaaS系スタートアップCEO ── 登録3ヶ月で大手5社と業務提携、ARR 1.8倍成長を達成</h3>
+		<p class="com_name">スタートアップ</p>
+	</div>
+</a>				</li>
+								<li class="fade fadeInUp is_inview">
+					<a href="#" class="c_client_card thumb_zoom">
+	<div class="p_thumb r-16-9"><div class="bg lazyloaded" data-bg="img/vision.png" style="background-image: url('img/vision.png');"></div></div>
+	<div class="text_group">
+		<h3 class="title txt_ovf_01" style="visibility: visible;">フリーランスエンジニア ── 月間案件数が2件→5件に。単価も平均40%向上</h3>
+		<p class="com_name">フリーランス</p>
+	</div>
+</a>				</li>
+							</ul>
+			<div class="btn_wrap fade fadeInUp is_inview"><a href="#" title="Works" class="p_btn_circle"><span class="p_arrow_circle"></span><span class="eng">View All</span></a></div>
+		</div>
+	</section>
+
+  <section id="mission">
+		<div class="main_inner">
+			<div class="content_block">
+				<div class="text_block p_text_block fade fadeInUp is_inview">
+					<h3 class="subtitle eng">Our Mission</h3>
+					<h2 class="title"><span>「出会う」から「成果を出す」まで<br>ビジネスの出会い方を再定義する</span></h2>
+          <p class="p_headline">
+            偶然の出会いを、<br>
+            必然の成果に変える
+            </p>
+					<p class="p_text">
+            従来のビジネス紹介は「出会い」で完結していました。INTER CONNECTは、その先にある「関係構築」「信頼醸成」「ビジネス創出」までを一貫して支援します。AIが業界動向・事業課題・成長ステージを分析し最適な相手を提案。マッチング後は、プラットフォーム内のメッセージ・面談予約・業界特化イベントを通じて関係を深め、協業や取引の実現まで伴走します。
+          </p>
+				</div>
+				<div class="img_block fade fadeInUp is_inview">
+					<img data-src="img/20260227135918526811.jpg" class=" lazyloaded" loading="lazy" alt="Mission Image" src="img/20260227135918526811.jpg">
+				</div>
+			</div>
+		</div>
+	</section>
+
+	<section id="service_cta">
+		<h2 class="title fade fadeInUp is_inview">まだ出会っていないだけの<br>最適なパートナーが、ここにいる</h2>
+		<div class="btn_wrap fade fadeInUp is_inview"><a href="#campaign" title="Register" class="p_btn_circle"><span class="p_arrow_circle"></span><span class="eng">Start Free</span></a></div>
+	</section>
+
+	<section id="campaign">
+	<div class="main_inner">
+		<div class="p_main_heading">
+			<h2 class="title eng fade fadeInUp is_inview">Campaign</h2>
+			<img data-src="img/customer-voice-letter.svg" alt="Customer Voice" class="p_bg_letter fade fadeInUp ls-is-cached lazyloaded is_inview" src="img/customer-voice-letter.svg">
+		</div>
+		<div class="bl_campaign fade fadeInUp">
+			<div class="bl_campaign_thumb">
+				<div class="bl_campaign_thumb_inner js_switchThumbs">
+										<img data-src="img/aironworks-gric-2025.jpg" class=" lazyloaded" loading="lazy" alt="新規登録キャンペーン - 500ポイントプレゼント" style="opacity: 1;" src="img/aironworks-gric-2025.jpg">
+										<img data-src="img/aironworks-exawizards-finalist-2025.jpg" class=" lazyloaded" loading="lazy" alt="プレミアムマッチングイベント開催" src="img/aironworks-exawizards-finalist-2025.jpg">
+										<img data-src="img/aironworks-sushi-tech-2025.jpg" class=" lazyloaded" loading="lazy" alt="紹介ポイント2倍キャンペーン" src="img/aironworks-sushi-tech-2025.jpg">
+									</div>
+			</div>
+			<div class="bl_campaign_list js_switchThumbs_buttons">
+								<a href="#" class="bl_campaign_link">
+					<span class="bl_campaign_link_thumb">
+						<span class="bl_campaign_link_thumb_inner">
+							<img data-src="img/aironworks-gric-2025.jpg" class="lazyload" loading="lazy" alt="新規登録キャンペーン">
+						</span>
+					</span>
+					<span class="bl_campaign_link_content">
+						<span class="eng">New member registration campaign - Get 500 bonus points when you sign up. AI matches your first partners within 24 hours.</span>
+						<p>新規登録キャンペーン実施中 - 500ポイントプレゼント + 登録24時間以内にAIが最適なパートナー候補を自動提案。初回面談予約も無料。</p>
+					</span>
+					<span class="bl_campaign_link_icon">
+						<img data-src="img/arrow.svg" alt="" class=" ls-is-cached lazyloaded" loading="lazy" src="img/arrow.svg">
+					</span>
+				</a>
+								<a href="#" class="bl_campaign_link">
+					<span class="bl_campaign_link_thumb">
+						<span class="bl_campaign_link_thumb_inner">
+							<img data-src="img/aironworks-exawizards-finalist-2025.jpg" class="lazyload" loading="lazy" alt="プレミアムマッチングイベント">
+						</span>
+					</span>
+					<span class="bl_campaign_link_content">
+						<span class=”eng”>Premium matching event - Startup founders meet enterprise decision-makers. Past events generated 40+ business deals.</span>
+						<p>【限定30名】スタートアップ創業者 x 大手企業決裁者 プレミアムマッチングイベント ── 過去開催では参加者の68%が商談に発展</p>
+					</span>
+					<span class="bl_campaign_link_icon">
+						<img data-src="img/arrow.svg" alt="" class=" ls-is-cached lazyloaded" loading="lazy" src="img/arrow.svg">
+					</span>
+				</a>
+								<a href="#" class="bl_campaign_link">
+					<span class="bl_campaign_link_thumb">
+						<span class="bl_campaign_link_thumb_inner">
+							<img data-src="img/aironworks-sushi-tech-2025.jpg" class="lazyload" loading="lazy" alt="紹介ポイント2倍キャンペーン">
+						</span>
+					</span>
+					<span class="bl_campaign_link_content">
+						<span class=”eng”>Referral program doubled - Earn up to 1,000 points per referral. Referred members have 2.3x higher deal conversion rates.</span>
+						<p>紹介ポイント2倍キャンペーン - 紹介成立で最大1,000pt獲得。紹介経由の登録者は従来比15倍以上の成約率を記録しています</p>
+					</span>
+					<span class="bl_campaign_link_icon">
+						<img data-src="img/arrow.svg" alt="" class=" ls-is-cached lazyloaded" loading="lazy" src="img/arrow.svg">
+					</span>
+				</a>
+							</div>
+		</div>
+		<script>
+		(() => {
+			let activeIndex = 0;
+			const thumbsWrapper = document.querySelector('.js_switchThumbs');
+			const buttonsWrapper = document.querySelector('.js_switchThumbs_buttons');
+			const buttons = buttonsWrapper.querySelectorAll('a');
+			const thumbs = thumbsWrapper.querySelectorAll('img');
+			thumbs[activeIndex].style.opacity = 1;
+
+			buttons.forEach((elm, i) => {
+				elm.addEventListener("mouseenter", () => {
+					activeIndex = i;
+					thumbs.forEach((elm, i) => {
+						if (activeIndex === i) {
+							elm.style.opacity = 1;
+						} else {
+							elm.style.opacity = 0;
+						}
+					});
+				});
+			})
+		})();
+		</script>
+	</div>
+</section>
+
+	<a href="#" title="About" id="aboutus">
+		<div class="content_inner fade fadeInUp">
+			<div class="main_inner">
+				<h2 class="heading eng fade fadeInUp is_inview">About us</h2>
+				<h3 class="title fade fadeInUp is_inview">1つの出会いが、<br class="sp">事業の未来を変える</h3>
+				<p class="subtitle fade fadeInUp is_inview">One Connection Changes Everything</p>
+				<p class="p_text fade fadeInUp is_inview">私たちは、ビジネスにおける「偶然の出会い」を「必然の成果」に変えることをミッションに掲げています。<br class="pc">テクノロジーの力で最適な相手を見つけ、コミュニティの力で関係を深め、<br class="pc">すべてのビジネスパーソンが持つ可能性を最大化する ── それがINTER CONNECTの存在意義です。</p>
+				<div class="p_arrow_circle fade fadeInUp is_inview"></div>
+			</div>
+		</div>
+	</a>
+
+			<section id="event">
+		<div class="main_inner">
+			<div class="content_block">
+				<div class="p_main_heading">
+					<h2 class="title eng fade fadeInUp is_inview">Event</h2>
+					<p class="description fade fadeInUp is_inview">経営者・決裁者限定の業界特化型イベントを<br>月4回以上開催。参加者の平均商談化率32%。</p>
+				</div>
+				<div class="slider_arrow_wrap fade fadeInUp is_inview">
+					<button class="swiper-button-next" tabindex="0" aria-label="Next slide" aria-controls="swiper-wrapper-377849df549fb8e9"><svg class="swiper-navigation-icon" width="11" height="20" viewBox="0 0 11 20" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M0.38296 20.0762C0.111788 19.805 0.111788 19.3654 0.38296 19.0942L9.19758 10.2796L0.38296 1.46497C0.111788 1.19379 0.111788 0.754138 0.38296 0.482966C0.654131 0.211794 1.09379 0.211794 1.36496 0.482966L10.4341 9.55214C10.8359 9.9539 10.8359 10.6053 10.4341 11.007L1.36496 20.0762C1.09379 20.3474 0.654131 20.3474 0.38296 20.0762Z" fill="currentColor"></path></svg></button>
+					<button class="swiper-button-prev" tabindex="0" aria-label="Previous slide" aria-controls="swiper-wrapper-377849df549fb8e9"><svg class="swiper-navigation-icon" width="11" height="20" viewBox="0 0 11 20" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M0.38296 20.0762C0.111788 19.805 0.111788 19.3654 0.38296 19.0942L9.19758 10.2796L0.38296 1.46497C0.111788 1.19379 0.111788 0.754138 0.38296 0.482966C0.654131 0.211794 1.09379 0.211794 1.36496 0.482966L10.4341 9.55214C10.8359 9.9539 10.8359 10.6053 10.4341 11.007L1.36496 20.0762C1.09379 20.3474 0.654131 20.3474 0.38296 20.0762Z" fill="currentColor"></path></svg></button>
+				</div>
+				<div class="btn_wrap fade fadeInUp is_inview"><a href="#" title="Event" class="p_btn_circle"><span class="p_arrow_circle"></span><span class="eng">All Events</span></a></div>
+				<img data-src="img/event-letter.svg" alt="Event" class="p_bg_letter fade fadeInUp loading= is_inview lazyloaded" lazy""="" src="img/event-letter.svg">
+			</div>
+			<div class="mySwiper event_block fade fadeInUp swiper-initialized swiper-horizontal is_inview">
+				<div class="swiper-wrapper" id="swiper-wrapper-377849df549fb8e9" aria-live="polite">
+										<div class="swiper-slide" role="group" aria-label="1 / 3" data-swiper-slide-index="0">
+						<a href="#" class="c_event_card thumb_zoom">
+	<img data-src="img/event-card-top.png" class="top_heading lazyloaded" src="img/event-card-top.png">
+	<div class="content_inner">
+		<div class="top_block">
+			<div class="p_event_info">
+								<div class="date_group">
+					<p class="date eng">22</p>
+					<div class="month_year">
+						<p class="month eng">Apr</p>
+						<p class="year eng">2025</p>
+					</div>
+				</div>
+				<div class="info_group">
+					<p class="date eng">2025/04/22 15:00</p>
+					<p class="place">東京ミッドタウン八重洲 八重洲セントラルタワー + オンライン開催</p>
+				</div>
+			</div>
+			<div class="p_btn_shadow"><span>イベント詳細</span><svg xmlns="http://www.w3.org/2000/svg" width="6" height="11.999" viewBox="0 0 6 11.999"><path d="M45.255,12h0V9.22L48.475,6l-3.22-3.22V0l6,6-6,6Z" transform="translate(-45.255 -0.001)"></path></svg></div>
+		</div>
+		<div class="p_thumb"><div class="bg lazyloaded" data-bg="img/event-thumb01.jpg" style="background-image: url('img/event-thumb01.jpg');"></div></div>
+		<div class="bottom_block">
+			<h3 class="title">【INTER CONNECT × 異業種交流】経営者限定ビジネスマッチングイベント - 新たなパートナーシップの創出</h3>
+			<div class="p_taxo_list01">
+				<p class="taxo">受付終了</p>			</div>
+		</div>
+	</div>
+</a></div>
+										<div class="swiper-slide" role="group" aria-label="2 / 3" data-swiper-slide-index="1">
+						<a href="#" class="c_event_card thumb_zoom">
+	<img data-src="img/event-card-top.png" class="top_heading lazyloaded" src="img/event-card-top.png">
+	<div class="content_inner">
+		<div class="top_block">
+			<div class="p_event_info">
+								<div class="date_group">
+					<p class="date eng">23</p>
+					<div class="month_year">
+						<p class="month eng">Jun</p>
+						<p class="year eng">2025</p>
+					</div>
+				</div>
+				<div class="info_group">
+					<p class="date eng">2025/06/23 16:00</p>
+					<p class="place">オンライン開催</p>
+				</div>
+			</div>
+			<div class="p_btn_shadow"><span>イベント詳細</span><svg xmlns="http://www.w3.org/2000/svg" width="6" height="11.999" viewBox="0 0 6 11.999"><path d="M45.255,12h0V9.22L48.475,6l-3.22-3.22V0l6,6-6,6Z" transform="translate(-45.255 -0.001)"></path></svg></div>
+		</div>
+		<div class="p_thumb"><div class="bg lazyloaded" data-bg="img/event-thumb02.jpg" style="background-image: url('img/event-thumb02.jpg');"></div></div>
+		<div class="bottom_block">
+			<h3 class="title">【オンラインセミナー】AIマッチングで変わるビジネスリファラル - 質の高い紹介を実現する最新手法</h3>
+			<div class="p_taxo_list01">
+				<p class="taxo">受付終了</p>			</div>
+		</div>
+	</div>
+</a></div>
+										<div class="swiper-slide" role="group" aria-label="3 / 3" data-swiper-slide-index="2">
+						<a href="#" class="c_event_card thumb_zoom">
+	<img data-src="img/event-card-top.png" class="top_heading lazyloaded" src="img/event-card-top.png">
+	<div class="content_inner">
+		<div class="top_block">
+			<div class="p_event_info">
+								<div class="date_group">
+					<p class="date eng">24</p>
+					<div class="month_year">
+						<p class="month eng">Jun</p>
+						<p class="year eng">2025</p>
+					</div>
+				</div>
+				<div class="info_group">
+					<p class="date eng">2025/06/24 12:00</p>
+					<p class="place">オンライン開催</p>
+				</div>
+			</div>
+			<div class="p_btn_shadow"><span>イベント詳細</span><svg xmlns="http://www.w3.org/2000/svg" width="6" height="11.999" viewBox="0 0 6 11.999"><path d="M45.255,12h0V9.22L48.475,6l-3.22-3.22V0l6,6-6,6Z" transform="translate(-45.255 -0.001)"></path></svg></div>
+		</div>
+		<div class="p_thumb"><div class="bg lazyloaded" data-bg="img/event-thumb03.jpg" style="background-image: url('img/event-thumb03.jpg');"></div></div>
+		<div class="bottom_block">
+			<h3 class="title">【初心者歓迎】ビジネスコミュニティ活用術 - INTER CONNECTで最初の1ヶ月を最大限に活かすコツ</h3>
+			<div class="p_taxo_list01">
+				<p class="taxo">受付終了</p>			</div>
+		</div>
+	</div>
+</a></div>
+	</div>
+			<span class="swiper-notification" aria-live="assertive" aria-atomic="true"></span></div>
+			<div class="btn_wrap_sp fade fadeInUp"><a href="#" title="Events" class="p_btn_circle"><span class="p_arrow_circle"></span><span class="eng">All Events</span></a></div>
+		</div>
+	</section>
+
+			<section id="e-books">
+		<div class="main_inner">
+			<img data-src="img/ebooks-letter.svg" alt="Customer Voice" class="p_bg_letter fade fadeInUp is_inview lazyloaded" loading="lazy" src="img/ebooks-letter.svg">
+			<div class="content_block">
+				<div class="p_main_heading">
+					<h2 class="title eng fade fadeInUp is_inview">E-books</h2>
+					<p class="description fade fadeInUp is_inview">成功する経営者のリファラル戦略から<br class="tb">AIマッチング活用術まで、実践的な知見を無料で公開。</p>
+				</div>
+				<div class="btn_wrap fade fadeInUp is_inview"><a href="#" title="Service" class="p_btn_circle"><span class="p_arrow_circle"></span><span class="eng">E-books Library</span></a></div>
+			</div>
+			<div class="ebooks_block fade fadeInUp is_inview">
+				<div class="c_ebook_slider">
+					<div class="ebook_slider_wrap">
+						<div class="slider_arrow_wrap"><button type="button" data-role="none" class="slick-prev slick-arrow" aria-label="Previous" role="button" style=""><i class="fas fa-chevron-left"></i></button><button type="button" data-role="none" class="slick-next slick-arrow" aria-label="Next" role="button" style=""><i class="fas fa-chevron-right"></i></button></div>
+						<ul class="ebook_slider slick-initialized slick-slider">
+														<div aria-live="polite" class="slick-list draggable"><div class="slick-track" style="opacity: 1; width: 1890px;" role="listbox"><li class="slide slick-slide slick-current slick-active" data-slick-index="0" aria-hidden="false" style="width: 630px; position: relative; left: 0px; top: 0px; z-index: 999; opacity: 1;" tabindex="-1" role="option" aria-describedby="slick-slide00">
+								<a href="dl/interconnect-business-matching-guide.pdf" download="INTERCONNECT_ビジネスマッチング完全ガイド.pdf" class="c_ebook_inro thumb_zoom" tabindex="0">
+	<img data-src="img/ebook-background.jpg" class="background lazyloaded" src="img/ebook-background.jpg">
+	<img src="img/interconnect-logo-header.png" class="logo">
+	<div class="p_thumb r-16-9"><div class="bg lazyloaded" data-bg="img/20260227135918027529.jpg" style="background-image: url('img/20260227135918027529.jpg');"></div></div>
+	<div class="text_group">
+		<span class="cate">ビジネスマッチング</span>
+		<h3 class="title txt_ovf_02" style="visibility: visible;">ビジネスマッチング完全ガイド 〜AIが導く最適なビジネスパートナーとの出会い〜</h3>
+		<div class="taxo_list">
+			<p class="taxo"># 無料ダウンロード</p>		</div>
+	</div>
+</a>							</li><li class="slide slick-slide" data-slick-index="1" aria-hidden="true" style="width: 630px; position: relative; left: -630px; top: 0px; z-index: 998; opacity: 0;" tabindex="-1" role="option" aria-describedby="slick-slide01">
+								<a href="#" class="c_ebook_inro thumb_zoom" tabindex="-1">
+	<img data-src="img/ebook-background.jpg" class="background lazyloaded" src="img/ebook-background.jpg">
+	<img src="img/interconnect-logo-header.png" class="logo">
+	<div class="p_thumb r-16-9"><div class="bg lazyloaded" data-bg="img/ebook-thumb02.jpg" style="background-image: url('img/ebook-thumb02.jpg');"></div></div>
+	<div class="text_group">
+		<span class="cate">コミュニティ活用</span>
+		<h3 class="title txt_ovf_02" style="visibility: visible;">成功する経営者のリファラル戦略 〜コミュニティ活用で事業成長を加速させる方法〜</h3>
+		<div class="taxo_list">
+			<p class="taxo"># 活用ノウハウ</p>		</div>
+	</div>
+</a>							</li><li class="slide slick-slide" data-slick-index="2" aria-hidden="true" style="width: 630px; position: relative; left: -1260px; top: 0px; z-index: 998; opacity: 0;" tabindex="-1" role="option" aria-describedby="slick-slide02">
+								<a href="#" class="c_ebook_inro thumb_zoom" tabindex="-1">
+	<img data-src="img/ebook-background.jpg" class="background lazyloaded" src="img/ebook-background.jpg">
+	<img src="img/interconnect-logo-header.png" class="logo">
+	<div class="p_thumb r-16-9"><div class="bg lazyloaded" data-bg="img/ebook-thumb03.jpg" style="background-image: url('img/ebook-thumb03.jpg');"></div></div>
+	<div class="text_group">
+		<span class="cate">マッチング活用</span>
+		<h3 class="title txt_ovf_02" style="visibility: visible;">INTER CONNECT活用ガイド - 初回登録から最初のマッチングまでの完全ステップ</h3>
+		<div class="taxo_list">
+			<p class="taxo"># 始め方ガイド</p>		</div>
+	</div>
+</a>							</li></div></div>
+
+													</ul>
+					</div>
+				</div>
+			</div>
+			<div class="btn_wrap_sp fade fadeInUp"><a href="#" title="Service" class="p_btn_circle"><span class="p_arrow_circle"></span><span class="eng">E-books Library</span></a></div>
+		</div>
+	</section>
+
+		<section id="newsblog">
+		<img data-src="img/newsblog-letter-top.svg" alt="Customer Voice" class="p_bg_letter fade fadeInUp is_inview lazyloaded" src="img/newsblog-letter-top.svg">
+		<div class="heading_area main_inner">
+			<div class="p_main_heading">
+				<h2 class="title eng fade fadeInUp is_inview">News &amp; Blog</h2>
+				<p class="description fade fadeInUp is_inview">プロダクトアップデート、業界動向、活用事例をお届けします。</p>
+			</div>
+			<div class="sns_block fade fadeInUp is_inview">
+				<p class="title">SNSでも情報を配信中</p>
+				<ul class="sns_list">
+					<li><a href="#" target="_blank"><img src="img/x-twitter.svg" loading="lazy"></a></li>
+					<li><a href="#" target="_blank"><img src="img/facebook-icon.svg" loading="lazy"></a></li>
+				</ul>
+			</div>
+		</div>
+		<div class="list_area main_inner">
+												<div class="left_block fade fadeInUp is_inview">
+				<a href="#" class="c_news_card thumb_zoom">
+	<div class="thumb_wrap">
+		<div class="p_thumb r-16-9"><div class="bg lazyloaded" data-bg="img/news-thumb01.jpg" style="background-image: url('img/news-thumb01.jpg');"></div></div>
+		<div class="list_num eng">No.<span class="num">53</span></div>
+	</div>
+	<div class="text_group">
+		<div class="info_group">
+			<span class="cate eng">Others</span>
+			<p class="date eng">2025/11/26</p>
+		</div>
+		<h3 class="title txt_ovf_01" style="visibility: visible;">INTER CONNECT サービスアップデート情報</h3>
+	</div>
+</a>			</div>
+																		<div class="right_block">
+				<ul class="p_two_column">
+										<li class="fade fadeInUp is_inview">
+						<a href="#" class="c_news_card thumb_zoom">
+	<div class="thumb_wrap">
+		<div class="p_thumb r-16-9"><div class="bg lazyloaded" data-bg="img/news-thumb02.jpg" style="background-image: url('img/news-thumb02.jpg');"></div></div>
+		<div class="list_num eng">No.<span class="num">52</span></div>
+	</div>
+	<div class="text_group">
+		<div class="info_group">
+			<span class="cate eng"></span>
+			<p class="date eng">2025/11/10</p>
+		</div>
+		<h3 class="title txt_ovf_01" style="visibility: visible;">INTER CONNECT、登録企業数200社を突破 ...</h3>
+	</div>
+</a>					</li>
+										<li class="fade fadeInUp is_inview">
+						<a href="#" class="c_news_card thumb_zoom">
+	<div class="thumb_wrap">
+		<div class="p_thumb r-16-9"><div class="bg lazyloaded" data-bg="img/news-thumb03.jpg" style="background-image: url('img/news-thumb03.jpg');"></div></div>
+		<div class="list_num eng">No.<span class="num">51</span></div>
+	</div>
+	<div class="text_group">
+		<div class="info_group">
+			<span class="cate eng">News</span>
+			<p class="date eng">2025/08/22</p>
+		</div>
+		<h3 class="title txt_ovf_01" style="visibility: visible;">AIマッチング機能をアップデート、精度が大幅向上 ...</h3>
+	</div>
+</a>					</li>
+										<li class="fade fadeInUp is_inview">
+						<a href="#" class="c_news_card thumb_zoom">
+	<div class="thumb_wrap">
+		<div class="p_thumb r-16-9"><div class="bg lazyloaded" data-bg="img/news-thumb04.jpg" style="background-image: url('img/news-thumb04.jpg');"></div></div>
+		<div class="list_num eng">No.<span class="num">50</span></div>
+	</div>
+	<div class="text_group">
+		<div class="info_group">
+			<span class="cate eng">Report</span>
+			<p class="date eng">2025/07/16</p>
+		</div>
+		<h3 class="title txt_ovf_01" style="visibility: visible;">Security Days Spring 2025 Tokyoナイ …</h3>
+	</div>
+</a>					</li>
+										<li class="fade fadeInUp is_inview">
+						<a href="#" class="c_news_card thumb_zoom">
+	<div class="thumb_wrap">
+		<div class="p_thumb r-16-9"><div class="bg lazyloaded" data-bg="img/news-thumb05.jpg" style="background-image: url('img/news-thumb05.jpg');"></div></div>
+		<div class="list_num eng">No.<span class="num">49</span></div>
+	</div>
+	<div class="text_group">
+		<div class="info_group">
+			<span class="cate eng">News</span>
+			<p class="date eng">2025/01/28</p>
+		</div>
+		<h3 class="title txt_ovf_01" style="visibility: visible;">紹介プログラムのポイント還元率を改定 ...</h3>
+	</div>
+</a>					</li>
+									</ul>
+			</div>
+								</div>
+		<div class="btn_wrap fade fadeInUp is_inview"><a href="#" title="News" class="p_btn_circle"><span class="p_arrow_circle"></span><span class="eng">Read More</span></a></div>
+	</section>
+
+	<div id="sp_snslink" class="fade fadeInUp">
+		<p class="title">SNSでも情報を配信中</p>
+		<ul class="sns_list">
+			<li class="tw"><a href="#" target="_blank"><img src="img/x-twitter.svg" loading="lazy"></a></li>
+			<li class="fb"><a href="#" target="_blank"><img src="img/facebook-icon.svg" loading="lazy"></a></li>
+		</ul>
+	</div>
+
+</main>
+
+<!-- Start of HubSpot Embed Code -->
+
+<!-- End of HubSpot Embed Code -->
+
+<footer id="contact" class="fade fadeInUp is_inview">
+	<div class="top_block">
+		<div class="left_block fade fadeInLeft">
+			<div class="content_block">
+				<h2 class="title">次の事業成長の鍵は、<br class="sp">まだ出会っていない<br>パートナーが握っている</h2>
+				<p class="p_text">登録企業の78%が、3ヶ月以内に新規ビジネスパートナーとの協業を開始しています。<br class="pc">あなたのビジネスを加速させる出会いを、今すぐ見つけてください。</p>
+			</div>
+		</div>
+		<div class="right_block fade fadeInRight">
+			<a href="#contact" title="Contact">
+				<div class="content_block">
+					<h3 class="title eng">Contact</h3>
+					<p class="subtitle">お問い合わせ</p>
+				</div>
+				<div class="p_arrow_circle"></div>
+			</a>
+			<a href="#campaign" title="Register">
+				<div class="content_block">
+					<h3 class="title eng">Free Registration</h3>
+					<p class="subtitle">無料登録</p>
+				</div>
+				<div class="p_arrow_circle"></div>
+			</a>
+		</div>
+	</div>
+  	<div class="bottom_block fade fadeInUp">
+		<div class="content_block">
+			<div class="img_block">
+				<a href="/"><img src="img/interconnect-logo-header.png" class=" ls-is-cached lazyloaded" alt="INTER CONNECT"></a>
+			</div>
+			<div class="menu_block">
+				<div class="btn_wrap"><a href="#" id="page_top" class="scroll_top" style=""><img src="img/scroll-top.svg" class=" ls-is-cached lazyloaded"></a></div>
+				<ul class="f_menu">
+					<li><a href="#service" class="eng">Service</a></li>
+					<li><a href="#our_clients" class="eng">Works</a></li>
+					<li><a href="#aboutus" class="eng">About us</a></li>
+					<li><a href="#event" class="eng">Event</a></li>
+					<li><a href="#e-books" class="eng">E-books</a></li>
+					<li><a href="#newsblog" class="eng">News</a></li>
+				</ul>
+			</div>
+		</div>
+		<small class="copyright">© 2026 INTER CONNECT All Rights Reserved</small>
+	</div>
+</footer>
+
+</div>
+
+<!-- adobefont 400/500 -->
+<script>
+(function(d) {
+	var config = {
+			kitId: 'ygw3gon',
+			scriptTimeout: 3000,
+			async: true
+		},
+		h = d.documentElement,
+		t = setTimeout(function() {
+			h.className = h.className.replace(/\bwf-loading\b/g, "") + " wf-inactive";
+		}, config.scriptTimeout),
+		tk = d.createElement("script"),
+		f = false,
+		s = d.getElementsByTagName("script")[0],
+		a;
+	h.className += " wf-loading";
+	tk.src = 'https://use.typekit.net/' + config.kitId + '.js';
+	tk.async = true;
+	tk.onload = tk.onreadystatechange = function() {
+		a = this.readyState;
+		if (f || a && a != "complete" && a != "loaded") return;
+		f = true;
+		clearTimeout(t);
+		try {
+			Typekit.load(config)
+		} catch (e) {}
+	};
+	s.parentNode.insertBefore(tk, s)
+})(document);
+</script>
+
+<script type="text/javascript">
+$(function() {
+	var windowWidth = $(window).width();
+	var windowSwitch = 960;
+	var swiper = new Swiper(".mySwiper", {
+		loop: true,
+		speed: 600,
+		effect: "slide",
+		grabCursor: true,
+		spaceBetween: 32,
+		navigation: {
+			nextEl: '.swiper-button-next',
+			prevEl: '.swiper-button-prev',
+		},
+	});
+	$('#e-books .c_ebook_slider .ebook_slider').slick({
+		fade: true,
+		autoplay: false,
+		speed: 800,
+		cssEase: 'ease',
+		arrows: true,
+		appendArrows: $('#e-books .c_ebook_slider .slider_arrow_wrap'),
+		dots: false,
+		initialSlide: 0,
+		slidesToShow: 1,
+		slidesToScroll: 1,
+		swipe: true,
+		swipeToSlide: true,
+		centerMode: true,
+		variableWidth: false,
+		infinite: true,
+		responsive: [{
+			breakpoint: 960,
+			settings: {
+				slidesToShow: 1,
+				centerMode: true,
+			}
+		}]
+	});
+	if (windowWidth <= windowSwitch) {
+		$('.c_client_listsection .c_client_list').slick({
+			autoplay: false,
+			speed: 800,
+			cssEase: 'ease',
+			arrows: false,
+			dots: false,
+			initialSlide: 0,
+			slidesToShow: 1,
+			slidesToScroll: 1,
+			swipe: true,
+			swipeToSlide: true,
+			centerMode: true,
+			variableWidth: true,
+			infinite: true,
+			responsive: [{
+				breakpoint: 960,
+				settings: {
+					slidesToShow: 1,
+					centerMode: true,
+				}
+			}]
+		});
+	}
+	$('#e-books .c_ebook_slider .slider_arrow_wrap button').on({
+		'mouseenter': function() {
+			$('#e-books .c_ebook_slider .slide').addClass('btn_hov');
+		},
+		'mouseleave': function() {
+			$('#e-books .c_ebook_slider .slide').removeClass('btn_hov');
+		}
+	});
+	$('#e-books .c_ebook_slider .slider_arrow_wrap button').click(function() {
+		$('#e-books .c_ebook_slider .slide').removeClass('btn_hov');
+	})
+});
+</script>
+<script type="text/javascript">
+$(function() {
+	gsap.to('.about_bg_letter', {
+		x: 300,
+		scrollTrigger: {
+			trigger: '#about',
+			start: 'top center',
+			end: 'bottom center',
+			scrub: 3,
+			markers: false,
+		}
+	});
+});
+</script>
+<script type="text/javascript">
+$(function() {
+	var card = $("#dim_movie");
+	$(document).on("mousemove", function(e) {
+		var ax = -20 - (($(window).innerWidth() / 1 - e.pageX) / 100);
+		var ay = 0 - (($(window).innerHeight() / 1 - e.pageY) / 70);
+
+		card.attr("style", "transform: perspective(1000px) scale3d(1, 1, 1) rotateY(" + ax + "deg) rotateX(" + ay + "deg);-webkit-transform: perspective(1000px) scale3d(1, 1, 1) rotateY(" + ax + "deg) rotateX(" + ay + "deg);-moz-transform: perspective(1000px) scale3d(1, 1, 1) rotateY(" + ax + "deg) rotateX(" + ay + "deg)");
+	});
+});
+</script>
+<script id="rendered-js">
+var SEPARATION = 30,
+	AMOUNTX = 200,
+	AMOUNTY = 30;
+var container;
+var camera, scene, renderer;
+var particles, particle, count = 0;
+var windowHalfX = window.innerWidth / 2;
+var windowHalfY = window.innerHeight / 2;
+init();
+animate();
+
+function init() {
+
+	container = document.createElement('div');
+	container.id = "wave_bg";
+	document.body.appendChild(container);
+	if (container) {
+		container.className += container.className ? ' waves' : 'waves';
+	}
+
+	camera = new THREE.PerspectiveCamera(120, window.innerWidth / window.innerHeight, 1, 10000);
+	camera.position.y = 120; //changes how far back you can see i.e the particles towards horizon
+	camera.position.z = 240; //This is how close or far the particles are seen
+
+	camera.rotation.x = 0.6;
+
+	scene = new THREE.Scene();
+
+	particles = new Array();
+
+	var PI2 = Math.PI * 2;
+	var material = new THREE.SpriteCanvasMaterial({
+
+		color: 0x434343, //changes color of particles
+		program: function(context) {
+
+			context.beginPath();
+			context.arc(0, 0, 0.1, 0, PI2, true);
+			context.fill();
+
+		}
+	});
+
+	var i = 0;
+
+	for (var ix = 0; ix < AMOUNTX; ix++) {
+
+		for (var iy = 0; iy < AMOUNTY; iy++) {
+
+			particle = particles[i++] = new THREE.Sprite(material);
+			particle.position.x = ix * SEPARATION - AMOUNTX * SEPARATION / 2;
+			particle.position.z = iy * SEPARATION - (AMOUNTY * SEPARATION - 10);
+			scene.add(particle);
+
+		}
+
+	}
+
+	renderer = new THREE.CanvasRenderer();
+	renderer.setSize(window.innerWidth, window.innerHeight);
+	renderer.setClearColor(0x000000, 1);
+	container.appendChild(renderer.domElement);
+
+	window.addEventListener('resize', onWindowResize, false);
+
+}
+
+function onWindowResize() {
+
+	windowHalfX = window.innerWidth / 2;
+	windowHalfY = window.innerHeight / 2;
+
+	camera.aspect = window.innerWidth / window.innerHeight;
+	camera.updateProjectionMatrix();
+
+	renderer.setSize(window.innerWidth, window.innerHeight);
+
+}
+
+function animate() {
+
+	requestAnimationFrame(animate);
+
+	render();
+
+}
+
+function render() {
+
+	var i = 0;
+
+	for (var ix = 0; ix < AMOUNTX; ix++) {
+
+		for (var iy = 0; iy < AMOUNTY; iy++) {
+
+			particle = particles[i++];
+			particle.position.y = Math.sin((ix + count) * 0.5) * 20 + Math.sin((iy + count) * 0.5) * 20;
+			particle.scale.x = particle.scale.y = (Math.sin((ix + count) * 0.3) + 2) * 4 + (Math.sin((iy + count) * 0.5) + 1) * 4;
+
+		}
+
+	}
+	renderer.render(scene, camera);
+	count += 0.1;
+
+}
+</script><div id="wave_bg" class="waves" style="transform: scale(1.4); bottom: 0px;"><canvas width="1423" height="910" style="width: 1423px; height: 910px;"></canvas></div>
+
+<script type="text/javascript">
+var windowWidth = $(window).width();
+var windowHeight = $(window).height();
+var headerHeight = $('header').height();
+var windowSwitch = 960;
+
+var serviceOffsetTop = $('#service').offset().top - $('#service').height();
+
+/*if (windowWidth <= windowSwitch) {
+	var featureOffsetTop = $('#feature').offset().top + $('#feature').height() + windowHeight;
+} else {
+	var featureOffsetTop = $('#feature').offset().top + $('#feature').height() - windowHeight + headerHeight;
+}*/
+if (windowWidth <= windowSwitch) {
+	var pointOffsetTop = $('#point').offset().top + $('#point').height() + windowHeight;
+} else {
+	var pointOffsetTop = $('#point').offset().top + $('#point').height() - windowHeight + headerHeight;
+}
+
+/*var navpos = $('#feature').offset().top - headerHeight;
+var page01pos = $('#feature .page01').offset().top;
+var page02pos = $('#feature .page02').offset().top;
+var page03pos = $('#feature .page03').offset().top;
+var placeholderpos = $('#feature .placeholder').offset().top;*/
+
+var currentScroll = 0;
+var opacityValue = 0;
+
+scroll;
+
+$(window).on('scroll', function() {
+
+	scroll = $(window).scrollTop();
+	opacityValue = 1 - currentScroll;
+
+	// particle
+	/*if ($(window).scrollTop() > serviceOffsetTop && $(window).scrollTop() < featureOffsetTop) {*/
+  if ($(window).scrollTop() > serviceOffsetTop && $(window).scrollTop() < pointOffsetTop) {
+		$('#wave_bg').addClass("is-view");
+		$('#wave_bg').css({
+			transform: "scale(1)",
+			bottom: "0"
+		});
+	} else {
+		$('#wave_bg').removeClass("is-view");
+		$('#wave_bg').css({
+			transform: "scale(1.4)",
+			bottom: "0"
+		});
+	}
+
+	/*if (windowWidth >= windowSwitch) {
+		// navi
+		if ($(window).scrollTop() > navpos && $(window).scrollTop() < featureOffsetTop) {
+			$('.p_fullpage_nav').addClass("fixed");
+		} else {
+			$('.p_fullpage_nav').removeClass("fixed");
+		}
+
+		// Full scroll
+		if ($(window).scrollTop() > page01pos && $(window).scrollTop() < page02pos) {
+
+			currentScroll = (1 - (page01pos - scroll) / windowHeight - 1);
+
+			console.log("page01!");
+			$('#feature .page01 .content_block').addClass('is-view');
+			$('#feature .page02 .content_block').removeClass('is-view');
+			$('#feature .page03 .content_block').removeClass('is-view');
+
+			$('#wave_bg').css({
+				transform: "scale(1.2)",
+				bottom: "0"
+			});
+
+			$('.p_fullpage_nav .first').addClass("here");
+			$('.p_fullpage_nav .second').removeClass("here");
+			$('.p_fullpage_nav .third').removeClass("here");
+
+		}
+
+		if ($(window).scrollTop() > page02pos && $(window).scrollTop() < page03pos) {
+
+			currentScroll = (1 - (page02pos - scroll) / windowHeight - 1);
+
+			console.log("page02!");
+			$('#feature .page01 .content_block').removeClass('is-view');
+			$('#feature .page02 .content_block').addClass('is-view');
+			$('#feature .page03 .content_block').removeClass('is-view');
+
+			$('#wave_bg').css({
+				transform: "scale(1.4)",
+				bottom: "0"
+			});
+
+			$('.p_fullpage_nav .first').removeClass("here");
+			$('.p_fullpage_nav .second').addClass("here");
+			$('.p_fullpage_nav .third').removeClass("here");
+
+		}
+
+		if ($(window).scrollTop() > page03pos && $(window).scrollTop() < placeholderpos) {
+
+			currentScroll = (1 - (page03pos - scroll) / windowHeight - 1);
+
+			console.log("page03!");
+			$('#feature .page01 .content_block').removeClass('is-view');
+			$('#feature .page02 .content_block').removeClass('is-view');
+			$('#feature .page03 .content_block').addClass('is-view');
+
+			$('#wave_bg').css({
+				transform: "scale(1)",
+				bottom: "0"
+			});
+
+			$('.p_fullpage_nav .first').removeClass("here");
+			$('.p_fullpage_nav .second').removeClass("here");
+			$('.p_fullpage_nav .third').addClass("here");
+		}
+	}*/
+
+});
+
+// Video sizing now handled by CSS object-fit: cover
+function yt_screen_retio() {}
+$(window).resize(function() {
+	// #first_view height handled by CSS 100dvh
+});
+$(function() {
+	// #first_view height handled by CSS 100dvh
+});
+/*$(function() {
+	var windowWidth = $(window).width();
+	var windowSwitch = 960;
+	// fullscroll inview animation
+	$('#feature .page01 .content_block .text_block').on('inview', function(event, isInView) {
+		var isPage03 = $('#feature .page03 .content_block').hasClass('is-view');
+		if (isInView && !isPage03) {
+			$('#feature .page01 .content_block').addClass('is-view');
+		}
+	});
+	if (windowWidth <= windowSwitch) {
+		$('#feature .page02 .content_block .text_block').on('inview', function(event, isInView) {
+			if (isInView) {
+				$('#feature .page02 .content_block').addClass('is-view');
+			}
+		});
+		$('#feature .page03 .content_block .text_block').on('inview', function(event, isInView) {
+			if (isInView) {
+				$('#feature .page03 .content_block').addClass('is-view');
+			}
+		});
+	}
+});*/
+</script>
+
+<script>
+(function() {
+  var header = document.querySelector('header');
+  var last = 0;
+  function onScroll() {
+    var y = window.scrollY || window.pageYOffset;
+    if (y > 1) {
+      if (!last) header.classList.add('scrolled');
+    } else {
+      if (last) header.classList.remove('scrolled');
+    }
+    last = y > 1 ? 1 : 0;
+  }
+  window.addEventListener('scroll', onScroll, { passive: true });
+  onScroll();
+})();
+</script>
+
+<script>
+/* === 全アニメーション再発火 === */
+$(function() {
+  // スクレイプ時にハードコードされた is_inview を除去
+  // first_view/loading/splide は除外（初期表示に必要）
+  $('.fade.is_inview, .inview.is_inview').each(function() {
+    var $el = $(this);
+    // ヒーロー・ローディング・splideは除外
+    if ($el.closest('#first_view, #js-loading, #js-loadingcontent, .splide').length) return;
+    $el.removeClass('is_inview');
+  });
+
+  // p_borderbox の is_inview も除去
+  $('.p_borderbox.is_inview').each(function() {
+    if ($(this).closest('#first_view').length) return;
+    $(this).removeClass('is_inview');
+  });
+
+  // セクション内要素にスタガー（時間差）を付与
+  $('section, #aboutus, footer').each(function() {
+    var $items = $(this).find('.fade').not('.is_inview');
+    $items.each(function(i) {
+      var delay = Math.min(i * 0.15, 0.6); // 最大0.6秒
+      $(this).css({
+        'transition-delay': delay + 's',
+        '-webkit-transition-delay': delay + 's'
+      });
+    });
+  });
+});
+</script>
+</body></html>
