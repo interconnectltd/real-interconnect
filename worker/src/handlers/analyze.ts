@@ -72,6 +72,70 @@ const opusOutputSchema = z.object({
 
 type OpusOutput = z.infer<typeof opusOutputSchema>;
 
+// --- カテゴリ正規化（日本語→英語マッピング） ---
+const JA_TO_EN_CATEGORY: [RegExp, string][] = [
+  [/営業|販路|セールス/, "sales"],
+  [/マーケティング|広告|PR/, "marketing"],
+  [/テクノロジー|技術|IT|エンジニア/, "technology"],
+  [/金融|保険|ファイナンス|資金/, "finance"],
+  [/人事|採用|HR|組織/, "hr"],
+  [/法務|コンプライアンス|法律/, "legal"],
+  [/オペレーション|運用|業務|経営基盤|インフラ/, "operations"],
+  [/戦略|事業開発|提携|アライアンス|経営戦略/, "strategy"],
+  [/デザイン|UI|UX/, "design"],
+  [/製造|ヘルスケア|教育|不動産|業界/, "industry"],
+  [/リーダーシップ|経営|マネジメント|代表/, "leadership"],
+  [/ネットワーキング|コミュニティ/, "other"],
+];
+
+const VALID_CATEGORIES_SET = new Set(CATEGORIES);
+
+function normalizeCategoryToEnglish(cat: string): typeof CATEGORIES[number] {
+  if (!cat) return "other";
+  const lower = cat.toLowerCase();
+  if (VALID_CATEGORIES_SET.has(lower as typeof CATEGORIES[number])) return lower as typeof CATEGORIES[number];
+  for (const [pattern, en] of JA_TO_EN_CATEGORY) {
+    if (pattern.test(cat)) return en as typeof CATEGORIES[number];
+  }
+  return "other";
+}
+
+/** Pre-process raw JSON to normalize category fields before Zod enum validation */
+function normalizeRawCategories(raw: unknown): void {
+  if (!raw || typeof raw !== "object") return;
+  const obj = raw as Record<string, unknown>;
+  for (const key of ["needs", "offers", "topic_depth"]) {
+    const arr = obj[key];
+    if (!Array.isArray(arr)) continue;
+    for (const item of arr) {
+      if (item && typeof item === "object" && "category" in item) {
+        const rec = item as Record<string, unknown>;
+        if (typeof rec.category === "string") {
+          rec.category = normalizeCategoryToEnglish(rec.category);
+        }
+      }
+    }
+  }
+}
+
+function normalizeInsightCategories(insights: OpusOutput): OpusOutput {
+  return {
+    ...insights,
+    needs: insights.needs.map((n) => ({
+      ...n,
+      category: normalizeCategoryToEnglish(n.category),
+    })),
+    offers: insights.offers.map((o) => ({
+      ...o,
+      category: normalizeCategoryToEnglish(o.category),
+    })),
+    topic_depth: insights.topic_depth.map((t) => ({
+      ...t,
+      category: normalizeCategoryToEnglish(t.category),
+    })),
+  };
+}
+
 // Opus v3.0.0 プロンプト
 const PROMPT_V3 = `あなたはビジネスミーティングの構造化分析エキスパートです。
 指定された発言者について分析結果をJSONのみで出力してください。簡潔に。
@@ -195,6 +259,9 @@ export async function handleAnalyze(payload: {
     throw new Error(`Failed to parse Opus JSON: ${text.slice(0, 200)}`);
   }
 
+  // Pre-normalize: 日本語カテゴリを英語に変換してからZodバリデーション
+  normalizeRawCategories(rawJson);
+
   // Zod バリデーション（default値で欠損フィールドを補完）
   let insights: OpusOutput;
   try {
@@ -219,10 +286,13 @@ export async function handleAnalyze(payload: {
     if (!retryMatch) throw new Error("Fallback: No JSON found");
 
     try {
-      insights = opusOutputSchema.parse(JSON.parse(retryMatch[0]));
+      const retryRaw = JSON.parse(retryMatch[0]);
+      normalizeRawCategories(retryRaw);
+      insights = opusOutputSchema.parse(retryRaw);
     } catch {
       // 最終フォールバック: 最低限のデータで構築
       const partial = JSON.parse(retryMatch[0]) as Record<string, unknown>;
+      normalizeRawCategories(partial);
       insights = opusOutputSchema.parse({
         needs: Array.isArray(partial.needs) ? partial.needs : [],
         offers: Array.isArray(partial.offers) ? partial.offers : [],
@@ -230,6 +300,9 @@ export async function handleAnalyze(payload: {
       });
     }
   }
+
+  // カテゴリ正規化（日本語→英語）— Opus が日本語カテゴリを返すケースを修正
+  insights = normalizeInsightCategories(insights);
 
   // needs/offers に会議品質係数を適用
   const needs = insights.needs.map((n) => ({

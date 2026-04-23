@@ -6,6 +6,37 @@
 import { calcAttributeScore } from "./attribute-score";
 import { calcPurposeScore } from "./purpose-score";
 
+// --- カテゴリ正規化（日本語→英語マッピング） ---
+const VALID_CATEGORIES = new Set([
+  "sales", "marketing", "technology", "finance", "hr", "legal",
+  "operations", "strategy", "design", "industry", "leadership", "other",
+]);
+
+const JA_TO_EN_CATEGORY: [RegExp, string][] = [
+  [/営業|販路|セールス/, "sales"],
+  [/マーケティング|広告|PR/, "marketing"],
+  [/テクノロジー|技術|IT|エンジニア/, "technology"],
+  [/金融|保険|ファイナンス|資金/, "finance"],
+  [/人事|採用|HR|組織/, "hr"],
+  [/法務|コンプライアンス|法律/, "legal"],
+  [/オペレーション|運用|業務|経営基盤|インフラ/, "operations"],
+  [/戦略|事業開発|提携|アライアンス|経営戦略/, "strategy"],
+  [/デザイン|UI|UX/, "design"],
+  [/製造|ヘルスケア|教育|不動産|業界/, "industry"],
+  [/リーダーシップ|経営|マネジメント|代表/, "leadership"],
+  [/ネットワーキング|コミュニティ/, "other"],
+];
+
+export function normalizeCategory(cat: string): string {
+  if (!cat) return "other";
+  const lower = cat.toLowerCase();
+  if (VALID_CATEGORIES.has(lower)) return lower;
+  for (const [pattern, en] of JA_TO_EN_CATEGORY) {
+    if (pattern.test(cat)) return en;
+  }
+  return "other";
+}
+
 // --- 隣接カテゴリマップ (§5.3, 11ペア双方向) ---
 const ADJACENT: Record<string, string[]> = {
   technology: ["strategy", "design", "operations"],
@@ -139,11 +170,13 @@ function calcNeedOfferScore(needs: NeedVector[], offers: OfferVector[]): number 
     let bestMatch = 0;
     for (const offer of offers) {
       let catMatch = 0;
+      const needCat = need.category ? normalizeCategory(need.category) : undefined;
+      const offerCat = offer.category ? normalizeCategory(offer.category) : undefined;
       if (need.subcategory && offer.subcategory && need.subcategory === offer.subcategory) {
         catMatch = 1.0;
-      } else if (need.category && offer.category && need.category === offer.category) {
+      } else if (needCat && offerCat && needCat === offerCat) {
         catMatch = 0.5;
-      } else if (need.category && offer.category && isAdjacent(need.category, offer.category)) {
+      } else if (needCat && offerCat && isAdjacent(needCat, offerCat)) {
         catMatch = 0.4;
       }
 
@@ -179,12 +212,14 @@ function calcExpertiseFit(viewerNeeds: NeedVector[], targetOffers: OfferVector[]
     totalWeight += w;
 
     let bestFit = 0.1; // 無関係のベース
+    const offerCat = offer.category ? normalizeCategory(offer.category) : undefined;
     for (const need of viewerNeeds) {
+      const needCat = need.category ? normalizeCategory(need.category) : undefined;
       if (need.subcategory && offer.subcategory && need.subcategory === offer.subcategory) {
         bestFit = Math.max(bestFit, 0.5); // ピア
-      } else if (need.category && offer.category && need.category === offer.category) {
+      } else if (needCat && offerCat && needCat === offerCat) {
         bestFit = Math.max(bestFit, 1.0); // 補完的（最高）
-      } else if (need.category && offer.category && isAdjacent(need.category, offer.category)) {
+      } else if (needCat && offerCat && isAdjacent(needCat, offerCat)) {
         bestFit = Math.max(bestFit, 0.4);
       }
     }
@@ -210,8 +245,10 @@ function calcTopicAlignment(viewerTopics: TopicVector[], targetTopics: TopicVect
 
     for (const tt of targetTopics) {
       let catMatch = 0;
-      if (vt.category && tt.category) {
-        if (vt.category === tt.category) catMatch = 0.5;
+      const vtCat = vt.category ? normalizeCategory(vt.category) : undefined;
+      const ttCat = tt.category ? normalizeCategory(tt.category) : undefined;
+      if (vtCat && ttCat) {
+        if (vtCat === ttCat) catMatch = 0.5;
         // トピックテキスト部分一致
         if (vt.topic && tt.topic && (vt.topic.includes(tt.topic) || tt.topic.includes(vt.topic))) {
           catMatch = 1.0;
