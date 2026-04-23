@@ -1,0 +1,1083 @@
+/* ============================================================
+   responsive-layout.css
+   Consolidated from:
+   - responsive-menu.css
+   - sidebar-responsive-fix.css
+   - responsive-complete.css
+   ============================================================ */
+
+/* ============================================================
+   Source: responsive-menu.css
+   ============================================================ */
+
+/* Responsive Menu Styles */
+
+/* Mobile Menu Toggle Button */
+.mobile-menu-toggle {
+    background: none;
+    border: none;
+    color: var(--text-primary);
+    font-size: 1.5rem;
+    padding: 10px;
+    cursor: pointer;
+    transition: color 0.3s ease;
+}
+
+.mobile-menu-toggle:hover {
+    color: var(--primary-color);
+}
+
+/* Mobile Navigation */
+.mobile-nav {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 280px;
+    height: 100vh;
+    background: #1a1d29;
+    transform: translateX(-100%);
+    transition: transform 0.3s ease;
+    z-index: 2100 !important;
+    overflow-y: auto;
+    box-shadow: 2px 0 10px rgba(0, 0, 0, 0.1);
+}
+
+.mobile-nav.active {
+    transform: translateX(0);
+}
+
+/* Mobile Backdrop */
+.mobile-backdrop {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.5);
+    z-index: 2050 !important;
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.3s ease, visibility 0.3s ease;
+    pointer-events: none;
+}
+
+.mobile-backdrop.active {
+    opacity: 1;
+    visibility: visible;
+    pointer-events: auto;
+}
+
+/* Mobile Nav Header */
+.mobile-nav-header {
+    padding: 20px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.mobile-nav-header h1 {
+    font-size: 1.5rem;
+    color: #fff;
+    margin: 0;
+    font-weight: 700;
+}
+
+/* Mobile Nav Menu */
+.mobile-nav-menu {
+    padding: 20px 0;
+}
+
+.mobile-nav-menu ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.mobile-nav-menu li {
+    margin: 0;
+}
+
+.mobile-nav-link {
+    display: flex;
+    align-items: center;
+    padding: 15px 20px;
+    color: #a0a8b8;
+    text-decoration: none;
+    transition: all 0.3s ease;
+}
+
+.mobile-nav-link:hover {
+    background: rgba(255, 255, 255, 0.05);
+    color: #fff;
+}
+
+.mobile-nav-link.active {
+    background: #0066ff;
+    color: white;
+}
+
+.mobile-nav-link i {
+    width: 20px;
+    margin-right: 15px;
+    font-size: 1.1rem;
+}
+
+.mobile-nav-link .badge {
+    margin-left: auto;
+    background: var(--danger-color, #ff3b30);
+    color: white;
+    padding: 2px 8px;
+    border-radius: 12px;
+    font-size: 0.75rem;
+}
+
+/* Mobile Nav Footer */
+.mobile-nav-footer {
+    padding: 20px;
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+    margin-top: auto;
+}
+
+/* Mobile Header - Hidden by default */
+.mobile-header {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 60px;
+    background: white;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    z-index: 900;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 20px;
+}
+
+/* Mobile Menu Toggle Button */
+.mobile-menu-toggle {
+    background: none;
+    border: none;
+    font-size: 1.5rem;
+    color: var(--text-primary, #333);
+    cursor: pointer;
+    padding: 8px;
+    min-width: 44px;
+    min-height: 44px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: color 0.3s ease;
+    position: relative;
+    z-index: 901;
+}
+
+.mobile-menu-toggle:hover {
+    color: var(--primary-color, #2563eb);
+}
+
+.mobile-menu-toggle:focus {
+    outline: 2px solid var(--primary-color, #2563eb);
+    outline-offset: 2px;
+}
+
+/* Mobile Header Title */
+.mobile-header h1 {
+    font-size: 1.25rem;
+    font-weight: 600;
+    color: var(--text-primary, #333);
+    margin: 0;
+}
+
+/* Mobile Header Actions */
+.mobile-header-actions {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.mobile-header .notification-btn {
+    color: var(--text-primary, #333);
+}
+
+.mobile-header .notification-btn:hover {
+    color: var(--primary-color, #2563eb);
+}
+
+.mobile-header .notification-badge {
+    border-radius: 12px;
+    min-width: 20px;
+    text-align: center;
+    height: auto;
+    display: block;
+}
+
+/* Responsive Behavior */
+@media (max-width: 991px) {
+    /* Show mobile header */
+    .mobile-header {
+        display: flex !important;
+    }
+
+    /* Transform sidebar for mobile instead of hiding */
+    .sidebar {
+        position: fixed !important;
+        left: 0 !important;
+        top: 0 !important;
+        width: 260px !important;
+        height: 100vh !important;
+        transform: translateX(-100%) !important;
+        transition: transform 0.3s ease !important;
+        z-index: 400 !important;
+    }
+
+    /* Show sidebar when active */
+    .sidebar.active,
+    .sidebar.show {
+        transform: translateX(0) !important;
+    }
+
+    /* Adjust main content for mobile */
+    .main-content {
+        margin-left: 0 !important;
+        padding-top: 60px; /* Account for mobile header */
+    }
+}
+
+/* Smooth animations */
+.mobile-nav,
+.mobile-backdrop {
+    will-change: transform, opacity;
+}
+
+/* Prevent body scroll when menu is open */
+body.menu-open {
+    overflow: hidden;
+}
+
+/* Close button for mobile nav */
+.mobile-nav-close {
+    background: none;
+    border: none;
+    color: #a0a8b8;
+    font-size: 1.5rem;
+    cursor: pointer;
+    padding: 5px;
+    min-width: 44px;
+    min-height: 44px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: color 0.3s ease;
+}
+
+.mobile-nav-close:hover {
+    color: #fff;
+}
+
+/* ============================================================
+   Source: sidebar-responsive-fix.css
+   ============================================================ */
+
+/**
+ * サイドバーレスポンシブ統一修正CSS
+ * 全ページのサイドバーとメインコンテンツのレイアウトを統一
+ * 基準: referral-final-fix.css の実装に準拠
+ */
+
+/* =============================
+   基本レイアウト設定
+   ============================= */
+/* ダッシュボード全体 */
+.dashboard {
+    display: flex;
+    min-height: 100vh;
+    width: 100%;
+    background: #f8f9fa;
+}
+
+/* サイドバー幅を260pxに統一 */
+.dashboard .sidebar {
+    width: 260px !important;
+    flex-shrink: 0;
+    background: white;
+    box-shadow: 2px 0 4px rgba(0, 0, 0, 0.05);
+    position: relative;
+    z-index: 100;
+}
+
+/* メインコンテンツ - デフォルトはサイドバーなし */
+.dashboard .main-content {
+    flex: 1;
+    margin-left: 0 !important;
+    width: 100% !important;
+    padding: 0 !important;
+    overflow-y: auto;
+    background: #f8f9fa;
+}
+
+/* サイドバーが非表示の場合 */
+.dashboard.sidebar-collapsed .main-content {
+    margin-left: 0 !important;
+    width: 100% !important;
+}
+
+/* コンテンツヘッダー */
+.dashboard .content-header {
+    background: white;
+    padding: 1.5rem 2rem !important;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+    margin-bottom: 2rem !important;
+    width: 100%;
+}
+
+/* コンテンツボディ - 最大幅制限を削除 */
+.dashboard .main-content .content-body {
+    padding: 0 2rem !important;
+    /* max-widthを削除して全幅使用 */
+    margin: 0 !important;
+    width: 100%;
+}
+
+/* =============================
+   PC画面対応（1024px以上）
+   ============================= */
+@media (min-width: 1024px) {
+    /* サイドバー固定表示 */
+    .dashboard .sidebar {
+        position: fixed;
+        left: 0;
+        top: 0;
+        height: 100vh;
+        overflow-y: auto;
+        display: block !important;
+    }
+
+    /* メインコンテンツをサイドバー分ずらす */
+    .dashboard .main-content {
+        margin-left: 260px !important;
+        width: calc(100% - 260px) !important;
+    }
+
+    /* モバイルヘッダーを非表示 */
+    .mobile-header {
+        display: none !important;
+    }
+
+    /* コンテンツボディ - 全幅使用 */
+    .dashboard .main-content .content-body {
+        /* max-widthを削除 */
+        padding: 0 3rem !important;
+        width: 100% !important;
+        box-sizing: border-box;
+    }
+}
+
+/* =============================
+   大画面対応（1440px以上）
+   ============================= */
+@media (min-width: 1440px) {
+    /* コンテンツボディのパディングを増やす */
+    .dashboard .main-content .content-body {
+        /* max-widthなし、全幅使用 */
+        padding: 0 4rem !important;
+    }
+}
+
+/* 超大画面（1920px以上） */
+@media (min-width: 1920px) {
+    .dashboard .main-content .content-body {
+        /* max-widthなし、全幅使用 */
+        padding: 0 5rem !important;
+    }
+}
+
+/* =============================
+   タブレット対応（768px〜1023px）
+   ============================= */
+@media (min-width: 768px) and (max-width: 1023px) {
+    /* サイドバーを非表示（ハンバーガーメニュー使用） */
+    .dashboard .sidebar {
+        display: none !important;
+    }
+
+    /* メインコンテンツを全幅に */
+    .dashboard .main-content {
+        margin-left: 0 !important;
+        width: 100% !important;
+        margin-top: 60px !important; /* モバイルヘッダーの高さ分 */
+    }
+
+    /* モバイルヘッダーを表示 */
+    .mobile-header {
+        display: flex !important;
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 60px;
+        background: white;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        z-index: 1000;
+        align-items: center;
+        padding: 0 1rem;
+    }
+
+    /* コンテンツの余白を調整 */
+    .dashboard .content-header {
+        padding: 1rem 1.5rem !important;
+    }
+
+    .dashboard .main-content .content-body {
+        padding: 0 1.5rem !important;
+        /* max-widthを削除 */
+        width: 100% !important;
+    }
+}
+
+/* =============================
+   モバイル対応（767px以下）
+   ============================= */
+@media (max-width: 767px) {
+    /* フレックスボックスを縦並びに */
+    .dashboard {
+        flex-direction: column;
+    }
+
+    /* サイドバーを非表示（モバイルナビを使用） */
+    .dashboard .sidebar {
+        display: none !important;
+    }
+
+    /* メインコンテンツを全幅に */
+    .dashboard .main-content {
+        margin-left: 0 !important;
+        width: 100% !important;
+        margin-top: 60px !important; /* モバイルヘッダーの高さ分 */
+    }
+
+    /* モバイルヘッダーを表示 */
+    .mobile-header {
+        display: flex !important;
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 60px;
+        background: white;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        z-index: 1000;
+        align-items: center;
+        padding: 0 1rem;
+    }
+
+    /* コンテンツヘッダーの余白調整 */
+    .dashboard .content-header {
+        padding: 1rem !important;
+        margin-bottom: 1rem !important;
+    }
+
+    /* コンテンツボディの余白調整 */
+    .dashboard .main-content .content-body {
+        padding: 0 1rem !important;
+        /* max-widthを削除 */
+        width: 100% !important;
+    }
+
+    /* モバイルナビゲーション表示時 */
+    .mobile-nav.active {
+        display: block !important;
+        position: fixed;
+        top: 0;
+        left: 0;
+        bottom: 0;
+        width: 280px;
+        background: #1a1d29;
+        box-shadow: 2px 0 10px rgba(0, 0, 0, 0.3);
+        z-index: 2100 !important;
+        overflow-y: auto;
+    }
+
+    /* モバイルバックドロップ */
+    .mobile-backdrop.active {
+        display: block !important;
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: rgba(0, 0, 0, 0.5);
+        z-index: 2050 !important;
+    }
+}
+
+/* =============================
+   小型モバイル対応（480px以下）
+   ============================= */
+@media (max-width: 480px) {
+    /* さらに余白を減らす */
+    .dashboard .content-header {
+        padding: 0.75rem !important;
+    }
+
+    .dashboard .main-content .content-body {
+        padding: 0 0.75rem !important;
+    }
+
+    /* モバイルナビの幅を調整 */
+    .mobile-nav.active {
+        width: 85vw;
+        max-width: 300px;
+    }
+}
+
+/* =============================
+   印刷対応
+   ============================= */
+@media print {
+    /* サイドバーを非表示 */
+    .dashboard .sidebar,
+    .mobile-header,
+    .mobile-nav,
+    .mobile-backdrop {
+        display: none !important;
+    }
+
+    /* メインコンテンツを全幅に */
+    .dashboard .main-content {
+        margin-left: 0 !important;
+        width: 100% !important;
+        margin-top: 0 !important;
+    }
+}
+
+/* =============================
+   アクセシビリティ対応
+   ============================= */
+/* フォーカス時のアウトライン */
+.dashboard .sidebar a:focus,
+.dashboard .main-content a:focus,
+.dashboard button:focus {
+    outline: 2px solid #0066ff;
+    outline-offset: 2px;
+}
+
+/* ハイコントラストモード対応 */
+@media (prefers-contrast: high) {
+    .dashboard .sidebar {
+        border-right: 2px solid #000;
+    }
+
+    .dashboard .content-header {
+        border-bottom: 2px solid #000;
+    }
+}
+
+/* ダークモード対応（将来の実装用） */
+@media (prefers-color-scheme: dark) {
+    /* ダークモード時のスタイルはここに追加 */
+}
+
+/* ============================================================
+   Source: responsive-complete.css
+   ============================================================ */
+
+/* ===========================
+   完全レスポンシブデザイン
+   =========================== */
+
+/* Base Typography Scale */
+:root {
+    --base-font-size: 16px;
+    --h1-size: 2.5rem;
+    --h2-size: 2rem;
+    --h3-size: 1.75rem;
+    --h4-size: 1.5rem;
+    --h5-size: 1.25rem;
+    --h6-size: 1rem;
+    --small-text: 0.875rem;
+    --tiny-text: 0.75rem;
+}
+
+/* Extra Large Screens (1920px+) */
+@media (min-width: 1920px) {
+    :root {
+        --base-font-size: 18px;
+    }
+
+    .container {
+        max-width: 1600px;
+    }
+}
+
+/* Large Desktop (1440px - 1919px) */
+@media (min-width: 1440px) and (max-width: 1919px) {
+    .container {
+        max-width: 1320px;
+    }
+}
+
+/* Desktop (1200px - 1439px) */
+@media (min-width: 1200px) and (max-width: 1439px) {
+    .container {
+        max-width: 1140px;
+    }
+}
+
+/* Small Desktop (992px - 1199px) */
+@media (min-width: 992px) and (max-width: 1199px) {
+    .container {
+        max-width: 960px;
+    }
+
+    .sidebar {
+        width: 240px;
+    }
+}
+
+/* Tablet Landscape (768px - 991px) */
+@media (min-width: 768px) and (max-width: 991px) {
+    :root {
+        --h1-size: 2.25rem;
+        --h2-size: 1.875rem;
+        --h3-size: 1.5rem;
+        --h4-size: 1.375rem;
+    }
+
+    .container {
+        max-width: 720px;
+        padding: 0 20px;
+    }
+
+    .grid-3 {
+        grid-template-columns: repeat(2, 1fr);
+    }
+
+    .card {
+        padding: 1.5rem;
+    }
+}
+
+/* Tablet Portrait (600px - 767px) */
+@media (min-width: 600px) and (max-width: 767px) {
+    :root {
+        --h1-size: 2rem;
+        --h2-size: 1.75rem;
+        --h3-size: 1.5rem;
+        --h4-size: 1.25rem;
+    }
+
+    .container {
+        max-width: 100%;
+        padding: 0 20px;
+    }
+
+    .grid-2,
+    .grid-3,
+    .grid-4 {
+        grid-template-columns: 1fr;
+        gap: 1rem;
+    }
+}
+
+/* Large Mobile (480px - 599px) */
+@media (min-width: 480px) and (max-width: 599px) {
+    :root {
+        --base-font-size: 15px;
+        --h1-size: 1.875rem;
+        --h2-size: 1.625rem;
+        --h3-size: 1.375rem;
+        --h4-size: 1.25rem;
+    }
+
+    .container {
+        padding: 0 16px;
+    }
+
+    .card {
+        padding: 1.25rem;
+        margin-bottom: 1rem;
+    }
+
+    .btn,
+    .button {
+        padding: 0.75rem 1.5rem;
+        font-size: 0.9375rem;
+    }
+}
+
+/* Mobile (320px - 479px) */
+@media (max-width: 479px) {
+    :root {
+        --base-font-size: 14px;
+        --h1-size: 1.75rem;
+        --h2-size: 1.5rem;
+        --h3-size: 1.25rem;
+        --h4-size: 1.125rem;
+    }
+
+    .container {
+        padding: 0 12px;
+    }
+
+    .card {
+        padding: 1rem;
+        margin-bottom: 0.75rem;
+        border-radius: 8px;
+    }
+
+    .btn,
+    .button {
+        padding: 0.625rem 1.25rem;
+        font-size: 0.875rem;
+        width: 100%;
+        margin-bottom: 0.5rem;
+    }
+
+    /* Stack form elements */
+    .form-group {
+        margin-bottom: 1rem;
+    }
+
+    input[type="text"],
+    input[type="email"],
+    input[type="password"],
+    textarea,
+    select {
+        font-size: 16px; /* Prevent zoom on iOS */
+    }
+}
+
+/* Small Mobile (below 320px) */
+@media (max-width: 319px) {
+    :root {
+        --base-font-size: 13px;
+        --h1-size: 1.5rem;
+        --h2-size: 1.375rem;
+        --h3-size: 1.25rem;
+        --h4-size: 1.125rem;
+    }
+
+    .container {
+        padding: 0 10px;
+    }
+}
+
+/* === Common Responsive Patterns === */
+
+/* Navigation */
+@media (max-width: 991px) {
+    .main-nav {
+        display: none;
+    }
+
+    .mobile-nav {
+        display: block;
+    }
+
+    .mobile-menu-toggle {
+        display: block;
+    }
+
+    .site-header {
+        position: sticky;
+        top: 0;
+        z-index: 1800;
+    }
+}
+
+@media (min-width: 992px) {
+    .mobile-nav,
+    .mobile-menu-toggle,
+    .mobile-header {
+        display: none !important;
+    }
+}
+
+/* Sidebar */
+@media (max-width: 991px) {
+    .sidebar {
+        position: fixed;
+        left: -300px;
+        width: 280px;
+        height: 100vh;
+        transition: left 0.3s ease;
+        z-index: 2000;
+    }
+
+    .sidebar.active {
+        left: 0;
+    }
+
+    .sidebar-overlay {
+        display: none;
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: rgba(0, 0, 0, 0.5);
+        z-index: 1999;
+    }
+
+    .sidebar-overlay.active {
+        display: block;
+    }
+}
+
+/* Grid Systems */
+@media (max-width: 767px) {
+    [class*="col-"] {
+        width: 100%;
+        margin-bottom: 1rem;
+    }
+
+    .row {
+        flex-direction: column;
+    }
+}
+
+/* Tables */
+@media (max-width: 767px) {
+    .table-responsive {
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+    }
+
+    table {
+        min-width: 600px;
+        word-break: break-word;
+    }
+
+    table th,
+    table td {
+        white-space: nowrap;
+    }
+}
+
+/* Cards and Components */
+@media (max-width: 599px) {
+    .card-horizontal {
+        flex-direction: column;
+    }
+
+    .card-image {
+        width: 100%;
+        height: 200px;
+    }
+
+    .modal-content {
+        margin: 10px;
+        max-height: calc(100vh - 20px);
+        overflow-y: auto;
+    }
+}
+
+/* Forms */
+@media (max-width: 479px) {
+    .form-inline {
+        flex-direction: column;
+    }
+
+    .form-inline > * {
+        width: 100%;
+        margin-bottom: 0.5rem;
+    }
+
+    .input-group {
+        flex-direction: column;
+    }
+
+    .input-group > * {
+        width: 100%;
+        border-radius: var(--radius) !important;
+    }
+}
+
+/* Text and Typography */
+@media (max-width: 599px) {
+    .text-truncate-mobile {
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+
+    .hide-mobile {
+        display: none !important;
+    }
+
+    .show-mobile {
+        display: block !important;
+    }
+}
+
+/* Images */
+@media (max-width: 767px) {
+    img {
+        max-width: 100%;
+        height: auto;
+    }
+
+    .avatar-large {
+        width: 80px;
+        height: 80px;
+    }
+
+    .avatar-medium {
+        width: 48px;
+        height: 48px;
+    }
+
+    .avatar-small {
+        width: 32px;
+        height: 32px;
+    }
+}
+
+/* Spacing Utilities */
+@media (max-width: 599px) {
+    .p-lg { padding: 1.5rem !important; }
+    .p-md { padding: 1rem !important; }
+    .p-sm { padding: 0.5rem !important; }
+
+    .m-lg { margin: 1.5rem !important; }
+    .m-md { margin: 1rem !important; }
+    .m-sm { margin: 0.5rem !important; }
+
+    .mt-lg { margin-top: 1.5rem !important; }
+    .mb-lg { margin-bottom: 1.5rem !important; }
+}
+
+/* Referral Page Specific */
+@media (max-width: 767px) {
+    .points-grid {
+        grid-template-columns: 1fr;
+        gap: 1rem;
+    }
+
+    .point-item {
+        display: flex;
+        align-items: center;
+        padding: 1rem;
+        background: white;
+        border-radius: 8px;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+
+    .point-icon {
+        font-size: 2rem;
+        margin-right: 1rem;
+    }
+
+    .invite-link-container {
+        flex-direction: column;
+    }
+
+    .invite-link-input {
+        margin-bottom: 0.5rem;
+    }
+
+    .copy-button {
+        width: 100%;
+    }
+}
+
+/* Auth Pages */
+@media (max-width: 599px) {
+    .auth-container {
+        padding: 1rem;
+    }
+
+    .auth-card {
+        width: 100%;
+        max-width: 400px;
+        padding: 1.5rem;
+    }
+
+    .auth-header h1 {
+        font-size: 1.75rem;
+    }
+}
+
+/* Dashboard */
+@media (max-width: 991px) {
+    .dashboard-main {
+        margin-left: 0;
+        padding: 1rem;
+    }
+
+    .dashboard-container {
+        padding: 0;
+    }
+
+    .stats-grid {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 0.75rem;
+    }
+}
+
+@media (max-width: 599px) {
+    .stats-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .chart-container {
+        height: 300px;
+    }
+}
+
+/* Utility Classes */
+.d-none { display: none !important; }
+.d-block { display: block !important; }
+.d-flex { display: flex !important; }
+.d-grid { display: grid !important; }
+
+@media (min-width: 576px) {
+    .d-sm-none { display: none !important; }
+    .d-sm-block { display: block !important; }
+    .d-sm-flex { display: flex !important; }
+    .d-sm-grid { display: grid !important; }
+}
+
+@media (min-width: 768px) {
+    .d-md-none { display: none !important; }
+    .d-md-block { display: block !important; }
+    .d-md-flex { display: flex !important; }
+    .d-md-grid { display: grid !important; }
+}
+
+@media (min-width: 992px) {
+    .d-lg-none { display: none !important; }
+    .d-lg-block { display: block !important; }
+    .d-lg-flex { display: flex !important; }
+    .d-lg-grid { display: grid !important; }
+}
+
+@media (min-width: 1200px) {
+    .d-xl-none { display: none !important; }
+    .d-xl-block { display: block !important; }
+    .d-xl-flex { display: flex !important; }
+    .d-xl-grid { display: grid !important; }
+}
+
+/* Print Styles */
+@media print {
+    .no-print,
+    .sidebar,
+    .mobile-nav,
+    .site-header,
+    .user-menu,
+    .notification-popup {
+        display: none !important;
+    }
+
+    body {
+        font-size: 12pt;
+        line-height: 1.5;
+    }
+
+    .container {
+        max-width: 100%;
+    }
+}

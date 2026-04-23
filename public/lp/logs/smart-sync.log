@@ -1,0 +1,232 @@
+🔄 スマート自動同期を開始します...
+最小同期間隔: 300秒（5分）
+✅ 2025-07-21 12:21:35 - 変更を同期します
+fatal: Unable to create '/home/ooxmichaelxoo/INTERCONNECT_project/.git/index.lock': File exists.
+
+Another git process seems to be running in this repository, e.g.
+an editor opened by 'git commit'. Please make sure all processes
+are terminated then try again. If it still fails, a git process
+may have crashed in this repository earlier:
+remove the file manually to continue.
+fatal: Unable to create '/home/ooxmichaelxoo/INTERCONNECT_project/.git/index.lock': File exists.
+
+Another git process seems to be running in this repository, e.g.
+an editor opened by 'git commit'. Please make sure all processes
+are terminated then try again. If it still fails, a git process
+may have crashed in this repository earlier:
+remove the file manually to continue.
+Everything up-to-date
+🚀 同期完了！
+⏳ 前回の同期から32秒しか経過していません。
+   次の同期まで268秒待機します...
+✅ 2025-07-21 12:26:31 - 変更を同期します
+[main 43f3f5d] Auto-sync: 2025-07-21 12:26:31
+ 2 files changed, 5 insertions(+), 70 deletions(-)
+To https://github.com/REVIRALL/interconnect.git
+   a79f5fb..43f3f5d  main -> main
+🚀 同期完了！
+⏳ 前回の同期から30秒しか経過していません。
+   次の同期まで270秒待機します...
+✅ 2025-07-21 12:31:11 - 変更を同期します
+[main d1ca47d] Auto-sync: 2025-07-21 12:31:11
+ 5 files changed, 101 insertions(+), 11 deletions(-)
+To https://github.com/REVIRALL/interconnect.git
+   43f3f5d..d1ca47d  main -> main
+🚀 同期完了！
+⏳ 前回の同期から28秒しか経過していません。
+   次の同期まで272秒待機します...
+✅ 2025-07-21 12:35:49 - 変更を同期します
+[main 4250058] Auto-sync: 2025-07-21 12:35:49
+ 4 files changed, 15 insertions(+), 23 deletions(-)
+To https://github.com/REVIRALL/interconnect.git
+   d1ca47d..4250058  main -> main
+🚀 同期完了！
+⏳ 前回の同期から22秒しか経過していません。
+   次の同期まで278秒待機します...
+✅ 2025-07-21 12:40:32 - 変更を同期します
+[main 11aa7ac] Auto-sync: 2025-07-21 12:40:32
+ 5 files changed, 27 insertions(+), 14 deletions(-)
+To https://github.com/REVIRALL/interconnect.git
+   4250058..11aa7ac  main -> main
+🚀 同期完了！
+⏳ 前回の同期から30秒しか経過していません。
+   次の同期まで270秒待機します...
+✅ 2025-07-21 12:45:10 - 変更を同期します
+[main 1c1175f] Auto-sync: 2025-07-21 12:45:10
+ 8 files changed, 805 insertions(+), 19 deletions(-)
+ create mode 100644 js/background-animation-fixed.js
+ create mode 100644 js/loading-screen-fixed.js
+ create mode 100644 js/main-fixed.js
+To https://github.com/REVIRALL/interconnect.git
+   11aa7ac..1c1175f  main -> main
+🚀 同期完了！
+⏳ 前回の同期から28秒しか経過していません。
+   次の同期まで272秒待機します...
+✅ 2025-07-21 12:49:48 - 変更を同期します
+[main 47eaa97] Auto-sync: 2025-07-21 12:49:48
+ 7 files changed, 640 insertions(+), 54 deletions(-)
+ create mode 100644 MEMORY_LEAK_FIX_GUIDE.md
+ create mode 100644 css/animations-performance.css
+ create mode 100644 js/performance-monitor.js
+To https://github.com/REVIRALL/interconnect.git
+   1c1175f..47eaa97  main -> main
+🚀 同期完了！
+⏳ 前回の同期から28秒しか経過していません。
+   次の同期まで272秒待機します...
+✅ 2025-07-21 12:54:24 - 変更を同期します
+[main eac381c] Auto-sync: 2025-07-21 12:54:24
+ 6 files changed, 502 insertions(+), 243 deletions(-)
+ create mode 100644 js/scroll-fade-fixed.js
+To https://github.com/REVIRALL/interconnect.git
+   47eaa97..eac381c  main -> main
+🚀 同期完了！
+⏳ 前回の同期から28秒しか経過していません。
+   次の同期まで272秒待機します...
+✅ 2025-07-21 12:59:02 - 変更を同期します
+[main 3bb1af4] Auto-sync: 2025-07-21 12:59:02
+ 3 files changed, 134 insertions(+), 169 deletions(-)
+To https://github.com/REVIRALL/interconnect.git
+   eac381c..3bb1af4  main -> main
+🚀 同期完了！
+⏳ 前回の同期から28秒しか経過していません。
+   次の同期まで272秒待機します...
+✅ 2025-07-21 13:03:39 - 変更を同期します
+[main 7cf8cef] Auto-sync: 2025-07-21 13:03:39
+ 9 files changed, 456 insertions(+), 1 deletion(-)
+ create mode 100644 .env
+ create mode 100644 js/auth-supabase.js
+ create mode 100644 js/supabase-client.js
+ create mode 100644 line-callback.html
+ create mode 100644 supabase/migrations/001_create_users_table.sql
+To https://github.com/REVIRALL/interconnect.git
+   3bb1af4..7cf8cef  main -> main
+🚀 同期完了！
+⏳ 前回の同期から29秒しか経過していません。
+   次の同期まで271秒待機します...
+✅ 2025-07-21 13:08:16 - 変更を同期します
+[main 9270566] Auto-sync: 2025-07-21 13:08:16
+ 4 files changed, 14 insertions(+), 28 deletions(-)
+To https://github.com/REVIRALL/interconnect.git
+   7cf8cef..9270566  main -> main
+🚀 同期完了！
+⏳ 前回の同期から39秒しか経過していません。
+   次の同期まで261秒待機します...
+✅ 2025-07-21 13:12:45 - 変更を同期します
+[main 922c04b] Auto-sync: 2025-07-21 13:12:45
+ 2 files changed, 9 insertions(+), 1 deletion(-)
+To https://github.com/REVIRALL/interconnect.git
+   9270566..922c04b  main -> main
+🚀 同期完了！
+⏳ 前回の同期から28秒しか経過していません。
+   次の同期まで272秒待機します...
+✅ 2025-07-21 13:17:23 - 変更を同期します
+[main c5e9151] Auto-sync: 2025-07-21 13:17:23
+ 6 files changed, 305 insertions(+), 21 deletions(-)
+ create mode 100644 netlify/functions/line-auth.js
+ create mode 100644 netlify/functions/package.json
+To https://github.com/REVIRALL/interconnect.git
+   922c04b..c5e9151  main -> main
+🚀 同期完了！
+⏳ 前回の同期から22秒しか経過していません。
+   次の同期まで278秒待機します...
+✅ 2025-07-21 13:22:05 - 変更を同期します
+[main ba57620] Auto-sync: 2025-07-21 13:22:05
+ 7 files changed, 502 insertions(+), 89 deletions(-)
+ create mode 100644 ENV_SETUP.md
+ create mode 100644 netlify/functions/utils/error-handler.js
+ create mode 100644 netlify/functions/utils/security.js
+To https://github.com/REVIRALL/interconnect.git
+   c5e9151..ba57620  main -> main
+🚀 同期完了！
+⏳ 前回の同期から29秒しか経過していません。
+   次の同期まで271秒待機します...
+✅ 2025-07-21 13:26:42 - 変更を同期します
+[main 326b0e1] Auto-sync: 2025-07-21 13:26:42
+ 10 files changed, 411 insertions(+), 12 deletions(-)
+ create mode 100644 .env.example
+ create mode 100644 .gitignore
+ create mode 100644 BACKEND_API_IMPLEMENTATION.md
+ create mode 100755 deploy.sh
+ create mode 100755 setup-netlify-env.sh
+ create mode 100755 test-local.sh
+To https://github.com/REVIRALL/interconnect.git
+   ba57620..326b0e1  main -> main
+🚀 同期完了！
+⏳ 前回の同期から28秒しか経過していません。
+   次の同期まで272秒待機します...
+✅ 2025-07-21 13:31:19 - 変更を同期します
+[main 92b1dfd] Auto-sync: 2025-07-21 13:31:19
+ 4 files changed, 105 insertions(+), 10 deletions(-)
+ create mode 100644 QUICK_SETUP.md
+To https://github.com/REVIRALL/interconnect.git
+   326b0e1..92b1dfd  main -> main
+🚀 同期完了！
+⏳ 前回の同期から29秒しか経過していません。
+   次の同期まで271秒待機します...
+✅ 2025-07-21 13:35:56 - 変更を同期します
+[main 9c8d527] Auto-sync: 2025-07-21 13:35:56
+ 1 file changed, 1 insertion(+)
+To https://github.com/REVIRALL/interconnect.git
+   7cceaef..9c8d527  main -> main
+🚀 同期完了！
+⏳ 前回の同期から29秒しか経過していません。
+   次の同期まで271秒待機します...
+✅ 2025-07-21 13:40:33 - 変更を同期します
+[main 1fc40d3] Auto-sync: 2025-07-21 13:40:33
+ 5 files changed, 93 insertions(+), 3 deletions(-)
+ create mode 100644 DEPLOYMENT_STATUS.md
+To https://github.com/REVIRALL/interconnect.git
+   9c8d527..1fc40d3  main -> main
+🚀 同期完了！
+⏳ 前回の同期から28秒しか経過していません。
+   次の同期まで272秒待機します...
+✅ 2025-07-21 13:45:11 - 変更を同期します
+[main ed0ffaf] Auto-sync: 2025-07-21 13:45:11
+ 4 files changed, 25 insertions(+), 19 deletions(-)
+To https://github.com/REVIRALL/interconnect.git
+   80481f9..ed0ffaf  main -> main
+🚀 同期完了！
+⏳ 前回の同期から28秒しか経過していません。
+   次の同期まで272秒待機します...
+✅ 2025-07-21 13:49:56 - 変更を同期します
+[main 08dfafc] Auto-sync: 2025-07-21 13:49:56
+ 3 files changed, 13 insertions(+), 1 deletion(-)
+fatal: unable to access 'https://github.com/REVIRALL/interconnect.git/': Could not resolve host: github.com
+⚠️  プッシュエラー。リベースして再試行...
+error: cannot pull with rebase: You have unstaged changes.
+error: Please commit or stash them.
+fatal: unable to access 'https://github.com/REVIRALL/interconnect.git/': Could not resolve host: github.com
+⏳ 前回の同期から19秒しか経過していません。
+   次の同期まで281秒待機します...
+✅ 2025-07-21 13:55:03 - 変更を同期します
+[main 2dbbf47] Auto-sync: 2025-07-21 13:55:03
+ 3 files changed, 72 insertions(+), 20 deletions(-)
+To https://github.com/REVIRALL/interconnect.git
+   f46f946..2dbbf47  main -> main
+🚀 同期完了！
+⏳ 前回の同期から30秒しか経過していません。
+   次の同期まで270秒待機します...
+✅ 2025-07-21 13:59:55 - 変更を同期します
+[main d5569dd] Auto-sync: 2025-07-21 13:59:55
+ 2 files changed, 9 insertions(+), 1 deletion(-)
+To https://github.com/REVIRALL/interconnect.git
+   2dbbf47..d5569dd  main -> main
+🚀 同期完了！
+⏳ 前回の同期から30秒しか経過していません。
+   次の同期まで270秒待機します...
+✅ 2025-07-21 14:04:49 - 変更を同期します
+[main fcf6102] Auto-sync: 2025-07-21 14:04:49
+ 4 files changed, 9 insertions(+), 45 deletions(-)
+To https://github.com/REVIRALL/interconnect.git
+   d5569dd..fcf6102  main -> main
+🚀 同期完了！
+⏳ 前回の同期から31秒しか経過していません。
+   次の同期まで269秒待機します...
+✅ 2025-07-21 14:09:47 - 変更を同期します
+[main 4a26d5f] Auto-sync: 2025-07-21 14:09:47
+ 2 files changed, 9 insertions(+), 1 deletion(-)
+To https://github.com/REVIRALL/interconnect.git
+   fcf6102..4a26d5f  main -> main
+🚀 同期完了！
+⏳ 前回の同期から31秒しか経過していません。
+   次の同期まで269秒待機します...

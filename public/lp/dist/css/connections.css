@@ -1,0 +1,488 @@
+/* コネクション管理ページのスタイル */
+
+/* 統計カード */
+.connection-stats {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 20px;
+    margin-bottom: 30px;
+}
+
+.stat-card {
+    background: white;
+    border-radius: 12px;
+    padding: 20px;
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+    transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.stat-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
+}
+
+.stat-icon {
+    width: 60px;
+    height: 60px;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 24px;
+}
+
+.stat-icon.connected {
+    background: #e6f7ff;
+    color: #1890ff;
+}
+
+.stat-icon.pending-received {
+    background: #fff7e6;
+    color: #fa8c16;
+}
+
+.stat-icon.pending-sent {
+    background: #f6ffed;
+    color: #52c41a;
+}
+
+.stat-icon.rejected {
+    background: #fff1f0;
+    color: #f5222d;
+}
+
+.stat-content {
+    flex: 1;
+}
+
+.stat-value {
+    font-size: 32px;
+    font-weight: 700;
+    color: #2c3e50;
+    line-height: 1;
+}
+
+.stat-label {
+    font-size: 14px;
+    color: #6c757d;
+    margin-top: 5px;
+}
+
+/* タブナビゲーション */
+.connection-tabs {
+    background: white;
+    border-radius: 12px;
+    padding: 8px;
+    display: flex;
+    gap: 8px;
+    margin-bottom: 20px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+}
+
+.tab-btn {
+    flex: 1;
+    padding: 12px 20px;
+    background: transparent;
+    border: none;
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: 500;
+    color: #6c757d;
+    cursor: pointer;
+    transition: all 0.2s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    position: relative;
+}
+
+.tab-btn:hover {
+    background: #f8f9fa;
+    color: #4A90E2;
+}
+
+.tab-btn.active {
+    background: #4A90E2;
+    color: white;
+}
+
+.tab-badge {
+    background: rgba(255, 255, 255, 0.3);
+    color: inherit;
+    padding: 2px 8px;
+    border-radius: 12px;
+    font-size: 12px;
+    font-weight: 600;
+    min-width: 24px;
+    text-align: center;
+}
+
+.tab-btn:not(.active) .tab-badge {
+    background: #e9ecef;
+    color: #495057;
+}
+
+/* コンテンツエリア */
+.connection-content {
+    background: white;
+    border-radius: 12px;
+    padding: 20px;
+    min-height: 500px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+}
+
+.tab-content {
+    display: none;
+}
+
+.tab-content.active {
+    display: block;
+}
+
+/* コネクションリスト */
+.connection-list {
+    display: grid;
+    gap: 15px;
+}
+
+.connection-item {
+    background: #f8f9fa;
+    border-radius: 12px;
+    padding: 20px;
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    transition: all 0.2s;
+}
+
+.connection-item:hover {
+    background: #e9ecef;
+    transform: translateX(5px);
+}
+
+.connection-avatar {
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 3px solid white;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.connection-info {
+    flex: 1;
+}
+
+.connection-name {
+    font-size: 18px;
+    font-weight: 600;
+    color: #2c3e50;
+    margin-bottom: 5px;
+}
+
+.connection-company {
+    font-size: 14px;
+    color: #6c757d;
+    margin-bottom: 5px;
+}
+
+.connection-message {
+    font-size: 14px;
+    color: #495057;
+    background: white;
+    padding: 10px;
+    border-radius: 8px;
+    margin-top: 10px;
+    border-left: 3px solid #4A90E2;
+}
+
+.connection-time {
+    font-size: 12px;
+    color: #adb5bd;
+    margin-top: 5px;
+}
+
+.connection-actions {
+    display: flex;
+    gap: 10px;
+    flex-direction: column;
+}
+
+.btn-accept {
+    background: #52c41a;
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+}
+
+.btn-accept:hover {
+    background: #389e0d;
+    transform: scale(1.05);
+}
+
+.btn-reject {
+    background: #f5222d;
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+}
+
+.btn-reject:hover {
+    background: #cf1322;
+    transform: scale(1.05);
+}
+
+.btn-cancel {
+    background: #ff7875;
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+}
+
+.btn-cancel:hover {
+    background: #ff4d4f;
+}
+
+.btn-message {
+    background: #1890ff;
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+}
+
+.btn-message:hover {
+    background: #096dd9;
+    transform: scale(1.05);
+}
+
+.btn-view-profile {
+    background: white;
+    color: #4A90E2;
+    border: 2px solid #4A90E2;
+    padding: 10px 20px;
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+}
+
+.btn-view-profile:hover {
+    background: #4A90E2;
+    color: white;
+}
+
+/* 連絡先情報（コネクト済み） */
+.contact-info-card {
+    background: #e6f7ff;
+    border: 1px solid #91d5ff;
+    border-radius: 8px;
+    padding: 15px;
+    margin-top: 10px;
+}
+
+.contact-info-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 5px 0;
+    font-size: 14px;
+    color: #495057;
+}
+
+.contact-info-item i {
+    color: #1890ff;
+    width: 20px;
+}
+
+.contact-info-item a {
+    color: #1890ff;
+    text-decoration: none;
+}
+
+.contact-info-item a:hover {
+    text-decoration: underline;
+}
+
+/* 空状態 */
+.empty-state {
+    text-align: center;
+    padding: 60px 20px;
+}
+
+.empty-state i {
+    font-size: 64px;
+    color: #dee2e6;
+    margin-bottom: 20px;
+}
+
+.empty-state h3 {
+    font-size: 20px;
+    color: #6c757d;
+    margin-bottom: 10px;
+}
+
+.empty-state p {
+    font-size: 14px;
+    color: #adb5bd;
+    margin-bottom: 20px;
+}
+
+.btn-find-connections {
+    background: #4A90E2;
+    color: white;
+    border: none;
+    padding: 12px 30px;
+    border-radius: 8px;
+    font-size: 16px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.btn-find-connections:hover {
+    background: #357ABD;
+    transform: translateY(-2px);
+}
+
+/* ローディング */
+.loading-spinner {
+    text-align: center;
+    padding: 40px;
+    color: #6c757d;
+}
+
+.loading-spinner i {
+    font-size: 32px;
+    margin-bottom: 10px;
+    color: #4A90E2;
+}
+
+/* レスポンシブ */
+@media (max-width: 768px) {
+    .connection-stats {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 10px;
+    }
+    
+    .stat-card {
+        padding: 15px;
+    }
+    
+    .stat-icon {
+        width: 50px;
+        height: 50px;
+        font-size: 20px;
+    }
+    
+    .stat-value {
+        font-size: 24px;
+    }
+    
+    .connection-tabs {
+        flex-direction: column;
+    }
+    
+    .tab-btn {
+        width: 100%;
+    }
+    
+    .connection-item {
+        flex-direction: column;
+        text-align: center;
+    }
+    
+    .connection-actions {
+        flex-direction: row;
+        width: 100%;
+    }
+    
+    .connection-actions button {
+        flex: 1;
+        padding: 8px 12px;
+        font-size: 13px;
+        min-height: 36px;
+    }
+    
+    /* ボタン内のアイコンとテキストの調整 */
+    .btn-accept,
+    .btn-reject,
+    .btn-cancel,
+    .btn-message,
+    .btn-view-profile {
+        justify-content: center;
+        gap: 6px;
+    }
+    
+    .btn-view-profile {
+        padding: 8px 12px;
+    }
+}
+
+/* 極小画面（480px以下）の対応 */
+@media (max-width: 480px) {
+    .connection-stats {
+        grid-template-columns: 1fr;
+    }
+    
+    .connection-actions {
+        flex-wrap: wrap;
+        gap: 8px;
+    }
+    
+    .connection-actions button {
+        flex: 1 1 calc(50% - 4px);
+        min-width: 120px;
+        padding: 10px 8px;
+        font-size: 12px;
+    }
+    
+    /* アイコンのみ表示してテキストを省略可能に */
+    .connection-actions button i {
+        margin-right: 4px;
+    }
+}

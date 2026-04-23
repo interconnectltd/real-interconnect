@@ -1,0 +1,380 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <link rel="icon" type="image/svg+xml" href="favicon.svg">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>イベント - INTERCONNECT</title>
+    
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Noto+Sans+JP:wght@300;400;500;700&display=swap" rel="stylesheet">
+    
+    <!-- Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" integrity="sha384-iw3OoTErCYJJB9mCa8LNS2hbsQ7M3C0EpIsO/H5+EGAkPGc6rk+V8i04oW/K5xq0" crossorigin="anonymous">
+    
+    <!-- Styles -->
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/buttons.css">
+    <link rel="stylesheet" href="css/dashboard.css">
+    <!-- ログアウトボタンUI修正 -->
+    <link rel="stylesheet" href="css/logout-button-fix.css">
+    <!-- Events page bundle (events + calendar-integration) -->
+    <link rel="stylesheet" href="css/events-page.css">
+    <link rel="stylesheet" href="css/event-modal.css">
+    <link rel="stylesheet" href="css/notifications.css">
+    <link rel="stylesheet" href="css/responsive-layout.css">
+    <!-- ユーザーメニューCSS（統合済み） -->
+    <link rel="stylesheet" href="css/user-menu.css">
+    <!-- FullCalendar CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/fullcalendar@5.11.3/main.min.css" integrity="sha384-39yVKLsD9lMelmY+ij49KZgE+Mfk6hjdUPNE8yKHqdMPceLXzhlCJAK81xlD5jDj" crossorigin="anonymous" rel="stylesheet">
+</head>
+<body>
+    <!-- Mobile Header -->
+    <header class="mobile-header">
+        <button class="mobile-menu-toggle" id="eventsSidebarToggle">
+            <i class="fas fa-bars"></i>
+        </button>
+        <h1>INTERCONNECT</h1>
+        <div class="mobile-header-actions">
+            <a href="notifications.html" class="notification-btn">
+                <i class="fas fa-bell"></i>
+                                <span class="notification-badge" style="display:none;">0</span>
+            </a>
+        </div>
+    </header>
+
+    <!-- Mobile Navigation -->
+    <nav class="mobile-nav">
+        <div class="mobile-nav-header">
+            <h1>INTERCONNECT</h1>
+            <button class="mobile-nav-close">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+        
+        <div class="mobile-nav-menu">
+            <ul>
+                <li>
+                    <a href="dashboard.html" class="mobile-nav-link">
+                        <i class="fas fa-home"></i>
+                        <span>ダッシュボード</span>
+                    </a>
+                </li>
+                <li>
+                    <a href="connections.html" class="mobile-nav-link">
+                            <i class="fas fa-link"></i>
+                            <span>コネクション</span>
+                    </a>
+                </li>
+                <li>
+                    <a href="#" class="mobile-nav-link active">
+                        <i class="fas fa-calendar-alt"></i>
+                        <span>イベント</span>
+                    </a>
+                </li>
+                <li>
+                    <a href="messages.html" class="mobile-nav-link">
+                        <i class="fas fa-envelope"></i>
+                        <span>メッセージ</span>
+                    </a>
+                </li>
+                <li>
+                    <a href="matching.html" class="mobile-nav-link">
+                        <i class="fas fa-handshake"></i>
+                        <span>マッチング</span>
+                    </a>
+                </li>
+                <li>
+                    <a href="referral.html" class="mobile-nav-link">
+                        <i class="fas fa-user-plus"></i>
+                        <span>紹介プログラム</span>
+                    </a>
+                </li>
+                <li>
+                    <a href="profile.html" class="mobile-nav-link">
+                        <i class="fas fa-user"></i>
+                        <span>プロフィール</span>
+                    </a>
+                </li>
+                <li>
+                    <a href="settings.html" class="mobile-nav-link">
+                        <i class="fas fa-cog"></i>
+                        <span>設定</span>
+                    </a>
+                </li>
+            </ul>
+        </div>
+        
+        <div class="mobile-nav-footer">
+            <a href="#" class="mobile-nav-link" onclick="logout(); return false;">
+                <i class="fas fa-sign-out-alt"></i>
+                <span>ログアウト</span>
+            </a>
+        </div>
+    </nav>
+    
+    <!-- Mobile Backdrop -->
+    <div class="mobile-backdrop"></div>
+
+    <div class="dashboard">
+        <!-- Sidebar -->
+        <aside class="sidebar" id="eventsSidebar">
+            <div class="sidebar-header">
+                <h1>INTERCONNECT</h1>
+                <button class="sidebar-toggle" id="sidebarToggle" aria-label="メニュー">
+                    <i class="fas fa-bars"></i>
+                </button>
+            </div>
+            
+            <nav class="sidebar-nav">
+                <ul>
+                    <li>
+                        <a href="dashboard.html" class="sidebar-link">
+                            <i class="fas fa-home"></i>
+                            <span>ダッシュボード</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="connections.html" class="sidebar-link">
+                            <i class="fas fa-link"></i>
+                            <span>コネクション</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="#" class="sidebar-link active">
+                            <i class="fas fa-calendar-alt"></i>
+                            <span>イベント</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="messages.html" class="sidebar-link">
+                            <i class="fas fa-envelope"></i>
+                            <span>メッセージ</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="matching.html" class="sidebar-link">
+                            <i class="fas fa-handshake"></i>
+                            <span>マッチング</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="referral.html" class="sidebar-link">
+                            <i class="fas fa-user-plus"></i>
+                            <span>紹介プログラム</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="profile.html" class="sidebar-link">
+                            <i class="fas fa-user"></i>
+                            <span>プロフィール</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="settings.html" class="sidebar-link">
+                            <i class="fas fa-cog"></i>
+                            <span>設定</span>
+                        </a>
+                    </li>
+                </ul>
+            </nav>
+            
+            <div class="sidebar-footer">
+                <a href="#" class="sidebar-link" onclick="logout(); return false;">
+                    <i class="fas fa-sign-out-alt"></i>
+                    <span>ログアウト</span>
+                </a>
+            </div>
+        </aside>
+        
+        <!-- Main Content -->
+        <main class="main-content">
+            <div class="content-header">
+                <div class="header-left">
+                    <div>
+                        <h1 class="page-title">
+                            <i class="fas fa-calendar-alt"></i>
+                            イベント
+                        </h1>
+                        <nav class="breadcrumb">
+                            <a href="dashboard.html">ダッシュボード</a>
+                            <i class="fas fa-chevron-right"></i>
+                            <span>イベント</span>
+                        </nav>
+                    </div>
+                </div>
+                <div class="header-right">
+                    <div class="user-menu">
+                        <div class="notification-wrapper">
+                            <button class="notification-btn" aria-label="通知">
+                                <i class="fas fa-bell"></i>
+                                <span class="notification-badge" style="display:none;">0</span>
+                            </button>
+                            <div class="notification-dropdown">
+                                <div class="notification-header">
+                                    <h3>通知</h3>
+                                    <button class="mark-all-read">すべて既読にする</button>
+                                </div>
+                                <div class="notification-list">
+                                    <div class="empty-notifications">
+                                        <i class="fas fa-bell-slash"></i>
+                                        <p>新しい通知はありません</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="user-profile">
+                            <img src="assets/default-avatar.svg" alt="User Avatar" class="user-avatar">
+                            <span class="user-name">ゲスト</span>
+                            <i class="fas fa-chevron-down"></i>
+                            <div class="user-dropdown">
+                                <a href="profile.html"><i class="fas fa-user"></i> プロフィール</a>
+                                <a href="settings.html"><i class="fas fa-cog"></i> 設定</a>
+                                <a href="#" id="logoutBtn"><i class="fas fa-sign-out-alt"></i> ログアウト</a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Events Content -->
+            <div class="content-container">
+                <!-- Event Filters and Search -->
+                <div class="events-controls">
+                    <div class="event-search">
+                        <i class="fas fa-search"></i>
+                        <input type="text" id="eventSearchInput" placeholder="イベントを検索...">
+                    </div>
+                    
+                    <div class="event-filters">
+                        <button class="filter-btn active" data-filter="all">すべて</button>
+                        <button class="filter-btn" data-filter="online">オンライン</button>
+                        <button class="filter-btn" data-filter="offline">オフライン</button>
+                        <button class="filter-btn" data-filter="free">無料</button>
+                        <button class="filter-btn" data-filter="paid">有料</button>
+                    </div>
+                    
+                    <div class="event-actions">
+                        <button class="btn btn-outline" id="show-calendar-view">
+                            <i class="fas fa-calendar"></i> カレンダー表示
+                        </button>
+                        <button class="btn btn-outline" id="export-calendar">
+                            <i class="fas fa-download"></i> エクスポート
+                        </button>
+                    </div>
+                </div>
+                
+                <!-- Upcoming Events -->
+                <section class="events-section">
+                    <h2 class="section-title">今後のイベント</h2>
+                    
+                    <div class="events-grid">
+                        <!-- イベントカードは動的に読み込まれます -->
+                        <!-- events-supabase.jsがSupabaseからデータを取得して表示 -->
+                    </div>
+                </section>
+                
+                <!-- Calendar View -->
+                <section class="events-section" id="calendar-view">
+                    <div class="calendar-container">
+                        <div class="calendar-header">
+                            <h2>カレンダー表示</h2>
+                            <div class="calendar-actions">
+                                <button class="btn btn-outline btn-sm" id="google-calendar-sync">
+                                    <i class="fab fa-google"></i> Googleカレンダー連携
+                                </button>
+                            </div>
+                        </div>
+                        <div id="calendar"></div>
+                    </div>
+                </section>
+                
+                <!-- Past Events -->
+                <section class="events-section">
+                    <h2 class="section-title">過去のイベント</h2>
+                    
+                    <div class="past-events-list">
+                        <!-- 過去のイベントは動的に読み込まれます -->
+                        <!-- events-supabase.jsがSupabaseからデータを取得して表示 -->
+                    </div>
+                </section>
+            </div>
+        </main>
+    </div>
+    
+    <!-- Event Detail Modal -->
+    <div class="modal" id="eventDetailModal">
+        <div class="modal-overlay"></div>
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 id="modalEventTitle">イベント詳細</h2>
+                <button class="modal-close" id="eventModalCloseBtn">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="modal-body" id="modalEventBody">
+                <!-- Event details will be dynamically inserted here -->
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" id="eventModalFooterCloseBtn">閉じる</button>
+                <button class="btn btn-primary" id="eventActionBtn">参加する</button>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Scripts -->
+    <!-- Service Workerログフィルター（最初に読み込む） -->
+    <!-- コンソール履歴管理 -->
+    <!-- 重複実行警告の抑制 -->
+    <!-- 関数実行トラッカー -->
+    <!-- Supabase統一初期化（最初に読み込む） -->
+    <script src="js/supabase-unified.js?v=1.1"></script>
+    <!-- Core initialization -->
+    <script src="js/core-utils.js"></script>
+    <script src="js/global-functions.js"></script>
+    <!-- profile-syncはSupabase初期化後に読み込む -->
+    <script src="js/profile-sync.js"></script>
+    <!-- 統一通知システム（core-utils/global-functionsの後） -->
+    <script src="js/notification-system-unified.js"></script>
+    <script src="js/notifications-realtime-unified.js"></script>
+    <script src="js/responsive-menu-simple.js"></script>
+    <script src="js/dashboard.js?v=20250812.2"></script>
+    <script src="js/events-bundle.js"></script>
+    <!-- FullCalendar JS -->
+    <script src="https://cdn.jsdelivr.net/npm/fullcalendar@5.11.3/main.min.js" integrity="sha384-5/vsv56401Wf+RP3yE5/aIKW4wutk4nLY3HjueTXN0rA+DmweMtrYaN6RSjdv31b" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/fullcalendar@5.11.3/locales/ja.js" integrity="sha384-bZOEzGnrXMvDuAJZy59GyYSU/hmfpZNf7CgnU+zaUzXThVnHciKGaCdlRAmEyTAn" crossorigin="anonymous"></script>
+    <!-- イベントデバッグツール（問題診断用） -->
+    <!-- Google API (オプション) -->
+    <script async defer src="https://apis.google.com/js/api.js"></script>
+    <!-- ユーザードロップダウンハンドラー -->
+    <script src="js/user-dropdown-handler.js"></script>
+    <!-- アバターサイズ強制適用 -->
+    <script src="js/avatar-size-enforcer.js"></script>
+    <!-- イベントモーダルボタンハンドラー -->
+    <script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // モーダル閉じるボタンのイベントリスナー
+        const closeBtn = document.getElementById('eventModalCloseBtn');
+        const footerCloseBtn = document.getElementById('eventModalFooterCloseBtn');
+        
+        if (closeBtn) {
+            closeBtn.addEventListener('click', function() {
+                if (window.eventModal && window.eventModal.close) {
+                    window.eventModal.close();
+                }
+            });
+        }
+        
+        if (footerCloseBtn) {
+            footerCloseBtn.addEventListener('click', function() {
+                if (window.eventModal && window.eventModal.close) {
+                    window.eventModal.close();
+                }
+            });
+        }
+    });
+    </script>
+</body>
+</html>

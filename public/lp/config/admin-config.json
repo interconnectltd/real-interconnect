@@ -1,0 +1,61 @@
+{
+  "system": {
+    "name": "INTERCONNECT Super Admin",
+    "version": "1.0.0",
+    "environment": "production",
+    "debug": false
+  },
+  "ui": {
+    "theme": "modern",
+    "sidebarCollapsed": false,
+    "darkMode": "auto",
+    "language": "ja"
+  },
+  "features": {
+    "autoSave": true,
+    "autoSaveInterval": 30000,
+    "notifications": true,
+    "analytics": true,
+    "realTimeUpdates": true
+  },
+  "permissions": {
+    "contentEdit": true,
+    "userManagement": true,
+    "systemSettings": true,
+    "analytics": true,
+    "logs": true
+  },
+  "security": {
+    "sessionTimeout": 3600000,
+    "maxLoginAttempts": 3,
+    "passwordPolicy": {
+      "minLength": 8,
+      "requireNumbers": true,
+      "requireSymbols": true,
+      "requireUppercase": true
+    }
+  },
+  "performance": {
+    "enableCompression": true,
+    "cacheTimeout": 300000,
+    "lazyLoading": true,
+    "optimizeImages": true
+  },
+  "integrations": {
+    "analytics": {
+      "googleAnalytics": {
+        "enabled": false,
+        "trackingId": ""
+      }
+    },
+    "notifications": {
+      "email": {
+        "enabled": true,
+        "provider": "smtp"
+      },
+      "push": {
+        "enabled": false
+      }
+    }
+  }
+}

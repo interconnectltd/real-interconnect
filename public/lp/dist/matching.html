@@ -1,0 +1,345 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <link rel="icon" type="image/svg+xml" href="favicon.svg">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>マッチング - INTERCONNECT</title>
+    
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Noto+Sans+JP:wght@300;400;500;700&display=swap" rel="stylesheet">
+    
+    <!-- Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" integrity="sha384-iw3OoTErCYJJB9mCa8LNS2hbsQ7M3C0EpIsO/H5+EGAkPGc6rk+V8i04oW/K5xq0" crossorigin="anonymous">
+    
+    <!-- Styles -->
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/buttons.css">
+    <link rel="stylesheet" href="css/dashboard.css">
+    <!-- ログアウトボタンUI修正 -->
+    <link rel="stylesheet" href="css/logout-button-fix.css">
+    <link rel="stylesheet" href="css/notifications.css">
+    <!-- ユーザーメニューCSS（統合済み） -->
+    <link rel="stylesheet" href="css/user-menu.css">
+    <!-- マッチングCSS（統合済み） -->
+    <link rel="stylesheet" href="css/matching.css">
+    <link rel="stylesheet" href="css/responsive-layout.css">
+</head>
+<body>
+    <!-- Mobile Header -->
+    <header class="mobile-header">
+        <button class="mobile-menu-toggle" id="matchingSidebarToggle">
+            <i class="fas fa-bars"></i>
+        </button>
+        <h1>INTERCONNECT</h1>
+        <div class="mobile-header-actions">
+            <a href="notifications.html" class="notification-btn">
+                <i class="fas fa-bell"></i>
+                                <span class="notification-badge" style="display:none;">0</span>
+            </a>
+        </div>
+    </header>
+
+    <!-- Mobile Navigation -->
+    <nav class="mobile-nav">
+        <div class="mobile-nav-header">
+            <h1>INTERCONNECT</h1>
+            <button class="mobile-nav-close">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+        
+        <div class="mobile-nav-menu">
+            <ul>
+                <li>
+                    <a href="dashboard.html" class="mobile-nav-link">
+                        <i class="fas fa-home"></i>
+                        <span>ダッシュボード</span>
+                    </a>
+                </li>
+                <li>
+                    <a href="connections.html" class="mobile-nav-link">
+                        <i class="fas fa-link"></i>
+                        <span>コネクション</span>
+                    </a>
+                </li>
+                <li>
+                    <a href="events.html" class="mobile-nav-link">
+                        <i class="fas fa-calendar-alt"></i>
+                        <span>イベント</span>
+                    </a>
+                </li>
+                <li>
+                    <a href="messages.html" class="mobile-nav-link">
+                        <i class="fas fa-envelope"></i>
+                        <span>メッセージ</span>
+                    </a>
+                </li>
+                <li>
+                    <a href="#" class="mobile-nav-link active">
+                        <i class="fas fa-handshake"></i>
+                        <span>マッチング</span>
+                    </a>
+                </li>
+                <li>
+                    <a href="referral.html" class="mobile-nav-link">
+                        <i class="fas fa-user-plus"></i>
+                        <span>紹介プログラム</span>
+                    </a>
+                </li>
+                <li>
+                    <a href="profile.html" class="mobile-nav-link">
+                        <i class="fas fa-user"></i>
+                        <span>プロフィール</span>
+                    </a>
+                </li>
+                <li>
+                    <a href="settings.html" class="mobile-nav-link">
+                        <i class="fas fa-cog"></i>
+                        <span>設定</span>
+                    </a>
+                </li>
+            </ul>
+        </div>
+        
+        <div class="mobile-nav-footer">
+            <a href="#" class="mobile-nav-link" onclick="logout(); return false;">
+                <i class="fas fa-sign-out-alt"></i>
+                <span>ログアウト</span>
+            </a>
+        </div>
+    </nav>
+    
+    <!-- Mobile Backdrop -->
+    <div class="mobile-backdrop"></div>
+
+    <div class="dashboard">
+        <!-- Sidebar -->
+        <aside class="sidebar" id="matchingSidebar">
+            <div class="sidebar-header">
+                <h1>INTERCONNECT</h1>
+                <button class="sidebar-toggle" aria-label="メニュー">
+                    <i class="fas fa-bars"></i>
+                </button>
+            </div>
+            
+            <nav class="sidebar-nav">
+                <ul>
+                    <li>
+                        <a href="dashboard.html" class="sidebar-link">
+                            <i class="fas fa-home"></i>
+                            <span>ダッシュボード</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="connections.html" class="sidebar-link">
+                            <i class="fas fa-link"></i>
+                            <span>コネクション</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="events.html" class="sidebar-link">
+                            <i class="fas fa-calendar-alt"></i>
+                            <span>イベント</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="messages.html" class="sidebar-link">
+                            <i class="fas fa-envelope"></i>
+                            <span>メッセージ</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="#" class="sidebar-link active">
+                            <i class="fas fa-handshake"></i>
+                            <span>マッチング</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="referral.html" class="sidebar-link">
+                            <i class="fas fa-user-plus"></i>
+                            <span>紹介プログラム</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="profile.html" class="sidebar-link">
+                            <i class="fas fa-user"></i>
+                            <span>プロフィール</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="settings.html" class="sidebar-link">
+                            <i class="fas fa-cog"></i>
+                            <span>設定</span>
+                        </a>
+                    </li>
+                </ul>
+            </nav>
+            
+            <div class="sidebar-footer">
+                <a href="#" class="sidebar-link" onclick="logout(); return false;">
+                    <i class="fas fa-sign-out-alt"></i>
+                    <span>ログアウト</span>
+                </a>
+            </div>
+        </aside>
+        
+        <!-- Main Content -->
+        <main class="main-content">
+            <!-- Header -->
+            <div class="content-header">
+                <div class="header-left">
+                    <div>
+                        <h1 class="page-title">
+                            <i class="fas fa-handshake"></i>
+                            マッチング
+                        </h1>
+                        <nav class="breadcrumb">
+                            <a href="dashboard.html">ダッシュボード</a>
+                            <i class="fas fa-chevron-right"></i>
+                            <span>マッチング</span>
+                        </nav>
+                    </div>
+                </div>
+                <div class="header-right">
+                    <div class="user-menu">
+                        <div class="notification-wrapper">
+                            <button class="notification-btn" aria-label="通知">
+                                <i class="fas fa-bell"></i>
+                                <span class="notification-badge" style="display:none;">0</span>
+                            </button>
+                            <div class="notification-dropdown">
+                                <div class="notification-header">
+                                    <h3>通知</h3>
+                                    <button class="mark-all-read">すべて既読にする</button>
+                                </div>
+                                <div class="notification-list">
+                                    <div class="empty-notifications">
+                                        <i class="fas fa-bell-slash"></i>
+                                        <p>新しい通知はありません</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="user-profile">
+                            <img src="assets/default-avatar.svg" alt="User Avatar" class="user-avatar">
+                            <span class="user-name">ゲスト</span>
+                            <i class="fas fa-chevron-down"></i>
+                            <div class="user-dropdown">
+                                <a href="profile.html"><i class="fas fa-user"></i> プロフィール</a>
+                                <a href="settings.html"><i class="fas fa-cog"></i> 設定</a>
+                                <a href="#" id="logoutBtn"><i class="fas fa-sign-out-alt"></i> ログアウト</a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Matching Filters -->
+            <div class="matching-filters">
+                <div class="filter-group">
+                    <label>業界</label>
+                    <select class="form-select" name="industry">
+                        <option value="">すべて</option>
+                        <option value="tech">IT・テクノロジー</option>
+                        <option value="finance">金融</option>
+                        <option value="healthcare">医療・ヘルスケア</option>
+                        <option value="retail">小売・流通</option>
+                    </select>
+                </div>
+                
+                <div class="filter-group">
+                    <label>地域</label>
+                    <select class="form-select" name="location">
+                        <option value="">すべて</option>
+                        <option value="tokyo">東京</option>
+                        <option value="osaka">大阪</option>
+                        <option value="nagoya">名古屋</option>
+                        <option value="fukuoka">福岡</option>
+                    </select>
+                </div>
+                
+                <div class="filter-group">
+                    <label>興味・関心</label>
+                    <select class="form-select" name="interest">
+                        <option value="">すべて</option>
+                        <option value="collaboration">協業</option>
+                        <option value="investment">投資</option>
+                        <option value="mentoring">メンタリング</option>
+                        <option value="networking">ネットワーキング</option>
+                    </select>
+                </div>
+                
+                <button class="btn btn-primary">
+                    <i class="fas fa-search"></i>
+                    検索
+                </button>
+            </div>
+            
+            <!-- Matching Stats -->
+            <div class="matching-stats">
+                <span class="results-count">12件のマッチング候補</span>
+                <div class="sort-options">
+                    <label>並び替え:</label>
+                    <select class="form-select">
+                        <option value="score">マッチング度順</option>
+                        <option value="newest">新着順</option>
+                        <option value="active">アクティブ順</option>
+                    </select>
+                </div>
+            </div>
+            
+            <!-- Matching Container for Dynamic Content -->
+            <div id="matching-container">
+                <!-- Dynamic content will be loaded here -->
+                <div class="matching-grid">
+                    <!-- マッチングカードが動的に挿入されます -->
+                </div>
+            </div>
+            
+            <!-- 静的コンテンツは削除済み（matching-unified.jsで動的に生成） -->
+            
+            <!-- Pagination -->
+            <div class="pagination">
+                <button class="btn btn-outline" disabled>
+                    <i class="fas fa-chevron-left"></i>
+                    前へ
+                </button>
+                <div class="page-numbers">
+                    <button class="page-number active">1</button>
+                    <button class="page-number">2</button>
+                    <button class="page-number">3</button>
+                </div>
+                <button class="btn btn-outline">
+                    次へ
+                    <i class="fas fa-chevron-right"></i>
+                </button>
+            </div>
+        </main>
+    </div>
+    
+    <!-- Scripts -->
+    <!-- Supabase統一初期化（最優先で読み込む） -->
+    <script src="js/supabase-unified.js?v=1.1"></script>
+    <!-- Core utilities -->
+    <script src="js/core-utils.js"></script>
+    <script src="js/global-functions.js"></script>
+    <script src="js/profile-sync.js"></script>
+    <!-- 統一通知システム（core-utils/global-functionsの後） -->
+    <script src="js/notification-system-unified.js"></script>
+    <script src="js/notifications-realtime-unified.js"></script>
+    <script src="js/responsive-menu-simple.js"></script>
+    <!-- プロファイル詳細モーダル（統合版）- matching-bundleより前に読み込む -->
+    <script src="js/profile-modal-unified.js"></script>
+    <!-- マッチングシステム統合JavaScript -->
+    <script src="js/matching-bundle.js"></script>
+    <!-- グローバル閲覧履歴 -->
+    <script src="js/global-viewing-history.js"></script>
+    <!-- ユーザードロップダウンハンドラー -->
+    <script src="js/user-dropdown-handler.js"></script>
+    <!-- アバターサイズ強制適用 -->
+    <script src="js/avatar-size-enforcer.js"></script>
+</body>
+</html>

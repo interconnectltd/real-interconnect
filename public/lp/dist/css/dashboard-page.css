@@ -1,0 +1,676 @@
+/* ============================================================ */
+/* Dashboard Page Bundle                                        */
+/* Consolidated from: activity-enhanced.css,                    */
+/*   activity-event-filter.css, timerex-booking.css             */
+/* ============================================================ */
+
+/* ============================================================ */
+/* Source: activity-enhanced.css                                 */
+/* ============================================================ */
+
+/**
+ * Enhanced Activity Styles
+ * アクティビティ表示の拡張スタイル
+ */
+
+/* アクティビティアイテムの拡張 */
+.activity-item.enhanced {
+    transition: all 0.3s ease;
+    position: relative;
+    overflow: hidden;
+}
+
+.activity-item.enhanced:hover {
+    transform: translateX(5px);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+/* 優先度インジケーター */
+.activity-item.enhanced[data-priority="10"]::before,
+.activity-item.enhanced[data-priority="9"]::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    width: 3px;
+    background: linear-gradient(180deg, #FFD700 0%, #FFA000 100%);
+}
+
+.activity-item.enhanced[data-priority="8"]::before,
+.activity-item.enhanced[data-priority="7"]::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    width: 3px;
+    background: #4CAF50;
+}
+
+/* アクティビティアイコンのアニメーション */
+.activity-item.enhanced .activity-icon {
+    transition: transform 0.3s ease;
+}
+
+.activity-item.enhanced:hover .activity-icon {
+    transform: scale(1.1) rotate(5deg);
+}
+
+/* 新着アクティビティのアニメーション */
+@keyframes slideInLeft {
+    from {
+        opacity: 0;
+        transform: translateX(-30px);
+    }
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+.activity-item.enhanced {
+    animation: slideInLeft 0.5s ease forwards;
+}
+
+/* 順番にアニメーション */
+.activity-item.enhanced:nth-child(1) { animation-delay: 0.1s; }
+.activity-item.enhanced:nth-child(2) { animation-delay: 0.2s; }
+.activity-item.enhanced:nth-child(3) { animation-delay: 0.3s; }
+.activity-item.enhanced:nth-child(4) { animation-delay: 0.4s; }
+.activity-item.enhanced:nth-child(5) { animation-delay: 0.5s; }
+
+/* タイムスタンプのスタイル改善 */
+.activity-item.enhanced .activity-time {
+    font-size: 0.75rem;
+    color: #9E9E9E;
+    font-weight: 500;
+    letter-spacing: 0.5px;
+}
+
+/* アクティビティタイプ別の背景 */
+.activity-item.enhanced[data-activity-type*="success"],
+.activity-item.enhanced[data-activity-type*="completed"] {
+    background: linear-gradient(90deg, rgba(76, 175, 80, 0.05) 0%, transparent 100%);
+}
+
+.activity-item.enhanced[data-activity-type*="milestone"],
+.activity-item.enhanced[data-activity-type*="achievement"] {
+    background: linear-gradient(90deg, rgba(255, 215, 0, 0.05) 0%, transparent 100%);
+}
+
+/* ロード中のスケルトンスクリーン */
+.activity-skeleton {
+    display: flex;
+    align-items: flex-start;
+    padding: 1rem;
+    gap: 1rem;
+}
+
+.activity-skeleton-icon {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+    background-size: 200% 100%;
+    animation: shimmer 1.5s infinite;
+}
+
+.activity-skeleton-content {
+    flex: 1;
+}
+
+.activity-skeleton-text {
+    height: 16px;
+    background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+    background-size: 200% 100%;
+    animation: shimmer 1.5s infinite;
+    margin-bottom: 0.5rem;
+    border-radius: 4px;
+}
+
+.activity-skeleton-text:last-child {
+    width: 60%;
+    height: 12px;
+    margin-bottom: 0;
+}
+
+@keyframes shimmer {
+    0% { background-position: -200% 0; }
+    100% { background-position: 200% 0; }
+}
+
+/* アクティビティがない場合の表示 */
+.activity-empty-state {
+    text-align: center;
+    padding: 3rem 2rem;
+    color: #9E9E9E;
+}
+
+.activity-empty-state i {
+    font-size: 3rem;
+    margin-bottom: 1rem;
+    opacity: 0.3;
+}
+
+.activity-empty-state p {
+    font-size: 0.875rem;
+    margin: 0;
+}
+
+/* モバイル対応 */
+@media (max-width: 768px) {
+    .activity-item.enhanced {
+        padding: 0.875rem;
+    }
+
+    .activity-item.enhanced .activity-icon {
+        width: 36px;
+        height: 36px;
+        font-size: 1rem;
+    }
+
+    .activity-item.enhanced .activity-content {
+        font-size: 0.875rem;
+    }
+}
+
+/* ============================================================ */
+/* Source: activity-event-filter.css                             */
+/* ============================================================ */
+
+/* Activity & Event Filter Styles */
+
+/* Filter containers */
+.activity-filters,
+.event-filters {
+    display: flex;
+    gap: var(--space-sm);
+    margin-left: auto;
+}
+
+/* Filter select */
+.filter-select {
+    padding: var(--space-xs) var(--space-md);
+    padding-right: calc(var(--space-md) + 20px);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-sm);
+    background: white;
+    color: var(--text-primary);
+    font-size: var(--font-sm);
+    cursor: pointer;
+    appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath fill='%23666' d='M6 8L0 0h12z'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right var(--space-sm) center;
+    background-size: 10px;
+    min-width: 120px;
+    transition: all 0.2s ease;
+}
+
+.filter-select:hover {
+    border-color: var(--primary-color);
+}
+
+.filter-select:focus {
+    outline: none;
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+}
+
+/* Card header adjustments */
+.content-card .card-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: var(--space-md);
+}
+
+.content-card .card-header h3 {
+    margin: 0;
+    flex-shrink: 0;
+}
+
+/* Activity item types */
+.activity-item[data-type="member_joined"] .activity-icon {
+    background: #dbeafe;
+    color: #2563eb;
+}
+
+.activity-item[data-type="event_completed"] .activity-icon {
+    background: #d1fae5;
+    color: #10b981;
+}
+
+.activity-item[data-type="matching_success"] .activity-icon {
+    background: #fef3c7;
+    color: #f59e0b;
+}
+
+.activity-item[data-type="message_sent"] .activity-icon {
+    background: #e0e7ff;
+    color: #6366f1;
+}
+
+.activity-item[data-type="connection_made"] .activity-icon {
+    background: #fce7f3;
+    color: #ec4899;
+}
+
+/* Event item enhancements */
+.event-item {
+    cursor: pointer;
+    transition: all 0.2s ease;
+    padding: var(--space-md);
+    margin: 0 calc(var(--space-md) * -1);
+    border-radius: var(--radius-md);
+}
+
+.event-item:hover {
+    background: var(--gray-50);
+    transform: translateX(4px);
+}
+
+.event-meta {
+    display: flex;
+    gap: var(--space-md);
+    font-size: var(--font-sm);
+    color: var(--text-secondary);
+    margin-top: var(--space-xs);
+}
+
+.event-meta span {
+    display: flex;
+    align-items: center;
+    gap: var(--space-xs);
+}
+
+.event-meta i {
+    font-size: var(--font-xs);
+}
+
+/* Empty state */
+.empty-state {
+    text-align: center;
+    padding: var(--space-2xl);
+    color: var(--gray-500);
+}
+
+.empty-state i {
+    font-size: 3rem;
+    margin-bottom: var(--space-md);
+    color: var(--gray-400);
+}
+
+.empty-state p {
+    margin: 0;
+    color: var(--text-secondary);
+}
+
+/* Loading state */
+.filter-loading {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: var(--space-2xl);
+    color: var(--gray-500);
+}
+
+.filter-loading i {
+    font-size: var(--font-2xl);
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    to { transform: rotate(360deg); }
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .content-card .card-header {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .activity-filters,
+    .event-filters {
+        width: 100%;
+        flex-direction: column;
+    }
+
+    .filter-select {
+        width: 100%;
+        min-width: auto;
+    }
+
+    .event-item {
+        margin: 0;
+        padding: var(--space-sm);
+    }
+}
+
+/* Dark mode support */
+@media (prefers-color-scheme: dark) {
+    .filter-select {
+        background: var(--dark-bg-secondary);
+        border-color: var(--dark-border-color);
+        color: var(--dark-text-primary);
+    }
+
+    .filter-select:hover,
+    .filter-select:focus {
+        border-color: var(--primary-color);
+    }
+
+    .event-item:hover {
+        background: var(--dark-bg-tertiary);
+    }
+}
+
+/* ============================================================ */
+/* Source: timerex-booking.css                                   */
+/* ============================================================ */
+
+/* ===========================
+   TimeRex予約ボタン スタイル
+   =========================== */
+
+/* 予約CTAセクション */
+.booking-cta-section {
+    margin: 2rem 0;
+    padding: 0 1rem;
+    animation: fadeInUp 0.6s ease-out;
+}
+
+.booking-cta-card {
+    background: linear-gradient(135deg, #f0f7ff 0%, #e8f2ff 100%);
+    border: 1px solid #d4e3f4;
+    border-radius: 20px;
+    padding: 2.5rem;
+    box-shadow: 0 4px 20px rgba(59, 130, 246, 0.08);
+    position: relative;
+    overflow: hidden;
+}
+
+/* 装飾的な背景パターン */
+.booking-cta-card::before {
+    content: '';
+    position: absolute;
+    top: -50%;
+    right: -10%;
+    width: 300px;
+    height: 300px;
+    background: radial-gradient(circle, rgba(59, 130, 246, 0.1) 0%, transparent 70%);
+    border-radius: 50%;
+    pointer-events: none;
+}
+
+.booking-cta-card::after {
+    content: '';
+    position: absolute;
+    bottom: -30%;
+    left: -10%;
+    width: 250px;
+    height: 250px;
+    background: radial-gradient(circle, rgba(99, 102, 241, 0.08) 0%, transparent 70%);
+    border-radius: 50%;
+    pointer-events: none;
+}
+
+.booking-cta-content {
+    position: relative;
+    z-index: 1;
+    display: flex;
+    align-items: center;
+    gap: 2rem;
+    flex-wrap: wrap;
+}
+
+.booking-cta-icon {
+    flex-shrink: 0;
+    width: 80px;
+    height: 80px;
+    background: white;
+    border-radius: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 8px 24px rgba(59, 130, 246, 0.15);
+}
+
+.booking-cta-icon i {
+    font-size: 2.5rem;
+    color: #3b82f6;
+}
+
+.booking-cta-text {
+    flex: 1;
+    min-width: 250px;
+}
+
+.booking-cta-text h3 {
+    margin: 0 0 0.5rem 0;
+    font-size: 1.75rem;
+    font-weight: 700;
+    color: #1e293b;
+}
+
+.booking-cta-text p {
+    margin: 0;
+    font-size: 1.125rem;
+    color: #64748b;
+    line-height: 1.6;
+}
+
+/* 予約ボタン */
+.booking-btn,
+.booking-cta-content .btn.booking-btn {
+    flex-shrink: 0;
+    font-size: 1.125rem !important;
+    padding: 1rem 2rem !important;
+    background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%) !important;
+    border: none !important;
+    color: white !important;
+    border-radius: 12px !important;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 15px rgba(59, 130, 246, 0.3) !important;
+    display: flex !important;
+    align-items: center;
+    gap: 0.75rem;
+    font-weight: 600 !important;
+    white-space: nowrap;
+}
+
+.booking-btn:hover,
+.booking-cta-content .btn.booking-btn:hover {
+    transform: translateY(-2px) !important;
+    box-shadow: 0 8px 25px rgba(59, 130, 246, 0.4) !important;
+    background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%) !important;
+}
+
+.booking-btn:active {
+    transform: translateY(0);
+}
+
+.booking-btn i {
+    font-size: 1.25rem;
+}
+
+/* レスポンシブデザイン */
+@media (max-width: 768px) {
+    .booking-cta-section {
+        margin: 1.5rem 0;
+        padding: 0;
+    }
+
+    .booking-cta-card {
+        padding: 1.5rem;
+        border-radius: 16px;
+    }
+
+    .booking-cta-content {
+        flex-direction: column;
+        text-align: center;
+        gap: 1.5rem;
+    }
+
+    .booking-cta-icon {
+        width: 60px;
+        height: 60px;
+    }
+
+    .booking-cta-icon i {
+        font-size: 2rem;
+    }
+
+    .booking-cta-text h3 {
+        font-size: 1.5rem;
+    }
+
+    .booking-cta-text p {
+        font-size: 1rem;
+    }
+
+    .booking-btn,
+    .booking-cta-content .btn.booking-btn {
+        width: 100%;
+        justify-content: center;
+        padding: 1rem 1.5rem !important;
+        font-size: 1rem !important;
+    }
+}
+
+/* アニメーション */
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* ローディング状態 */
+.booking-btn.loading {
+    position: relative;
+    color: transparent;
+}
+
+.booking-btn.loading::after {
+    content: '';
+    position: absolute;
+    width: 20px;
+    height: 20px;
+    top: 50%;
+    left: 50%;
+    margin-left: -10px;
+    margin-top: -10px;
+    border: 2px solid #ffffff;
+    border-radius: 50%;
+    border-top-color: transparent;
+    animation: spinner 0.8s linear infinite;
+}
+
+@keyframes spinner {
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+/* 予約確認モーダル */
+.booking-confirmation-modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.5);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 5500;
+    animation: fadeIn 0.3s ease-out;
+}
+
+.booking-confirmation-modal .modal-content {
+    background: white;
+    padding: 2.5rem;
+    border-radius: 20px;
+    max-width: 500px;
+    width: 90%;
+    box-shadow: 0 20px 50px rgba(0, 0, 0, 0.3);
+    animation: slideInUp 0.3s ease-out;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+    }
+    to {
+        opacity: 1;
+    }
+}
+
+@keyframes slideInUp {
+    from {
+        transform: translateY(50px);
+        opacity: 0;
+    }
+    to {
+        transform: translateY(0);
+        opacity: 1;
+    }
+}
+
+.booking-confirmation-modal h3 {
+    color: #10b981;
+    margin: 0 0 1.5rem 0;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    font-size: 1.5rem;
+}
+
+.booking-confirmation-modal h3 i {
+    font-size: 2rem;
+}
+
+.booking-details {
+    background: #f8fbff;
+    padding: 1.25rem;
+    border-radius: 12px;
+    margin-bottom: 1.5rem;
+    border: 1px solid #d4e3f4;
+}
+
+.booking-details p {
+    margin: 0.75rem 0;
+    color: #334155;
+    display: flex;
+    align-items: flex-start;
+    gap: 0.5rem;
+}
+
+.booking-details strong {
+    color: #1e293b;
+    min-width: 80px;
+}
+
+.modal-content .note {
+    color: #64748b;
+    font-size: 0.95rem;
+    margin: 1.5rem 0;
+    padding: 1rem;
+    background: #fef3c7;
+    border-radius: 8px;
+    border: 1px solid #fde68a;
+}
+
+.modal-content .btn {
+    width: 100%;
+    margin-top: 1rem;
+}

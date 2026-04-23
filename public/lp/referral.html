@@ -1,0 +1,524 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <link rel="icon" type="image/svg+xml" href="favicon.svg">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>紹介プログラム - INTERCONNECT</title>
+    
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Noto+Sans+JP:wght@300;400;500;700&display=swap" rel="stylesheet">
+    
+    <!-- Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" integrity="sha384-iw3OoTErCYJJB9mCa8LNS2hbsQ7M3C0EpIsO/H5+EGAkPGc6rk+V8i04oW/K5xq0" crossorigin="anonymous">
+    
+    <!-- Styles -->
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/buttons.css">
+    <link rel="stylesheet" href="css/dashboard.css">
+    <!-- ログアウトボタンUI修正 -->
+    <link rel="stylesheet" href="css/logout-button-fix.css">
+    <link rel="stylesheet" href="css/notifications.css">
+    <link rel="stylesheet" href="css/responsive-layout.css">
+    <!-- Referral page bundle (referral + share-modal-enhanced) -->
+    <link rel="stylesheet" href="css/referral-page.css">
+    <!-- ユーザーメニューCSS（統合済み） -->
+    <link rel="stylesheet" href="css/user-menu.css">
+</head>
+<body class="referral-page">
+    <!-- Mobile Header (ダッシュボードと同じ) -->
+    <header class="mobile-header">
+        <button class="mobile-menu-toggle" id="referralSidebarToggle">
+            <i class="fas fa-bars"></i>
+        </button>
+        <h1>INTERCONNECT</h1>
+        <div class="mobile-header-actions">
+            <a href="notifications.html" class="notification-btn">
+                <i class="fas fa-bell"></i>
+                                <span class="notification-badge" style="display:none;">0</span>
+            </a>
+        </div>
+    </header>
+    
+    <!-- Mobile Backdrop -->
+    <div class="mobile-backdrop"></div>
+
+    <!-- Mobile Navigation (ダッシュボードと同じ) -->
+    <nav class="mobile-nav">
+        <div class="mobile-nav-header">
+            <h1>INTERCONNECT</h1>
+            <button class="mobile-nav-close">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+        
+        <div class="mobile-nav-menu">
+            <ul>
+                <li>
+                    <a href="dashboard.html" class="mobile-nav-link">
+                        <i class="fas fa-home"></i>
+                        <span>ダッシュボード</span>
+                    </a>
+                </li>
+                <li>
+                    <a href="connections.html" class="mobile-nav-link">
+                        <i class="fas fa-link"></i>
+                        <span>コネクション</span>
+                    </a>
+                </li>
+                <li>
+                    <a href="events.html" class="mobile-nav-link">
+                        <i class="fas fa-calendar-alt"></i>
+                        <span>イベント</span>
+                    </a>
+                </li>
+                <li>
+                    <a href="messages.html" class="mobile-nav-link">
+                        <i class="fas fa-envelope"></i>
+                        <span>メッセージ</span>
+                    </a>
+                </li>
+                <li>
+                    <a href="matching.html" class="mobile-nav-link">
+                        <i class="fas fa-handshake"></i>
+                        <span>マッチング</span>
+                    </a>
+                </li>
+                <li>
+                    <a href="referral.html" class="mobile-nav-link active">
+                        <i class="fas fa-user-plus"></i>
+                        <span>紹介プログラム</span>
+                    </a>
+                </li>
+                <li>
+                    <a href="profile.html" class="mobile-nav-link">
+                        <i class="fas fa-user"></i>
+                        <span>プロフィール</span>
+                    </a>
+                </li>
+                <li>
+                    <a href="settings.html" class="mobile-nav-link">
+                        <i class="fas fa-cog"></i>
+                        <span>設定</span>
+                    </a>
+                </li>
+            </ul>
+        </div>
+        
+        <div class="mobile-nav-footer">
+            <a href="#" class="mobile-nav-link" onclick="logout(); return false;">
+                <i class="fas fa-sign-out-alt"></i>
+                <span>ログアウト</span>
+            </a>
+        </div>
+    </nav>
+
+    <div class="dashboard">
+        <!-- Sidebar (ダッシュボードと同じ構造) -->
+        <aside class="sidebar" id="dashboardSidebar">
+            <div class="sidebar-header">
+                <h1>INTERCONNECT</h1>
+                <button class="sidebar-toggle" aria-label="メニュー">
+                    <i class="fas fa-bars"></i>
+                </button>
+            </div>
+            
+            <nav class="sidebar-nav">
+                <ul>
+                    <li>
+                        <a href="dashboard.html" class="sidebar-link">
+                            <i class="fas fa-home"></i>
+                            <span>ダッシュボード</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="connections.html" class="sidebar-link">
+                            <i class="fas fa-link"></i>
+                            <span>コネクション</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="events.html" class="sidebar-link">
+                            <i class="fas fa-calendar-alt"></i>
+                            <span>イベント</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="messages.html" class="sidebar-link">
+                            <i class="fas fa-envelope"></i>
+                            <span>メッセージ</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="matching.html" class="sidebar-link">
+                            <i class="fas fa-handshake"></i>
+                            <span>マッチング</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="referral.html" class="sidebar-link active">
+                            <i class="fas fa-user-plus"></i>
+                            <span>紹介プログラム</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="profile.html" class="sidebar-link">
+                            <i class="fas fa-user"></i>
+                            <span>プロフィール</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="settings.html" class="sidebar-link">
+                            <i class="fas fa-cog"></i>
+                            <span>設定</span>
+                        </a>
+                    </li>
+                </ul>
+            </nav>
+            
+            <div class="sidebar-footer">
+                <button class="logout-btn" onclick="logout()">
+                    <i class="fas fa-sign-out-alt"></i>
+                    <span>ログアウト</span>
+                </button>
+            </div>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <div class="content-header">
+                <div class="header-left">
+                    <div>
+                        <h1 class="page-title">
+                            <i class="fas fa-user-plus"></i>
+                            紹介プログラム
+                        </h1>
+                        <nav class="breadcrumb">
+                            <a href="dashboard.html">ダッシュボード</a>
+                            <i class="fas fa-chevron-right"></i>
+                            <span>紹介プログラム</span>
+                        </nav>
+                    </div>
+                </div>
+                <div class="header-right">
+                    <div class="user-menu">
+                        <div class="notification-wrapper">
+                            <button class="notification-btn" aria-label="通知">
+                                <i class="fas fa-bell"></i>
+                                <span class="notification-badge" style="display:none;">0</span>
+                            </button>
+                            <div class="notification-dropdown">
+                                <div class="notification-header">
+                                    <h3>通知</h3>
+                                    <button class="mark-all-read">すべて既読にする</button>
+                                </div>
+                                <div class="notification-list">
+                                    <div class="empty-notifications">
+                                        <i class="fas fa-bell-slash"></i>
+                                        <p>新しい通知はありません</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="user-profile">
+                            <img src="assets/default-avatar.svg" alt="User Avatar" class="user-avatar">
+                            <span class="user-name">ゲスト</span>
+                            <i class="fas fa-chevron-down"></i>
+                            <div class="user-dropdown">
+                                <a href="profile.html"><i class="fas fa-user"></i> プロフィール</a>
+                                <a href="settings.html"><i class="fas fa-cog"></i> 設定</a>
+                                <a href="#" id="logoutBtn"><i class="fas fa-sign-out-alt"></i> ログアウト</a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="content-body">
+                <!-- ページ説明 -->
+                <div class="page-intro">
+                    <p class="page-description">
+                        <i class="fas fa-gift"></i>
+                        友達を紹介して、1,000ポイントを獲得しよう！紹介された方が面談を完了すると、あなたに報酬が入ります。
+                    </p>
+                </div>
+                
+                <!-- ポイント概要 -->
+                <section class="points-summary card">
+                    <div class="points-grid">
+                        <div class="point-item">
+                            <div class="point-icon">
+                                <i class="fas fa-coins"></i>
+                            </div>
+                            <div class="point-info">
+                                <span class="label">利用可能ポイント</span>
+                                <div class="value-wrapper">
+                                    <span class="value" id="available-points">0</span>
+                                    <span class="unit">pt</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="point-item">
+                            <div class="point-icon">
+                                <i class="fas fa-chart-line"></i>
+                            </div>
+                            <div class="point-info">
+                                <span class="label">累計獲得</span>
+                                <div class="value-wrapper">
+                                    <span class="value" id="total-earned">0</span>
+                                    <span class="unit">pt</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="point-item">
+                            <div class="point-icon">
+                                <i class="fas fa-users"></i>
+                            </div>
+                            <div class="point-info">
+                                <span class="label">紹介人数</span>
+                                <div class="value-wrapper">
+                                    <span class="value" id="referral-count">0</span>
+                                    <span class="unit">人</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="point-item">
+                            <div class="point-icon">
+                                <i class="fas fa-percentage"></i>
+                            </div>
+                            <div class="point-info">
+                                <span class="label">成約率</span>
+                                <div class="value-wrapper">
+                                    <span class="value" id="conversion-rate">0</span>
+                                    <span class="unit">%</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <button id="cashout-btn" class="btn btn-primary cashout-button" disabled>
+                        <i class="fas fa-money-check-alt"></i>
+                        ポイントを現金化する（最低5,000pt）
+                    </button>
+                </section>
+
+
+                <!-- 紹介の流れ -->
+                <section class="referral-steps card">
+                    <h2><i class="fas fa-route"></i> 紹介の流れ</h2>
+                    <div class="steps-container">
+                        <div class="step">
+                            <div class="step-number">1</div>
+                            <div class="step-icon">
+                                <i class="fas fa-link"></i>
+                            </div>
+                            <h3>リンクを作成</h3>
+                            <p>あなた専用の紹介リンクを作成します</p>
+                        </div>
+                        <div class="step-arrow">
+                            <i class="fas fa-chevron-right"></i>
+                        </div>
+                        <div class="step">
+                            <div class="step-number">2</div>
+                            <div class="step-icon">
+                                <i class="fas fa-share-alt"></i>
+                            </div>
+                            <h3>友達に共有</h3>
+                            <p>SNSやメールでリンクを共有します</p>
+                        </div>
+                        <div class="step-arrow">
+                            <i class="fas fa-chevron-right"></i>
+                        </div>
+                        <div class="step">
+                            <div class="step-number">3</div>
+                            <div class="step-icon">
+                                <i class="fas fa-user-check"></i>
+                            </div>
+                            <h3>友達が登録</h3>
+                            <p>友達があなたのリンクから登録します</p>
+                        </div>
+                        <div class="step-arrow">
+                            <i class="fas fa-chevron-right"></i>
+                        </div>
+                        <div class="step">
+                            <div class="step-number">4</div>
+                            <div class="step-icon">
+                                <i class="fas fa-gift"></i>
+                            </div>
+                            <h3>報酬獲得</h3>
+                            <p>面談完了で1,000ポイント獲得！</p>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- 紹介リンク管理 -->
+                <section class="referral-links card">
+                    <div class="section-header">
+                        <h2><i class="fas fa-link"></i> 紹介リンク</h2>
+                        <button id="create-link-btn" class="btn btn-primary">
+                            <i class="fas fa-plus"></i> 新しいリンクを作成
+                        </button>
+                    </div>
+                    
+                    <div class="link-create-form" id="link-form" style="display: none;">
+                        <input type="text" id="link-description" class="form-input" placeholder="リンクの説明（例：Twitter用、LINE用など）" maxlength="50">
+                        <div class="form-actions">
+                            <button onclick="createReferralLink()" class="btn btn-primary">
+                                <i class="fas fa-check"></i> 作成
+                            </button>
+                            <button onclick="cancelLinkCreation()" class="btn btn-secondary">
+                                <i class="fas fa-times"></i> キャンセル
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <div id="links-list" class="links-list">
+                        <!-- 動的に生成 -->
+                    </div>
+                </section>
+
+                <!-- タブセクション -->
+                <section class="tabs-section card">
+                    <div class="tab-navigation">
+                        <button class="tab-button active" data-tab="history">
+                            <i class="fas fa-history"></i> 紹介履歴
+                        </button>
+                        <button class="tab-button" data-tab="cashout">
+                            <i class="fas fa-money-check-alt"></i> 出金履歴
+                        </button>
+                    </div>
+
+                    <!-- 紹介履歴 -->
+                    <div id="history-tab" class="tab-content active">
+                        <div class="filter-section">
+                            <div class="filter-wrapper">
+                                <label class="filter-label">
+                                    <i class="fas fa-filter"></i>
+                                    ステータスで絞り込み
+                                </label>
+                                <select id="status-filter" class="form-select">
+                                    <option value="all">すべて表示</option>
+                                    <option value="pending">⏳ 登録待ち</option>
+                                    <option value="registered">✅ 登録済み</option>
+                                    <option value="completed">🎉 面談完了</option>
+                                    <option value="cancelled">❌ キャンセル</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div id="referral-list" class="history-list">
+                            <!-- 動的に生成 -->
+                        </div>
+                    </div>
+
+                    <!-- キャッシュアウト履歴 -->
+                    <div id="cashout-tab" class="tab-content">
+                        <div id="cashout-list" class="history-list">
+                            <!-- 動的に生成 -->
+                        </div>
+                    </div>
+                </section>
+            </div>
+        </main>
+    </div>
+
+
+    <!-- 共有モーダル -->
+    <div id="share-modal" class="modal">
+        <div class="modal-content compact">
+            <div class="modal-header">
+                <h3><i class="fas fa-share-alt"></i> リンクを共有</h3>
+                <button class="close-button" onclick="closeShareModal()">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="share-options">
+                <button class="share-button twitter" onclick="shareToTwitter()">
+                    <i class="fab fa-twitter"></i><span>Twitter</span>
+                </button>
+                <button class="share-button line" onclick="shareToLine()">
+                    <i class="fab fa-line"></i><span>LINE</span>
+                </button>
+                <button class="share-button facebook" onclick="shareToFacebook()">
+                    <i class="fab fa-facebook"></i><span>Facebook</span>
+                </button>
+                <button class="share-button email" onclick="shareByEmail()">
+                    <i class="fas fa-envelope"></i><span>メール</span>
+                </button>
+                <button class="share-button copy" onclick="copyShareLink()">
+                    <i class="fas fa-copy"></i><span>コピー</span>
+                </button>
+            </div>
+            <div class="share-text">
+                <textarea id="share-message" rows="5">経営者向けAI活用コミュニティ「INTERCONNECT」をご存知ですか？
+
+AIを活用した次世代のビジネスマッチングサービスで、経営者同士の出会いから新しいビジネスチャンスが生まれています。
+
+今なら無料面談を受けられるので、ぜひこちらのリンクからご登録ください。</textarea>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <!-- Service Workerログフィルター（最初に読み込む） -->
+    <!-- 紹介ページデバッグ -->
+    <!-- コンソール履歴管理 -->
+    <!-- 重複実行警告の抑制 -->
+    <!-- 関数実行トラッカー -->
+    <!-- Supabase統一初期化（最初に読み込む） -->
+    <!-- Supabase統一初期化（最初に読み込む） -->
+    <script src="js/supabase-unified.js?v=1.1"></script>
+    <script src="js/core-utils.js"></script>
+    <script src="js/global-functions.js"></script>
+    <script src="js/profile-sync.js"></script>
+    <script src="js/notification-system-unified.js"></script>
+    <script src="js/guest-mode-manager.js"></script>
+    <script src="js/notifications-realtime-unified.js"></script>
+    <script src="js/responsive-menu-simple.js"></script>
+    <script src="js/dashboard.js"></script>
+    <script src="js/referral-bundle.js"></script>
+    <script>
+        // タブ切り替え
+        document.querySelectorAll('.tab-button').forEach(button => {
+            button.addEventListener('click', () => {
+                const tab = button.dataset.tab;
+                
+                // タブボタンのアクティブ状態を切り替え
+                document.querySelectorAll('.tab-button').forEach(b => b.classList.remove('active'));
+                button.classList.add('active');
+                
+                // タブコンテンツの表示を切り替え
+                document.querySelectorAll('.tab-content').forEach(content => {
+                    content.classList.remove('active');
+                });
+                document.getElementById(`${tab}-tab`).classList.add('active');
+            });
+        });
+        
+        // ログアウト機能 - global-functions.jsのwindow.logoutを使用
+        const logoutBtn = document.getElementById('logoutBtn');
+        if (logoutBtn) {
+            logoutBtn.addEventListener('click', async (e) => {
+                e.preventDefault();
+                if (typeof window.logout === 'function') {
+                    await window.logout();
+                }
+            });
+        }
+        
+        // モーダル関数はreferral-unified.jsで定義済み
+    </script>
+    <!-- サイドバートグルが既に読み込まれている場合の確認 -->
+    <script>
+        if (!window.toggleSidebar) {
+            console.log('[Referral] サイドバートグル機能を初期化します');
+        }
+    </script>
+    <!-- TimeRex予約システム -->
+    <!-- booking_intentsテーブル使用停止 -->
+    <!-- ユーザードロップダウンハンドラー -->
+    <script src="js/user-dropdown-handler.js"></script>
+    <!-- アバターサイズ強制適用 -->
+    <script src="js/avatar-size-enforcer.js"></script>
+</body>
+</html>

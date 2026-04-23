@@ -1,0 +1,1642 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <link rel="icon" type="image/svg+xml" href="favicon.svg">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>マスター管理画面 - INTERCONNECT</title>
+    
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Noto+Sans+JP:wght@300;400;500;700;900&display=swap" rel="stylesheet">
+    
+    <!-- Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" integrity="sha384-iw3OoTErCYJJB9mCa8LNS2hbsQ7M3C0EpIsO/H5+EGAkPGc6rk+V8i04oW/K5xq0" crossorigin="anonymous">
+    
+    <!-- Styles -->
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/buttons.css">
+    <link rel="stylesheet" href="css/dashboard.css">
+    <link rel="stylesheet" href="css/notifications.css">
+    <link rel="stylesheet" href="css/responsive-layout.css">
+    <link rel="stylesheet" href="css/super-admin.css">
+</head>
+<body class="admin-theme">
+    <!-- 管理者認証ガード（セクション5修正） -->
+    <script>
+    (async function() {
+        function waitForClient() {
+            return new Promise(function(resolve) {
+                if (window.supabaseClient) return resolve(window.supabaseClient);
+                var interval = setInterval(function() {
+                    if (window.supabaseClient) { clearInterval(interval); resolve(window.supabaseClient); }
+                }, 100);
+                setTimeout(function() { clearInterval(interval); resolve(null); }, 5000);
+            });
+        }
+        var client = await waitForClient();
+        if (!client) { window.location.href = 'login.html'; return; }
+        try {
+            var result = await client.auth.getUser();
+            var user = result.data && result.data.user;
+            if (!user) { window.location.href = 'login.html'; return; }
+            var profileResult = await client.from('user_profiles').select('is_admin').eq('id', user.id).maybeSingle();
+            if (!profileResult.data || !profileResult.data.is_admin) {
+                window.location.href = 'dashboard.html';
+                return;
+            }
+        } catch (e) { window.location.href = 'login.html'; return; }
+        document.body.style.visibility = 'visible';
+    })();
+    </script>
+    <style>body { visibility: hidden; }</style>
+
+    <!-- Mobile Header -->
+    <header class="mobile-header admin-mobile-header">
+        <button class="mobile-menu-toggle" id="superAdminMobileToggle">
+            <span></span>
+            <span></span>
+            <span></span>
+        </button>
+        <div class="mobile-title">
+            <i class="fas fa-crown"></i>
+            <span>マスター管理</span>
+        </div>
+        <div class="mobile-header-actions">
+            <button class="notification-btn" id="mobileNotificationBtn">
+                <i class="fas fa-bell"></i>
+            </button>
+            <button class="mobile-profile-btn" id="mobileProfileBtn">
+                <img src="assets/user-placeholder.svg" alt="Admin">
+            </button>
+        </div>
+    </header>
+
+    <!-- Mobile Navigation Overlay -->
+    <div class="mobile-overlay" id="mobileOverlay"></div>
+
+    <div class="admin-container">
+        <!-- Sidebar -->
+        <aside class="admin-sidebar" id="adminSidebar">
+            <div class="sidebar-header">
+                <div class="logo-section">
+                    <i class="fas fa-crown logo-icon"></i>
+                    <div class="logo-text">
+                        <h1>INTERCONNECT</h1>
+                        <span>Master Admin</span>
+                    </div>
+                </div>
+                <button class="sidebar-collapse-btn" id="superAdminCollapseBtn">
+                    <i class="fas fa-angle-double-left"></i>
+                </button>
+            </div>
+            
+            <nav class="admin-nav">
+                <div class="nav-section">
+                    <h3 class="nav-section-title">ダッシュボード</h3>
+                    <ul class="nav-list">
+                        <li>
+                            <a href="#dashboard" class="nav-link active" data-page="dashboard">
+                                <i class="fas fa-chart-line"></i>
+                                <span>概要</span>
+                                <div class="nav-indicator"></div>
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+
+                <div class="nav-section">
+                    <h3 class="nav-section-title">コンテンツ管理</h3>
+                    <ul class="nav-list">
+                        <li>
+                            <a href="admin-site-settings.html" class="nav-link">
+                                <i class="fas fa-cog"></i>
+                                <span>サイト設定</span>
+                            </a>
+                        </li>
+                        <li>
+                            <a href="#content" class="nav-link" data-page="content">
+                                <i class="fas fa-edit"></i>
+                                <span>コンテンツ編集</span>
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+
+                <div class="nav-section">
+                    <h3 class="nav-section-title">システム情報</h3>
+                    <ul class="nav-list">
+                        <li>
+                            <a href="#info" class="nav-link" data-page="info">
+                                <i class="fas fa-info-circle"></i>
+                                <span>システム状況</span>
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+            </nav>
+            
+            <div class="sidebar-footer">
+                <div class="admin-profile">
+                    <img src="assets/user-placeholder.svg" alt="Admin" class="admin-avatar">
+                    <div class="admin-info">
+                        <span class="admin-name">マスター管理者</span>
+                        <span class="admin-role">Super Admin</span>
+                    </div>
+                    <button class="profile-menu-btn" id="profileMenuBtn">
+                        <i class="fas fa-ellipsis-v"></i>
+                    </button>
+                </div>
+                
+                <div class="profile-dropdown" id="profileDropdown">
+                    <a href="#profile" class="dropdown-item">
+                        <i class="fas fa-user"></i>
+                        <span>プロフィール</span>
+                    </a>
+                    <a href="#settings" class="dropdown-item">
+                        <i class="fas fa-cog"></i>
+                        <span>設定</span>
+                    </a>
+                    <hr class="dropdown-divider">
+                    <a href="#logout" class="dropdown-item logout" onclick="superAdminLogout()">
+                        <i class="fas fa-sign-out-alt"></i>
+                        <span>ログアウト</span>
+                    </a>
+                </div>
+            </div>
+        </aside>
+        
+        <!-- Main Content -->
+        <main class="admin-main">
+            <!-- Top Bar -->
+            <header class="admin-topbar">
+                <div class="topbar-left">
+                    <button class="sidebar-toggle-btn" id="superAdminToggleBtn">
+                        <i class="fas fa-bars"></i>
+                    </button>
+                    <div class="breadcrumb">
+                        <span class="breadcrumb-item">管理画面</span>
+                        <i class="fas fa-chevron-right breadcrumb-separator"></i>
+                        <span class="breadcrumb-item current" id="currentPageBreadcrumb">ダッシュボード</span>
+                    </div>
+                </div>
+                
+                <div class="topbar-right">
+                    <div class="search-container">
+                        <input type="text" class="search-input" placeholder="検索..." id="globalSearch">
+                        <i class="fas fa-search search-icon"></i>
+                    </div>
+                    
+                    <div class="topbar-actions">
+                        <div class="notification-dropdown">
+                            <button class="notification-btn" id="notificationBtn">
+                                <i class="fas fa-bell"></i>
+                            </button>
+                            <div class="notification-panel" id="notificationPanel">
+                                <div class="notification-header">
+                                    <h3>通知</h3>
+                                    <button class="mark-all-read">すべて既読</button>
+                                </div>
+                                <div class="notification-list">
+                                    <div class="notification-item unread">
+                                        <div class="notification-icon">
+                                            <i class="fas fa-user-plus"></i>
+                                        </div>
+                                        <div class="notification-content">
+                                            <p>新規ユーザーが登録されました</p>
+                                            <span class="notification-time">2分前</span>
+                                        </div>
+                                    </div>
+                                    <div class="notification-item">
+                                        <div class="notification-icon">
+                                            <i class="fas fa-info-circle"></i>
+                                        </div>
+                                        <div class="notification-content">
+                                            <p>システムが正常に動作しています</p>
+                                            <span class="notification-time">15分前</span>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="notification-footer">
+                                    <a href="#notifications">すべての通知を見る</a>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="profile-menu">
+                            <button class="profile-btn" id="profileBtn">
+                                <img src="assets/user-placeholder.svg" alt="Admin" class="profile-avatar">
+                                <span class="profile-name">管理者</span>
+                                <i class="fas fa-chevron-down"></i>
+                            </button>
+                            <div class="profile-dropdown" id="topProfileDropdown">
+                                <a href="#profile" class="dropdown-item">
+                                    <i class="fas fa-user"></i>
+                                    <span>プロフィール</span>
+                                </a>
+                                <a href="#settings" class="dropdown-item">
+                                    <i class="fas fa-cog"></i>
+                                    <span>設定</span>
+                                </a>
+                                <hr class="dropdown-divider">
+                                <a href="#logout" class="dropdown-item logout" onclick="superAdminLogout()">
+                                    <i class="fas fa-sign-out-alt"></i>
+                                    <span>ログアウト</span>
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </header>
+            
+            <!-- Page Content -->
+            <div class="admin-content">
+                <!-- Dashboard Page -->
+                <div class="page-content active" id="dashboard-page">
+                    <div class="page-header">
+                        <h1 class="page-title">ダッシュボード</h1>
+                        <p class="page-subtitle">システム全体の概要と重要な指標</p>
+                    </div>
+                    
+                    <!-- KPI Cards -->
+                    <div class="kpi-grid">
+                        <div class="kpi-card">
+                            <div class="kpi-header">
+                                <div class="kpi-icon users">
+                                    <i class="fas fa-users"></i>
+                                </div>
+                            </div>
+                            <div class="kpi-content">
+                                <div class="kpi-value" id="kpi-total-users">--</div>
+                                <div class="kpi-label">総ユーザー数</div>
+                                <div class="kpi-change neutral">
+                                    <i class="fas fa-minus"></i>
+                                    <span>--</span>
+                                    <small>先月比</small>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="kpi-card">
+                            <div class="kpi-header">
+                                <div class="kpi-icon revenue">
+                                    <i class="fas fa-yen-sign"></i>
+                                </div>
+                            </div>
+                            <div class="kpi-content">
+                                <div class="kpi-value" id="kpi-monthly-revenue">--</div>
+                                <div class="kpi-label">月間売上</div>
+                                <div class="kpi-change neutral">
+                                    <i class="fas fa-minus"></i>
+                                    <span>--</span>
+                                    <small>先月比</small>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="kpi-card">
+                            <div class="kpi-header">
+                                <div class="kpi-icon matches">
+                                    <i class="fas fa-handshake"></i>
+                                </div>
+                            </div>
+                            <div class="kpi-content">
+                                <div class="kpi-value" id="kpi-matchings">--</div>
+                                <div class="kpi-label">マッチング成立</div>
+                                <div class="kpi-change neutral">
+                                    <i class="fas fa-minus"></i>
+                                    <span>--</span>
+                                    <small>先月比</small>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="kpi-card">
+                            <div class="kpi-header">
+                                <div class="kpi-icon events">
+                                    <i class="fas fa-calendar-check"></i>
+                                </div>
+                            </div>
+                            <div class="kpi-content">
+                                <div class="kpi-value" id="kpi-events">--</div>
+                                <div class="kpi-label">開催イベント</div>
+                                <div class="kpi-change neutral">
+                                    <i class="fas fa-minus"></i>
+                                    <span>--</span>
+                                    <small>先月比</small>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Activity & System Status -->
+                    <div class="dashboard-bottom">
+                        <div class="activity-panel">
+                            <div class="panel-header">
+                                <h3>最近のアクティビティ</h3>
+                                <a href="#activity" class="view-all">すべて見る</a>
+                            </div>
+                            <div class="activity-list" id="activity-list">
+                                <div class="activity-item">
+                                    <div class="activity-content">
+                                        <p>読み込み中...</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="alerts-panel">
+                            <div class="panel-header">
+                                <h3>システム状況</h3>
+                                <span class="alert-count">全て正常</span>
+                            </div>
+                            <div class="alerts-list">
+                                <div class="alert-item info">
+                                    <div class="alert-icon">
+                                        <i class="fas fa-check-circle"></i>
+                                    </div>
+                                    <div class="alert-content">
+                                        <h4>システム正常</h4>
+                                        <p>すべてのサービスが正常に動作しています</p>
+                                        <span class="alert-time">現在</span>
+                                    </div>
+                                </div>
+                                
+                                <div class="alert-item success">
+                                    <div class="alert-icon">
+                                        <i class="fas fa-save"></i>
+                                    </div>
+                                    <div class="alert-content">
+                                        <h4>バックアップ完了</h4>
+                                        <p>定期バックアップが正常に完了しました</p>
+                                        <span class="alert-time">1時間前</span>
+                                    </div>
+                                </div>
+                                
+                                <div class="alert-item info">
+                                    <div class="alert-icon">
+                                        <i class="fas fa-shield-alt"></i>
+                                    </div>
+                                    <div class="alert-content">
+                                        <h4>セキュリティ監視</h4>
+                                        <p>セキュリティシステムが正常に稼働中</p>
+                                        <span class="alert-time">継続中</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Content Management Page -->
+                <div class="page-content" id="content-page" style="display: none;">
+                    <div class="page-header">
+                        <h1 class="page-title">コンテンツ編集</h1>
+                        <p class="page-subtitle">サイトコンテンツの編集と管理</p>
+                        <div class="page-actions">
+                            <button class="btn btn-outline">
+                                <i class="fas fa-download"></i>
+                                エクスポート
+                            </button>
+                            <button class="btn btn-primary">
+                                <i class="fas fa-plus"></i>
+                                新規コンテンツ
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <!-- コンテンツ管理タブ -->
+                    <div class="content-tabs">
+                        <div class="tab-nav">
+                            <button class="tab-btn active" data-tab="pages">ページ管理</button>
+                            <button class="tab-btn" data-tab="media">メディア管理</button>
+                            <button class="tab-btn" data-tab="templates">テンプレート</button>
+                            <button class="tab-btn" data-tab="drafts">下書き</button>
+                        </div>
+                        
+                        <!-- ページ管理タブ -->
+                        <div class="tab-content active" id="pages-tab">
+                            <div class="content-toolbar">
+                                <div class="toolbar-left">
+                                    <div class="search-container">
+                                        <input type="text" placeholder="ページを検索..." class="search-input">
+                                        <i class="fas fa-search"></i>
+                                    </div>
+                                    <select class="filter-select">
+                                        <option value="all">すべてのページ</option>
+                                        <option value="published">公開中</option>
+                                        <option value="draft">下書き</option>
+                                        <option value="private">非公開</option>
+                                    </select>
+                                </div>
+                                <div class="toolbar-right">
+                                    <button class="btn btn-sm btn-outline">
+                                        <i class="fas fa-filter"></i>
+                                        フィルター
+                                    </button>
+                                    <button class="btn btn-sm btn-outline">
+                                        <i class="fas fa-sort"></i>
+                                        並び替え
+                                    </button>
+                                </div>
+                            </div>
+                            
+                            <div class="content-grid">
+                                <div class="content-card">
+                                    <div class="content-header">
+                                        <div class="content-icon">
+                                            <i class="fas fa-home"></i>
+                                        </div>
+                                        <div class="content-info">
+                                            <h3>ホームページ</h3>
+                                            <span class="content-status published">公開中</span>
+                                        </div>
+                                        <div class="content-menu">
+                                            <button class="btn-menu">
+                                                <i class="fas fa-ellipsis-v"></i>
+                                            </button>
+                                        </div>
+                                    </div>
+                                    <div class="content-body">
+                                        <p>メインランディングページ。サービス紹介、料金プラン、お問い合わせフォームを含む。</p>
+                                        <div class="content-stats">
+                                            <div class="stat">
+                                                <span class="stat-label">文字数:</span>
+                                                <span class="stat-value">2,540</span>
+                                            </div>
+                                            <div class="stat">
+                                                <span class="stat-label">画像:</span>
+                                                <span class="stat-value">8</span>
+                                            </div>
+                                            <div class="stat">
+                                                <span class="stat-label">リンク:</span>
+                                                <span class="stat-value">12</span>
+                                            </div>
+                                        </div>
+                                        <div class="content-meta">
+                                            <div class="meta-item">
+                                                <i class="fas fa-clock"></i>
+                                                <span>最終更新: 2時間前</span>
+                                            </div>
+                                            <div class="meta-item">
+                                                <i class="fas fa-user"></i>
+                                                <span>作成者: マスター管理者</span>
+                                            </div>
+                                            <div class="meta-item">
+                                                <i class="fas fa-eye"></i>
+                                                <span>PV: 1,247</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="content-actions">
+                                        <button class="btn btn-sm btn-outline">
+                                            <i class="fas fa-eye"></i>
+                                            プレビュー
+                                        </button>
+                                        <button class="btn btn-sm btn-outline">
+                                            <i class="fas fa-copy"></i>
+                                            複製
+                                        </button>
+                                        <a href="admin-site-settings.html" class="btn btn-sm btn-primary">
+                                            <i class="fas fa-edit"></i>
+                                            編集
+                                        </a>
+                                    </div>
+                                </div>
+                                
+                                <div class="content-card">
+                                    <div class="content-header">
+                                        <div class="content-icon">
+                                            <i class="fas fa-users"></i>
+                                        </div>
+                                        <div class="content-info">
+                                            <h3>メンバー紹介</h3>
+                                            <span class="content-status published">公開中</span>
+                                        </div>
+                                        <div class="content-menu">
+                                            <button class="btn-menu">
+                                                <i class="fas fa-ellipsis-v"></i>
+                                            </button>
+                                        </div>
+                                    </div>
+                                    <div class="content-body">
+                                        <p>コミュニティメンバーのプロフィールと実績を紹介するページ。</p>
+                                        <div class="content-stats">
+                                            <div class="stat">
+                                                <span class="stat-label">メンバー:</span>
+                                                <span class="stat-value">247</span>
+                                            </div>
+                                            <div class="stat">
+                                                <span class="stat-label">業界:</span>
+                                                <span class="stat-value">15</span>
+                                            </div>
+                                            <div class="stat">
+                                                <span class="stat-label">年商平均:</span>
+                                                <span class="stat-value">8.5億</span>
+                                            </div>
+                                        </div>
+                                        <div class="content-meta">
+                                            <div class="meta-item">
+                                                <i class="fas fa-clock"></i>
+                                                <span>最終更新: 1日前</span>
+                                            </div>
+                                            <div class="meta-item">
+                                                <i class="fas fa-user"></i>
+                                                <span>作成者: マスター管理者</span>
+                                            </div>
+                                            <div class="meta-item">
+                                                <i class="fas fa-eye"></i>
+                                                <span>PV: 892</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="content-actions">
+                                        <button class="btn btn-sm btn-outline">
+                                            <i class="fas fa-eye"></i>
+                                            プレビュー
+                                        </button>
+                                        <button class="btn btn-sm btn-outline">
+                                            <i class="fas fa-copy"></i>
+                                            複製
+                                        </button>
+                                        <a href="members.html" class="btn btn-sm btn-primary">
+                                            <i class="fas fa-edit"></i>
+                                            編集
+                                        </a>
+                                    </div>
+                                </div>
+                                
+                                <div class="content-card">
+                                    <div class="content-header">
+                                        <div class="content-icon">
+                                            <i class="fas fa-calendar"></i>
+                                        </div>
+                                        <div class="content-info">
+                                            <h3>イベント情報</h3>
+                                            <span class="content-status published">公開中</span>
+                                        </div>
+                                        <div class="content-menu">
+                                            <button class="btn-menu">
+                                                <i class="fas fa-ellipsis-v"></i>
+                                            </button>
+                                        </div>
+                                    </div>
+                                    <div class="content-body">
+                                        <p>開催予定および過去のイベント情報を管理するページ。</p>
+                                        <div class="content-stats">
+                                            <div class="stat">
+                                                <span class="stat-label">開催数:</span>
+                                                <span class="stat-value">24</span>
+                                            </div>
+                                            <div class="stat">
+                                                <span class="stat-label">参加者:</span>
+                                                <span class="stat-value">1,540</span>
+                                            </div>
+                                            <div class="stat">
+                                                <span class="stat-label">満足度:</span>
+                                                <span class="stat-value">4.8/5</span>
+                                            </div>
+                                        </div>
+                                        <div class="content-meta">
+                                            <div class="meta-item">
+                                                <i class="fas fa-clock"></i>
+                                                <span>最終更新: 3日前</span>
+                                            </div>
+                                            <div class="meta-item">
+                                                <i class="fas fa-user"></i>
+                                                <span>作成者: マスター管理者</span>
+                                            </div>
+                                            <div class="meta-item">
+                                                <i class="fas fa-eye"></i>
+                                                <span>PV: 456</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="content-actions">
+                                        <button class="btn btn-sm btn-outline">
+                                            <i class="fas fa-eye"></i>
+                                            プレビュー
+                                        </button>
+                                        <button class="btn btn-sm btn-outline">
+                                            <i class="fas fa-copy"></i>
+                                            複製
+                                        </button>
+                                        <a href="events.html" class="btn btn-sm btn-primary">
+                                            <i class="fas fa-edit"></i>
+                                            編集
+                                        </a>
+                                    </div>
+                                </div>
+                                
+                                <div class="content-card draft">
+                                    <div class="content-header">
+                                        <div class="content-icon">
+                                            <i class="fas fa-file-alt"></i>
+                                        </div>
+                                        <div class="content-info">
+                                            <h3>新サービス紹介</h3>
+                                            <span class="content-status draft">下書き</span>
+                                        </div>
+                                        <div class="content-menu">
+                                            <button class="btn-menu">
+                                                <i class="fas fa-ellipsis-v"></i>
+                                            </button>
+                                        </div>
+                                    </div>
+                                    <div class="content-body">
+                                        <p>新しいプレミアムサービスの紹介ページ（作成中）。</p>
+                                        <div class="content-stats">
+                                            <div class="stat">
+                                                <span class="stat-label">進捗:</span>
+                                                <span class="stat-value">65%</span>
+                                            </div>
+                                            <div class="stat">
+                                                <span class="stat-label">文字数:</span>
+                                                <span class="stat-value">1,203</span>
+                                            </div>
+                                            <div class="stat">
+                                                <span class="stat-label">画像:</span>
+                                                <span class="stat-value">3/8</span>
+                                            </div>
+                                        </div>
+                                        <div class="content-meta">
+                                            <div class="meta-item">
+                                                <i class="fas fa-clock"></i>
+                                                <span>最終更新: 6時間前</span>
+                                            </div>
+                                            <div class="meta-item">
+                                                <i class="fas fa-user"></i>
+                                                <span>作成者: マスター管理者</span>
+                                            </div>
+                                            <div class="meta-item">
+                                                <i class="fas fa-save"></i>
+                                                <span>自動保存済み</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="content-actions">
+                                        <button class="btn btn-sm btn-outline">
+                                            <i class="fas fa-eye"></i>
+                                            プレビュー
+                                        </button>
+                                        <button class="btn btn-sm btn-success">
+                                            <i class="fas fa-paper-plane"></i>
+                                            公開
+                                        </button>
+                                        <button class="btn btn-sm btn-primary">
+                                            <i class="fas fa-edit"></i>
+                                            編集続行
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- メディア管理タブ -->
+                        <div class="tab-content" id="media-tab">
+                            <div class="media-toolbar">
+                                <div class="toolbar-left">
+                                    <button class="btn btn-primary">
+                                        <i class="fas fa-upload"></i>
+                                        ファイルアップロード
+                                    </button>
+                                    <button class="btn btn-outline">
+                                        <i class="fas fa-folder-plus"></i>
+                                        フォルダ作成
+                                    </button>
+                                </div>
+                                <div class="toolbar-right">
+                                    <div class="view-toggle">
+                                        <button class="view-btn active">
+                                            <i class="fas fa-th"></i>
+                                        </button>
+                                        <button class="view-btn">
+                                            <i class="fas fa-list"></i>
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="media-grid">
+                                <div class="media-item">
+                                    <div class="media-thumbnail">
+                                        <img src="assets/hero-fallback.svg" alt="Hero Background">
+                                        <div class="media-overlay">
+                                            <button class="btn btn-sm btn-primary">
+                                                <i class="fas fa-eye"></i>
+                                            </button>
+                                            <button class="btn btn-sm btn-outline">
+                                                <i class="fas fa-download"></i>
+                                            </button>
+                                            <button class="btn btn-sm btn-danger">
+                                                <i class="fas fa-trash"></i>
+                                            </button>
+                                        </div>
+                                    </div>
+                                    <div class="media-info">
+                                        <h4>hero-background.jpg</h4>
+                                        <p>1920×1080 • 2.3MB</p>
+                                        <span class="media-date">2日前</span>
+                                    </div>
+                                </div>
+                                
+                                <div class="media-item">
+                                    <div class="media-thumbnail">
+                                        <div class="media-icon">
+                                            <i class="fas fa-file-video"></i>
+                                        </div>
+                                        <div class="media-overlay">
+                                            <button class="btn btn-sm btn-primary">
+                                                <i class="fas fa-play"></i>
+                                            </button>
+                                            <button class="btn btn-sm btn-outline">
+                                                <i class="fas fa-download"></i>
+                                            </button>
+                                            <button class="btn btn-sm btn-danger">
+                                                <i class="fas fa-trash"></i>
+                                            </button>
+                                        </div>
+                                    </div>
+                                    <div class="media-info">
+                                        <h4>interconnect-intro.mp4</h4>
+                                        <p>1920×1080 • 45.6MB</p>
+                                        <span class="media-date">1週間前</span>
+                                    </div>
+                                </div>
+                                
+                                <div class="media-item">
+                                    <div class="media-thumbnail">
+                                        <div class="media-icon">
+                                            <i class="fas fa-file-pdf"></i>
+                                        </div>
+                                        <div class="media-overlay">
+                                            <button class="btn btn-sm btn-primary">
+                                                <i class="fas fa-eye"></i>
+                                            </button>
+                                            <button class="btn btn-sm btn-outline">
+                                                <i class="fas fa-download"></i>
+                                            </button>
+                                            <button class="btn btn-sm btn-danger">
+                                                <i class="fas fa-trash"></i>
+                                            </button>
+                                        </div>
+                                    </div>
+                                    <div class="media-info">
+                                        <h4>service-guide.pdf</h4>
+                                        <p>A4サイズ • 12ページ • 8.2MB</p>
+                                        <span class="media-date">3日前</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- テンプレートタブ -->
+                        <div class="tab-content" id="templates-tab">
+                            <div class="template-grid">
+                                <div class="template-card">
+                                    <div class="template-preview">
+                                        <div class="template-mockup">
+                                            <div class="mockup-header"></div>
+                                            <div class="mockup-content"></div>
+                                            <div class="mockup-sidebar"></div>
+                                        </div>
+                                    </div>
+                                    <div class="template-info">
+                                        <h4>ランディングページ</h4>
+                                        <p>サービス紹介用のテンプレート</p>
+                                        <div class="template-actions">
+                                            <button class="btn btn-sm btn-outline">プレビュー</button>
+                                            <button class="btn btn-sm btn-primary">使用</button>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <div class="template-card">
+                                    <div class="template-preview">
+                                        <div class="template-mockup">
+                                            <div class="mockup-nav"></div>
+                                            <div class="mockup-grid"></div>
+                                            <div class="mockup-footer"></div>
+                                        </div>
+                                    </div>
+                                    <div class="template-info">
+                                        <h4>イベントページ</h4>
+                                        <p>イベント告知・参加者管理用</p>
+                                        <div class="template-actions">
+                                            <button class="btn btn-sm btn-outline">プレビュー</button>
+                                            <button class="btn btn-sm btn-primary">使用</button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- 下書きタブ -->
+                        <div class="tab-content" id="drafts-tab">
+                            <div class="drafts-list">
+                                <div class="draft-item">
+                                    <div class="draft-info">
+                                        <h4>新サービス紹介</h4>
+                                        <p>プレミアムプランの詳細説明ページ</p>
+                                        <div class="draft-meta">
+                                            <span>最終編集: 6時間前</span>
+                                            <span>進捗: 65%</span>
+                                        </div>
+                                    </div>
+                                    <div class="draft-actions">
+                                        <button class="btn btn-sm btn-outline">削除</button>
+                                        <button class="btn btn-sm btn-primary">編集続行</button>
+                                    </div>
+                                </div>
+                                
+                                <div class="draft-item">
+                                    <div class="draft-info">
+                                        <h4>年末特別企画</h4>
+                                        <p>2024年総まとめイベント告知</p>
+                                        <div class="draft-meta">
+                                            <span>最終編集: 2日前</span>
+                                            <span>進捗: 30%</span>
+                                        </div>
+                                    </div>
+                                    <div class="draft-actions">
+                                        <button class="btn btn-sm btn-outline">削除</button>
+                                        <button class="btn btn-sm btn-primary">編集続行</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- System Info Page -->
+                <div class="page-content" id="info-page" style="display: none;">
+                    <div class="page-header">
+                        <h1 class="page-title">システム状況</h1>
+                        <p class="page-subtitle">システムの健全性と詳細情報を監視</p>
+                        <div class="page-actions">
+                            <button class="btn btn-outline">
+                                <i class="fas fa-sync-alt"></i>
+                                リフレッシュ
+                            </button>
+                            <button class="btn btn-outline">
+                                <i class="fas fa-download"></i>
+                                レポート出力
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <!-- システム概要 -->
+                    <div class="system-overview">
+                        <div class="overview-grid">
+                            <div class="overview-card">
+                                <div class="card-icon healthy">
+                                    <i class="fas fa-heartbeat"></i>
+                                </div>
+                                <div class="card-content">
+                                    <h3>システム健全性</h3>
+                                    <div class="status-value healthy">99.9%</div>
+                                    <p>すべてのサービスが正常に稼働中</p>
+                                </div>
+                            </div>
+                            
+                            <div class="overview-card">
+                                <div class="card-icon">
+                                    <i class="fas fa-clock"></i>
+                                </div>
+                                <div class="card-content">
+                                    <h3>稼働時間</h3>
+                                    <div class="status-value">247日 18時間</div>
+                                    <p>最後の再起動: 2024-05-15</p>
+                                </div>
+                            </div>
+                            
+                            <div class="overview-card">
+                                <div class="card-icon warning">
+                                    <i class="fas fa-database"></i>
+                                </div>
+                                <div class="card-content">
+                                    <h3>ストレージ使用量</h3>
+                                    <div class="status-value warning">85.2%</div>
+                                    <p>512GB中 436GB 使用</p>
+                                </div>
+                            </div>
+                            
+                            <div class="overview-card">
+                                <div class="card-icon">
+                                    <i class="fas fa-tachometer-alt"></i>
+                                </div>
+                                <div class="card-content">
+                                    <h3>パフォーマンス</h3>
+                                    <div class="status-value healthy">良好</div>
+                                    <p>平均応答時間: 120ms</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- 詳細情報タブ -->
+                    <div class="system-tabs">
+                        <div class="tab-nav">
+                            <button class="tab-btn active" data-tab="performance">パフォーマンス</button>
+                            <button class="tab-btn" data-tab="security">セキュリティ</button>
+                            <button class="tab-btn" data-tab="maintenance">メンテナンス</button>
+                            <button class="tab-btn" data-tab="logs">ログ</button>
+                        </div>
+                        
+                        <!-- パフォーマンスタブ -->
+                        <div class="tab-content active" id="performance-tab">
+                            <div class="metrics-grid">
+                                <div class="metric-card">
+                                    <div class="metric-header">
+                                        <h4>CPU使用率</h4>
+                                        <span class="metric-status healthy">正常</span>
+                                    </div>
+                                    <div class="metric-chart">
+                                        <div class="progress-bar">
+                                            <div class="progress-fill" style="width: 45%"></div>
+                                        </div>
+                                        <div class="metric-value">45%</div>
+                                    </div>
+                                    <div class="metric-details">
+                                        <div class="detail-item">
+                                            <span>平均:</span>
+                                            <span>42%</span>
+                                        </div>
+                                        <div class="detail-item">
+                                            <span>最大:</span>
+                                            <span>78%</span>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <div class="metric-card">
+                                    <div class="metric-header">
+                                        <h4>メモリ使用率</h4>
+                                        <span class="metric-status healthy">正常</span>
+                                    </div>
+                                    <div class="metric-chart">
+                                        <div class="progress-bar">
+                                            <div class="progress-fill" style="width: 68%"></div>
+                                        </div>
+                                        <div class="metric-value">68%</div>
+                                    </div>
+                                    <div class="metric-details">
+                                        <div class="detail-item">
+                                            <span>使用量:</span>
+                                            <span>5.4GB / 8GB</span>
+                                        </div>
+                                        <div class="detail-item">
+                                            <span>利用可能:</span>
+                                            <span>2.6GB</span>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <div class="metric-card">
+                                    <div class="metric-header">
+                                        <h4>ネットワーク</h4>
+                                        <span class="metric-status healthy">良好</span>
+                                    </div>
+                                    <div class="metric-chart">
+                                        <div class="network-stats">
+                                            <div class="stat">
+                                                <span class="stat-label">受信:</span>
+                                                <span class="stat-value">1.2MB/s</span>
+                                            </div>
+                                            <div class="stat">
+                                                <span class="stat-label">送信:</span>
+                                                <span class="stat-value">850KB/s</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="metric-details">
+                                        <div class="detail-item">
+                                            <span>レイテンシ:</span>
+                                            <span>12ms</span>
+                                        </div>
+                                        <div class="detail-item">
+                                            <span>パケットロス:</span>
+                                            <span>0.01%</span>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <div class="metric-card">
+                                    <div class="metric-header">
+                                        <h4>アクティブユーザー</h4>
+                                        <span class="metric-status">リアルタイム</span>
+                                    </div>
+                                    <div class="metric-chart">
+                                        <div class="user-count">
+                                            <div class="count-large">247</div>
+                                            <div class="count-label">オンライン</div>
+                                        </div>
+                                    </div>
+                                    <div class="metric-details">
+                                        <div class="detail-item">
+                                            <span>ピーク:</span>
+                                            <span>389 (14:30)</span>
+                                        </div>
+                                        <div class="detail-item">
+                                            <span>24時間平均:</span>
+                                            <span>198</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- セキュリティタブ -->
+                        <div class="tab-content" id="security-tab">
+                            <div class="security-grid">
+                                <div class="security-card">
+                                    <div class="security-header">
+                                        <div class="security-icon secure">
+                                            <i class="fas fa-shield-alt"></i>
+                                        </div>
+                                        <div class="security-info">
+                                            <h4>セキュリティスキャン</h4>
+                                            <span class="security-status secure">セキュア</span>
+                                        </div>
+                                    </div>
+                                    <div class="security-body">
+                                        <p>最後のスキャン: 2時間前</p>
+                                        <div class="security-details">
+                                            <div class="detail-row">
+                                                <span>検出された脅威:</span>
+                                                <span class="secure">0件</span>
+                                            </div>
+                                            <div class="detail-row">
+                                                <span>修正済み脆弱性:</span>
+                                                <span>3件</span>
+                                            </div>
+                                            <div class="detail-row">
+                                                <span>セキュリティスコア:</span>
+                                                <span class="secure">A+</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <div class="security-card">
+                                    <div class="security-header">
+                                        <div class="security-icon">
+                                            <i class="fas fa-key"></i>
+                                        </div>
+                                        <div class="security-info">
+                                            <h4>SSL/TLS証明書</h4>
+                                            <span class="security-status secure">有効</span>
+                                        </div>
+                                    </div>
+                                    <div class="security-body">
+                                        <p>証明書の有効期限: 2025-06-15</p>
+                                        <div class="security-details">
+                                            <div class="detail-row">
+                                                <span>発行者:</span>
+                                                <span>Let's Encrypt</span>
+                                            </div>
+                                            <div class="detail-row">
+                                                <span>暗号化レベル:</span>
+                                                <span>256-bit</span>
+                                            </div>
+                                            <div class="detail-row">
+                                                <span>残り日数:</span>
+                                                <span>154日</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <div class="security-card">
+                                    <div class="security-header">
+                                        <div class="security-icon warning">
+                                            <i class="fas fa-exclamation-triangle"></i>
+                                        </div>
+                                        <div class="security-info">
+                                            <h4>ログイン試行</h4>
+                                            <span class="security-status warning">注意</span>
+                                        </div>
+                                    </div>
+                                    <div class="security-body">
+                                        <p>過去24時間の異常なアクティビティ</p>
+                                        <div class="security-details">
+                                            <div class="detail-row">
+                                                <span>失敗ログイン:</span>
+                                                <span class="warning">12件</span>
+                                            </div>
+                                            <div class="detail-row">
+                                                <span>ブロックしたIP:</span>
+                                                <span>3個</span>
+                                            </div>
+                                            <div class="detail-row">
+                                                <span>成功率:</span>
+                                                <span>94.2%</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- メンテナンスタブ -->
+                        <div class="tab-content" id="maintenance-tab">
+                            <div class="maintenance-grid">
+                                <div class="maintenance-card">
+                                    <div class="maintenance-header">
+                                        <h4>バックアップ状況</h4>
+                                        <span class="maintenance-status success">完了</span>
+                                    </div>
+                                    <div class="maintenance-body">
+                                        <div class="backup-info">
+                                            <div class="backup-item">
+                                                <span class="backup-type">フルバックアップ</span>
+                                                <span class="backup-time">3時間前</span>
+                                                <span class="backup-status success">成功</span>
+                                            </div>
+                                            <div class="backup-item">
+                                                <span class="backup-type">差分バックアップ</span>
+                                                <span class="backup-time">30分前</span>
+                                                <span class="backup-status success">成功</span>
+                                            </div>
+                                            <div class="backup-item">
+                                                <span class="backup-type">設定バックアップ</span>
+                                                <span class="backup-time">1時間前</span>
+                                                <span class="backup-status success">成功</span>
+                                            </div>
+                                        </div>
+                                        <div class="backup-actions">
+                                            <button class="btn btn-sm btn-outline">手動バックアップ</button>
+                                            <button class="btn btn-sm btn-outline">復元</button>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <div class="maintenance-card">
+                                    <div class="maintenance-header">
+                                        <h4>スケジュールタスク</h4>
+                                        <span class="maintenance-status">2件実行中</span>
+                                    </div>
+                                    <div class="maintenance-body">
+                                        <div class="task-list">
+                                            <div class="task-item running">
+                                                <div class="task-info">
+                                                    <span class="task-name">データベース最適化</span>
+                                                    <span class="task-schedule">毎日 3:00</span>
+                                                </div>
+                                                <span class="task-status running">実行中</span>
+                                            </div>
+                                            <div class="task-item">
+                                                <div class="task-info">
+                                                    <span class="task-name">ログローテーション</span>
+                                                    <span class="task-schedule">毎週日曜 2:00</span>
+                                                </div>
+                                                <span class="task-status scheduled">予定</span>
+                                            </div>
+                                            <div class="task-item">
+                                                <div class="task-info">
+                                                    <span class="task-name">キャッシュクリア</span>
+                                                    <span class="task-schedule">毎日 1:00</span>
+                                                </div>
+                                                <span class="task-status completed">完了</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <div class="maintenance-card">
+                                    <div class="maintenance-header">
+                                        <h4>システム更新</h4>
+                                        <span class="maintenance-status info">利用可能</span>
+                                    </div>
+                                    <div class="maintenance-body">
+                                        <div class="update-info">
+                                            <div class="update-item">
+                                                <span class="update-component">フロントエンド</span>
+                                                <span class="update-version">v1.0.0 → v1.0.1</span>
+                                                <span class="update-type">パッチ</span>
+                                            </div>
+                                            <div class="update-item">
+                                                <span class="update-component">セキュリティ</span>
+                                                <span class="update-version">v2.3.1 → v2.3.2</span>
+                                                <span class="update-type security">セキュリティ</span>
+                                            </div>
+                                        </div>
+                                        <div class="update-actions">
+                                            <button class="btn btn-sm btn-primary">今すぐ更新</button>
+                                            <button class="btn btn-sm btn-outline">詳細を見る</button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- ログタブ -->
+                        <div class="tab-content" id="logs-tab">
+                            <div class="logs-container">
+                                <div class="logs-toolbar">
+                                    <div class="toolbar-left">
+                                        <select class="log-filter">
+                                            <option value="all">すべてのログ</option>
+                                            <option value="error">エラー</option>
+                                            <option value="warning">警告</option>
+                                            <option value="info">情報</option>
+                                        </select>
+                                        <input type="date" class="date-filter" value="2025-01-12">
+                                    </div>
+                                    <div class="toolbar-right">
+                                        <button class="btn btn-sm btn-outline">
+                                            <i class="fas fa-download"></i>
+                                            エクスポート
+                                        </button>
+                                        <button class="btn btn-sm btn-outline">
+                                            <i class="fas fa-trash"></i>
+                                            クリア
+                                        </button>
+                                    </div>
+                                </div>
+                                
+                                <div class="logs-list">
+                                    <div class="log-entry info">
+                                        <div class="log-time">2025-01-12 14:32:15</div>
+                                        <div class="log-level info">INFO</div>
+                                        <div class="log-message">ユーザーログイン成功: admin@interconnect.jp</div>
+                                        <div class="log-source">auth.js:245</div>
+                                    </div>
+                                    
+                                    <div class="log-entry warning">
+                                        <div class="log-time">2025-01-12 14:28:03</div>
+                                        <div class="log-level warning">WARNING</div>
+                                        <div class="log-message">ストレージ使用量が80%を超えました</div>
+                                        <div class="log-source">storage.js:67</div>
+                                    </div>
+                                    
+                                    <div class="log-entry info">
+                                        <div class="log-time">2025-01-12 14:25:42</div>
+                                        <div class="log-level info">INFO</div>
+                                        <div class="log-message">バックアップ処理が正常に完了しました</div>
+                                        <div class="log-source">backup.js:123</div>
+                                    </div>
+                                    
+                                    <div class="log-entry error">
+                                        <div class="log-time">2025-01-12 14:20:18</div>
+                                        <div class="log-level error">ERROR</div>
+                                        <div class="log-message">メール送信に失敗しました: SMTP接続エラー</div>
+                                        <div class="log-source">mail.js:89</div>
+                                    </div>
+                                    
+                                    <div class="log-entry info">
+                                        <div class="log-time">2025-01-12 14:15:55</div>
+                                        <div class="log-level info">INFO</div>
+                                        <div class="log-message">新規ユーザー登録: user247@example.com</div>
+                                        <div class="log-source">register.js:156</div>
+                                    </div>
+                                </div>
+                                
+                                <div class="logs-pagination">
+                                    <button class="btn btn-sm btn-outline">前のページ</button>
+                                    <span class="pagination-info">1 / 23 ページ (1,150件)</span>
+                                    <button class="btn btn-sm btn-outline">次のページ</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- システム詳細情報 -->
+                    <div class="system-details">
+                        <div class="details-grid">
+                            <div class="detail-card">
+                                <h4>システム情報</h4>
+                                <div class="detail-list">
+                                    <div class="detail-item">
+                                        <span class="detail-label">バージョン:</span>
+                                        <span class="detail-value">INTERCONNECT v1.0.0</span>
+                                    </div>
+                                    <div class="detail-item">
+                                        <span class="detail-label">最終更新:</span>
+                                        <span class="detail-value">2025-01-12 10:30</span>
+                                    </div>
+                                    <div class="detail-item">
+                                        <span class="detail-label">サーバー:</span>
+                                        <span class="detail-value">Ubuntu 22.04 LTS</span>
+                                    </div>
+                                    <div class="detail-item">
+                                        <span class="detail-label">Node.js:</span>
+                                        <span class="detail-value">v18.17.0</span>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="detail-card">
+                                <h4>技術仕様</h4>
+                                <div class="detail-list">
+                                    <div class="detail-item">
+                                        <span class="detail-label">フロントエンド:</span>
+                                        <span class="detail-value">HTML5, CSS3, JavaScript ES6+</span>
+                                    </div>
+                                    <div class="detail-item">
+                                        <span class="detail-label">アイコン:</span>
+                                        <span class="detail-value">Font Awesome 6.4.0</span>
+                                    </div>
+                                    <div class="detail-item">
+                                        <span class="detail-label">フォント:</span>
+                                        <span class="detail-value">Inter + Noto Sans JP</span>
+                                    </div>
+                                    <div class="detail-item">
+                                        <span class="detail-label">ブラウザ対応:</span>
+                                        <span class="detail-value">Chrome 90+, Firefox 88+, Safari 14+</span>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="detail-card">
+                                <h4>環境変数</h4>
+                                <div class="detail-list">
+                                    <div class="detail-item">
+                                        <span class="detail-label">NODE_ENV:</span>
+                                        <span class="detail-value">production</span>
+                                    </div>
+                                    <div class="detail-item">
+                                        <span class="detail-label">PORT:</span>
+                                        <span class="detail-value">3000</span>
+                                    </div>
+                                    <div class="detail-item">
+                                        <span class="detail-label">SSL:</span>
+                                        <span class="detail-value">enabled</span>
+                                    </div>
+                                    <div class="detail-item">
+                                        <span class="detail-label">CACHE:</span>
+                                        <span class="detail-value">redis</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Scripts -->
+    <script src="js/supabase-unified.js?v=1.1"></script>
+    <script src="js/core-utils.js"></script>
+    <script src="js/global-functions.js"></script>
+    <script src="js/profile-sync.js"></script>
+    <script src="js/notification-system-unified.js"></script>
+    <script src="js/notifications-realtime-unified.js"></script>
+    <script src="js/responsive-menu-simple.js"></script>
+    <script src="js/dashboard.js"></script>
+    <script>
+        // Simple admin functionality
+        document.addEventListener('DOMContentLoaded', function() {
+            // Navigation functionality
+            const navLinks = document.querySelectorAll('.nav-link[data-page]');
+            const pages = document.querySelectorAll('.page-content');
+            const breadcrumb = document.getElementById('currentPageBreadcrumb');
+            
+            navLinks.forEach(link => {
+                link.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    
+                    const targetPage = this.dataset.page;
+                    const targetElement = document.getElementById(targetPage + '-page');
+                    
+                    if (targetElement) {
+                        // Remove active class from all nav links
+                        navLinks.forEach(l => l.classList.remove('active'));
+                        this.classList.add('active');
+                        
+                        // Hide all pages
+                        pages.forEach(page => page.style.display = 'none');
+                        
+                        // Show target page
+                        targetElement.style.display = 'block';
+                        
+                        // Update breadcrumb
+                        const pageTitle = this.querySelector('span').textContent;
+                        breadcrumb.textContent = pageTitle;
+                    }
+                });
+            });
+            
+            // Sidebar toggle
+            const sidebarToggle = document.getElementById('superAdminToggleBtn');
+            const sidebar = document.getElementById('adminSidebar');
+            const collapseBtn = document.getElementById('superAdminCollapseBtn');
+            
+            if (sidebarToggle && sidebar) {
+                sidebarToggle.addEventListener('click', function() {
+                    sidebar.classList.toggle('collapsed');
+                });
+            }
+            
+            if (collapseBtn && sidebar) {
+                collapseBtn.addEventListener('click', function() {
+                    sidebar.classList.toggle('collapsed');
+                });
+            }
+            
+            // Mobile menu toggle
+            const mobileToggle = document.getElementById('superAdminMobileToggle');
+            const mobileOverlay = document.getElementById('mobileOverlay');
+            
+            if (mobileToggle && sidebar && mobileOverlay) {
+                mobileToggle.addEventListener('click', function() {
+                    sidebar.classList.toggle('mobile-open');
+                    mobileOverlay.classList.toggle('active');
+                });
+                
+                mobileOverlay.addEventListener('click', function() {
+                    sidebar.classList.remove('mobile-open');
+                    mobileOverlay.classList.remove('active');
+                });
+            }
+            
+            // Notification panel toggle
+            const notificationBtn = document.getElementById('notificationBtn');
+            const notificationPanel = document.getElementById('notificationPanel');
+            
+            if (notificationBtn && notificationPanel) {
+                notificationBtn.addEventListener('click', function(e) {
+                    e.stopPropagation();
+                    notificationPanel.classList.toggle('active');
+                });
+                
+                document.addEventListener('click', function() {
+                    notificationPanel.classList.remove('active');
+                });
+                
+                notificationPanel.addEventListener('click', function(e) {
+                    e.stopPropagation();
+                });
+            }
+            
+            // Profile dropdown toggle
+            const profileBtn = document.getElementById('profileBtn');
+            const topProfileDropdown = document.getElementById('topProfileDropdown');
+            
+            if (profileBtn && topProfileDropdown) {
+                profileBtn.addEventListener('click', function(e) {
+                    e.stopPropagation();
+                    topProfileDropdown.classList.toggle('active');
+                });
+                
+                document.addEventListener('click', function() {
+                    topProfileDropdown.classList.remove('active');
+                });
+            }
+            
+            // Sidebar profile dropdown
+            const profileMenuBtn = document.getElementById('profileMenuBtn');
+            const profileDropdown = document.getElementById('profileDropdown');
+            
+            if (profileMenuBtn && profileDropdown) {
+                profileMenuBtn.addEventListener('click', function(e) {
+                    e.stopPropagation();
+                    profileDropdown.classList.toggle('active');
+                });
+            }
+            
+            // Search functionality (demo)
+            const searchInput = document.getElementById('globalSearch');
+            if (searchInput) {
+                searchInput.addEventListener('keypress', function(e) {
+                    if (e.key === 'Enter') {
+                        alert('検索機能（デモ）: ' + this.value);
+                    }
+                });
+            }
+            
+            // Mark all notifications as read
+            const markAllRead = document.querySelector('.mark-all-read');
+            if (markAllRead) {
+                markAllRead.addEventListener('click', function() {
+                    document.querySelectorAll('.notification-item.unread').forEach(item => {
+                        item.classList.remove('unread');
+                    });
+                    document.querySelectorAll('.notification-badge').forEach(badge => {
+                        badge.textContent = '0';
+                        badge.style.display = 'none';
+                    });
+                });
+            }
+        });
+        
+        // Logout function
+        async function superAdminLogout() {
+            if (!confirm('ログアウトしますか？')) return;
+            try {
+                if (window.supabaseClient) await window.supabaseClient.auth.signOut();
+            } catch (e) { /* ignore */ }
+            localStorage.clear();
+            sessionStorage.clear();
+            window.location.href = 'login.html';
+        }
+
+        // KPI・アクティビティ実データ取得
+        (async function loadDashboardData() {
+            try {
+                await (window.waitForSupabase ? window.waitForSupabase() : Promise.resolve());
+                var client = window.supabaseClient;
+                if (!client) return;
+
+                // KPI: 総ユーザー数
+                var usersResult = await client.from('user_profiles').select('id', { count: 'exact', head: true });
+                var totalUsers = (usersResult.count != null) ? usersResult.count : 0;
+                var el = document.getElementById('kpi-total-users');
+                if (el) el.textContent = totalUsers.toLocaleString('ja-JP');
+
+                // KPI: 月間売上（cashout_requests の completed 合計）
+                var now = new Date();
+                var monthStart = new Date(now.getFullYear(), now.getMonth(), 1).toISOString();
+                var revenueResult = await client.from('cashout_requests')
+                    .select('amount')
+                    .eq('status', 'completed')
+                    .gte('created_at', monthStart);
+                var totalRevenue = 0;
+                if (revenueResult.data) {
+                    revenueResult.data.forEach(function(r) { totalRevenue += (Number(r.amount) || 0); });
+                }
+                el = document.getElementById('kpi-monthly-revenue');
+                if (el) el.textContent = '\u00A5' + totalRevenue.toLocaleString('ja-JP');
+
+                // KPI: マッチング成立数
+                var matchResult = await client.from('matchings').select('id', { count: 'exact', head: true });
+                var totalMatches = (matchResult.count != null) ? matchResult.count : 0;
+                el = document.getElementById('kpi-matchings');
+                if (el) el.textContent = totalMatches.toLocaleString('ja-JP');
+
+                // KPI: 開催イベント数
+                var eventsResult = await client.from('event_items').select('id', { count: 'exact', head: true });
+                var totalEvents = (eventsResult.count != null) ? eventsResult.count : 0;
+                el = document.getElementById('kpi-events');
+                if (el) el.textContent = totalEvents.toLocaleString('ja-JP');
+
+                // アクティビティ: 最新5件のユーザー登録
+                var activityList = document.getElementById('activity-list');
+                if (activityList) {
+                    var actResult = await client.from('user_profiles')
+                        .select('display_name, created_at')
+                        .order('created_at', { ascending: false })
+                        .limit(5);
+                    if (actResult.data && actResult.data.length > 0) {
+                        activityList.innerHTML = '';
+                        actResult.data.forEach(function(u) {
+                            var item = document.createElement('div');
+                            item.className = 'activity-item';
+
+                            var avatar = document.createElement('div');
+                            avatar.className = 'activity-avatar';
+                            var img = document.createElement('img');
+                            img.src = 'assets/user-placeholder.svg';
+                            img.alt = 'User';
+                            avatar.appendChild(img);
+
+                            var content = document.createElement('div');
+                            content.className = 'activity-content';
+                            var p = document.createElement('p');
+                            var strong = document.createElement('strong');
+                            strong.textContent = u.display_name || '名前未設定';
+                            p.appendChild(strong);
+                            p.appendChild(document.createTextNode('さんが新規登録しました'));
+                            content.appendChild(p);
+
+                            var timeSpan = document.createElement('span');
+                            timeSpan.className = 'activity-time';
+                            var diff = Date.now() - new Date(u.created_at).getTime();
+                            var mins = Math.floor(diff / 60000);
+                            if (mins < 60) timeSpan.textContent = mins + '分前';
+                            else if (mins < 1440) timeSpan.textContent = Math.floor(mins / 60) + '時間前';
+                            else timeSpan.textContent = Math.floor(mins / 1440) + '日前';
+                            content.appendChild(timeSpan);
+
+                            var typeDiv = document.createElement('div');
+                            typeDiv.className = 'activity-type';
+                            var icon = document.createElement('i');
+                            icon.className = 'fas fa-user-plus';
+                            typeDiv.appendChild(icon);
+
+                            item.appendChild(avatar);
+                            item.appendChild(content);
+                            item.appendChild(typeDiv);
+                            activityList.appendChild(item);
+                        });
+                    } else {
+                        activityList.innerHTML = '';
+                        var emptyDiv = document.createElement('div');
+                        emptyDiv.className = 'activity-item';
+                        var emptyP = document.createElement('p');
+                        emptyP.textContent = '最近のアクティビティはありません';
+                        emptyDiv.appendChild(emptyP);
+                        activityList.appendChild(emptyDiv);
+                    }
+                }
+            } catch (e) {
+                console.error('Dashboard data load error:', e);
+            }
+        })();
+    </script>
+    <script src="js/user-dropdown-handler.js"></script>
+    <script src="js/avatar-size-enforcer.js"></script>
+</body>
+</html>

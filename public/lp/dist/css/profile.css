@@ -1,0 +1,1488 @@
+/* ===========================
+   Profile Styles
+   =========================== */
+
+/* Profile Header */
+.profile-container {
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+.profile-header {
+    background: white;
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-sm);
+    overflow: hidden;
+    margin-bottom: var(--space-xl);
+}
+
+.profile-cover {
+    height: 300px;
+    position: relative;
+    background: var(--bg-secondary);
+    overflow: hidden;
+}
+
+.profile-cover img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.btn-edit-cover {
+    position: absolute;
+    bottom: var(--space-lg);
+    right: var(--space-lg);
+    background: white;
+    color: var(--text-primary);
+    box-shadow: var(--shadow-md);
+}
+
+.profile-info {
+    padding: var(--space-xl);
+    display: flex;
+    align-items: flex-start;
+    gap: var(--space-xl);
+    margin-top: -80px;
+    position: relative;
+}
+
+.profile-avatar {
+    width: 160px;
+    height: 160px;
+    border-radius: 50%;
+    overflow: hidden;
+    border: 5px solid white;
+    box-shadow: var(--shadow-lg);
+    position: relative;
+    flex-shrink: 0;
+}
+
+/* オンラインインジケーター */
+.profile-avatar .online-indicator {
+    position: absolute;
+    bottom: 10px;
+    right: 10px;
+    width: 24px;
+    height: 24px;
+    background-color: #4caf50;
+    border: 4px solid white;
+    border-radius: 50%;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+    z-index: 10;
+}
+
+.profile-avatar img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.btn-edit-avatar {
+    position: absolute;
+    bottom: 10px;
+    right: 10px;
+    width: 40px;
+    height: 40px;
+    background: white;
+    color: var(--text-primary);
+    box-shadow: var(--shadow-md);
+}
+
+.btn-icon {
+    border: none;
+    border-radius: var(--radius-full);
+    width: 48px;
+    height: 48px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: var(--transition-base);
+}
+
+.btn-icon:hover {
+    transform: scale(1.05);
+}
+
+.profile-details {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-lg);
+}
+
+
+.profile-details h2 {
+    font-size: 2rem;
+    font-weight: 700;
+    color: var(--text-primary);
+    margin-bottom: var(--space-sm);
+}
+
+.profile-title {
+    font-size: 1.125rem;
+    color: var(--text-secondary);
+    margin-bottom: var(--space-xs);
+}
+
+.profile-company {
+    color: var(--primary-color);
+    font-weight: 500;
+    margin-bottom: var(--space-lg);
+}
+
+.profile-stats {
+    display: flex;
+    gap: var(--space-xl);
+}
+
+.profile-stats .stat {
+    display: flex;
+    align-items: center;
+    gap: var(--space-sm);
+    background: var(--bg-secondary);
+    padding: var(--space-md) var(--space-lg);
+    border-radius: var(--radius-md);
+    min-width: 150px;
+    transition: var(--transition-base);
+    cursor: pointer;
+}
+
+.profile-stats .stat:hover {
+    background: var(--primary-light);
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-sm);
+}
+
+.profile-stats .stat-value {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: var(--primary-color);
+}
+
+.profile-stats .stat-label {
+    font-size: 0.875rem;
+    color: var(--text-secondary);
+    font-weight: 500;
+}
+
+/* Profile Tabs */
+.profile-tabs {
+    display: flex;
+    gap: var(--space-lg);
+    border-bottom: 2px solid var(--border-color);
+    margin-bottom: var(--space-xl);
+    overflow-x: auto;
+}
+
+.tab-btn {
+    background: none;
+    border: none;
+    padding: var(--space-md) var(--space-lg);
+    color: var(--text-secondary);
+    font-weight: 500;
+    cursor: pointer;
+    transition: var(--transition-base);
+    white-space: nowrap;
+    position: relative;
+}
+
+.tab-btn:hover {
+    color: var(--text-primary);
+}
+
+.tab-btn.active {
+    color: var(--primary-color);
+}
+
+.tab-btn.active::after {
+    content: '';
+    position: absolute;
+    bottom: -2px;
+    left: 0;
+    right: 0;
+    height: 2px;
+    background: var(--primary-color);
+}
+
+/* Profile Content */
+.profile-content {
+    background: white;
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-sm);
+    padding: var(--space-xl);
+}
+
+.profile-section {
+    margin-bottom: var(--space-2xl);
+}
+
+.profile-section:last-child {
+    margin-bottom: 0;
+}
+
+.section-title {
+    font-size: 1.25rem;
+    font-weight: 600;
+    color: var(--text-primary);
+    margin-bottom: var(--space-lg);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.section-title .btn-text {
+    font-size: 0.875rem;
+    font-weight: 500;
+}
+
+/* About Section */
+.about-content {
+    color: var(--text-primary);
+    line-height: 1.8;
+}
+
+/* Contact Info */
+.contact-info {
+    display: grid;
+    gap: var(--space-lg);
+}
+
+.contact-item {
+    display: flex;
+    align-items: center;
+    gap: var(--space-md);
+}
+
+.contact-item i {
+    width: 40px;
+    height: 40px;
+    background: var(--bg-secondary);
+    color: var(--primary-color);
+    border-radius: var(--radius-full);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.contact-details {
+    flex: 1;
+}
+
+.contact-label {
+    font-size: 0.875rem;
+    color: var(--text-secondary);
+}
+
+.contact-value {
+    color: var(--text-primary);
+    font-weight: 500;
+}
+
+/* Experience Timeline */
+.experience-timeline {
+    position: relative;
+    padding-left: var(--space-xl);
+}
+
+.experience-timeline::before {
+    content: '';
+    position: absolute;
+    left: 8px;
+    top: 0;
+    bottom: 0;
+    width: 2px;
+    background: var(--border-color);
+}
+
+.timeline-item {
+    position: relative;
+    margin-bottom: var(--space-xl);
+}
+
+.timeline-item::before {
+    content: '';
+    position: absolute;
+    left: -32px;
+    top: 8px;
+    width: 16px;
+    height: 16px;
+    background: white;
+    border: 2px solid var(--primary-color);
+    border-radius: var(--radius-full);
+}
+
+.timeline-date {
+    font-size: 0.875rem;
+    color: var(--text-secondary);
+    margin-bottom: var(--space-xs);
+}
+
+.timeline-title {
+    font-size: 1.125rem;
+    font-weight: 600;
+    color: var(--text-primary);
+    margin-bottom: var(--space-xs);
+}
+
+.timeline-company {
+    color: var(--primary-color);
+    margin-bottom: var(--space-sm);
+}
+
+.timeline-description {
+    color: var(--text-secondary);
+    line-height: 1.6;
+}
+
+/* Skills Grid */
+.skills-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    gap: var(--space-md);
+}
+
+.skill-item {
+    background: var(--bg-secondary);
+    padding: var(--space-md);
+    border-radius: var(--radius-md);
+    text-align: center;
+    transition: var(--transition-base);
+}
+
+.skill-item:hover {
+    background: var(--primary-light);
+    transform: translateY(-2px);
+}
+
+.skill-name {
+    font-weight: 500;
+    color: var(--text-primary);
+}
+
+/* Interests Tags */
+.interests-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-sm);
+}
+
+.tag {
+    background: var(--bg-secondary);
+    color: var(--text-primary);
+    padding: var(--space-sm) var(--space-md);
+    border-radius: var(--radius-full);
+    font-size: 0.875rem;
+    transition: var(--transition-base);
+}
+
+.tag:hover {
+    background: var(--primary-color);
+    color: white;
+}
+
+/* Edit Mode */
+.edit-form {
+    display: none;
+}
+
+.edit-mode .edit-form {
+    display: block;
+}
+
+.edit-mode .view-mode {
+    display: none;
+}
+
+.form-group {
+    margin-bottom: var(--space-lg);
+}
+
+.form-label {
+    display: block;
+    font-weight: 500;
+    margin-bottom: var(--space-sm);
+    color: var(--text-primary);
+}
+
+.form-input,
+.form-textarea {
+    width: 100%;
+    padding: var(--space-md);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-md);
+    font-size: 1rem;
+    transition: var(--transition-base);
+}
+
+.form-input:focus,
+.form-textarea:focus {
+    outline: none;
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 3px var(--primary-light);
+}
+
+.form-textarea {
+    min-height: 120px;
+    resize: vertical;
+}
+
+.form-actions {
+    display: flex;
+    gap: var(--space-md);
+    justify-content: flex-end;
+    margin-top: var(--space-xl);
+}
+
+/* QR Code Section */
+.qr-code-section {
+    text-align: center;
+    padding: var(--space-xl);
+    background: var(--bg-secondary);
+    border-radius: var(--radius-lg);
+    margin-top: var(--space-xl);
+}
+
+.qr-code-container {
+    display: inline-block;
+    padding: var(--space-lg);
+    background: white;
+    border-radius: var(--radius-md);
+    box-shadow: var(--shadow-sm);
+}
+
+.qr-code-container img {
+    width: 200px;
+    height: 200px;
+    display: block;
+}
+
+.qr-upload-btn {
+    margin-top: var(--space-lg);
+}
+
+/* Business Challenges Section */
+.business-challenges {
+    display: grid;
+    gap: var(--space-xl);
+}
+
+.challenge-category {
+    background: var(--bg-secondary);
+    padding: var(--space-lg);
+    border-radius: var(--radius-md);
+}
+
+.challenge-category h4 {
+    font-size: 1rem;
+    font-weight: 600;
+    color: var(--text-primary);
+    margin-bottom: var(--space-md);
+    display: flex;
+    align-items: center;
+    gap: var(--space-sm);
+}
+
+.challenge-category h4 i {
+    color: var(--primary-color);
+}
+
+.challenge-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.challenge-list li {
+    padding: var(--space-sm) 0;
+    padding-left: var(--space-lg);
+    position: relative;
+    color: var(--text-secondary);
+}
+
+.challenge-list li::before {
+    content: '•';
+    position: absolute;
+    left: 0;
+    color: var(--primary-color);
+    font-weight: bold;
+}
+
+/* Budget Planning Section */
+.budget-planning {
+    background: var(--bg-secondary);
+    padding: var(--space-lg);
+    border-radius: var(--radius-md);
+}
+
+.budget-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: var(--space-md) 0;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.budget-item:last-child {
+    border-bottom: none;
+}
+
+.budget-label {
+    font-weight: 500;
+    color: var(--text-primary);
+}
+
+.budget-value {
+    color: var(--primary-color);
+    font-weight: 600;
+}
+
+/* Responsive Design */
+@media (max-width: 1024px) {
+    .profile-info {
+        flex-direction: column;
+        align-items: center;
+        text-align: center;
+        padding: var(--space-lg);
+    }
+    
+    .profile-details {
+        width: 100%;
+        align-items: center;
+    }
+    
+    
+    .profile-stats {
+        justify-content: center;
+    }
+    
+    .profile-header .btn {
+        width: 100%;
+        max-width: 300px;
+        margin: 0 auto;
+    }
+}
+
+/* 警告バナー */
+.warning-banner {
+    background: linear-gradient(135deg, #fff3cd 0%, #ffeaa7 100%);
+    border: 1px solid #ffc107;
+    border-radius: var(--radius-lg);
+    padding: var(--space-lg);
+    margin-bottom: var(--space-xl);
+    box-shadow: 0 2px 8px rgba(255, 193, 7, 0.1);
+}
+
+.warning-content {
+    display: flex;
+    align-items: center;
+    gap: var(--space-md);
+    flex-wrap: wrap;
+}
+
+.warning-content i {
+    color: #f39c12;
+    font-size: 1.25rem;
+    flex-shrink: 0;
+}
+
+.warning-content span {
+    flex: 1;
+    color: #856404;
+    font-weight: 500;
+    min-width: 200px;
+}
+
+.warning-content .btn {
+    flex-shrink: 0;
+}
+
+/* ローディングオーバーレイ */
+.loading-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(255, 255, 255, 0.9);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+    min-height: 400px;
+}
+
+.loading-spinner {
+    text-align: center;
+}
+
+.loading-spinner i {
+    font-size: 3rem;
+    color: var(--primary-color);
+    margin-bottom: 1rem;
+}
+
+.loading-spinner p {
+    color: var(--text-secondary);
+    font-size: 1.125rem;
+}
+
+/* 相対位置の設定 */
+.profile-container {
+    position: relative;
+}
+
+@media (max-width: 768px) {
+    .profile-cover {
+        height: 200px;
+    }
+    
+    .profile-avatar {
+        width: 120px;
+        height: 120px;
+        margin-top: -60px;
+    }
+    
+    .profile-details h2 {
+        font-size: 1.5rem;
+    }
+    
+    .profile-stats {
+        display: flex;
+        flex-direction: column;
+        gap: var(--space-md);
+        align-items: stretch;
+    }
+    
+    .profile-tabs {
+        gap: var(--space-sm);
+    }
+    
+    .tab-btn {
+        padding: var(--space-sm) var(--space-md);
+        font-size: 0.875rem;
+    }
+    
+    .skills-grid {
+        grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+    }
+    
+    .experience-timeline {
+        padding-left: var(--space-lg);
+    }
+}
+
+@media (max-width: 480px) {
+    .profile-info {
+        padding: var(--space-md);
+        margin-top: -40px;
+    }
+    
+    .profile-avatar {
+        width: 100px;
+        height: 100px;
+    }
+    
+    .btn-edit-avatar {
+        width: 32px;
+        height: 32px;
+        font-size: 0.875rem;
+    }
+    
+    .profile-details h2 {
+        font-size: 1.25rem;
+    }
+    
+    .profile-stats {
+        display: flex;
+        flex-direction: column;
+        gap: var(--space-sm);
+        width: 100%;
+    }
+    
+    .profile-stats .stat {
+        padding: var(--space-sm) var(--space-md);
+        min-width: auto;
+        width: 100%;
+        justify-content: space-between;
+    }
+    
+    .profile-stats .stat-value {
+        font-size: 1.25rem;
+    }
+    
+    .profile-content {
+        padding: var(--space-lg);
+    }
+    
+    .profile-tabs {
+        gap: 0;
+    }
+    
+    .tab-btn {
+        padding: var(--space-sm);
+        font-size: 0.75rem;
+    }
+    
+    .qr-code-container img {
+        width: 150px;
+        height: 150px;
+    }
+}
+
+/* 事業課題の詳細 */
+.challenge-details {
+    margin-top: var(--space-md);
+    padding: var(--space-md);
+    background: rgba(0, 102, 255, 0.05);
+    border-radius: var(--radius-md);
+    border-left: 3px solid var(--primary-color);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+    display: block !important;
+    visibility: visible !important;
+}
+
+.challenge-details h5 {
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: var(--primary-color);
+    margin-bottom: var(--space-sm);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.challenge-details p {
+    font-size: 0.875rem;
+    line-height: 1.6;
+    color: var(--text-primary);
+    white-space: pre-wrap;
+    word-break: break-word;
+    margin: 0;
+    min-height: 50px;
+    background: white;
+    padding: var(--space-sm);
+    border-radius: var(--radius-sm);
+}
+
+/* スキルカテゴリー */
+.skills-container {
+    display: grid;
+    gap: var(--space-xl);
+}
+
+.skill-category {
+    background: var(--bg-secondary);
+    padding: var(--space-lg);
+    border-radius: var(--radius-md);
+}
+
+.skill-category h4 {
+    font-size: 1rem;
+    font-weight: 600;
+    color: var(--primary-color);
+    margin-bottom: var(--space-md);
+    padding-bottom: var(--space-sm);
+    border-bottom: 2px solid var(--primary-light);
+}
+
+.skill-item {
+    background: white;
+    padding: var(--space-sm) var(--space-md);
+    border-radius: var(--radius-md);
+    border: 1px solid var(--border-color);
+    transition: all 0.3s ease;
+    cursor: pointer;
+}
+
+.skill-item:hover {
+    background: var(--primary-light);
+    border-color: var(--primary-color);
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-sm);
+}
+
+.skill-item.active {
+    background: var(--primary-color);
+    border-color: var(--primary-color);
+    color: white;
+}
+
+.skill-item.active .skill-name {
+    color: white;
+}
+
+/* 興味・関心カテゴリー */
+.interests-container {
+    display: grid;
+    gap: var(--space-xl);
+}
+
+.interest-category {
+    background: var(--bg-secondary);
+    padding: var(--space-lg);
+    border-radius: var(--radius-md);
+}
+
+.interest-category h4 {
+    font-size: 1rem;
+    font-weight: 600;
+    color: var(--primary-color);
+    margin-bottom: var(--space-md);
+    padding-bottom: var(--space-sm);
+    border-bottom: 2px solid var(--primary-light);
+}
+
+.interests-grid {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-sm);
+}
+
+.interests-grid .tag {
+    background: white;
+    color: var(--text-primary);
+    padding: var(--space-sm) var(--space-md);
+    border-radius: var(--radius-full);
+    font-size: 0.875rem;
+    border: 1px solid var(--border-color);
+    transition: all 0.3s ease;
+    cursor: pointer;
+}
+
+.interests-grid .tag:hover {
+    background: var(--primary-light);
+    border-color: var(--primary-color);
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-sm);
+}
+
+.interests-grid .tag.active {
+    background: var(--primary-color);
+    color: white;
+    border-color: var(--primary-color);
+}
+
+/* モーダルスタイル */
+.modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 5000;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+.modal.show {
+    opacity: 1;
+}
+
+.modal-content {
+    background: white;
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-lg);
+    width: 90%;
+    max-width: 600px;
+    max-height: 90vh;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+}
+
+.modal-content.modal-small {
+    max-width: 400px;
+}
+
+.modal-content.modal-large {
+    max-width: 800px;
+}
+
+.modal-header {
+    padding: var(--space-lg);
+    border-bottom: 1px solid var(--border-color);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.modal-header h2 {
+    font-size: 1.5rem;
+    font-weight: 600;
+    color: var(--text-primary);
+    margin: 0;
+}
+
+.modal-close {
+    background: none;
+    border: none;
+    font-size: 1.5rem;
+    color: var(--text-secondary);
+    cursor: pointer;
+    padding: var(--space-sm);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: var(--transition-base);
+}
+
+.modal-close:hover {
+    color: var(--text-primary);
+}
+
+.modal-body {
+    padding: var(--space-lg);
+    overflow-y: auto;
+    flex: 1;
+}
+
+.modal-footer {
+    padding: var(--space-lg);
+    border-top: 1px solid var(--border-color);
+    display: flex;
+    justify-content: flex-end;
+    gap: var(--space-md);
+}
+
+.form-section {
+    margin-bottom: var(--space-xl);
+}
+
+.form-section h3 {
+    font-size: 1.125rem;
+    font-weight: 600;
+    color: var(--text-primary);
+    margin-bottom: var(--space-lg);
+}
+
+.form-group {
+    margin-bottom: var(--space-lg);
+}
+
+.form-group label {
+    display: block;
+    font-weight: 500;
+    margin-bottom: var(--space-sm);
+    color: var(--text-primary);
+}
+
+.form-group input,
+.form-group textarea {
+    width: 100%;
+    padding: var(--space-md);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-md);
+    font-size: 1rem;
+    transition: var(--transition-base);
+}
+
+.form-group input:focus,
+.form-group textarea:focus {
+    outline: none;
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 3px var(--primary-light);
+}
+
+.form-group textarea {
+    resize: vertical;
+    min-height: 100px;
+}
+
+.required {
+    color: var(--error-color);
+}
+
+.image-upload-area {
+    text-align: center;
+}
+
+.upload-placeholder {
+    border: 2px dashed var(--border-color);
+    border-radius: var(--radius-md);
+    padding: var(--space-xl);
+    cursor: pointer;
+    transition: var(--transition-base);
+}
+
+.upload-placeholder:hover {
+    border-color: var(--primary-color);
+    background: var(--bg-secondary);
+}
+
+.upload-placeholder i {
+    font-size: 3rem;
+    color: var(--primary-color);
+    margin-bottom: var(--space-md);
+    display: block;
+}
+
+.upload-placeholder p {
+    color: var(--text-primary);
+    font-weight: 500;
+    margin-bottom: var(--space-xs);
+}
+
+.upload-placeholder small {
+    color: var(--text-secondary);
+    font-size: 0.875rem;
+}
+
+.btn-outline {
+    background: white;
+    color: var(--primary-color);
+    border: 2px solid var(--primary-color);
+}
+
+.btn-outline:hover {
+    background: var(--primary-light);
+}
+
+/* 経歴編集 */
+.experience-list {
+    max-height: 400px;
+    overflow-y: auto;
+    margin-bottom: var(--space-lg);
+}
+
+.experience-item {
+    background: var(--bg-secondary);
+    padding: var(--space-lg);
+    border-radius: var(--radius-md);
+    margin-bottom: var(--space-md);
+    position: relative;
+}
+
+.experience-item .btn-remove {
+    position: absolute;
+    top: var(--space-md);
+    right: var(--space-md);
+    background: var(--error-color);
+    color: white;
+    border: none;
+    width: 32px;
+    height: 32px;
+    border-radius: var(--radius-full);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: var(--transition-base);
+}
+
+.experience-item .btn-remove:hover {
+    background: var(--error-dark);
+    transform: scale(1.1);
+}
+
+/* スキル・興味関心編集 */
+.skills-edit-container,
+.interests-edit-container {
+    max-height: 500px;
+    overflow-y: auto;
+}
+
+.edit-category {
+    margin-bottom: var(--space-xl);
+}
+
+.edit-category h4 {
+    font-size: 1rem;
+    font-weight: 600;
+    color: var(--primary-color);
+    margin-bottom: var(--space-md);
+    padding-bottom: var(--space-sm);
+    border-bottom: 2px solid var(--primary-light);
+}
+
+.checkbox-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: var(--space-sm);
+}
+
+.checkbox-item {
+    display: flex;
+    align-items: center;
+    padding: var(--space-sm) var(--space-md);
+    background: white;
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-md);
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.checkbox-item:hover {
+    background: var(--bg-secondary);
+    border-color: var(--primary-color);
+}
+
+.checkbox-item input[type="checkbox"] {
+    margin-right: var(--space-sm);
+    cursor: pointer;
+}
+
+.checkbox-item.checked {
+    background: var(--primary-light);
+    border-color: var(--primary-color);
+}
+
+/* 事業課題編集 */
+.challenges-edit-container {
+    margin-bottom: var(--space-xl);
+}
+
+.challenge-edit-group {
+    background: var(--bg-secondary);
+    padding: var(--space-lg);
+    border-radius: var(--radius-md);
+    margin-bottom: var(--space-md);
+}
+
+.challenge-edit-group h4 {
+    font-size: 1rem;
+    font-weight: 600;
+    color: var(--text-primary);
+    margin-bottom: var(--space-md);
+    display: flex;
+    align-items: center;
+    gap: var(--space-sm);
+}
+
+.challenge-edit-group h4 i {
+    color: var(--primary-color);
+}
+
+.challenge-detail-input {
+    margin-top: var(--space-md);
+    display: none;
+}
+
+.challenge-detail-input.show {
+    display: block;
+}
+
+.challenge-detail-input label {
+    display: block;
+    font-size: 0.875rem;
+    color: var(--text-secondary);
+    margin-bottom: var(--space-sm);
+}
+
+.challenge-detail-input textarea {
+    width: 100%;
+    min-height: 80px;
+    padding: var(--space-sm);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-md);
+    font-size: 0.875rem;
+    resize: vertical;
+}
+
+/* レスポンシブ対応の強化 */
+@media (max-width: 1200px) {
+    .business-challenges {
+        grid-template-columns: 1fr;
+    }
+    
+    .skills-grid {
+        grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+    }
+}
+
+@media (max-width: 768px) {
+    .challenge-category {
+        padding: var(--space-md);
+    }
+    
+    .skill-category {
+        padding: var(--space-md);
+    }
+    
+    .skills-grid {
+        grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+        gap: var(--space-sm);
+    }
+    
+    .skill-item {
+        padding: var(--space-xs) var(--space-sm);
+        font-size: 0.875rem;
+    }
+    
+    .profile-tabs {
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+        scrollbar-width: thin;
+    }
+    
+    .profile-tabs::-webkit-scrollbar {
+        height: 4px;
+    }
+    
+    .profile-tabs::-webkit-scrollbar-thumb {
+        background: var(--border-color);
+        border-radius: 2px;
+    }
+    
+    .tab-btn {
+        white-space: nowrap;
+        flex-shrink: 0;
+    }
+}
+
+@media (max-width: 480px) {
+    .skills-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .skill-item {
+        text-align: center;
+        padding: var(--space-sm);
+    }
+    
+    .challenge-details {
+        padding: var(--space-sm);
+        font-size: 0.8125rem;
+    }
+    
+    .profile-content {
+        padding: var(--space-md);
+    }
+    
+    .profile-section {
+        background: white;
+        padding: var(--space-md);
+        border-radius: var(--radius-md);
+        margin-bottom: var(--space-md);
+    }
+}
+
+/* Source: profile-image-upload.css */
+/* ===========================
+   プロフィール画像アップロードCSS
+   =========================== */
+
+/* 画像アップロードエリア */
+.image-upload-area {
+    width: 100%;
+    margin: 20px 0;
+}
+
+.upload-placeholder {
+    border: 2px dashed #e0e0e0;
+    border-radius: 8px;
+    padding: 40px;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 12px;
+}
+
+.upload-placeholder:hover {
+    border-color: #4a90e2;
+    background: #f8f9fa;
+}
+
+.upload-placeholder i {
+    font-size: 48px;
+    color: #8e8e93;
+}
+
+.upload-placeholder p {
+    margin: 0;
+    color: #495057;
+    font-weight: 500;
+}
+
+.upload-placeholder small {
+    color: #6c757d;
+    font-size: 12px;
+}
+
+/* アバター・カバー編集ボタン */
+.btn-edit-avatar,
+.btn-edit-cover {
+    position: absolute;
+    bottom: 8px;
+    right: 8px;
+    background: white;
+    border: 1px solid #e0e0e0;
+    border-radius: 50%;
+    width: 32px;
+    height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.btn-edit-avatar:hover,
+.btn-edit-cover:hover {
+    background: #4a90e2;
+    border-color: #4a90e2;
+    color: white;
+}
+
+.btn-edit-avatar i,
+.btn-edit-cover i {
+    font-size: 14px;
+}
+
+/* プロフィールアバターコンテナ */
+.profile-avatar {
+    position: relative;
+    display: inline-block;
+}
+
+.profile-avatar img {
+    width: 120px;
+    height: 120px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 4px solid white;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+}
+
+/* カバー画像コンテナ */
+.profile-cover {
+    position: relative;
+    height: 300px;
+    overflow: hidden;
+    border-radius: 8px 8px 0 0;
+}
+
+.profile-cover img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.btn-edit-cover {
+    bottom: 16px;
+    right: 16px;
+}
+
+/* モーダルサイズ */
+.modal-small .modal-content {
+    max-width: 400px;
+}
+
+/* プレビュー画像 */
+#avatar-preview {
+    border-radius: 50%;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+}
+
+#cover-preview {
+    border-radius: 8px;
+}
+
+/* ローディング */
+.upload-loading {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.5);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 9998;
+}
+
+.loading-content {
+    background: white;
+    padding: 24px 32px;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
+}
+
+.loading-content i {
+    font-size: 24px;
+    color: #4a90e2;
+}
+
+.loading-content span {
+    font-size: 16px;
+    color: #212529;
+}
+
+/* トースト通知 */
+.toast {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    background: white;
+    padding: 16px 24px;
+    border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    transform: translateX(400px);
+    transition: transform 0.3s ease;
+    z-index: 9999;
+}
+
+.toast.show {
+    transform: translateX(0);
+}
+
+.toast-success {
+    border-left: 4px solid #28a745;
+}
+
+.toast-success i {
+    color: #28a745;
+}
+
+.toast-error {
+    border-left: 4px solid #dc3545;
+}
+
+.toast-error i {
+    color: #dc3545;
+}
+
+/* レスポンシブ対応 */
+@media (max-width: 768px) {
+    .upload-placeholder {
+        padding: 30px;
+    }
+
+    .upload-placeholder i {
+        font-size: 36px;
+    }
+
+    .profile-avatar img {
+        width: 100px;
+        height: 100px;
+    }
+
+    .profile-cover {
+        height: 200px;
+    }
+
+    .toast {
+        left: 20px;
+        right: 20px;
+        transform: translateY(100px);
+    }
+
+    .toast.show {
+        transform: translateY(0);
+    }
+}

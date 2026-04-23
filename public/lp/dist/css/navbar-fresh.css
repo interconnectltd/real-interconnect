@@ -1,0 +1,351 @@
+/* ===========================
+   新しいナビゲーションスタイル
+   0から作り直し
+   =========================== */
+
+/* 新しいナビゲーション */
+nav.navbar {
+    display: block !important;
+    position: fixed !important;
+    top: 0 !important;
+    left: 0 !important;
+    width: 100% !important;
+    height: 64px !important;
+    background: none !important;
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+    z-index: 1800 !important;
+    /* backdrop-filterをnoneで明示上書き（style.cssのblur(10px)を無効化）
+       実際の背景ぼかしは::afterで描画。navbarにbackdrop-filterがあると
+       position:fixed子要素の基準がnavbarになるため */
+}
+
+/* navbarの背景・ぼかし・影を::afterで描画（containing block問題を回避） */
+nav.navbar::after {
+    content: '' !important;
+    position: absolute !important;
+    top: 0 !important;
+    left: 0 !important;
+    right: 0 !important;
+    bottom: 0 !important;
+    background: rgba(255, 255, 255, 0.95) !important;
+    backdrop-filter: blur(12px) !important;
+    -webkit-backdrop-filter: blur(12px) !important;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08) !important;
+    z-index: -1 !important;
+    pointer-events: none !important;
+    transition: background 0.3s ease, box-shadow 0.3s ease !important;
+}
+
+nav.navbar.scrolled::after {
+    background: rgba(255, 255, 255, 0.98) !important;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1) !important;
+}
+
+nav.navbar .container {
+    max-width: 1400px !important;
+    height: 100% !important;
+    margin: 0 auto !important;
+    padding: 0 24px !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: space-between !important;
+    position: relative !important;
+    z-index: 1 !important;
+}
+
+/* ロゴエリア */
+.navbar-brand {
+    display: flex !important;
+    align-items: center !important;
+    gap: 10px !important;
+    flex-shrink: 0 !important;
+}
+
+.navbar-brand h1 {
+    font-size: 20px !important;
+    font-weight: 700 !important;
+    color: #0066ff !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    line-height: 1 !important;
+}
+
+.navbar-brand .tagline {
+    font-size: 12px !important;
+    color: #6b7280 !important;
+    font-weight: 400 !important;
+    white-space: nowrap !important;
+}
+
+/* ナビゲーションメニュー */
+.navbar-nav {
+    display: flex !important;
+    align-items: center !important;
+    list-style: none !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    gap: 24px !important;
+    height: 100% !important;
+}
+
+.navbar-nav li {
+    display: flex !important;
+    align-items: center !important;
+    margin: 0 !important;
+    padding: 0 !important;
+}
+
+/* リンクスタイル（デスクトップ・モバイル共通の水テーマ） */
+.nav-link,
+.navbar-nav > a {
+    display: inline-flex !important;
+    align-items: center !important;
+    font-size: 14px !important;
+    font-weight: 500 !important;
+    color: #374151 !important;
+    white-space: nowrap !important;
+    padding: 8px 16px !important;
+    border-radius: 10px !important;
+    position: relative !important;
+    background: none !important;
+    border: none !important;
+    box-shadow: none !important;
+    /* 文字下の水色の下線 */
+    text-decoration: underline !important;
+    text-decoration-color: rgba(56, 189, 248, 0.45) !important;
+    text-underline-offset: 5px !important;
+    text-decoration-thickness: 1.5px !important;
+    text-decoration-skip-ink: auto !important;
+    /* 水の動きのトランジション */
+    transition: transform 0.35s cubic-bezier(0.25, 0.46, 0.45, 0.94),
+                background 0.35s ease,
+                box-shadow 0.35s ease,
+                color 0.3s ease,
+                text-decoration-color 0.4s ease !important;
+}
+
+/* ホバー: 浮き上がり + 水の質感 + 下線フェードアウト（全リンク共通） */
+.nav-link:hover,
+.navbar-nav > a:hover {
+    transform: translateY(-3px) !important;
+    background: linear-gradient(
+        135deg,
+        rgba(56, 189, 248, 0.08) 0%,
+        rgba(59, 130, 246, 0.12) 50%,
+        rgba(14, 165, 233, 0.06) 100%
+    ) !important;
+    box-shadow:
+        0 4px 16px rgba(56, 189, 248, 0.15),
+        0 1px 4px rgba(59, 130, 246, 0.08),
+        inset 0 1px 0 rgba(255, 255, 255, 0.5) !important;
+    color: #0369a1 !important;
+    text-decoration-color: transparent !important;
+}
+
+/* ハンバーガーメニュー */
+.navbar-toggler {
+    display: none !important;
+    width: 40px !important;
+    height: 40px !important;
+    padding: 0 !important;
+    background: none !important;
+    border: none !important;
+    cursor: pointer !important;
+    position: relative !important;
+    overflow: visible !important;
+}
+
+.navbar-toggler span {
+    display: block !important;
+    position: absolute !important;
+    left: 50% !important;
+    transform: translateX(-50%) !important;
+    width: 20px !important;
+    height: 2px !important;
+    background: #374151 !important;
+    transition: all 0.3s ease !important;
+    transform-origin: center !important;
+}
+
+.navbar-toggler span:nth-child(1) {
+    top: 13px !important;
+}
+
+.navbar-toggler span:nth-child(2) {
+    top: 19px !important;
+}
+
+.navbar-toggler span:nth-child(3) {
+    top: 25px !important;
+}
+
+.navbar-toggler.active span:nth-child(1) {
+    top: 19px !important;
+    transform: translateX(-50%) rotate(45deg) !important;
+}
+
+.navbar-toggler.active span:nth-child(2) {
+    opacity: 0 !important;
+}
+
+.navbar-toggler.active span:nth-child(3) {
+    top: 19px !important;
+    transform: translateX(-50%) rotate(-45deg) !important;
+}
+
+/* 1200px以下 */
+@media (max-width: 1200px) {
+    .navbar-nav {
+        gap: 16px !important;
+    }
+    
+    .nav-link {
+        font-size: 13px !important;
+        padding: 6px 12px !important;
+    }
+    
+    .navbar-brand .tagline {
+        display: none !important;
+    }
+}
+
+/* 1024px以下 - タブレット */
+@media (max-width: 1024px) {
+    .navbar-toggler {
+        display: block !important;
+    }
+
+    /* バックドロップ: navbar内の::beforeで実装（スタッキングコンテキスト問題を回避） */
+    nav.navbar.menu-open::before {
+        content: '' !important;
+        position: fixed !important;
+        top: 0 !important;
+        left: 0 !important;
+        width: 100% !important;
+        height: 100% !important;
+        background: rgba(0, 0, 0, 0.4) !important;
+        z-index: 1850 !important;
+    }
+
+    /* navbar内のコンテナをバックドロップより上に */
+    nav.navbar.menu-open .container {
+        position: relative !important;
+        z-index: 1860 !important;
+    }
+
+    .navbar-nav {
+        display: none !important;
+        position: fixed !important;
+        top: 50% !important;
+        left: 50% !important;
+        transform: translate(-50%, -50%) !important;
+        width: 280px !important;
+        max-width: 90vw !important;
+        background: rgba(255, 255, 255, 0.95) !important;
+        backdrop-filter: blur(20px) !important;
+        -webkit-backdrop-filter: blur(20px) !important;
+        flex-direction: column !important;
+        padding: 32px 24px !important;
+        box-shadow: 0 16px 48px rgba(0, 0, 0, 0.15) !important;
+        gap: 4px !important;
+        height: auto !important;
+        border-radius: 16px !important;
+        z-index: 1900 !important;
+        list-style: none !important;
+    }
+
+    .navbar-nav.active {
+        display: flex !important;
+    }
+
+    .navbar-nav li,
+    .navbar-nav > a {
+        width: 100% !important;
+        list-style: none !important;
+    }
+
+    /* --- メニュー内リンク共通 --- */
+    .nav-link,
+    .navbar-nav > a,
+    .navbar-nav > a.btn-primary,
+    .navbar-nav .nav-link.btn-login,
+    .navbar-nav .nav-link.btn-register,
+    .navbar-nav .nav-link.btn-contact {
+        width: 100% !important;
+        justify-content: center !important;
+        padding: 14px 20px !important;
+        font-size: 15px !important;
+        font-weight: 500 !important;
+        text-align: center !important;
+        display: block !important;
+        color: #374151 !important;
+        background: none !important;
+        border: none !important;
+        border-radius: 10px !important;
+        box-shadow: none !important;
+        /* 文字下だけの下線（水色の川） */
+        text-decoration: underline !important;
+        text-decoration-color: rgba(56, 189, 248, 0.5) !important;
+        text-underline-offset: 6px !important;
+        text-decoration-thickness: 1.5px !important;
+        text-decoration-skip-ink: auto !important;
+        /* 滑らかな水の動きのトランジション */
+        transition: transform 0.35s cubic-bezier(0.25, 0.46, 0.45, 0.94),
+                    background 0.35s ease,
+                    box-shadow 0.35s ease,
+                    color 0.3s ease,
+                    text-decoration-color 0.4s ease !important;
+    }
+
+    /* --- ホバー: 浮き上がり + 水の質感 + 下線が消える --- */
+    .nav-link:hover,
+    .navbar-nav > a:hover,
+    .navbar-nav > a.btn-primary:hover,
+    .navbar-nav .nav-link.btn-login:hover,
+    .navbar-nav .nav-link.btn-register:hover,
+    .navbar-nav .nav-link.btn-contact:hover {
+        transform: translateY(-3px) !important;
+        background: linear-gradient(
+            135deg,
+            rgba(56, 189, 248, 0.08) 0%,
+            rgba(59, 130, 246, 0.12) 50%,
+            rgba(14, 165, 233, 0.06) 100%
+        ) !important;
+        box-shadow:
+            0 4px 16px rgba(56, 189, 248, 0.15),
+            0 1px 4px rgba(59, 130, 246, 0.08),
+            inset 0 1px 0 rgba(255, 255, 255, 0.5) !important;
+        color: #0369a1 !important;
+        /* 川が消えるように下線がフェードアウト */
+        text-decoration-color: transparent !important;
+    }
+}
+
+/* 768px以下 - モバイル */
+@media (max-width: 768px) {
+    nav.navbar {
+        height: 56px !important;
+    }
+    
+    nav.navbar .container {
+        padding: 0 16px !important;
+    }
+    
+    .navbar-brand h1 {
+        font-size: 18px !important;
+    }
+}
+
+/* ヒーローセクション調整 */
+.hero {
+    margin-top: 64px !important;
+}
+
+@media (max-width: 768px) {
+    .hero {
+        margin-top: 56px !important;
+    }
+}
+
+/* ハンバーガーアニメーション（上のセクションで定義済み）

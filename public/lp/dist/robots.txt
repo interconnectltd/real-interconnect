@@ -1,0 +1,6 @@
+User-agent: *
+Allow: /
+Disallow: /admin
+Disallow: /super-admin
+
+Sitemap: https://inter-connect.app/sitemap.xml

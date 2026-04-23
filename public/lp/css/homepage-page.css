@@ -1,0 +1,1642 @@
+/* ============================================================ */
+/* Homepage Page Bundle                                        */
+/* Consolidated from: homepage-modern.css, contact-balanced.css,*/
+/*   news-category-mobile-fix.css, video-loading-optimize.css, */
+/*   video-poster-fallback.css                                 */
+/* ============================================================ */
+
+/* ============================================================ */
+/* Source: homepage-modern.css                                 */
+/* ============================================================ */
+
+/* ===========================
+   モダンなホームページデザイン
+   LPスタイルの斜めデザイン
+   =========================== */
+
+/* ヒーローセクション改善 */
+.hero {
+    position: relative;
+    min-height: 100vh;
+    overflow: hidden;
+}
+
+.hero-video-container {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 1;
+}
+
+.hero-overlay {
+    background: linear-gradient(135deg, rgba(0, 0, 0, 0.4) 0%, rgba(0, 0, 0, 0.6) 100%);
+}
+
+.hero-content {
+    position: relative;
+    z-index: 3;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 100vh;
+    padding: 120px 20px 80px;
+}
+
+.hero-title {
+    font-size: clamp(2rem, 5vw, 4rem);
+    font-weight: 800;
+    color: #ffffff;
+    margin-bottom: 24px;
+    line-height: 1.2;
+    letter-spacing: -0.02em;
+    opacity: 0; /* ローディング完了まで非表示（JSのタイプライターで表示） */
+    font-family: 'Courier New', 'Monaco', monospace;
+    text-shadow: 0 2px 8px rgba(0, 0, 0, 0.6), 0 0 20px rgba(0, 0, 0, 0.3);
+}
+
+.hero-subtitle {
+    font-size: clamp(1rem, 2vw, 1.5rem);
+    color: rgba(255, 255, 255, 0.9);
+    margin-bottom: 48px;
+    line-height: 1.6;
+    opacity: 0; /* ローディング完了まで非表示（JSのタイプライターで表示） */
+    font-family: 'Courier New', 'Monaco', monospace;
+    text-shadow: 0 1px 4px rgba(0, 0, 0, 0.5);
+}
+
+/* デバイス別の最適化 */
+/* 大画面デスクトップ (1920px以上) */
+@media (min-width: 1920px) {
+    .hero-title {
+        font-size: 4.5rem;
+    }
+    
+    .hero-subtitle {
+        font-size: 1.75rem;
+    }
+}
+
+/* デスクトップ (1200px - 1919px) */
+@media (min-width: 1200px) and (max-width: 1919px) {
+    .hero-title {
+        font-size: 3.5rem;
+    }
+    
+    .hero-subtitle {
+        font-size: 1.375rem;
+    }
+}
+
+/* タブレット横向き (992px - 1199px) */
+@media (min-width: 992px) and (max-width: 1199px) {
+    .hero-title {
+        font-size: 3rem;
+    }
+    
+    .hero-subtitle {
+        font-size: 1.25rem;
+    }
+}
+
+/* タブレット縦向き (768px - 991px) */
+@media (min-width: 768px) and (max-width: 991px) {
+    .hero-title {
+        font-size: 2.5rem;
+        margin-bottom: 20px;
+    }
+    
+    .hero-subtitle {
+        font-size: 1.125rem;
+        margin-bottom: 40px;
+    }
+}
+
+/* 大きめのスマートフォン (576px - 767px) */
+@media (min-width: 576px) and (max-width: 767px) {
+    .hero-title {
+        font-size: 2.25rem;
+        margin-bottom: 16px;
+    }
+    
+    .hero-subtitle {
+        font-size: 1.0625rem;
+        margin-bottom: 36px;
+    }
+}
+
+/* スマートフォン (576px未満) */
+@media (max-width: 575px) {
+    .hero-title {
+        font-size: 1.75rem; /* 28px */
+        margin-bottom: 14px;
+        line-height: 1.3;
+    }
+    
+    .hero-subtitle {
+        font-size: 0.9375rem; /* 15px */
+        margin-bottom: 28px;
+        line-height: 1.5;
+    }
+    
+    .hero-content {
+        padding: 100px 16px 60px;
+    }
+    
+    /* ヒーローボタンのレスポンシブ統一 */
+    .hero-buttons {
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+        width: 100%;
+        margin-top: 32px;
+    }
+    
+    .hero-buttons .btn {
+        width: 100%;
+        min-height: 48px;
+        font-size: 0.9rem;
+        padding: 12px 24px;
+        border-radius: 8px;
+    }
+}
+
+/* iPhone標準サイズ (375px幅) 専用最適化 */
+@media (width: 375px) and (min-height: 812px) {
+    .hero-title {
+        font-size: 1.625rem; /* 26px */
+        margin-bottom: 12px;
+        line-height: 1.25;
+        letter-spacing: -0.01em;
+    }
+    
+    .hero-subtitle {
+        font-size: 0.875rem; /* 14px */
+        margin-bottom: 24px;
+        line-height: 1.45;
+    }
+    
+    .hero-content {
+        padding: 90px 20px 50px;
+    }
+    
+    /* 375px幅でのボタン統一 */
+    .hero-buttons .btn {
+        min-height: 44px;
+        font-size: 0.85rem;
+        padding: 10px 20px;
+    }
+}
+
+/* 375px幅で高さが短い場合 */
+@media (width: 375px) and (max-height: 811px) {
+    .hero-title {
+        font-size: 1.5rem; /* 24px */
+        margin-bottom: 10px;
+    }
+    
+    .hero-subtitle {
+        font-size: 0.8125rem; /* 13px */
+        margin-bottom: 20px;
+    }
+    
+    .hero-content {
+        padding: 80px 20px 40px;
+    }
+    
+    /* 高さが短い場合のボタン調整 */
+    .hero-buttons .btn {
+        min-height: 40px;
+        font-size: 0.8rem;
+        padding: 8px 16px;
+    }
+}
+
+/* 極小画面 (375px未満) */
+@media (max-width: 374px) {
+    .hero-title {
+        font-size: 1.625rem; /* 26px */
+        margin-bottom: 12px;
+    }
+    
+    .hero-subtitle {
+        font-size: 0.875rem; /* 14px */
+        margin-bottom: 24px;
+    }
+    
+    /* 極小画面でのボタン統一 */
+    .hero-buttons .btn {
+        min-height: 42px;
+        font-size: 0.8rem;
+        padding: 8px 16px;
+    }
+}
+
+/* スクロールインジケーター改善 */
+.scroll-indicator {
+    position: absolute;
+    bottom: 40px;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 4;
+    animation: bounce 2s infinite;
+}
+
+/* 375px幅でのスクロールインジケーター調整 */
+@media (width: 375px) {
+    .scroll-indicator {
+        bottom: 30px;
+    }
+    
+    .scroll-icon {
+        width: 24px;
+        height: 36px;
+    }
+    
+    .scroll-text {
+        font-size: 0.75rem;
+        margin-top: 8px;
+    }
+}
+
+@keyframes bounce {
+    0%, 20%, 50%, 80%, 100% {
+        transform: translateX(-50%) translateY(0);
+    }
+    40% {
+        transform: translateX(-50%) translateY(-10px);
+    }
+    60% {
+        transform: translateX(-50%) translateY(-5px);
+    }
+}
+
+/* 斜めのセクション区切り - 削除 */
+.hero::after {
+    display: none !important;
+    content: none !important;
+}
+
+/* Aboutセクション改善 */
+.about {
+    position: relative;
+    padding: 120px 0;
+    background: white;
+    overflow: hidden;
+}
+
+.about::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(45deg, rgba(0, 102, 255, 0.03) 0%, transparent 70%);
+    pointer-events: none;
+}
+
+.section-title {
+    font-size: clamp(2rem, 4vw, 3rem);
+    font-weight: 800;
+    text-align: center;
+    margin-bottom: 60px;
+    color: #1e293b;
+    width: fit-content;
+    margin-left: auto;
+    margin-right: auto;
+    padding-bottom: 14px;
+    position: relative;
+}
+
+.section-title::after {
+    content: '';
+    display: block;
+    margin: 10px auto 0;
+    width: 100%;
+    height: 4px;
+    background: linear-gradient(90deg, #0066ff 0%, #00d4ff 100%);
+    border-radius: 2px;
+}
+
+.about-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 40px;
+    position: relative;
+    z-index: 2;
+}
+
+.about-item {
+    background: white;
+    padding: 40px;
+    border-radius: 20px;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.08);
+    transition: all 0.3s ease;
+    position: relative;
+    overflow: hidden;
+}
+
+.about-item::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 4px;
+    background: linear-gradient(90deg, #0066ff 0%, #00d4ff 100%);
+}
+
+.about-item:hover {
+    transform: translateY(-10px);
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.12);
+}
+
+.icon-wrapper {
+    width: 80px;
+    height: 80px;
+    background: linear-gradient(135deg, #0066ff 0%, #00d4ff 100%);
+    border-radius: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 24px;
+    font-size: 2rem;
+    color: white;
+}
+
+/* 特徴セクション - 斜めの背景削除 */
+.features {
+    position: relative;
+    padding: 120px 0 160px;
+    background: #f8fafc;
+    overflow: hidden;
+}
+
+.features::before {
+    display: none !important;
+    content: none !important;
+}
+
+.features-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+    gap: 30px;
+    margin-top: 60px;
+}
+
+.feature-card {
+    background: white;
+    padding: 40px;
+    border-radius: 24px;
+    position: relative;
+    overflow: hidden;
+    transition: all 0.3s ease;
+}
+
+.feature-card::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    right: 0;
+    width: 100px;
+    height: 100px;
+    background: linear-gradient(135deg, rgba(0, 102, 255, 0.1) 0%, transparent 70%);
+    border-radius: 0 0 0 100%;
+}
+
+.feature-card:hover {
+    transform: translateY(-5px) scale(1.02);
+    box-shadow: 0 20px 60px rgba(0, 102, 255, 0.15);
+}
+
+.feature-icon {
+    width: 70px;
+    height: 70px;
+    background: linear-gradient(135deg, #0066ff 0%, #00d4ff 100%);
+    border-radius: 18px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 24px;
+    font-size: 1.8rem;
+    color: white;
+}
+
+/* メンバー構成セクション */
+.members {
+    position: relative;
+    padding: 120px 0;
+    background: white;
+}
+
+.member-stats {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 40px;
+    margin-bottom: 80px;
+}
+
+.stat {
+    text-align: center;
+}
+
+.stat-number {
+    font-size: clamp(3rem, 5vw, 4rem);
+    font-weight: 800;
+    background: linear-gradient(135deg, #0066ff 0%, #00d4ff 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    margin-bottom: 8px;
+}
+
+/* 自動スクロールする業界タグ */
+.industries {
+    margin-top: 60px;
+    position: relative;
+}
+
+.industries h3 {
+    text-align: center;
+    font-size: 1.5rem;
+    margin-bottom: 40px;
+    color: #1e293b;
+}
+
+.industry-scroll-container {
+    overflow: hidden;
+    position: relative;
+    padding: 10px 0;
+}
+
+.industry-tags {
+    display: flex;
+    animation: scroll-right 30s linear infinite;
+    width: max-content;
+}
+
+.industry-tags:hover {
+    animation-play-state: paused;
+}
+
+@keyframes scroll-right {
+    0% {
+        transform: translateX(0);
+    }
+    100% {
+        transform: translateX(-50%);
+    }
+}
+
+.tag {
+    display: inline-flex;
+    align-items: center;
+    padding: 12px 24px;
+    margin: 0 8px;
+    background: linear-gradient(135deg, #0066ff 0%, #0052cc 100%);
+    color: white;
+    border-radius: 50px;
+    font-weight: 600;
+    white-space: nowrap;
+    transition: all 0.3s ease;
+}
+
+.tag:hover {
+    transform: scale(1.1);
+    box-shadow: 0 10px 30px rgba(0, 102, 255, 0.3);
+}
+
+/* 業界タグを複製して無限スクロール効果 */
+.industry-scroll-container::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    right: 0;
+    width: 100px;
+    height: 100%;
+    background: linear-gradient(90deg, transparent 0%, white 100%);
+    z-index: 2;
+    pointer-events: none;
+}
+
+.industry-scroll-container::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100px;
+    height: 100%;
+    background: linear-gradient(90deg, white 0%, transparent 100%);
+    z-index: 2;
+    pointer-events: none;
+}
+
+/* イベントセクション - 斜めデザイン削除 */
+.events {
+    position: relative;
+    padding: 160px 0 120px;
+    background: #f8fafc;
+}
+
+.events::before {
+    display: none !important;
+    content: none !important;
+}
+
+.events-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+    gap: 30px;
+    margin-top: 60px;
+}
+
+.event-card {
+    background: white;
+    padding: 32px;
+    border-radius: 20px;
+    position: relative;
+    overflow: hidden;
+    transition: all 0.3s ease;
+}
+
+.event-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 4px;
+    height: 100%;
+    background: linear-gradient(180deg, #0066ff 0%, #00d4ff 100%);
+}
+
+.event-date {
+    display: inline-block;
+    padding: 8px 16px;
+    background: linear-gradient(135deg, #0066ff 0%, #0052cc 100%);
+    color: white;
+    border-radius: 8px;
+    font-weight: 600;
+    margin-bottom: 16px;
+}
+
+/* 実績セクション */
+.achievements {
+    position: relative;
+    padding: 120px 0;
+    background: linear-gradient(135deg, #0066ff 0%, #004fc4 100%);
+    color: white;
+    overflow: hidden;
+}
+
+.achievements .section-title {
+    color: white;
+}
+
+.achievements .section-title::after {
+    background: linear-gradient(90deg, white 0%, rgba(255, 255, 255, 0.6) 100%);
+}
+
+.achievements .section-description {
+    color: rgba(255, 255, 255, 0.9);
+    font-size: 1.125rem;
+    text-align: center;
+    margin-bottom: 40px;
+}
+
+.achievements::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1440 320"><path fill="%23ffffff10" d="M0,96L48,112C96,128,192,160,288,160C384,160,480,128,576,138.7C672,149,768,203,864,213.3C960,224,1056,192,1152,165.3C1248,139,1344,117,1392,106.7L1440,96L1440,320L1392,320C1344,320,1248,320,1152,320C1056,320,960,320,864,320C768,320,672,320,576,320C480,320,384,320,288,320C192,320,96,320,48,320L0,320Z"></path></svg>') no-repeat bottom;
+    background-size: cover;
+}
+
+.section-subtitle {
+    text-align: center;
+    font-size: 1rem;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    opacity: 0.9;
+    margin-bottom: 16px;
+    color: white;
+}
+
+.achievement-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 40px;
+    margin-top: 60px;
+}
+
+.achievement-item {
+    text-align: center;
+    padding: 40px;
+    background: rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(10px);
+    border-radius: 20px;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    transition: all 0.3s ease;
+}
+
+.achievement-item:hover {
+    transform: translateY(-10px);
+    background: rgba(255, 255, 255, 0.15);
+}
+
+.achievement-number {
+    font-size: clamp(2.5rem, 4vw, 3.5rem);
+    font-weight: 800;
+    margin-bottom: 8px;
+    color: white;
+}
+
+.achievement-label {
+    font-size: 1.25rem;
+    font-weight: 600;
+    color: white;
+    margin-bottom: 4px;
+}
+
+.achievement-sublabel {
+    font-size: 0.875rem;
+    color: rgba(255, 255, 255, 0.7);
+}
+
+/* コンタクトセクション */
+.contact {
+    position: relative;
+    padding: 120px 0;
+    background: white;
+}
+
+.contact-form {
+    max-width: 800px;
+    margin: 0 auto;
+    background: #f8fafc;
+    padding: 60px;
+    border-radius: 24px;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.08);
+}
+
+.form-group {
+    margin-bottom: 24px;
+}
+
+.form-group input,
+.form-group textarea {
+    width: 100%;
+    padding: 16px 20px;
+    border: 2px solid #e2e8f0;
+    border-radius: 12px;
+    font-size: 1rem;
+    transition: all 0.3s ease;
+    background: white;
+}
+
+.form-group input:focus,
+.form-group textarea:focus {
+    outline: none;
+    border-color: #0066ff;
+    box-shadow: 0 0 0 4px rgba(0, 102, 255, 0.1);
+}
+
+.submit-button {
+    width: 100%;
+    padding: 16px 32px;
+    background: linear-gradient(135deg, #0066ff 0%, #0052cc 100%);
+    color: white;
+    border: none;
+    border-radius: 12px;
+    font-size: 1.125rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.submit-button:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 10px 40px rgba(0, 102, 255, 0.3);
+}
+
+/* アニメーション */
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(30px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* レスポンシブ */
+@media (max-width: 768px) {
+    .about,
+    .features,
+    .members,
+    .events,
+    .achievements,
+    .contact {
+        padding: 80px 0;
+    }
+    
+    .contact-form {
+        padding: 40px 24px;
+    }
+    
+    .feature-card,
+    .about-item {
+        padding: 32px 24px;
+    }
+}
+
+/* モバイルブレーク追加 */
+.mobile-break {
+    display: none;
+}
+
+@media (max-width: 640px) {
+    .mobile-break {
+        display: block;
+    }
+}
+
+/* ヒーローセクションのレスポンシブ対応 */
+@media (max-width: 480px) {
+    .hero-title {
+        font-size: 1.75rem !important;
+        line-height: 1.2;
+        margin-bottom: 15px;
+    }
+    
+    .hero-subtitle {
+        font-size: 0.9rem !important;
+        margin-bottom: 10px;
+    }
+    
+    .hero-description {
+        font-size: 0.85rem;
+        padding: 0 10px;
+    }
+    
+    .hero-buttons .btn {
+        padding: 10px 20px;
+        font-size: 0.85rem;
+    }
+}
+
+@media (max-width: 375px) {
+    .hero-title {
+        font-size: 1.5rem !important;
+        word-break: keep-all;
+    }
+    
+    .hero-subtitle {
+        font-size: 0.85rem !important;
+    }
+    
+    .hero-buttons {
+        gap: 10px;
+        margin-top: 28px;
+    }
+    
+    .hero-buttons .btn {
+        width: 100%;
+        min-height: 44px;
+        font-size: 0.85rem;
+        padding: 10px 20px;
+        border-radius: 8px;
+    }
+}
+
+@media (max-width: 320px) {
+    .hero-title {
+        font-size: 1.25rem !important;
+    }
+    
+    .hero-subtitle {
+        font-size: 0.8rem !important;
+    }
+    
+    .hero-buttons .btn {
+        width: 100%;
+        min-height: 40px;
+        font-size: 0.8rem;
+        padding: 8px 16px;
+        border-radius: 6px;
+    }
+}
+
+/* Source: hero.css */
+/**
+ * Hero Section - シンプルで正しい実装
+ */
+
+/* ヒーローセクション */
+.hero {
+    position: relative;
+    width: 100%;
+    height: 100vh;
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+/* 動画コンテナ */
+.hero-video-container {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 0;
+}
+
+/* 動画 */
+.hero-video {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    min-width: 100%;
+    min-height: 100%;
+    width: auto;
+    height: auto;
+    transform: translate(-50%, -50%);
+    object-fit: cover;
+}
+
+/* オーバーレイ */
+.hero-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.5);
+    z-index: 1;
+}
+
+/* ヒーローコンテンツ */
+.hero-content {
+    position: relative;
+    z-index: 2;
+    text-align: center;
+    color: white;
+    padding: 0 20px;
+}
+
+/* セクションバッジ */
+.section-badge {
+    display: inline-block;
+    padding: 8px 24px;
+    background: linear-gradient(135deg, #0066ff 0%, #00d4ff 100%);
+    border-radius: 50px;
+    color: white;
+    font-size: 0.875rem;
+    font-weight: 600;
+    margin-bottom: 20px;
+    letter-spacing: 0.05em;
+}
+
+/* タイトル */
+.hero-title {
+    font-size: 3.5rem;
+    font-weight: 700;
+    color: #ffffff;
+    margin-bottom: 24px;
+    line-height: 1.2;
+    letter-spacing: -0.02em;
+    text-shadow: 0 2px 8px rgba(0, 0, 0, 0.6), 0 0 20px rgba(0, 0, 0, 0.3);
+}
+
+/* サブタイトル */
+.hero-subtitle {
+    font-size: 1.25rem;
+    color: rgba(255, 255, 255, 0.9);
+    margin-bottom: 32px;
+    line-height: 1.6;
+    text-shadow: 0 1px 4px rgba(0, 0, 0, 0.5);
+}
+
+/* ボタンコンテナ */
+.hero-buttons {
+    display: flex;
+    gap: 16px;
+    justify-content: center;
+    flex-wrap: wrap;
+}
+
+/* ボタン共通 */
+.hero-buttons .btn {
+    padding: 16px 32px;
+    font-size: 16px;
+    font-weight: 600;
+    letter-spacing: 0.02em;
+    border-radius: 8px;
+    text-decoration: none;
+    transition: all 0.3s ease;
+    cursor: pointer;
+    min-width: 180px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+}
+
+/* プライマリボタン */
+.hero-buttons .btn-primary {
+    background: linear-gradient(135deg, #0066ff 0%, #0052cc 100%);
+    color: #ffffff;
+    border: 2px solid transparent;
+    box-shadow: 0 4px 15px rgba(0, 102, 255, 0.3);
+}
+
+.hero-buttons .btn-primary:hover {
+    background: linear-gradient(135deg, #0052cc 0%, #0040a0 100%);
+    transform: translateY(-2px);
+    box-shadow: 0 10px 30px rgba(0, 102, 255, 0.4);
+}
+
+/* アウトラインボタン */
+.hero-buttons .btn-outline-light {
+    background: transparent;
+    color: #ffffff;
+    border: 2px solid #ffffff;
+}
+
+.hero-buttons .btn-outline-light:hover {
+    background: rgba(255, 255, 255, 0.1);
+    transform: translateY(-2px);
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+}
+
+/* スクロールインジケーター */
+.scroll-indicator {
+    position: absolute;
+    bottom: 40px;
+    left: 50%;
+    transform: translateX(-50%);
+    text-align: center;
+    cursor: pointer;
+    z-index: 3;
+}
+
+.scroll-icon {
+    width: 30px;
+    height: 45px;
+    margin: 0 auto 10px;
+    border: 2px solid rgba(255, 255, 255, 0.8);
+    border-radius: 15px;
+    position: relative;
+}
+
+.scroll-icon::before {
+    content: '';
+    position: absolute;
+    top: 8px;
+    left: 50%;
+    width: 4px;
+    height: 10px;
+    background: rgba(255, 255, 255, 0.8);
+    border-radius: 2px;
+    transform: translateX(-50%);
+    animation: scroll 2s infinite;
+}
+
+@keyframes scroll {
+    0% {
+        transform: translateX(-50%) translateY(0);
+        opacity: 0;
+    }
+    30% {
+        opacity: 1;
+    }
+    60% {
+        opacity: 1;
+    }
+    100% {
+        transform: translateX(-50%) translateY(20px);
+        opacity: 0;
+    }
+}
+
+.scroll-text {
+    font-size: 0.875rem;
+    color: rgba(255, 255, 255, 0.8);
+    font-weight: 500;
+}
+
+/* モバイル対応 */
+@media (max-width: 768px) {
+    .hero-title {
+        font-size: 2rem;
+    }
+
+    .hero-subtitle {
+        font-size: 1rem;
+    }
+
+    .hero-buttons {
+        flex-direction: column;
+        width: 100%;
+    }
+
+    .hero-buttons .btn {
+        width: 100%;
+        max-width: 280px;
+    }
+
+    .mobile-break {
+        display: block;
+    }
+}
+
+/* デスクトップでは改行を表示しない */
+@media (min-width: 769px) {
+    .mobile-break {
+        display: none;
+    }
+}
+
+/* Source: homepage-video-preload-fix.css */
+/**
+ * Homepage Video Preload Fix
+ * 動画プリロードの警告を修正
+ */
+
+/* 動画コンテナのスタイル最適化 */
+.hero-video-container {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+    z-index: 1;
+}
+
+.hero-video {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    min-width: 100%;
+    min-height: 100%;
+    width: auto;
+    height: auto;
+    transform: translate(-50%, -50%);
+    object-fit: cover;
+    z-index: 1;
+    /* プリロードの最適化 */
+    will-change: transform;
+}
+
+/* フォールバック画像は完全に非表示 */
+.hero-fallback {
+    display: none !important;
+    visibility: hidden !important;
+    opacity: 0 !important;
+    pointer-events: none !important;
+}
+/* ============================================================ */
+/* Source: contact-balanced.css                                */
+/* ============================================================ */
+
+/* ===========================
+   Contact Section - Balanced Layout
+   =========================== */
+
+/* Contact info grid */
+.contact-info {
+    margin-bottom: 80px !important;
+}
+
+.contact-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 30px;
+    align-items: stretch;
+    justify-content: center;
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+/* 小画面対応 */
+@media (max-width: 320px) {
+    .contact-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+.contact-col {
+    display: flex;
+    justify-content: center;
+}
+
+.contact-item {
+    background: white;
+    border-radius: 20px;
+    padding: 40px 30px;
+    text-align: center;
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 5px 20px rgba(0, 0, 0, 0.08);
+    transition: all 0.3s ease;
+}
+
+.contact-item:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.12);
+}
+
+.contact-item i {
+    margin-bottom: 25px !important;
+}
+
+.contact-item h4 {
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: #1e293b;
+    margin-bottom: 15px;
+}
+
+.contact-item p {
+    margin-bottom: 10px;
+    color: #64748b;
+    line-height: 1.6;
+}
+
+.contact-item p:first-of-type {
+    min-height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+/* Contact form */
+.contact-form {
+    max-width: 800px;
+    margin: 0 auto;
+    background: white;
+    padding: 50px;
+    border-radius: 20px;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.08);
+}
+
+.contact-form .form-group {
+    margin-bottom: 25px;
+}
+
+.contact-form input,
+.contact-form textarea {
+    width: 100%;
+    padding: 18px 25px;
+    border: 2px solid #e5e7eb;
+    border-radius: 12px;
+    font-size: 1rem;
+    transition: all 0.3s ease;
+    background: #f8fafc;
+}
+
+.contact-form input:focus,
+.contact-form textarea:focus {
+    outline: none;
+    border-color: #0066ff;
+    background: white;
+    box-shadow: 0 0 0 4px rgba(0, 102, 255, 0.1);
+}
+
+.contact-form .submit-button {
+    width: 100%;
+    padding: 18px 40px;
+    background: linear-gradient(135deg, #0066ff 0%, #004fc4 100%);
+    color: white;
+    border: none;
+    border-radius: 50px;
+    font-size: 1.125rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    margin-top: 10px;
+}
+
+.contact-form .submit-button:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 10px 30px rgba(0, 102, 255, 0.3);
+}
+
+/* Responsive */
+/* Visually hidden label for accessibility */
+.visually-hidden {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border: 0;
+}
+
+@media (max-width: 768px) {
+    .contact-grid {
+        grid-template-columns: 1fr;
+        gap: 20px;
+    }
+    
+    .contact-form {
+        padding: 30px 20px;
+    }
+}
+/* ============================================================ */
+/* Source: news-category-mobile-fix.css                        */
+/* ============================================================ */
+
+/* ===========================
+   News Category Mobile Fix
+   ニュースカテゴリーのモバイル表示修正
+   =========================== */
+
+/* モバイル時のnews-categoryの縦幅修正 */
+@media (max-width: 768px) {
+    .news-category {
+        /* 縦幅を適切に設定 */
+        line-height: 1.4;
+        padding: 4px 12px;
+        min-height: 24px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        
+        /* フォントサイズも調整 */
+        font-size: 0.75rem;
+        
+        /* ボタンとしての見た目を強化 */
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        transition: all 0.2s ease;
+    }
+    
+    /* ニュースアイテム全体のレイアウト調整 */
+    .news-item {
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+        padding: 16px;
+    }
+    
+    /* カテゴリーとテキストの間隔調整 */
+    .news-item > span:last-child {
+        line-height: 1.5;
+        margin-top: 4px;
+    }
+    
+    /* ホバー/タップ効果 */
+    .news-category:active {
+        transform: scale(0.98);
+        box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+    }
+}
+
+/* さらに小さい画面（480px以下）での調整 */
+@media (max-width: 480px) {
+    .news-category {
+        /* より小さいサイズに調整 */
+        font-size: 0.7rem;
+        padding: 3px 10px;
+        min-height: 22px;
+        border-radius: 10px;
+    }
+    
+    /* ニュースアイテムの余白を縮小 */
+    .news-item {
+        padding: 12px;
+    }
+    
+    /* 月見出しとの間隔調整 */
+    .news-month h4 {
+        margin-bottom: 12px;
+    }
+}
+
+/* 極小画面（360px以下）での追加調整 */
+@media (max-width: 360px) {
+    .news-category {
+        font-size: 0.65rem;
+        padding: 2px 8px;
+        min-height: 20px;
+        
+        /* 文字が切れないように */
+        letter-spacing: -0.02em;
+    }
+    
+    /* ニュースアイテムをよりコンパクトに */
+    .news-item {
+        padding: 10px;
+        gap: 6px;
+    }
+    
+    .news-item > span:last-child {
+        font-size: 0.85rem;
+        line-height: 1.4;
+    }
+}
+
+/* アクセシビリティ: フォーカス状態 */
+.news-category:focus-visible {
+    outline: 2px solid #0066ff;
+    outline-offset: 2px;
+}
+
+/* ダークモード対応 */
+@media (prefers-color-scheme: dark) {
+    .news-category {
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+    }
+    
+    .news-category:active {
+        box-shadow: 0 1px 2px rgba(0, 0, 0, 0.4);
+    }
+}
+/* ============================================================ */
+/* Source: video-loading-optimize.css                          */
+/* ============================================================ */
+
+/* ===========================
+   Video Loading Optimization
+   動画読み込み最適化スタイル
+   =========================== */
+
+/* 1. 動画コンテナの最適化 */
+.hero-video-container,
+#instantLoadingScreen video {
+    /* GPUアクセラレーションを有効化 */
+    transform: translateZ(0);
+    -webkit-transform: translateZ(0);
+    backface-visibility: hidden;
+    -webkit-backface-visibility: hidden;
+    perspective: 1000;
+    -webkit-perspective: 1000;
+    
+    /* レンダリング最適化 */
+    will-change: transform;
+    contain: layout style paint;
+}
+
+/* 2. 動画要素の最適化 */
+video {
+    /* ハードウェアアクセラレーション */
+    -webkit-transform: translate3d(0, 0, 0);
+    transform: translate3d(0, 0, 0);
+    
+    /* スムーズな再生 */
+    -webkit-backface-visibility: hidden;
+    backface-visibility: hidden;
+    
+    /* メモリ使用量の最適化 */
+    image-rendering: -webkit-optimize-contrast;
+    image-rendering: crisp-edges;
+}
+
+/* 3. プレースホルダーアニメーション */
+.video-placeholder {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(
+        135deg,
+        #1a1a2e 0%,
+        #16213e 50%,
+        #0f3460 100%
+    );
+    animation: placeholderShimmer 2s ease-in-out infinite;
+    z-index: -1;
+}
+
+@keyframes placeholderShimmer {
+    0% {
+        background-position: -100% 0;
+    }
+    100% {
+        background-position: 100% 0;
+    }
+}
+
+/* 4. 動画読み込み中のスケルトンスクリーン */
+.video-skeleton {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: 
+        linear-gradient(
+            90deg,
+            rgba(255, 255, 255, 0) 0%,
+            rgba(255, 255, 255, 0.1) 50%,
+            rgba(255, 255, 255, 0) 100%
+        );
+    background-size: 200% 100%;
+    animation: skeletonLoading 1.5s ease-in-out infinite;
+}
+
+@keyframes skeletonLoading {
+    0% {
+        background-position: -200% 0;
+    }
+    100% {
+        background-position: 200% 0;
+    }
+}
+
+/* 5. 低品質プレビュー画像 */
+.video-preview {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    filter: blur(20px);
+    transform: scale(1.1);
+    transition: opacity 0.3s ease-out;
+}
+
+.video-loaded .video-preview {
+    opacity: 0;
+}
+
+/* 6. パフォーマンス最適化クラス */
+.optimize-video {
+    /* コンポジットレイヤーの作成 */
+    opacity: 0.99;
+    
+    /* ペイント最適化 */
+    contain: paint;
+    
+    /* レイアウト計算の削減 */
+    contain-intrinsic-size: 1920px 1080px;
+}
+
+/* 7. モバイル最適化 */
+@media (max-width: 768px) {
+    video {
+        /* モバイルでの再生最適化 */
+        -webkit-playsinline: true;
+        playsinline: true;
+        
+        /* タッチ遅延の削除 */
+        touch-action: manipulation;
+    }
+    
+    /* 低解像度デバイス向け */
+    @media (max-resolution: 1dppx) {
+        video {
+            image-rendering: pixelated;
+        }
+    }
+}
+
+/* 8. ネットワーク状態インジケーター */
+.network-indicator {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    padding: 8px 16px;
+    background: rgba(0, 0, 0, 0.8);
+    color: white;
+    border-radius: 20px;
+    font-size: 12px;
+    display: none;
+    z-index: 9999;
+}
+
+.network-indicator.slow {
+    display: block;
+    background: rgba(255, 152, 0, 0.9);
+}
+
+.network-indicator.offline {
+    display: block;
+    background: rgba(244, 67, 54, 0.9);
+}
+
+/* 9. 動画バッファリングインジケーター */
+.video-buffering {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 50px;
+    height: 50px;
+    display: none;
+}
+
+.video-buffering::after {
+    content: '';
+    display: block;
+    width: 100%;
+    height: 100%;
+    border: 3px solid rgba(255, 255, 255, 0.2);
+    border-top-color: white;
+    border-radius: 50%;
+    animation: buffering 0.8s linear infinite;
+}
+
+video.buffering ~ .video-buffering {
+    display: block;
+}
+
+@keyframes buffering {
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+/* 10. プリロードアニメーション */
+.preload-progress {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 0%;
+    height: 3px;
+    background: linear-gradient(90deg, #3b82f6, #8b5cf6);
+    transition: width 0.3s ease;
+    z-index: 10;
+}
+
+/* 11. エラー時のフォールバック */
+video.error {
+    display: none;
+}
+
+video.error ~ .video-fallback {
+    display: block;
+    width: 100%;
+    height: 100%;
+    background: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><text x="50" y="50" text-anchor="middle" dy=".3em" fill="white" font-family="sans-serif" font-size="16">動画を読み込み中...</text></svg>') center no-repeat;
+    background-color: #1a1a2e;
+}
+/* ============================================================ */
+/* Source: video-poster-fallback.css                           */
+/* ============================================================ */
+
+/**
+ * 動画ポスター画像フォールバック
+ */
+
+.hero-video-container {
+    /* position: absolute は先のルールで定義済み — relativeに変えない */
+    background: linear-gradient(135deg, #1a1f3a 0%, #0a0e27 100%);
+    background-image: url('../assets/video-poster.jpg');
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+}
+
+/* 動画読み込み前の表示 */
+.hero-video[poster] {
+    background-color: #0a0e27;
+}
+
+/* 動画読み込み中のスケルトン */
+.hero-video:not([src]) {
+    background: linear-gradient(
+        90deg,
+        #1a1f3a 0%,
+        #2a2f4a 50%,
+        #1a1f3a 100%
+    );
+    background-size: 200% 100%;
+    animation: shimmer 2s infinite;
+}
+
+@keyframes shimmer {
+    0% {
+        background-position: -200% 0;
+    }
+    100% {
+        background-position: 200% 0;
+    }
+}
+
+/* 低速接続時の静的画像表示 */
+.hero-static-image {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    z-index: 1;
+}

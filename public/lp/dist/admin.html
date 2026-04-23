@@ -1,0 +1,769 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <link rel="icon" type="image/svg+xml" href="favicon.svg">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>管理画面 - INTERCONNECT</title>
+    
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Noto+Sans+JP:wght@300;400;500;700&display=swap" rel="stylesheet">
+    
+    <!-- Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" integrity="sha384-iw3OoTErCYJJB9mCa8LNS2hbsQ7M3C0EpIsO/H5+EGAkPGc6rk+V8i04oW/K5xq0" crossorigin="anonymous">
+    
+    <!-- Styles -->
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/buttons.css">
+    <link rel="stylesheet" href="css/dashboard.css">
+    <link rel="stylesheet" href="css/admin.css">
+    <link rel="stylesheet" href="css/notifications.css">
+    <link rel="stylesheet" href="css/responsive-layout.css">
+    <!-- ユーザーメニューCSS（統合済み） -->
+    <link rel="stylesheet" href="css/user-menu.css">
+</head>
+<body>
+    <!-- 管理者認証ガード（A6修正） -->
+    <script>
+    (async function() {
+        // Supabase SDK を待つ
+        function waitForClient() {
+            return new Promise(function(resolve) {
+                if (window.supabaseClient) return resolve(window.supabaseClient);
+                var interval = setInterval(function() {
+                    if (window.supabaseClient) { clearInterval(interval); resolve(window.supabaseClient); }
+                }, 100);
+                setTimeout(function() { clearInterval(interval); resolve(null); }, 5000);
+            });
+        }
+        var client = await waitForClient();
+        if (!client) { window.location.href = 'login.html'; return; }
+        try {
+            var result = await client.auth.getUser();
+            var user = result.data && result.data.user;
+            if (!user) { window.location.href = 'login.html'; return; }
+            var profileResult = await client.from('user_profiles').select('is_admin').eq('id', user.id).maybeSingle();
+            if (!profileResult.data || !profileResult.data.is_admin) {
+                window.location.href = 'dashboard.html';
+                return;
+            }
+        } catch (e) { window.location.href = 'login.html'; return; }
+        // 認証OK → ページ表示
+        document.body.style.visibility = 'visible';
+    })();
+    </script>
+    <style>body { visibility: hidden; }</style>
+
+    <!-- Mobile Header -->
+    <header class="mobile-header">
+        <button class="mobile-menu-toggle" id="adminSidebarToggle">
+            <i class="fas fa-bars"></i>
+        </button>
+        <h1>INTERCONNECT</h1>
+        <div class="mobile-header-actions">
+            <a href="notifications.html" class="notification-btn">
+                <i class="fas fa-bell"></i>
+            </a>
+        </div>
+    </header>
+
+    <!-- Mobile Navigation -->
+    <nav class="mobile-nav">
+        <div class="mobile-nav-header">
+            <h1>INTERCONNECT</h1>
+            <button class="mobile-nav-close">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+        
+        <div class="mobile-nav-menu">
+            <ul>
+                <li>
+                    <a href="dashboard.html" class="mobile-nav-link">
+                        <i class="fas fa-home"></i>
+                        <span>ダッシュボード</span>
+                    </a>
+                </li>
+                <li>
+                    <a href="members.html" class="mobile-nav-link">
+                        <i class="fas fa-users"></i>
+                        <span>メンバー</span>
+                    </a>
+                </li>
+                <li>
+                    <a href="events.html" class="mobile-nav-link">
+                        <i class="fas fa-calendar-alt"></i>
+                        <span>イベント</span>
+                    </a>
+                </li>
+                <li>
+                    <a href="messages.html" class="mobile-nav-link">
+                        <i class="fas fa-envelope"></i>
+                        <span>メッセージ</span>
+                    </a>
+                </li>
+                <li>
+                    <a href="matching.html" class="mobile-nav-link">
+                        <i class="fas fa-handshake"></i>
+                        <span>マッチング</span>
+                    </a>
+                </li>
+                <li>
+                    <a href="referral.html" class="mobile-nav-link">
+                        <i class="fas fa-user-plus"></i>
+                        <span>紹介プログラム</span>
+                    </a>
+                </li>
+                <li>
+                    <a href="profile.html" class="mobile-nav-link">
+                        <i class="fas fa-user"></i>
+                        <span>プロフィール</span>
+                    </a>
+                </li>
+                <li>
+                    <a href="settings.html" class="mobile-nav-link">
+                        <i class="fas fa-cog"></i>
+                        <span>設定</span>
+                    </a>
+                </li>
+                <li>
+                    <a href="#" class="mobile-nav-link active">
+                        <i class="fas fa-user-shield"></i>
+                        <span>管理画面</span>
+                    </a>
+                </li>
+            </ul>
+        </div>
+        
+        <div class="mobile-nav-footer">
+            <a href="#" class="mobile-nav-link" onclick="logout()">
+                <i class="fas fa-sign-out-alt"></i>
+                <span>ログアウト</span>
+            </a>
+        </div>
+    </nav>
+    
+    <!-- Mobile Backdrop -->
+    <div class="mobile-backdrop"></div>
+
+    <div class="dashboard">
+        <!-- Sidebar -->
+        <aside class="sidebar" id="adminSidebar">
+            <div class="sidebar-header">
+                <h1>INTERCONNECT</h1>
+                <button class="sidebar-toggle" id="adminSidebarToggleDesktop" aria-label="メニュー">
+                    <i class="fas fa-bars"></i>
+                </button>
+            </div>
+            
+            <nav class="sidebar-nav">
+                <ul>
+                    <li>
+                        <a href="dashboard.html" class="sidebar-link">
+                            <i class="fas fa-home"></i>
+                            <span>ダッシュボード</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="members.html" class="sidebar-link">
+                            <i class="fas fa-users"></i>
+                            <span>メンバー</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="events.html" class="sidebar-link">
+                            <i class="fas fa-calendar-alt"></i>
+                            <span>イベント</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="messages.html" class="sidebar-link">
+                            <i class="fas fa-envelope"></i>
+                            <span>メッセージ</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="matching.html" class="sidebar-link">
+                            <i class="fas fa-handshake"></i>
+                            <span>マッチング</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="referral.html" class="sidebar-link">
+                            <i class="fas fa-user-plus"></i>
+                            <span>紹介プログラム</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="profile.html" class="sidebar-link">
+                            <i class="fas fa-user"></i>
+                            <span>プロフィール</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="settings.html" class="sidebar-link">
+                            <i class="fas fa-cog"></i>
+                            <span>設定</span>
+                        </a>
+                    </li>
+                    <li class="sidebar-divider"></li>
+                    <li>
+                        <a href="#" class="sidebar-link active">
+                            <i class="fas fa-user-shield"></i>
+                            <span>管理画面</span>
+                        </a>
+                    </li>
+                </ul>
+            </nav>
+            
+            <div class="sidebar-footer">
+                <a href="#" class="sidebar-link" onclick="logout()">
+                    <i class="fas fa-sign-out-alt"></i>
+                    <span>ログアウト</span>
+                </a>
+            </div>
+        </aside>
+        
+        <!-- Main Content -->
+        <main class="main-content">
+            <!-- Header -->
+            <header class="dashboard-header">
+                <div class="header-left">
+                    <h1>管理画面</h1>
+                    <p>システム管理とユーザー管理</p>
+                </div>
+                
+                                <div class="header-right">
+                    <div class="user-menu">
+                        <div class="notification-wrapper">
+                            <button class="notification-btn" aria-label="通知">
+                                <i class="fas fa-bell"></i>
+                                <span class="notification-badge" style="display:none;">0</span>
+                            </button>
+                            <div class="notification-dropdown">
+                                <div class="notification-header">
+                                    <h3>通知</h3>
+                                    <button class="mark-all-read">すべて既読にする</button>
+                                </div>
+                                <div class="notification-list">
+                                    <div class="empty-notifications">
+                                        <i class="fas fa-bell-slash"></i>
+                                        <p>新しい通知はありません</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="user-profile">
+                            <img src="assets/default-avatar.svg" alt="User Avatar" class="user-avatar">
+                            <span class="user-name">ゲスト</span>
+                            <i class="fas fa-chevron-down"></i>
+                            <div class="user-dropdown">
+                                <a href="profile.html"><i class="fas fa-user"></i> プロフィール</a>
+                                <a href="settings.html"><i class="fas fa-cog"></i> 設定</a>
+                                <a href="#" id="logoutBtn"><i class="fas fa-sign-out-alt"></i> ログアウト</a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </header>
+            
+            <!-- Admin Stats -->
+            <div class="admin-stats">
+                <div class="stat-card">
+                    <div class="stat-icon">
+                        <i class="fas fa-users"></i>
+                    </div>
+                    <div class="stat-content">
+                        <div class="stat-value" id="stat-total-users">--</div>
+                        <div class="stat-label">総ユーザー数</div>
+                    </div>
+                </div>
+                
+                <div class="stat-card">
+                    <div class="stat-icon">
+                        <i class="fas fa-user-check"></i>
+                    </div>
+                    <div class="stat-content">
+                        <div class="stat-value" id="stat-active-users">--</div>
+                        <div class="stat-label">アクティブユーザー</div>
+                    </div>
+                </div>
+                
+                <div class="stat-card">
+                    <div class="stat-icon">
+                        <i class="fas fa-calendar-check"></i>
+                    </div>
+                    <div class="stat-content">
+                        <div class="stat-value" id="stat-events">--</div>
+                        <div class="stat-label">開催イベント</div>
+                    </div>
+                </div>
+                
+                <div class="stat-card">
+                    <div class="stat-icon">
+                        <i class="fas fa-exclamation-triangle"></i>
+                    </div>
+                    <div class="stat-content">
+                        <div class="stat-value" id="stat-reports">--</div>
+                        <div class="stat-label">報告件数</div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Admin Tabs -->
+            <div class="admin-tabs">
+                <button class="tab-btn active" data-tab="users">ユーザー管理</button>
+                <button class="tab-btn" data-tab="events">イベント管理</button>
+                <button class="tab-btn" data-tab="reports">レポート</button>
+                <button class="tab-btn" data-tab="system">システム設定</button>
+            </div>
+            
+            <!-- Admin Content -->
+            <div class="admin-content">
+                <!-- User Management Section -->
+                <section id="users" class="admin-section active">
+                    <div class="section-header">
+                        <h2>ユーザー管理</h2>
+                        <button class="btn btn-primary">
+                            <i class="fas fa-user-plus"></i>
+                            新規ユーザー追加
+                        </button>
+                    </div>
+
+                    <div class="admin-filters">
+                        <input type="text" class="form-input" placeholder="ユーザーを検索...">
+                        <select class="form-select">
+                            <option value="">すべてのステータス</option>
+                            <option value="active">アクティブ</option>
+                            <option value="inactive">非アクティブ</option>
+                            <option value="banned">停止中</option>
+                        </select>
+                        <button class="btn btn-outline">フィルター</button>
+                    </div>
+
+                    <div class="admin-table">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>ID</th>
+                                    <th>ユーザー名</th>
+                                    <th>メールアドレス</th>
+                                    <th>登録日</th>
+                                    <th>ステータス</th>
+                                    <th>アクション</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <!-- Table rows will be dynamically loaded -->
+                            </tbody>
+                        </table>
+                    </div>
+                </section>
+
+                <!-- Events Management Section (F5修正) -->
+                <section id="events" class="admin-section">
+                    <div class="section-header">
+                        <h2>イベント管理</h2>
+                    </div>
+                    <div class="admin-table">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>タイトル</th>
+                                    <th>日時</th>
+                                    <th>場所</th>
+                                    <th>参加者数</th>
+                                    <th>ステータス</th>
+                                </tr>
+                            </thead>
+                            <tbody id="events-table-body">
+                                <tr><td colspan="5" style="text-align:center;padding:2rem;color:#888;">読み込み中...</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </section>
+
+                <!-- Reports Section (F5修正) -->
+                <section id="reports" class="admin-section">
+                    <div class="section-header">
+                        <h2>レポート</h2>
+                    </div>
+                    <div class="admin-stats" style="margin-bottom:1.5rem;">
+                        <div class="stat-card">
+                            <div class="stat-icon"><i class="fas fa-user-plus"></i></div>
+                            <div class="stat-content">
+                                <div class="stat-value" id="report-new-users">--</div>
+                                <div class="stat-label">今月の新規登録</div>
+                            </div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-icon"><i class="fas fa-handshake"></i></div>
+                            <div class="stat-content">
+                                <div class="stat-value" id="report-matchings">--</div>
+                                <div class="stat-label">マッチング成立数</div>
+                            </div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-icon"><i class="fas fa-calendar-check"></i></div>
+                            <div class="stat-content">
+                                <div class="stat-value" id="report-event-participants">--</div>
+                                <div class="stat-label">イベント参加者数（累計）</div>
+                            </div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-icon"><i class="fas fa-link"></i></div>
+                            <div class="stat-content">
+                                <div class="stat-value" id="report-connections">--</div>
+                                <div class="stat-label">コネクション総数</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div style="background:var(--card-bg,#fff);border-radius:12px;padding:1.5rem;border:1px solid var(--border-color,#e5e7eb);">
+                        <h3 style="margin:0 0 1rem;font-size:1rem;">月別登録ユーザー数</h3>
+                        <div id="monthly-chart" style="display:flex;align-items:flex-end;gap:4px;height:120px;"></div>
+                    </div>
+                </section>
+
+                <!-- System Settings Section (F5修正) -->
+                <section id="system" class="admin-section">
+                    <div class="section-header">
+                        <h2>システム設定</h2>
+                    </div>
+                    <div style="display:grid;gap:1rem;">
+                        <div style="background:var(--card-bg,#fff);border-radius:12px;padding:1.5rem;border:1px solid var(--border-color,#e5e7eb);">
+                            <h3 style="margin:0 0 1rem;font-size:1rem;"><i class="fas fa-server" style="margin-right:0.5rem;color:#667eea;"></i>接続状態</h3>
+                            <div style="display:grid;gap:0.75rem;" id="system-status">
+                                <div style="display:flex;justify-content:space-between;align-items:center;">
+                                    <span>Supabase接続</span>
+                                    <span id="sys-supabase-status" class="status-badge status-active">確認中...</span>
+                                </div>
+                                <div style="display:flex;justify-content:space-between;align-items:center;">
+                                    <span>Realtime</span>
+                                    <span id="sys-realtime-status" class="status-badge status-active">確認中...</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div style="background:var(--card-bg,#fff);border-radius:12px;padding:1.5rem;border:1px solid var(--border-color,#e5e7eb);">
+                            <h3 style="margin:0 0 1rem;font-size:1rem;"><i class="fab fa-line" style="margin-right:0.5rem;color:#06c755;"></i>LINE公式アカウント管理</h3>
+                            <div style="display:grid;gap:0.75rem;">
+                                <div style="display:flex;justify-content:space-between;align-items:center;">
+                                    <div>
+                                        <span style="font-weight:600;">さらさん</span>
+                                        <span style="font-size:0.8rem;color:#6b7280;margin-left:0.5rem;">管理者</span>
+                                    </div>
+                                    <a href="https://manager.line.biz/invitation/F6Hkk1Rc8n8V6LQ9tebpNv035HmpED" target="_blank" rel="noopener noreferrer" style="display:inline-flex;align-items:center;gap:6px;padding:6px 14px;background:#06c755;color:#fff;border-radius:8px;font-size:0.85rem;font-weight:500;text-decoration:none;transition:opacity 0.2s;">
+                                        <i class="fab fa-line"></i> LINE Manager を開く
+                                    </a>
+                                </div>
+                                <div style="border-top:1px solid var(--border-color,#e5e7eb);padding-top:0.75rem;display:flex;justify-content:space-between;align-items:center;">
+                                    <div>
+                                        <span style="font-weight:600;">れんさん</span>
+                                        <span style="font-size:0.8rem;color:#6b7280;margin-left:0.5rem;">管理者</span>
+                                    </div>
+                                    <a href="https://manager.line.biz/invitation/F6Hkk1Rc8n8V6LQ9tebpNv035HmpED" target="_blank" rel="noopener noreferrer" style="display:inline-flex;align-items:center;gap:6px;padding:6px 14px;background:#06c755;color:#fff;border-radius:8px;font-size:0.85rem;font-weight:500;text-decoration:none;transition:opacity 0.2s;">
+                                        <i class="fab fa-line"></i> LINE Manager を開く
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                        <div style="background:var(--card-bg,#fff);border-radius:12px;padding:1.5rem;border:1px solid var(--border-color,#e5e7eb);">
+                            <h3 style="margin:0 0 1rem;font-size:1rem;"><i class="fas fa-info-circle" style="margin-right:0.5rem;color:#667eea;"></i>バージョン情報</h3>
+                            <div style="display:grid;gap:0.75rem;">
+                                <div style="display:flex;justify-content:space-between;">
+                                    <span>アプリケーション</span>
+                                    <span>INTERCONNECT v1.0</span>
+                                </div>
+                                <div style="display:flex;justify-content:space-between;">
+                                    <span>フロントエンド</span>
+                                    <span>Netlify Static</span>
+                                </div>
+                                <div style="display:flex;justify-content:space-between;">
+                                    <span>バックエンド</span>
+                                    <span>Supabase</span>
+                                </div>
+                                <div style="display:flex;justify-content:space-between;">
+                                    <span>DB テーブル数</span>
+                                    <span id="sys-table-count">--</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+            </div>
+        </main>
+    </div>
+    
+    <!-- Scripts -->
+    <script src="js/supabase-unified.js?v=1.1"></script>
+    <script src="js/core-utils.js"></script>
+    <script src="js/global-functions.js"></script>
+    <script src="js/profile-sync.js"></script>
+    <script src="js/notification-system-unified.js"></script>
+    <script src="js/notifications-realtime-unified.js"></script>
+    <script src="js/responsive-menu-simple.js"></script>
+    <script src="js/dashboard.js"></script>
+    <script>
+        // 管理画面データ読み込み（F1修正）
+        (async function loadAdminData() {
+            try {
+                await (window.waitForSupabase ? window.waitForSupabase() : Promise.resolve());
+                const client = window.supabaseClient;
+                if (!client) return;
+
+                // 統計データを並列で取得
+                const [usersResult, eventsResult] = await Promise.all([
+                    client.from('user_profiles').select('id, status, created_at', { count: 'exact', head: true }),
+                    client.from('event_items').select('id', { count: 'exact', head: true })
+                ]);
+
+                // 総ユーザー数
+                const totalUsers = usersResult.count || 0;
+                var el = document.getElementById('stat-total-users');
+                if (el) el.textContent = totalUsers.toLocaleString();
+
+                // アクティブユーザー（直近30日にログイン）
+                var thirtyDaysAgo = new Date();
+                thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+                const { count: activeCount } = await client
+                    .from('user_profiles')
+                    .select('id', { count: 'exact', head: true })
+                    .gte('updated_at', thirtyDaysAgo.toISOString());
+                el = document.getElementById('stat-active-users');
+                if (el) el.textContent = (activeCount || 0).toLocaleString();
+
+                // イベント数
+                el = document.getElementById('stat-events');
+                if (el) el.textContent = (eventsResult.count || 0).toLocaleString();
+
+                // 報告件数（notificationsでtype='report'をカウント）
+                const { count: reportCount } = await client
+                    .from('notifications')
+                    .select('id', { count: 'exact', head: true })
+                    .eq('type', 'report');
+                el = document.getElementById('stat-reports');
+                if (el) el.textContent = (reportCount || 0).toLocaleString();
+
+                // ユーザーテーブル読み込み
+                await loadUsersTable(client);
+
+                // タブ切り替え（各タブのデータ遅延ロード）
+                var tabDataLoaded = { users: true, events: false, reports: false, system: false };
+                document.querySelectorAll('.admin-tabs .tab-btn').forEach(function(btn) {
+                    btn.addEventListener('click', function() {
+                        document.querySelectorAll('.admin-tabs .tab-btn').forEach(function(b) { b.classList.remove('active'); });
+                        document.querySelectorAll('.admin-section').forEach(function(s) { s.classList.remove('active'); });
+                        this.classList.add('active');
+                        var tab = this.dataset.tab;
+                        var section = document.getElementById(tab);
+                        if (section) section.classList.add('active');
+                        // 各タブのデータを初回表示時にロード
+                        if (!tabDataLoaded[tab]) {
+                            tabDataLoaded[tab] = true;
+                            if (tab === 'events') loadEventsTable(client);
+                            if (tab === 'reports') loadReports(client);
+                            if (tab === 'system') loadSystemInfo(client);
+                        }
+                    });
+                });
+
+            } catch (e) {
+                console.error('[Admin] データ読み込みエラー:', e);
+            }
+        })();
+
+        async function loadUsersTable(client) {
+            var tbody = document.querySelector('#users .admin-table tbody');
+            if (!tbody) return;
+
+            var { data: users, error } = await client
+                .from('user_profiles')
+                .select('id, full_name, email, created_at, is_active')
+                .order('created_at', { ascending: false })
+                .limit(50);
+
+            if (error || !users) return;
+
+            tbody.innerHTML = '';
+            users.forEach(function(user) {
+                var tr = document.createElement('tr');
+                var shortId = (user.id || '').substring(0, 8);
+                var name = document.createElement('td');
+                name.textContent = user.full_name || '未設定';
+                var email = document.createElement('td');
+                email.textContent = user.email || '';
+                var date = document.createElement('td');
+                date.textContent = user.created_at ? new Date(user.created_at).toLocaleDateString('ja-JP') : '';
+                var status = document.createElement('td');
+                var badge = document.createElement('span');
+                var isActive = user.is_active !== false;
+                badge.className = 'status-badge status-' + (isActive ? 'active' : 'inactive');
+                badge.textContent = isActive ? 'アクティブ' : '非アクティブ';
+                status.appendChild(badge);
+                var actions = document.createElement('td');
+                actions.textContent = '-';
+
+                var idCell = document.createElement('td');
+                idCell.textContent = shortId;
+
+                tr.appendChild(idCell);
+                tr.appendChild(name);
+                tr.appendChild(email);
+                tr.appendChild(date);
+                tr.appendChild(status);
+                tr.appendChild(actions);
+                tbody.appendChild(tr);
+            });
+        }
+
+        // イベント一覧読み込み（F5修正）
+        async function loadEventsTable(client) {
+            var tbody = document.getElementById('events-table-body');
+            if (!tbody) return;
+            try {
+                var { data: events, error } = await client
+                    .from('event_items')
+                    .select('id, title, event_date, location, max_participants, is_cancelled')
+                    .order('event_date', { ascending: false })
+                    .limit(50);
+                if (error) throw error;
+                if (!events || events.length === 0) {
+                    tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;padding:2rem;color:#888;">イベントデータがありません</td></tr>';
+                    return;
+                }
+                tbody.innerHTML = '';
+                events.forEach(function(ev) {
+                    var tr = document.createElement('tr');
+                    var isCancelled = ev.is_cancelled === true;
+                    var statusText = isCancelled ? 'キャンセル' : '公開中';
+                    var statusClass = isCancelled ? 'inactive' : 'active';
+                    var cells = [
+                        ev.title || '無題',
+                        ev.event_date ? new Date(ev.event_date).toLocaleDateString('ja-JP') : '未定',
+                        ev.location || '-',
+                        ev.max_participants ? ev.max_participants + '名' : '-'
+                    ];
+                    cells.forEach(function(text) {
+                        var td = document.createElement('td');
+                        td.textContent = text;
+                        tr.appendChild(td);
+                    });
+                    // ステータス列
+                    var statusTd = document.createElement('td');
+                    var badge = document.createElement('span');
+                    badge.className = 'status-badge status-' + statusClass;
+                    badge.textContent = statusText;
+                    statusTd.appendChild(badge);
+                    tr.appendChild(statusTd);
+                    tbody.appendChild(tr);
+                });
+            } catch (e) {
+                var errTr = document.createElement('tr');
+                var errTd = document.createElement('td');
+                errTd.colSpan = 5;
+                errTd.style.cssText = 'text-align:center;padding:2rem;color:#e74c3c;';
+                errTd.textContent = '読み込みエラー: ' + (e.message || e);
+                errTr.appendChild(errTd);
+                tbody.innerHTML = '';
+                tbody.appendChild(errTr);
+            }
+        }
+
+        // レポート読み込み（F5修正）
+        async function loadReports(client) {
+            try {
+                var now = new Date();
+                var monthStart = new Date(now.getFullYear(), now.getMonth(), 1).toISOString();
+
+                var [newUsersRes, matchingsRes, connectionsRes] = await Promise.all([
+                    client.from('user_profiles').select('id', { count: 'exact', head: true }).gte('created_at', monthStart),
+                    client.from('matchings').select('id', { count: 'exact', head: true }),
+                    client.from('connections').select('id', { count: 'exact', head: true })
+                ]);
+
+                var el = document.getElementById('report-new-users');
+                if (el) el.textContent = (newUsersRes.count || 0).toLocaleString();
+                el = document.getElementById('report-matchings');
+                if (el) el.textContent = (matchingsRes.count || 0).toLocaleString();
+                el = document.getElementById('report-connections');
+                if (el) el.textContent = (connectionsRes.count || 0).toLocaleString();
+
+                // イベント参加者数
+                var { count: participantCount } = await client
+                    .from('event_participants')
+                    .select('id', { count: 'exact', head: true });
+                el = document.getElementById('report-event-participants');
+                if (el) el.textContent = (participantCount || 0).toLocaleString();
+
+                // 月別チャート（直近6ヶ月）
+                var chartEl = document.getElementById('monthly-chart');
+                if (chartEl) {
+                    var months = [];
+                    for (var i = 5; i >= 0; i--) {
+                        var d = new Date(now.getFullYear(), now.getMonth() - i, 1);
+                        months.push(d);
+                    }
+                    var counts = await Promise.all(months.map(function(m) {
+                        var start = m.toISOString();
+                        var end = new Date(m.getFullYear(), m.getMonth() + 1, 1).toISOString();
+                        return client.from('user_profiles').select('id', { count: 'exact', head: true })
+                            .gte('created_at', start).lt('created_at', end)
+                            .then(function(r) { return r.count || 0; });
+                    }));
+                    var maxCount = Math.max.apply(null, counts.concat([1]));
+                    chartEl.innerHTML = '';
+                    months.forEach(function(m, idx) {
+                        var bar = document.createElement('div');
+                        bar.style.cssText = 'flex:1;display:flex;flex-direction:column;align-items:center;gap:4px;';
+                        var height = Math.max(4, (counts[idx] / maxCount) * 100);
+                        bar.innerHTML = '<span style="font-size:12px;font-weight:600;">' + counts[idx] + '</span>' +
+                            '<div style="width:100%;height:' + height + 'px;background:linear-gradient(135deg,#667eea,#764ba2);border-radius:4px;"></div>' +
+                            '<span style="font-size:11px;color:#888;">' + (m.getMonth() + 1) + '月</span>';
+                        chartEl.appendChild(bar);
+                    });
+                }
+            } catch (e) {
+                console.error('[Admin] レポート読み込みエラー:', e);
+            }
+        }
+
+        // システム情報読み込み（F5修正）
+        async function loadSystemInfo(client) {
+            try {
+                // Supabase接続テスト
+                var { error } = await client.from('user_profiles').select('id', { head: true, count: 'exact' }).limit(1);
+                var statusEl = document.getElementById('sys-supabase-status');
+                if (statusEl) {
+                    statusEl.textContent = error ? '接続エラー' : '正常';
+                    statusEl.className = 'status-badge status-' + (error ? 'inactive' : 'active');
+                }
+
+                // Realtime接続状態（Supabase JS v2: connectionState()）
+                var realtimeEl = document.getElementById('sys-realtime-status');
+                if (realtimeEl) {
+                    var state = client.realtime && typeof client.realtime.connectionState === 'function'
+                        ? client.realtime.connectionState() : null;
+                    var connected = state === 'open' || state === 'OPEN';
+                    realtimeEl.textContent = connected ? '接続中' : (state || '未接続');
+                    realtimeEl.className = 'status-badge status-' + (connected ? 'active' : 'inactive');
+                }
+
+                // テーブル数（並列チェック）
+                var tables = ['user_profiles', 'event_items', 'connections', 'matchings', 'messages',
+                    'notifications', 'invitations', 'event_participants'];
+                var results = await Promise.all(tables.map(function(t) {
+                    return client.from(t).select('id', { head: true, count: 'exact' }).limit(0);
+                }));
+                var tableCount = results.filter(function(r) { return !r.error; }).length;
+                var tcEl = document.getElementById('sys-table-count');
+                if (tcEl) tcEl.textContent = tableCount + '+';
+            } catch (e) {
+                console.error('[Admin] システム情報読み込みエラー:', e);
+            }
+        }
+    </script>
+    <script src="js/user-dropdown-handler.js"></script>
+    <script src="js/avatar-size-enforcer.js"></script>
+</body>
+</html>

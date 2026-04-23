@@ -1,0 +1,28 @@
+# Video optimization headers
+/assets/*.mp4
+  Cache-Control: public, max-age=31536000, immutable
+  X-Content-Type-Options: nosniff
+  
+# Preload critical video
+/assets/interconnect-top.mp4
+  Link: </assets/interconnect-top.mp4>; rel=preload; as=video
+  Cache-Control: public, max-age=31536000, immutable
+  Accept-Ranges: bytes
+
+# General asset caching
+/assets/*
+  Cache-Control: public, max-age=31536000, immutable
+  
+# HTML files - no cache
+/*.html
+  Cache-Control: no-cache, no-store, must-revalidate
+  
+# JavaScript files - no cache for development
+/js/*
+  Cache-Control: no-cache, no-store, must-revalidate
+  Pragma: no-cache
+  Expires: 0
+  
+# CSS files - shorter cache for development
+/css/*
+  Cache-Control: public, max-age=300, must-revalidate

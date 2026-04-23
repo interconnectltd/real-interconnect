@@ -1,0 +1,660 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <link rel="icon" type="image/svg+xml" href="favicon.svg">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>新規登録 - INTERCONNECT</title>
+    
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Noto+Sans+JP:wght@300;400;500;700&display=swap" rel="stylesheet">
+    
+    <!-- Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" integrity="sha384-iw3OoTErCYJJB9mCa8LNS2hbsQ7M3C0EpIsO/H5+EGAkPGc6rk+V8i04oW/K5xq0" crossorigin="anonymous">
+    
+    <!-- Styles -->
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/buttons.css">
+    <!-- 認証ページ統一スタイル -->
+    <link rel="stylesheet" href="css/auth-unified.css">
+    <!-- 登録ページCSS（統合済み） -->
+    <link rel="stylesheet" href="css/register-page.css">
+</head>
+<body>
+    <div class="auth-container">
+        <div class="auth-card">
+            <div class="auth-header">
+                <h1>INTERCONNECT</h1>
+                <p>経営者コミュニティ</p>
+            </div>
+            
+            <h2 class="auth-title">新規登録</h2>
+            
+            <button type="button" class="auth-button line-button" id="lineRegisterBtn" 
+                    style="background: #00C300 !important; color: white !important; border: none !important;">
+                <i class="fab fa-line"></i>
+                LINEで登録
+            </button>
+            
+            <div class="auth-divider">
+                <span>または</span>
+            </div>
+            
+            <!-- Progress Indicator -->
+            <div class="registration-progress">
+                <div class="progress-step active" data-step="1">
+                    <div class="step-number">1</div>
+                    <div class="step-label">基本情報</div>
+                </div>
+                <div class="progress-line"></div>
+                <div class="progress-step" data-step="2">
+                    <div class="step-number">2</div>
+                    <div class="step-label">事業課題</div>
+                </div>
+                <div class="progress-line"></div>
+                <div class="progress-step" data-step="3">
+                    <div class="step-number">3</div>
+                    <div class="step-label">連絡先</div>
+                </div>
+                <div class="progress-line"></div>
+                <div class="progress-step" data-step="4">
+                    <div class="step-number">4</div>
+                    <div class="step-label">スキル</div>
+                </div>
+                <div class="progress-line"></div>
+                <div class="progress-step" data-step="5">
+                    <div class="step-number">5</div>
+                    <div class="step-label">興味・関心</div>
+                </div>
+            </div>
+            
+            <form class="auth-form" id="registerForm">
+                <!-- Step 1: Basic Information -->
+                <div class="form-step active" data-step="1">
+                    <div class="form-group">
+                        <label for="name">お名前<span class="required">*</span></label>
+                        <input type="text" id="name" name="name" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="company">会社名<span class="required">*</span></label>
+                        <input type="text" id="company" name="company" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="industry">業種<span class="required">*</span></label>
+                        <select id="industry" name="industry" required>
+                            <option value="">選択してください</option>
+                            <option value="IT・テクノロジー">IT・テクノロジー</option>
+                            <option value="製造業">製造業</option>
+                            <option value="小売・EC">小売・EC</option>
+                            <option value="金融・保険">金融・保険</option>
+                            <option value="不動産・建設">不動産・建設</option>
+                            <option value="医療・ヘルスケア">医療・ヘルスケア</option>
+                            <option value="教育">教育</option>
+                            <option value="飲食・サービス">飲食・サービス</option>
+                            <option value="広告・メディア">広告・メディア</option>
+                            <option value="コンサルティング">コンサルティング</option>
+                            <option value="物流・運輸">物流・運輸</option>
+                            <option value="エネルギー・環境">エネルギー・環境</option>
+                            <option value="農業・食品">農業・食品</option>
+                            <option value="その他">その他</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="email">メールアドレス<span class="required">*</span></label>
+                        <input type="email" id="email" name="email" autocomplete="email" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="password">パスワード<span class="required">*</span></label>
+                        <div class="password-input-wrapper">
+                            <input type="password" id="password" name="password" autocomplete="new-password" required>
+                            <button type="button" class="password-toggle" aria-label="パスワードを表示">
+                                <i class="fas fa-eye"></i>
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="password-confirm">パスワード（確認）<span class="required">*</span></label>
+                        <div class="password-input-wrapper">
+                            <input type="password" id="password-confirm" name="password-confirm" autocomplete="new-password" required>
+                            <button type="button" class="password-toggle" aria-label="パスワードを表示">
+                                <i class="fas fa-eye"></i>
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <button type="button" class="auth-button" data-action="next">次へ</button>
+                </div>
+                
+                <!-- Step 2: Business Challenges -->
+                <div class="form-step" data-step="2">
+                    <h3>事業課題を選択してください（複数選択可）</h3>
+                    
+                    <div class="challenges-section">
+                        <div class="challenge-group">
+                            <h4><i class="fas fa-chart-line"></i> 売上・収益</h4>
+                            <label class="checkbox-label">
+                                <input type="checkbox" name="challenges" value="現状課題なし_売上" data-exclusive="true">
+                                <span>現状課題なし</span>
+                            </label>
+                            <label class="checkbox-label">
+                                <input type="checkbox" name="challenges" value="新規顧客獲得">
+                                <span>新規顧客獲得の伸び悩み</span>
+                            </label>
+                            <label class="checkbox-label">
+                                <input type="checkbox" name="challenges" value="既存顧客単価">
+                                <span>既存顧客の単価向上</span>
+                            </label>
+                            <label class="checkbox-label">
+                                <input type="checkbox" name="challenges" value="市場シェア拡大">
+                                <span>市場シェアの拡大</span>
+                            </label>
+                            <label class="checkbox-label">
+                                <input type="checkbox" name="challenges" value="リピート率向上">
+                                <span>顧客リピート率の向上</span>
+                            </label>
+                            <label class="checkbox-label">
+                                <input type="checkbox" name="challenges" value="新規事業開発">
+                                <span>新規事業・サービスの開発</span>
+                            </label>
+                        </div>
+
+                        <div class="challenge-group">
+                            <h4><i class="fas fa-users"></i> 組織・人材</h4>
+                            <label class="checkbox-label">
+                                <input type="checkbox" name="challenges" value="現状課題なし_組織" data-exclusive="true">
+                                <span>現状課題なし</span>
+                            </label>
+                            <label class="checkbox-label">
+                                <input type="checkbox" name="challenges" value="人材採用">
+                                <span>優秀な人材の採用</span>
+                            </label>
+                            <label class="checkbox-label">
+                                <input type="checkbox" name="challenges" value="人材育成">
+                                <span>社員の育成・スキルアップ</span>
+                            </label>
+                            <label class="checkbox-label">
+                                <input type="checkbox" name="challenges" value="組織文化">
+                                <span>組織文化の醸成</span>
+                            </label>
+                            <label class="checkbox-label">
+                                <input type="checkbox" name="challenges" value="離職防止">
+                                <span>離職率の改善・定着率向上</span>
+                            </label>
+                            <label class="checkbox-label">
+                                <input type="checkbox" name="challenges" value="評価制度">
+                                <span>人事評価制度の構築</span>
+                            </label>
+                        </div>
+
+                        <div class="challenge-group">
+                            <h4><i class="fas fa-cogs"></i> 業務効率・DX</h4>
+                            <label class="checkbox-label">
+                                <input type="checkbox" name="challenges" value="現状課題なし_DX" data-exclusive="true">
+                                <span>現状課題なし</span>
+                            </label>
+                            <label class="checkbox-label">
+                                <input type="checkbox" name="challenges" value="DX推進">
+                                <span>DX推進・デジタル化</span>
+                            </label>
+                            <label class="checkbox-label">
+                                <input type="checkbox" name="challenges" value="業務自動化">
+                                <span>業務プロセスの自動化</span>
+                            </label>
+                            <label class="checkbox-label">
+                                <input type="checkbox" name="challenges" value="システム統合">
+                                <span>社内システムの統合</span>
+                            </label>
+                            <label class="checkbox-label">
+                                <input type="checkbox" name="challenges" value="データ活用">
+                                <span>データ分析・活用の推進</span>
+                            </label>
+                            <label class="checkbox-label">
+                                <input type="checkbox" name="challenges" value="セキュリティ">
+                                <span>情報セキュリティの強化</span>
+                            </label>
+                        </div>
+
+                        <div class="challenge-group">
+                            <h4><i class="fas fa-globe"></i> 事業戦略・競争力</h4>
+                            <label class="checkbox-label">
+                                <input type="checkbox" name="challenges" value="現状課題なし_戦略" data-exclusive="true">
+                                <span>現状課題なし</span>
+                            </label>
+                            <label class="checkbox-label">
+                                <input type="checkbox" name="challenges" value="差別化戦略">
+                                <span>競合他社との差別化</span>
+                            </label>
+                            <label class="checkbox-label">
+                                <input type="checkbox" name="challenges" value="ブランディング">
+                                <span>ブランド力の向上</span>
+                            </label>
+                            <label class="checkbox-label">
+                                <input type="checkbox" name="challenges" value="海外展開">
+                                <span>海外市場への展開</span>
+                            </label>
+                            <label class="checkbox-label">
+                                <input type="checkbox" name="challenges" value="パートナーシップ">
+                                <span>戦略的パートナーシップ構築</span>
+                            </label>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="budget">年間予算規模（万円）</label>
+                        <input type="text" id="budget" name="budget" placeholder="例：1000（1000万円の場合）" pattern="[0-9]*" inputmode="numeric">
+                        <small class="form-help">任意。数字のみ（単位：万円）</small>
+                    </div>
+                    
+                    <div class="form-navigation">
+                        <button type="button" class="auth-button-outline" data-action="prev">戻る</button>
+                        <button type="button" class="auth-button" data-action="next">次へ</button>
+                    </div>
+                </div>
+                
+                <!-- Step 3: Contact Information -->
+                <div class="form-step" data-step="3">
+                    <h3>連絡先情報</h3>
+                    
+                    <div class="form-group">
+                        <label for="phone">電話番号<span class="required">*</span></label>
+                        <input type="tel" id="phone" name="phone" placeholder="090-1234-5678" data-required="true">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="line-id">LINE ID または URL<span class="required">*</span></label>
+                        <input type="text" id="line-id" name="line-id" placeholder="@example_line" data-required="true">
+                        <small class="form-help">ビジネスでの連絡に使用します</small>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="line-qr">LINE QRコード<span class="required">*</span></label>
+                        <div class="file-upload-wrapper">
+                            <input type="file" id="line-qr" name="line-qr" accept="image/*" class="file-input" data-required="true">
+                            <label for="line-qr" class="file-upload-label">
+                                <i class="fas fa-cloud-upload-alt"></i>
+                                <span>QRコード画像をアップロード</span>
+                            </label>
+                            <div class="file-preview" id="qr-preview"></div>
+                        </div>
+                        <small class="form-help">PNG、JPG、JPEG形式（最大5MB）</small>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="position">役職<span class="required">*</span></label>
+                        <input type="text" id="position" name="position" placeholder="代表取締役CEO" data-required="true">
+                    </div>
+                    
+                    <div class="form-navigation">
+                        <button type="button" class="auth-button-outline" data-action="prev">戻る</button>
+                        <button type="button" class="auth-button" data-action="next">次へ</button>
+                    </div>
+                </div>
+                
+                <!-- Step 4: Skills -->
+                <div class="form-step" data-step="4">
+                    <h3>スキル・専門分野</h3>
+                    <p class="step-description">あなたの専門分野やスキルを選択してください（複数選択可）</p>
+                    
+                    <div class="skills-selection-container">
+                        <div class="skill-category-section">
+                            <h4>経営・戦略</h4>
+                            <div class="skills-checkbox-grid">
+                                <label class="skill-checkbox">
+                                    <input type="checkbox" name="skills" value="経営戦略立案">
+                                    <span>経営戦略立案</span>
+                                </label>
+                                <label class="skill-checkbox">
+                                    <input type="checkbox" name="skills" value="事業計画策定">
+                                    <span>事業計画策定</span>
+                                </label>
+                                <label class="skill-checkbox">
+                                    <input type="checkbox" name="skills" value="ビジョン構築">
+                                    <span>ビジョン構築</span>
+                                </label>
+                                <label class="skill-checkbox">
+                                    <input type="checkbox" name="skills" value="M&A戦略">
+                                    <span>M&A戦略</span>
+                                </label>
+                                <label class="skill-checkbox">
+                                    <input type="checkbox" name="skills" value="組織変革">
+                                    <span>組織変革</span>
+                                </label>
+                                <label class="skill-checkbox">
+                                    <input type="checkbox" name="skills" value="リスクマネジメント">
+                                    <span>リスクマネジメント</span>
+                                </label>
+                                <label class="skill-checkbox">
+                                    <input type="checkbox" name="skills" value="ガバナンス強化">
+                                    <span>ガバナンス強化</span>
+                                </label>
+                            </div>
+                        </div>
+                        
+                        <div class="skill-category-section">
+                            <h4>事業開発</h4>
+                            <div class="skills-checkbox-grid">
+                                <label class="skill-checkbox">
+                                    <input type="checkbox" name="skills" value="新規事業開発">
+                                    <span>新規事業開発</span>
+                                </label>
+                                <label class="skill-checkbox">
+                                    <input type="checkbox" name="skills" value="事業提携・アライアンス">
+                                    <span>事業提携・アライアンス</span>
+                                </label>
+                                <label class="skill-checkbox">
+                                    <input type="checkbox" name="skills" value="ビジネスモデル構築">
+                                    <span>ビジネスモデル構築</span>
+                                </label>
+                                <label class="skill-checkbox">
+                                    <input type="checkbox" name="skills" value="市場開拓">
+                                    <span>市場開拓</span>
+                                </label>
+                                <label class="skill-checkbox">
+                                    <input type="checkbox" name="skills" value="商品企画">
+                                    <span>商品企画</span>
+                                </label>
+                                <label class="skill-checkbox">
+                                    <input type="checkbox" name="skills" value="サービス開発">
+                                    <span>サービス開発</span>
+                                </label>
+                                <label class="skill-checkbox">
+                                    <input type="checkbox" name="skills" value="プロダクトマネジメント">
+                                    <span>プロダクトマネジメント</span>
+                                </label>
+                            </div>
+                        </div>
+                        
+                        <div class="skill-category-section">
+                            <h4>テクノロジー</h4>
+                            <div class="skills-checkbox-grid">
+                                <label class="skill-checkbox">
+                                    <input type="checkbox" name="skills" value="AI・機械学習">
+                                    <span>AI・機械学習</span>
+                                </label>
+                                <label class="skill-checkbox">
+                                    <input type="checkbox" name="skills" value="IoT">
+                                    <span>IoT</span>
+                                </label>
+                                <label class="skill-checkbox">
+                                    <input type="checkbox" name="skills" value="ブロックチェーン">
+                                    <span>ブロックチェーン</span>
+                                </label>
+                                <label class="skill-checkbox">
+                                    <input type="checkbox" name="skills" value="クラウド">
+                                    <span>クラウド</span>
+                                </label>
+                                <label class="skill-checkbox">
+                                    <input type="checkbox" name="skills" value="ビッグデータ">
+                                    <span>ビッグデータ</span>
+                                </label>
+                                <label class="skill-checkbox">
+                                    <input type="checkbox" name="skills" value="サイバーセキュリティ">
+                                    <span>サイバーセキュリティ</span>
+                                </label>
+                                <label class="skill-checkbox">
+                                    <input type="checkbox" name="skills" value="DX推進">
+                                    <span>DX推進</span>
+                                </label>
+                                <label class="skill-checkbox">
+                                    <input type="checkbox" name="skills" value="システム設計">
+                                    <span>システム設計</span>
+                                </label>
+                            </div>
+                        </div>
+                        
+                        <div class="skill-category-section">
+                            <h4>マーケティング</h4>
+                            <div class="skills-checkbox-grid">
+                                <label class="skill-checkbox">
+                                    <input type="checkbox" name="skills" value="デジタルマーケティング">
+                                    <span>デジタルマーケティング</span>
+                                </label>
+                                <label class="skill-checkbox">
+                                    <input type="checkbox" name="skills" value="ブランディング">
+                                    <span>ブランディング</span>
+                                </label>
+                                <label class="skill-checkbox">
+                                    <input type="checkbox" name="skills" value="PR・広報">
+                                    <span>PR・広報</span>
+                                </label>
+                                <label class="skill-checkbox">
+                                    <input type="checkbox" name="skills" value="SNSマーケティング">
+                                    <span>SNSマーケティング</span>
+                                </label>
+                                <label class="skill-checkbox">
+                                    <input type="checkbox" name="skills" value="コンテンツマーケティング">
+                                    <span>コンテンツマーケティング</span>
+                                </label>
+                                <label class="skill-checkbox">
+                                    <input type="checkbox" name="skills" value="SEO/SEM">
+                                    <span>SEO/SEM</span>
+                                </label>
+                                <label class="skill-checkbox">
+                                    <input type="checkbox" name="skills" value="CRM">
+                                    <span>CRM</span>
+                                </label>
+                                <label class="skill-checkbox">
+                                    <input type="checkbox" name="skills" value="マーケティング分析">
+                                    <span>マーケティング分析</span>
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="skills-pr">あなたのスキル・専門分野のPR</label>
+                        <textarea id="skills-pr" name="skills-pr" rows="5" minlength="100" placeholder="あなたができること、専門分野、実績などを100文字以上で詳しくPRしてください（スキルを選択した場合は必須）"></textarea>
+                        <small class="char-count"><span id="skills-pr-count">0</span>/100文字</small>
+                    </div>
+                    
+                    <div class="form-navigation">
+                        <button type="button" class="auth-button-outline" data-action="prev">戻る</button>
+                        <button type="button" class="auth-button" data-action="next">次へ</button>
+                    </div>
+                </div>
+                
+                <!-- Step 5: Interests -->
+                <div class="form-step" data-step="5">
+                    <h3>興味・関心分野</h3>
+                    <p class="step-description">興味のある分野を選択してください（複数選択可）</p>
+                    
+                    <div class="interests-selection-container">
+                        <div class="interest-category-section">
+                            <h4>ビジネス・経営</h4>
+                            <div class="interests-checkbox-grid">
+                                <label class="interest-checkbox">
+                                    <input type="checkbox" name="interests" value="スタートアップ">
+                                    <span>スタートアップ</span>
+                                </label>
+                                <label class="interest-checkbox">
+                                    <input type="checkbox" name="interests" value="イノベーション">
+                                    <span>イノベーション</span>
+                                </label>
+                                <label class="interest-checkbox">
+                                    <input type="checkbox" name="interests" value="新規事業開発">
+                                    <span>新規事業開発</span>
+                                </label>
+                                <label class="interest-checkbox">
+                                    <input type="checkbox" name="interests" value="M&A">
+                                    <span>M&A</span>
+                                </label>
+                                <label class="interest-checkbox">
+                                    <input type="checkbox" name="interests" value="事業承継">
+                                    <span>事業承継</span>
+                                </label>
+                                <label class="interest-checkbox">
+                                    <input type="checkbox" name="interests" value="IPO">
+                                    <span>IPO</span>
+                                </label>
+                                <label class="interest-checkbox">
+                                    <input type="checkbox" name="interests" value="ベンチャーキャピタル">
+                                    <span>ベンチャーキャピタル</span>
+                                </label>
+                            </div>
+                        </div>
+                        
+                        <div class="interest-category-section">
+                            <h4>テクノロジー</h4>
+                            <div class="interests-checkbox-grid">
+                                <label class="interest-checkbox">
+                                    <input type="checkbox" name="interests" value="AI・人工知能">
+                                    <span>AI・人工知能</span>
+                                </label>
+                                <label class="interest-checkbox">
+                                    <input type="checkbox" name="interests" value="機械学習">
+                                    <span>機械学習</span>
+                                </label>
+                                <label class="interest-checkbox">
+                                    <input type="checkbox" name="interests" value="IoT">
+                                    <span>IoT</span>
+                                </label>
+                                <label class="interest-checkbox">
+                                    <input type="checkbox" name="interests" value="ブロックチェーン">
+                                    <span>ブロックチェーン</span>
+                                </label>
+                                <label class="interest-checkbox">
+                                    <input type="checkbox" name="interests" value="メタバース">
+                                    <span>メタバース</span>
+                                </label>
+                                <label class="interest-checkbox">
+                                    <input type="checkbox" name="interests" value="Web3">
+                                    <span>Web3</span>
+                                </label>
+                                <label class="interest-checkbox">
+                                    <input type="checkbox" name="interests" value="NFT">
+                                    <span>NFT</span>
+                                </label>
+                                <label class="interest-checkbox">
+                                    <input type="checkbox" name="interests" value="AR/VR">
+                                    <span>AR/VR</span>
+                                </label>
+                            </div>
+                        </div>
+                        
+                        <div class="interest-category-section">
+                            <h4>産業・分野</h4>
+                            <div class="interests-checkbox-grid">
+                                <label class="interest-checkbox">
+                                    <input type="checkbox" name="interests" value="FinTech">
+                                    <span>FinTech</span>
+                                </label>
+                                <label class="interest-checkbox">
+                                    <input type="checkbox" name="interests" value="EdTech">
+                                    <span>EdTech</span>
+                                </label>
+                                <label class="interest-checkbox">
+                                    <input type="checkbox" name="interests" value="HealthTech">
+                                    <span>HealthTech</span>
+                                </label>
+                                <label class="interest-checkbox">
+                                    <input type="checkbox" name="interests" value="AgriTech">
+                                    <span>AgriTech</span>
+                                </label>
+                                <label class="interest-checkbox">
+                                    <input type="checkbox" name="interests" value="FoodTech">
+                                    <span>FoodTech</span>
+                                </label>
+                                <label class="interest-checkbox">
+                                    <input type="checkbox" name="interests" value="RetailTech">
+                                    <span>RetailTech</span>
+                                </label>
+                                <label class="interest-checkbox">
+                                    <input type="checkbox" name="interests" value="PropTech">
+                                    <span>PropTech</span>
+                                </label>
+                            </div>
+                        </div>
+                        
+                        <div class="interest-category-section">
+                            <h4>社会・環境</h4>
+                            <div class="interests-checkbox-grid">
+                                <label class="interest-checkbox">
+                                    <input type="checkbox" name="interests" value="サステナビリティ">
+                                    <span>サステナビリティ</span>
+                                </label>
+                                <label class="interest-checkbox">
+                                    <input type="checkbox" name="interests" value="SDGs">
+                                    <span>SDGs</span>
+                                </label>
+                                <label class="interest-checkbox">
+                                    <input type="checkbox" name="interests" value="脱炭素">
+                                    <span>脱炭素</span>
+                                </label>
+                                <label class="interest-checkbox">
+                                    <input type="checkbox" name="interests" value="ESG投資">
+                                    <span>ESG投資</span>
+                                </label>
+                                <label class="interest-checkbox">
+                                    <input type="checkbox" name="interests" value="サーキュラーエコノミー">
+                                    <span>サーキュラーエコノミー</span>
+                                </label>
+                                <label class="interest-checkbox">
+                                    <input type="checkbox" name="interests" value="グリーンテック">
+                                    <span>グリーンテック</span>
+                                </label>
+                                <label class="interest-checkbox">
+                                    <input type="checkbox" name="interests" value="ソーシャルビジネス">
+                                    <span>ソーシャルビジネス</span>
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="interests-details">興味・関心・お困りごとの詳細<span class="required">*</span></label>
+                        <textarea id="interests-details" name="interests-details" rows="5" minlength="100" placeholder="どんなことに興味があったり、困っていたりするかを100文字以上で詳しく記載してください" data-required="true"></textarea>
+                        <small class="char-count"><span id="interests-details-count">0</span>/100文字</small>
+                    </div>
+                    
+                    <div class="form-options">
+                        <label class="checkbox-label">
+                            <input type="checkbox" name="newsletter" checked>
+                            <span>イベント情報を受け取る</span>
+                        </label>
+                    </div>
+                    
+                    <div class="form-options">
+                        <label class="checkbox-label">
+                            <input type="checkbox" name="agree" data-required="true">
+                            <span><a href="terms.html" target="_blank">利用規約</a>に同意する</span>
+                        </label>
+                    </div>
+                    
+                    <div class="form-navigation">
+                        <button type="button" class="auth-button-outline" data-action="prev">戻る</button>
+                        <button type="submit" class="auth-button">登録する</button>
+                    </div>
+                </div>
+            </form>
+            
+            <div class="auth-footer">
+                <p>すでにアカウントをお持ちの方は</p>
+                <a href="/login">ログイン</a>
+            </div>
+            
+            <div class="auth-back">
+                <a href="/">← トップページに戻る</a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <!-- supabase-unified.js が CDN SDK を動的ロードするため、CDN script タグは不要 -->
+    <script src="js/supabase-unified.js?v=1.1"></script>
+    <!-- LIFF SDK + 初期化 -->
+    <script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
+    <script src="js/liff-init.js"></script>
+    <script src="js/core-utils.js"></script>
+    <script src="js/global-functions.js"></script>
+    <script src="js/notification-system-unified.js"></script>
+    <script src="js/login-bundle.js"></script>
+    <script src="js/registration-unified.js"></script>
+</body>
+</html>

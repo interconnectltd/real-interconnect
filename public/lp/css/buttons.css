@@ -1,0 +1,332 @@
+/* ===========================
+   Global Button Styles
+   =========================== */
+
+/* Base button styles */
+.btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--space-sm);
+    padding: var(--space-md) var(--space-lg);
+    border: none;
+    border-radius: var(--radius-md);
+    font-weight: 600;
+    text-align: center;
+    cursor: pointer;
+    transition: var(--transition-base);
+    text-decoration: none;
+    line-height: 1.5;
+    white-space: nowrap;
+    min-height: 44px;
+}
+
+/* Button icons */
+.btn i {
+    font-size: 1rem;
+}
+
+/* Button variants */
+.btn-primary {
+    background: #0066ff;
+    color: white !important; /* 青いボタンは必ず白文字 */
+    border: 2px solid #0066ff;
+}
+
+.btn-primary:hover {
+    background: #0052cc;
+    border-color: #0052cc;
+    color: white !important; /* ホバー時も白文字を維持 */
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(0, 102, 255, 0.3);
+}
+
+/* 青いボタン内のすべてのテキスト要素を白に */
+.btn-primary span,
+.btn-primary i,
+.btn-primary .btn-text {
+    color: white !important;
+}
+
+.btn-secondary {
+    background: var(--secondary-color);
+    color: white !important; /* セカンダリボタンも白文字 */
+}
+
+.btn-secondary:hover {
+    background: var(--secondary-dark);
+    color: white !important;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(16, 224, 104, 0.3);
+}
+
+/* セカンダリボタン内のテキスト要素も白に */
+.btn-secondary span,
+.btn-secondary i,
+.btn-secondary .btn-text {
+    color: white !important;
+}
+
+.btn-outline {
+    background: white;
+    border: 2px solid #0066ff;
+    color: #0066ff !important; /* 白いボタンは青文字 */
+}
+
+.btn-outline:hover {
+    background: #0066ff;
+    color: white !important; /* ホバー時は白文字 */
+    border-color: #0066ff;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(0, 102, 255, 0.3);
+}
+
+/* 白いボタン内のテキスト要素は青（ホバー時は白） */
+.btn-outline span,
+.btn-outline i,
+.btn-outline .btn-text {
+    color: #0066ff !important;
+}
+
+.btn-outline:hover span,
+.btn-outline:hover i,
+.btn-outline:hover .btn-text {
+    color: white !important;
+}
+
+/* Button sizes */
+.btn-small {
+    padding: var(--space-xs) var(--space-md);
+    font-size: 0.875rem;
+    min-height: 44px;
+}
+
+.btn-large {
+    padding: var(--space-lg) var(--space-2xl);
+    font-size: 1.125rem;
+    min-height: 52px;
+}
+
+/* Block button */
+.btn-block {
+    width: 100%;
+    display: flex;
+}
+
+/* Icon-only button */
+.btn-icon {
+    width: 44px;
+    height: 44px;
+    padding: 0;
+    border-radius: var(--radius-full);
+}
+
+.btn-icon.btn-small {
+    width: 44px;
+    height: 44px;
+}
+
+/* Text button */
+.btn-text {
+    background: none;
+    border: none;
+    color: #0066ff;
+    padding: var(--space-sm);
+    font-weight: 500;
+}
+
+.btn-text:hover {
+    color: #0052cc;
+    text-decoration: underline;
+    transform: none;
+    box-shadow: none;
+}
+
+/* Disabled state */
+.btn:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+.btn:disabled:hover {
+    transform: none;
+    box-shadow: none;
+}
+
+/* Additional button color rules for consistency */
+/* Any button with blue background should have white text */
+.btn[style*="background: #0066ff"],
+.btn[style*="background:#0066ff"],
+.btn[style*="background-color: #0066ff"],
+.btn[style*="background-color:#0066ff"],
+.btn[style*="background: rgb(0, 102, 255)"],
+.btn[style*="background-color: rgb(0, 102, 255)"] {
+    color: white !important;
+}
+
+/* Ensure all child elements also have white text */
+.btn[style*="background: #0066ff"] *,
+.btn[style*="background:#0066ff"] *,
+.btn[style*="background-color: #0066ff"] *,
+.btn[style*="background-color:#0066ff"] *,
+.btn[style*="background: rgb(0, 102, 255)"] *,
+.btn[style*="background-color: rgb(0, 102, 255)"] * {
+    color: white !important;
+}
+
+/* White background buttons should have blue text */
+.btn[style*="background: white"],
+.btn[style*="background:#fff"],
+.btn[style*="background-color: white"],
+.btn[style*="background-color:#fff"],
+.btn[style*="background: #ffffff"],
+.btn[style*="background-color: #ffffff"] {
+    color: #0066ff !important;
+}
+
+/* Ensure all child elements of white buttons have blue text */
+.btn[style*="background: white"] *,
+.btn[style*="background:#fff"] *,
+.btn[style*="background-color: white"] *,
+.btn[style*="background-color:#fff"] *,
+.btn[style*="background: #ffffff"] *,
+.btn[style*="background-color: #ffffff"] * {
+    color: #0066ff !important;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .btn {
+        padding: var(--space-sm) var(--space-md);
+        font-size: 0.875rem;
+        min-height: 40px;
+    }
+    
+    .btn-small {
+        padding: var(--space-xs) var(--space-sm);
+        font-size: 0.8125rem;
+        min-height: 40px;
+    }
+    
+    .btn-large {
+        padding: var(--space-md) var(--space-lg);
+        font-size: 1rem;
+        min-height: 48px;
+    }
+}
+
+@media (max-width: 480px) {
+    .btn {
+        font-size: 0.8125rem;
+        min-height: 36px;
+    }
+
+    .btn i {
+        font-size: 0.875rem;
+    }
+}
+
+/* ===========================
+   Confirm Modal (confirm() replacement)
+   =========================== */
+.confirm-modal-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.5);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 10000;
+    animation: confirmFadeIn 0.2s ease;
+    padding: 20px;
+}
+
+.confirm-modal-overlay.confirm-modal-closing {
+    animation: confirmFadeOut 0.2s ease forwards;
+}
+
+.confirm-modal {
+    background: white;
+    border-radius: 16px;
+    padding: 32px;
+    max-width: 420px;
+    width: 100%;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.15);
+    animation: confirmSlideIn 0.2s ease;
+}
+
+.confirm-modal-closing .confirm-modal {
+    animation: confirmSlideOut 0.2s ease forwards;
+}
+
+.confirm-modal-message {
+    font-size: 1rem;
+    line-height: 1.6;
+    color: #1e293b;
+    margin: 0 0 24px;
+    white-space: pre-line;
+}
+
+.confirm-modal-buttons {
+    display: flex;
+    gap: 12px;
+    justify-content: flex-end;
+}
+
+.confirm-modal-buttons .btn {
+    min-width: 100px;
+}
+
+.confirm-modal-danger {
+    background: #ef4444;
+    color: white;
+    border: 2px solid #ef4444;
+}
+
+.confirm-modal-danger:hover {
+    background: #dc2626;
+    border-color: #dc2626;
+}
+
+@keyframes confirmFadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+@keyframes confirmFadeOut {
+    from { opacity: 1; }
+    to { opacity: 0; }
+}
+
+@keyframes confirmSlideIn {
+    from { transform: translateY(-20px) scale(0.95); opacity: 0; }
+    to { transform: translateY(0) scale(1); opacity: 1; }
+}
+
+@keyframes confirmSlideOut {
+    from { transform: translateY(0) scale(1); opacity: 1; }
+    to { transform: translateY(-20px) scale(0.95); opacity: 0; }
+}
+
+@media (max-width: 480px) {
+    .confirm-modal {
+        padding: 24px;
+    }
+
+    .confirm-modal-buttons {
+        flex-direction: column-reverse;
+    }
+
+    .confirm-modal-buttons .btn {
+        width: 100%;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .confirm-modal-overlay,
+    .confirm-modal-overlay.confirm-modal-closing,
+    .confirm-modal,
+    .confirm-modal-closing .confirm-modal {
+        animation: none;
+    }
+}

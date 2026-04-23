@@ -10,6 +10,14 @@ const nextConfig: NextConfig = {
       },
     ],
   },
+  async rewrites() {
+    return [
+      {
+        source: "/",
+        destination: "/lp/index.html",
+      },
+    ];
+  },
 };
 
 export default nextConfig;

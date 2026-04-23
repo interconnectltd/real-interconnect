@@ -1,0 +1,390 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <link rel="icon" type="image/svg+xml" href="favicon.svg">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>紹介プログラム管理 - INTERCONNECT Admin</title>
+    
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Noto+Sans+JP:wght@300;400;500;700&display=swap" rel="stylesheet">
+    
+    <!-- Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" integrity="sha384-iw3OoTErCYJJB9mCa8LNS2hbsQ7M3C0EpIsO/H5+EGAkPGc6rk+V8i04oW/K5xq0" crossorigin="anonymous">
+    
+    <!-- Styles -->
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/dashboard.css">
+    <link rel="stylesheet" href="css/admin.css">
+</head>
+<body>
+    <!-- 管理者認証ガード -->
+    <script>
+    (async function() {
+        function waitForClient() {
+            return new Promise(function(resolve) {
+                if (window.supabaseClient) return resolve(window.supabaseClient);
+                var interval = setInterval(function() {
+                    if (window.supabaseClient) { clearInterval(interval); resolve(window.supabaseClient); }
+                }, 100);
+                setTimeout(function() { clearInterval(interval); resolve(null); }, 5000);
+            });
+        }
+        var client = await waitForClient();
+        if (!client) { window.location.href = 'login.html'; return; }
+        try {
+            var result = await client.auth.getUser();
+            var user = result.data && result.data.user;
+            if (!user) { window.location.href = 'login.html'; return; }
+            var profileResult = await client.from('user_profiles').select('is_admin').eq('id', user.id).maybeSingle();
+            if (!profileResult.data || !profileResult.data.is_admin) {
+                window.location.href = 'dashboard.html';
+                return;
+            }
+        } catch (e) { window.location.href = 'login.html'; return; }
+        document.body.style.visibility = 'visible';
+    })();
+    </script>
+    <style>body { visibility: hidden; }</style>
+
+    <div class="admin-dashboard">
+        <!-- サイドバー -->
+        <aside class="admin-sidebar">
+            <div class="sidebar-header">
+                <h1>INTERCONNECT Admin</h1>
+            </div>
+            
+            <nav class="sidebar-nav">
+                <ul>
+                    <li>
+                        <a href="admin.html#dashboard" class="sidebar-link">
+                            <i class="fas fa-tachometer-alt"></i>
+                            <span>ダッシュボード</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="admin.html#users" class="sidebar-link">
+                            <i class="fas fa-users"></i>
+                            <span>ユーザー管理</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="admin-referral.html" class="sidebar-link active">
+                            <i class="fas fa-user-plus"></i>
+                            <span>紹介プログラム</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="admin.html#events" class="sidebar-link">
+                            <i class="fas fa-calendar-alt"></i>
+                            <span>イベント管理</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="admin.html#reports" class="sidebar-link">
+                            <i class="fas fa-chart-line"></i>
+                            <span>レポート</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="admin.html#settings" class="sidebar-link">
+                            <i class="fas fa-cog"></i>
+                            <span>設定</span>
+                        </a>
+                    </li>
+                </ul>
+            </nav>
+            
+            <div class="sidebar-footer">
+                <a href="#" class="sidebar-link" onclick="adminLogout(); return false;">
+                    <i class="fas fa-sign-out-alt"></i>
+                    <span>ログアウト</span>
+                </a>
+            </div>
+        </aside>
+        
+        <!-- メインコンテンツ -->
+        <main class="admin-main">
+            <header class="admin-header">
+                <h1>紹介プログラム管理</h1>
+                <div class="header-actions">
+                    <button class="btn btn-secondary" onclick="exportReferralData()">
+                        <i class="fas fa-download"></i> データエクスポート
+                    </button>
+                    <button class="btn btn-primary" onclick="openRewardSettings()">
+                        <i class="fas fa-cog"></i> 報酬設定
+                    </button>
+                </div>
+            </header>
+            
+            <!-- 統計サマリー -->
+            <section class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-icon">
+                        <i class="fas fa-users"></i>
+                    </div>
+                    <div class="stat-content">
+                        <div class="stat-value" id="total-referrers">0</div>
+                        <div class="stat-label">紹介者数</div>
+                    </div>
+                </div>
+                
+                <div class="stat-card">
+                    <div class="stat-icon">
+                        <i class="fas fa-user-check"></i>
+                    </div>
+                    <div class="stat-content">
+                        <div class="stat-value" id="successful-referrals">0</div>
+                        <div class="stat-label">成功した紹介</div>
+                    </div>
+                </div>
+                
+                <div class="stat-card">
+                    <div class="stat-icon">
+                        <i class="fas fa-coins"></i>
+                    </div>
+                    <div class="stat-content">
+                        <div class="stat-value" id="total-rewards">0</div>
+                        <div class="stat-label">総報酬額</div>
+                    </div>
+                </div>
+                
+                <div class="stat-card warning">
+                    <div class="stat-icon">
+                        <i class="fas fa-exclamation-triangle"></i>
+                    </div>
+                    <div class="stat-content">
+                        <div class="stat-value" id="suspicious-users">0</div>
+                        <div class="stat-label">要確認ユーザー</div>
+                    </div>
+                </div>
+            </section>
+            
+            <!-- タブナビゲーション -->
+            <div class="tab-navigation">
+                <button class="tab-button active" data-tab="overview">概要</button>
+                <button class="tab-button" data-tab="referrals">紹介一覧</button>
+                <button class="tab-button" data-tab="cashouts">キャッシュアウト</button>
+                <button class="tab-button" data-tab="fraud">不正検知</button>
+                <button class="tab-button" data-tab="analytics">分析</button>
+            </div>
+            
+            <!-- タブコンテンツ -->
+            <div class="tab-content">
+                <!-- 概要タブ -->
+                <div class="tab-pane active" id="overview-tab">
+                    <!-- 最新の紹介活動 -->
+                    <section class="content-card">
+                        <h2>最新の紹介活動</h2>
+                        <div class="activity-list" id="recent-activity">
+                            <div class="loading-spinner">
+                                <i class="fas fa-spinner fa-spin"></i>
+                                <p>データを読み込み中...</p>
+                            </div>
+                        </div>
+                    </section>
+                    
+                    <!-- トップ紹介者 -->
+                    <section class="content-card">
+                        <h2>トップ紹介者</h2>
+                        <div class="top-referrers-list" id="top-referrers">
+                            <div class="loading-spinner">
+                                <i class="fas fa-spinner fa-spin"></i>
+                                <p>データを読み込み中...</p>
+                            </div>
+                        </div>
+                    </section>
+                </div>
+                
+                <!-- 紹介一覧タブ -->
+                <div class="tab-pane" id="referrals-tab">
+                    <section class="content-card">
+                        <div class="card-header">
+                            <h2>紹介一覧</h2>
+                            <div class="filters">
+                                <select id="referral-status-filter">
+                                    <option value="">すべてのステータス</option>
+                                    <option value="pending">招待中</option>
+                                    <option value="registered">登録済み</option>
+                                    <option value="completed">会議完了</option>
+                                    <option value="cancelled">キャンセル</option>
+                                </select>
+                                <input type="text" id="referral-search" placeholder="検索...">
+                            </div>
+                        </div>
+                        
+                        <div class="table-responsive">
+                            <table class="data-table" id="referrals-table">
+                                <thead>
+                                    <tr>
+                                        <th>日時</th>
+                                        <th>紹介者</th>
+                                        <th>被紹介者</th>
+                                        <th>ステータス</th>
+                                        <th>報酬</th>
+                                        <th>アクション</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <!-- データは動的に挿入 -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </section>
+                </div>
+                
+                <!-- キャッシュアウトタブ -->
+                <div class="tab-pane" id="cashouts-tab">
+                    <section class="content-card">
+                        <div class="card-header">
+                            <h2>キャッシュアウト申請</h2>
+                            <div class="filters">
+                                <select id="cashout-status-filter">
+                                    <option value="">すべてのステータス</option>
+                                    <option value="pending">申請中</option>
+                                    <option value="approved">承認済み</option>
+                                    <option value="processing">処理中</option>
+                                    <option value="completed">完了</option>
+                                    <option value="rejected">却下</option>
+                                </select>
+                            </div>
+                        </div>
+                        
+                        <div class="table-responsive">
+                            <table class="data-table" id="cashouts-table">
+                                <thead>
+                                    <tr>
+                                        <th>申請日</th>
+                                        <th>申請者</th>
+                                        <th>金額</th>
+                                        <th>源泉徴収</th>
+                                        <th>振込額</th>
+                                        <th>ステータス</th>
+                                        <th>アクション</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <!-- データは動的に挿入 -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </section>
+                </div>
+                
+                <!-- 不正検知タブ -->
+                <div class="tab-pane" id="fraud-tab">
+                    <section class="content-card">
+                        <h2>不正の可能性があるアクティビティ</h2>
+                        
+                        <!-- フィルター -->
+                        <div class="fraud-filters">
+                            <select id="fraud-severity-filter">
+                                <option value="">すべての重要度</option>
+                                <option value="high">高</option>
+                                <option value="medium">中</option>
+                                <option value="low">低</option>
+                            </select>
+                            <select id="fraud-type-filter">
+                                <option value="">すべてのタイプ</option>
+                                <option value="duplicate_ip">重複IP</option>
+                                <option value="rapid_registration">大量登録</option>
+                                <option value="suspicious_pattern">不審なパターン</option>
+                            </select>
+                        </div>
+                        
+                        <!-- 不正フラグリスト -->
+                        <div class="fraud-flags-list" id="fraud-flags">
+                            <div class="loading-spinner">
+                                <i class="fas fa-spinner fa-spin"></i>
+                                <p>データを読み込み中...</p>
+                            </div>
+                        </div>
+                    </section>
+                    
+                    <!-- IP統計 -->
+                    <section class="content-card">
+                        <h2>IP別登録統計</h2>
+                        <div class="ip-stats-list" id="ip-stats">
+                            <div class="loading-spinner">
+                                <i class="fas fa-spinner fa-spin"></i>
+                                <p>データを読み込み中...</p>
+                            </div>
+                        </div>
+                    </section>
+                </div>
+                
+                <!-- 分析タブ -->
+                <div class="tab-pane" id="analytics-tab">
+                    <section class="content-card">
+                        <h2>紹介プログラム分析</h2>
+                        
+                        <!-- 期間選択 -->
+                        <div class="date-range-selector">
+                            <input type="date" id="analytics-start-date">
+                            <span>〜</span>
+                            <input type="date" id="analytics-end-date">
+                            <button class="btn btn-primary" onclick="updateAnalytics()">更新</button>
+                        </div>
+                        
+                        <!-- チャート -->
+                        <div class="charts-grid">
+                            <div class="chart-container">
+                                <h3>紹介数推移</h3>
+                                <canvas id="referrals-chart"></canvas>
+                            </div>
+                            <div class="chart-container">
+                                <h3>報酬額推移</h3>
+                                <canvas id="rewards-chart"></canvas>
+                            </div>
+                            <div class="chart-container">
+                                <h3>成功率推移</h3>
+                                <canvas id="success-rate-chart"></canvas>
+                            </div>
+                            <div class="chart-container">
+                                <h3>ユーザー別分布</h3>
+                                <canvas id="distribution-chart"></canvas>
+                            </div>
+                        </div>
+                    </section>
+                </div>
+            </div>
+        </main>
+    </div>
+    
+    <!-- モーダル -->
+    <!-- 詳細モーダル -->
+    <div class="modal" id="detail-modal">
+        <div class="modal-overlay"></div>
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 id="modal-title">詳細情報</h2>
+                <button class="modal-close">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="modal-body" id="modal-body">
+                <!-- 動的コンテンツ -->
+            </div>
+            <div class="modal-footer" id="modal-footer">
+                <!-- 動的アクション -->
+            </div>
+        </div>
+    </div>
+    
+    <!-- スクリプト -->
+    <script src="js/supabase-unified.js?v=1.1"></script>
+    <script src="js/core-utils.js"></script>
+    <script src="js/global-functions.js"></script>
+    <script src="js/profile-sync.js"></script>
+    <script src="js/notification-system-unified.js"></script>
+    <script src="js/notifications-realtime-unified.js"></script>
+    <script src="js/responsive-menu-simple.js"></script>
+    <script src="js/dashboard.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.js" integrity="sha384-FcQlsUOd0TJjROrBxhJdUhXTUgNJQxTMcxZe6nHbaEfFL1zjQ+bq/uRoBQxb0KMo" crossorigin="anonymous"></script>
+    <script src="js/admin-referral-bundle.js"></script>
+    <script src="js/user-dropdown-handler.js"></script>
+    <script src="js/avatar-size-enforcer.js"></script>
+</body>
+</html>

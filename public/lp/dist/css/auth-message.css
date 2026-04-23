@@ -1,0 +1,89 @@
+/**
+ * Auth Message Styles
+ * 認証ページのメッセージスタイル
+ */
+
+.auth-description {
+    text-align: center;
+    margin-bottom: 2rem;
+    color: var(--text-secondary);
+}
+
+.auth-description p {
+    margin: 0.5rem 0;
+    font-size: 0.95rem;
+    line-height: 1.6;
+}
+
+.auth-message {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 1rem;
+    margin: 1rem 0;
+    border-radius: 8px;
+    background: #e3f2fd;
+    border: 1px solid #90caf9;
+    color: #1565c0;
+    font-size: 0.95rem;
+    line-height: 1.5;
+    animation: slideDown 0.3s ease-out;
+}
+
+.auth-message i {
+    font-size: 1.25rem;
+    flex-shrink: 0;
+}
+
+.auth-message.error {
+    background: #ffebee;
+    border-color: #ef9a9a;
+    color: #c62828;
+}
+
+.auth-message.success {
+    background: #e8f5e9;
+    border-color: #a5d6a7;
+    color: #2e7d32;
+}
+
+.auth-message.warning {
+    background: #fff3e0;
+    border-color: #ffcc80;
+    color: #ef6c00;
+}
+
+@keyframes slideDown {
+    from {
+        opacity: 0;
+        transform: translateY(-10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* ローディングアイコンのアニメーション */
+.fa-spin {
+    animation: fa-spin 1s infinite linear;
+}
+
+@keyframes fa-spin {
+    0% {
+        transform: rotate(0deg);
+    }
+    100% {
+        transform: rotate(360deg);
+    }
+}
+
+/* ボタン内のローディング状態 */
+.auth-button:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+.auth-button i {
+    margin-left: 0.5rem;
+}

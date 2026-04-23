@@ -1,0 +1,34 @@
+<!-- 統一版 Header-Right コンポーネント -->
+<!-- 全ページで使用する正式版 -->
+<div class="header-right">
+    <div class="user-menu">
+        <div class="notification-wrapper">
+            <button class="notification-btn" aria-label="通知">
+                <i class="fas fa-bell"></i>
+                <span class="notification-badge" style="display:none;">0</span>
+            </button>
+            <div class="notification-dropdown">
+                <div class="notification-header">
+                    <h3>通知</h3>
+                    <button class="mark-all-read">すべて既読にする</button>
+                </div>
+                <div class="notification-list">
+                    <div class="empty-notifications">
+                        <i class="fas fa-bell-slash"></i>
+                        <p>新しい通知はありません</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="user-profile">
+            <img src="assets/default-avatar.svg" alt="User Avatar" class="user-avatar">
+            <span class="user-name">ゲスト</span>
+            <i class="fas fa-chevron-down"></i>
+            <div class="user-dropdown">
+                <a href="profile.html"><i class="fas fa-user"></i> プロフィール</a>
+                <a href="settings.html"><i class="fas fa-cog"></i> 設定</a>
+                <a href="#" id="logoutBtn"><i class="fas fa-sign-out-alt"></i> ログアウト</a>
+            </div>
+        </div>
+    </div>
+</div>

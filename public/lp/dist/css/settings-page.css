@@ -1,0 +1,1204 @@
+/* ============================================================ */
+/* Settings Page Bundle                                        */
+/* Consolidated from: settings.css, toggle-unified.css         */
+/* ============================================================ */
+
+/* ============================================================ */
+/* Source: settings.css                                        */
+/* ============================================================ */
+
+/* ===========================
+   Settings Page Styles
+   =========================== */
+
+/* Settings Container */
+.settings-container {
+    max-width: 1000px;
+    margin: 0 auto;
+}
+
+/* Settings Navigation */
+.settings-nav {
+    background: white;
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-sm);
+    padding: var(--space-md);
+    margin-bottom: var(--space-xl);
+    overflow-x: auto;
+}
+
+.settings-nav-list {
+    display: flex;
+    gap: var(--space-md);
+    list-style: none;
+    min-width: max-content;
+}
+
+.settings-nav-item {
+    flex-shrink: 0;
+}
+
+.settings-nav-link {
+    display: flex;
+    align-items: center;
+    gap: var(--space-sm);
+    padding: var(--space-sm) var(--space-lg);
+    color: var(--text-secondary);
+    font-weight: 500;
+    border-radius: var(--radius-md);
+    transition: var(--transition-base);
+    white-space: nowrap;
+}
+
+.settings-nav-link:hover {
+    background: var(--bg-secondary);
+    color: var(--text-primary);
+}
+
+.settings-nav-link.active {
+    background: var(--primary-light);
+    color: var(--primary-color);
+}
+
+.settings-nav-link i {
+    width: 20px;
+    text-align: center;
+}
+
+/* Settings Content */
+.settings-content {
+    background: white;
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-sm);
+    padding: var(--space-xl);
+}
+
+.settings-section {
+    margin-bottom: var(--space-2xl);
+}
+
+.settings-section:last-child {
+    margin-bottom: 0;
+}
+
+.section-header {
+    margin-bottom: var(--space-lg);
+}
+
+.section-title {
+    font-size: 1.25rem;
+    font-weight: 600;
+    color: var(--text-primary);
+    margin-bottom: var(--space-sm);
+}
+
+.section-description {
+    color: var(--text-secondary);
+}
+
+/* Form Elements */
+.form-group {
+    margin-bottom: var(--space-lg);
+}
+
+.form-label {
+    display: block;
+    font-weight: 500;
+    color: var(--text-primary);
+    margin-bottom: var(--space-sm);
+}
+
+.form-label.required::after {
+    content: ' *';
+    color: var(--accent-color);
+}
+
+.form-input,
+.form-select,
+.form-textarea {
+    width: 100%;
+    padding: var(--space-md);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-md);
+    font-size: 1rem;
+    transition: var(--transition-base);
+}
+
+.form-input:focus,
+.form-select:focus,
+.form-textarea:focus {
+    outline: none;
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 3px var(--primary-light);
+}
+
+.form-textarea {
+    min-height: 120px;
+    resize: vertical;
+}
+
+.form-help {
+    font-size: 0.875rem;
+    color: var(--text-secondary);
+    margin-top: var(--space-xs);
+}
+
+.form-error {
+    font-size: 0.875rem;
+    color: var(--accent-color);
+    margin-top: var(--space-xs);
+}
+
+/* Two Column Form */
+.form-row {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: var(--space-lg);
+}
+
+/* Checkbox and Radio */
+.form-checkbox,
+.form-radio {
+    display: flex;
+    align-items: flex-start;
+    gap: var(--space-sm);
+    margin-bottom: var(--space-md);
+}
+
+.form-checkbox input[type="checkbox"],
+.form-radio input[type="radio"] {
+    width: 20px;
+    height: 20px;
+    margin-top: 2px;
+    cursor: pointer;
+}
+
+.form-checkbox label,
+.form-radio label {
+    cursor: pointer;
+    flex: 1;
+}
+
+/* Toggle Settings */
+.toggle-setting {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: var(--space-lg) 0;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.toggle-setting:last-child {
+    border-bottom: none;
+}
+
+.toggle-info {
+    flex: 1;
+    margin-right: var(--space-lg);
+}
+
+.toggle-label {
+    font-weight: 500;
+    color: var(--text-primary);
+    margin-bottom: var(--space-xs);
+}
+
+.toggle-description {
+    font-size: 0.875rem;
+    color: var(--text-secondary);
+}
+
+/* Toggle Switch */
+.toggle-switch {
+    position: relative;
+    width: 50px;
+    height: 26px;
+    background: var(--border-color);
+    border-radius: var(--radius-full);
+    cursor: pointer;
+    transition: var(--transition-base);
+}
+
+.toggle-switch.active {
+    background: var(--primary-color);
+}
+
+.toggle-switch::after {
+    content: '';
+    position: absolute;
+    top: 3px;
+    left: 3px;
+    width: 20px;
+    height: 20px;
+    background: white;
+    border-radius: var(--radius-full);
+    transition: var(--transition-base);
+}
+
+.toggle-switch.active::after {
+    transform: translateX(24px);
+}
+
+/* Password Change */
+.password-requirements {
+    background: var(--bg-secondary);
+    border-radius: var(--radius-md);
+    padding: var(--space-md);
+    margin-top: var(--space-md);
+}
+
+.password-requirements h4 {
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: var(--text-primary);
+    margin-bottom: var(--space-sm);
+}
+
+.requirement-list {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-xs);
+    font-size: 0.875rem;
+    color: var(--text-secondary);
+}
+
+.requirement-item {
+    display: flex;
+    align-items: center;
+    gap: var(--space-sm);
+}
+
+.requirement-item i {
+    width: 16px;
+    color: var(--secondary-color);
+}
+
+/* Danger Zone */
+.danger-zone {
+    background: #fee;
+    border: 1px solid #fcc;
+    border-radius: var(--radius-lg);
+    padding: var(--space-xl);
+}
+
+.danger-zone .section-title {
+    color: #e11;
+}
+
+.danger-zone .btn-danger {
+    background: #e11;
+    color: white;
+}
+
+.danger-zone .btn-danger:hover {
+    background: #c00;
+}
+
+/* Action Buttons */
+.form-actions {
+    display: flex;
+    gap: var(--space-md);
+    margin-top: var(--space-xl);
+    padding-top: var(--space-xl);
+    border-top: 1px solid var(--border-color);
+}
+
+.btn-save {
+    background: var(--primary-color);
+    color: white;
+}
+
+.btn-save:hover {
+    background: var(--primary-dark);
+}
+
+.btn-cancel {
+    background: white;
+    border: 1px solid var(--border-color);
+    color: var(--text-secondary);
+}
+
+.btn-cancel:hover {
+    background: var(--bg-secondary);
+}
+
+/* Success Message */
+.success-message {
+    background: var(--secondary-light);
+    color: var(--secondary-color);
+    padding: var(--space-md);
+    border-radius: var(--radius-md);
+    margin-bottom: var(--space-lg);
+    display: flex;
+    align-items: center;
+    gap: var(--space-sm);
+}
+
+.success-message i {
+    font-size: 1.25rem;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .settings-content {
+        padding: var(--space-lg);
+    }
+    
+    .form-row {
+        grid-template-columns: 1fr;
+    }
+    
+    .toggle-setting {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: var(--space-md);
+    }
+    
+    .toggle-info {
+        margin-right: 0;
+    }
+    
+    .form-actions {
+        flex-direction: column;
+    }
+    
+    .form-actions .btn {
+        width: 100%;
+    }
+}
+
+@media (max-width: 480px) {
+    .settings-nav {
+        padding: var(--space-sm);
+    }
+    
+    .settings-nav-list {
+        gap: var(--space-sm);
+    }
+    
+    .settings-nav-link {
+        padding: var(--space-sm) var(--space-md);
+        font-size: 0.875rem;
+    }
+    
+    .settings-content {
+        padding: var(--space-md);
+    }
+    
+    .section-title {
+        font-size: 1.125rem;
+    }
+}
+
+/* ============================================================ */
+/* Source: settings-enhanced.css                                  */
+/* ============================================================ */
+
+/* Enhanced Navigation Design */
+.settings-nav {
+    background: linear-gradient(135deg, #f8f9fa 0%, #ffffff 100%);
+    border-radius: 16px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+    padding: 8px;
+    margin-bottom: 32px;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: thin;
+    scrollbar-color: #e0e0e0 transparent;
+}
+
+.settings-nav::-webkit-scrollbar {
+    height: 6px;
+}
+
+.settings-nav::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+.settings-nav::-webkit-scrollbar-thumb {
+    background: #e0e0e0;
+    border-radius: 3px;
+}
+
+/* Navigation Items Container */
+.settings-nav {
+    display: flex;
+    gap: 4px;
+    list-style: none;
+    min-width: max-content;
+}
+
+/* Navigation Items */
+.settings-nav-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 12px 20px;
+    color: #64748b;
+    font-weight: 500;
+    font-size: 15px;
+    border-radius: 12px;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    white-space: nowrap;
+    text-decoration: none;
+    position: relative;
+    overflow: hidden;
+    background: transparent;
+    border: 2px solid transparent;
+}
+
+/* Hover Effect */
+.settings-nav-item:hover {
+    background: rgba(0, 102, 255, 0.05);
+    color: #0066ff;
+    transform: translateY(-1px);
+}
+
+/* Active State */
+.settings-nav-item.active {
+    background: #0066ff;
+    color: white;
+    box-shadow: 0 4px 16px rgba(0, 102, 255, 0.25);
+}
+
+.settings-nav-item.active i {
+    color: white;
+}
+
+/* Icon Styling */
+.settings-nav-item i {
+    width: 20px;
+    text-align: center;
+    font-size: 18px;
+    transition: all 0.3s ease;
+}
+
+/* Ripple Effect */
+.settings-nav-item::before {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 0;
+    height: 0;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.5);
+    transform: translate(-50%, -50%);
+    transition: width 0.6s, height 0.6s;
+}
+
+.settings-nav-item:active::before {
+    width: 300px;
+    height: 300px;
+}
+
+/* Enhanced Toggle Design */
+.toggle-group {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 20px;
+    background: #f8f9fa;
+    border-radius: 12px;
+    margin-bottom: 16px;
+    transition: all 0.3s ease;
+    border: 2px solid transparent;
+}
+
+.toggle-group:hover {
+    background: #f0f4f8;
+    border-color: #e2e8f0;
+}
+
+/* Toggle Info Section */
+.toggle-info {
+    flex: 1;
+    margin-right: 24px;
+}
+
+.toggle-info strong {
+    display: block;
+    font-size: 16px;
+    font-weight: 600;
+    color: #1e293b;
+    margin-bottom: 4px;
+}
+
+.toggle-info p {
+    font-size: 14px;
+    color: #64748b;
+    margin: 0;
+    line-height: 1.5;
+}
+
+/* Enhanced Toggle Switch */
+.toggle-switch {
+    position: relative;
+    min-width: 56px;
+    height: 32px;
+    flex-shrink: 0;
+}
+
+.toggle-input {
+    opacity: 0;
+    width: 0;
+    height: 0;
+}
+
+.toggle-slider {
+    position: absolute;
+    cursor: pointer;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: #cbd5e1;
+    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    border-radius: 34px;
+    box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.toggle-slider:before {
+    position: absolute;
+    content: "";
+    height: 24px;
+    width: 24px;
+    left: 4px;
+    bottom: 4px;
+    background-color: white;
+    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    border-radius: 50%;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+}
+
+.toggle-input:checked + .toggle-slider {
+    background-color: #0066ff;
+    box-shadow: inset 0 2px 4px rgba(0, 102, 255, 0.2);
+}
+
+.toggle-input:focus + .toggle-slider {
+    box-shadow: 0 0 0 3px rgba(0, 102, 255, 0.2);
+}
+
+.toggle-input:checked + .toggle-slider:before {
+    transform: translateX(24px);
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    /* Navigation becomes scrollable pills */
+    .settings-nav {
+        padding: 6px;
+        margin: 0 -16px 24px -16px;
+        border-radius: 0;
+    }
+
+    .settings-nav-item {
+        padding: 10px 16px;
+        font-size: 14px;
+        min-width: auto;
+    }
+
+    .settings-nav-item i {
+        font-size: 16px;
+    }
+
+    /* Stack toggle content on mobile */
+    .toggle-group {
+        padding: 16px;
+    }
+
+    .toggle-info {
+        margin-right: 16px;
+    }
+
+    .toggle-info strong {
+        font-size: 15px;
+    }
+
+    .toggle-info p {
+        font-size: 13px;
+    }
+
+    /* Smaller toggle switch on mobile */
+    .toggle-switch {
+        min-width: 48px;
+        height: 28px;
+    }
+
+    .toggle-slider:before {
+        height: 20px;
+        width: 20px;
+        left: 4px;
+        bottom: 4px;
+    }
+
+    .toggle-input:checked + .toggle-slider:before {
+        transform: translateX(20px);
+    }
+}
+
+@media (max-width: 480px) {
+    /* Compact navigation on small screens */
+    .settings-nav-item {
+        padding: 8px 12px;
+        gap: 6px;
+    }
+
+    /* Show only icons on very small screens */
+    .settings-nav-item span {
+        display: none;
+    }
+
+    .settings-nav-item i {
+        font-size: 20px;
+    }
+
+    /* Add tooltip on hover for icon-only navigation */
+    .settings-nav-item {
+        position: relative;
+    }
+
+    .settings-nav-item::after {
+        content: attr(data-tooltip);
+        position: absolute;
+        bottom: -30px;
+        left: 50%;
+        transform: translateX(-50%);
+        background: #1e293b;
+        color: white;
+        padding: 4px 8px;
+        border-radius: 4px;
+        font-size: 12px;
+        white-space: nowrap;
+        opacity: 0;
+        pointer-events: none;
+        transition: opacity 0.3s ease;
+    }
+
+    .settings-nav-item:hover::after {
+        opacity: 1;
+    }
+
+    /* Very compact toggle on small screens */
+    .toggle-group {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 12px;
+    }
+
+    .toggle-info {
+        margin-right: 0;
+        width: 100%;
+    }
+
+    .toggle-switch {
+        align-self: flex-end;
+    }
+}
+
+/* Settings Content Card Enhancement */
+.settings-card {
+    background: white;
+    border-radius: 16px;
+    padding: 24px;
+    box-shadow: 0 2px 12px rgba(0, 0, 0, 0.04);
+    border: 1px solid #e2e8f0;
+    margin-bottom: 24px;
+}
+
+.settings-card h3 {
+    font-size: 20px;
+    font-weight: 600;
+    color: #1e293b;
+    margin-bottom: 20px;
+    padding-bottom: 16px;
+    border-bottom: 2px solid #f1f5f9;
+}
+
+/* Form Input Enhancement */
+.form-input:focus,
+.form-select:focus,
+.form-textarea:focus {
+    outline: none;
+    border-color: #0066ff;
+    box-shadow: 0 0 0 4px rgba(0, 102, 255, 0.1);
+}
+
+/* Button Enhancement */
+.btn-save {
+    background: linear-gradient(135deg, #0066ff 0%, #0052cc 100%);
+    box-shadow: 0 4px 12px rgba(0, 102, 255, 0.3);
+    padding: 12px 32px;
+    font-weight: 600;
+}
+
+.btn-save:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(0, 102, 255, 0.4);
+}
+
+/* Loading State for Toggle */
+.toggle-switch.loading .toggle-slider {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+.toggle-switch.loading .toggle-slider:before {
+    animation: pulse 1s infinite;
+}
+
+@keyframes pulse {
+    0% { opacity: 1; }
+    50% { opacity: 0.5; }
+    100% { opacity: 1; }
+}
+
+/* ============================================================ */
+/* Source: settings-responsive-fix.css                            */
+/* ============================================================ */
+
+/* Mobile Header Fix */
+@media (max-width: 1024px) {
+    /* Main content adjustment for mobile header */
+    .main-content {
+        padding-top: 60px; /* Mobile header height */
+    }
+
+    /* Settings container adjustments */
+    .settings-container {
+        padding: var(--space-md);
+    }
+
+    /* Fix navigation overflow */
+    .settings-nav {
+        margin: 0 calc(var(--space-md) * -1);
+        border-radius: 0;
+        padding: var(--space-md) var(--space-md);
+    }
+
+    /* Ensure nav scrolls horizontally */
+    .settings-nav-list {
+        padding-bottom: var(--space-sm);
+    }
+
+    /* Visual scroll indicator */
+    .settings-nav {
+        position: relative;
+    }
+
+    .settings-nav::after {
+        content: '';
+        position: absolute;
+        right: 0;
+        top: 0;
+        bottom: 0;
+        width: 30px;
+        background: linear-gradient(to right, transparent, white);
+        pointer-events: none;
+    }
+}
+
+/* Tablet Specific Fixes */
+@media (min-width: 769px) and (max-width: 1024px) {
+    .settings-container {
+        max-width: 100%;
+        padding: var(--space-lg);
+    }
+}
+
+/* Mobile Specific Fixes */
+@media (max-width: 768px) {
+    /* Fix mobile header spacing */
+    .mobile-header {
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        z-index: 100;
+        background: white;
+        box-shadow: var(--shadow-sm);
+    }
+
+    /* Adjust main content for fixed header */
+    body {
+        padding-top: 60px;
+    }
+
+    /* Fix settings content spacing */
+    .settings-content {
+        margin-bottom: var(--space-xl);
+        border-radius: var(--radius-md);
+    }
+
+    /* Better touch targets for toggles */
+    .toggle-switch {
+        min-width: 50px;
+        min-height: 30px;
+    }
+
+    /* Fix form elements on mobile */
+    .form-input,
+    .form-select,
+    .form-textarea {
+        font-size: 16px; /* Prevent iOS zoom */
+        padding: var(--space-md) var(--space-lg);
+    }
+
+    /* Better spacing for sections */
+    .settings-section {
+        padding-bottom: var(--space-lg);
+        border-bottom: 1px solid var(--border-color);
+    }
+
+    .settings-section:last-child {
+        border-bottom: none;
+        padding-bottom: 0;
+    }
+}
+
+/* Small Mobile Fixes */
+@media (max-width: 480px) {
+    /* Compact mobile header */
+    .mobile-header h1 {
+        font-size: 1.125rem;
+    }
+
+    /* Full width buttons */
+    .btn {
+        width: 100%;
+        justify-content: center;
+    }
+
+    /* Compact form spacing */
+    .form-group {
+        margin-bottom: var(--space-md);
+    }
+
+    /* Settings nav improvements */
+    .settings-nav-link {
+        min-width: 120px;
+        justify-content: center;
+    }
+
+    .settings-nav-link span {
+        display: none; /* Hide text on very small screens */
+    }
+
+    .settings-nav-link i {
+        font-size: 1.125rem;
+    }
+
+    /* Show active state more clearly */
+    .settings-nav-link.active {
+        box-shadow: inset 0 -3px 0 var(--primary-color);
+        background: transparent;
+        border-radius: 0;
+    }
+}
+
+/* Fix sidebar visibility on desktop */
+@media (min-width: 1025px) {
+    .mobile-header,
+    .mobile-nav,
+    .mobile-backdrop {
+        display: none !important;
+    }
+
+    /* Ensure sidebar is visible */
+    .sidebar {
+        display: block !important;
+        position: fixed;
+        left: 0;
+        top: 0;
+        bottom: 0;
+        width: 250px;
+        transform: translateX(0) !important;
+    }
+
+    /* Adjust main content for sidebar */
+    .main-content {
+        margin-left: 250px;
+        padding-top: 0;
+    }
+}
+
+/* Animation improvements */
+@media (prefers-reduced-motion: reduce) {
+    .toggle-switch,
+    .toggle-switch::after,
+    .settings-nav-link,
+    .form-input,
+    .form-select,
+    .form-textarea {
+        transition: none !important;
+    }
+}
+
+/* Dark mode support */
+@media (prefers-color-scheme: dark) {
+    .settings-content,
+    .settings-nav {
+        background: #1a1a1a;
+        color: #e0e0e0;
+    }
+
+    .form-input,
+    .form-select,
+    .form-textarea {
+        background: #2a2a2a;
+        border-color: #3a3a3a;
+        color: #e0e0e0;
+    }
+
+    .toggle-switch {
+        background: #3a3a3a;
+    }
+
+    .danger-zone {
+        background: #2a1a1a;
+        border-color: #4a2a2a;
+    }
+}
+/* ============================================================ */
+/* Source: toggle-unified.css                                  */
+/* ============================================================ */
+
+/* ===========================
+   Unified Toggle Switch Component
+   すべてのトグルスイッチの統一スタイル
+   =========================== */
+
+/* Base Toggle Container */
+.toggle-group {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 20px;
+    background: #f8f9fa;
+    border-radius: 12px;
+    margin-bottom: 16px;
+    transition: all 0.3s ease;
+    border: 2px solid transparent;
+}
+
+.toggle-group:hover {
+    background: #f0f4f8;
+    border-color: #e2e8f0;
+}
+
+/* Toggle Info Section */
+.toggle-info {
+    flex: 1;
+    margin-right: 24px;
+}
+
+.toggle-info strong {
+    display: block;
+    font-size: 16px;
+    font-weight: 600;
+    color: #1e293b;
+    margin-bottom: 4px;
+}
+
+.toggle-info p {
+    font-size: 14px;
+    color: #64748b;
+    margin: 0;
+    line-height: 1.5;
+}
+
+/* Toggle Switch Container - 統一版 */
+.toggle-switch {
+    position: relative;
+    display: inline-block;
+    min-width: 56px;
+    height: 32px;
+    flex-shrink: 0;
+}
+
+/* Hide default checkbox */
+.toggle-switch input[type="checkbox"],
+.toggle-input {
+    position: absolute;
+    opacity: 0;
+    width: 0;
+    height: 0;
+    pointer-events: none;
+}
+
+/* Toggle Slider Track */
+.toggle-slider {
+    position: absolute;
+    cursor: pointer;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: #cbd5e1;
+    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    border-radius: 34px;
+    box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+/* Toggle Slider Circle - 単一の丸のみ */
+.toggle-slider::before {
+    position: absolute;
+    content: "";
+    height: 24px;
+    width: 24px;
+    left: 4px;
+    bottom: 4px;
+    background-color: white;
+    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    border-radius: 50%;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+}
+
+/* Active State */
+.toggle-input:checked + .toggle-slider,
+.toggle-switch input:checked + .toggle-slider {
+    background-color: #0066ff;
+    box-shadow: inset 0 2px 4px rgba(0, 102, 255, 0.2);
+}
+
+/* Move circle when checked */
+.toggle-input:checked + .toggle-slider::before,
+.toggle-switch input:checked + .toggle-slider::before {
+    transform: translateX(24px);
+}
+
+/* Focus State */
+.toggle-input:focus + .toggle-slider,
+.toggle-switch input:focus + .toggle-slider {
+    box-shadow: 0 0 0 3px rgba(0, 102, 255, 0.2);
+}
+
+/* Loading State */
+.toggle-switch.loading .toggle-slider {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+.toggle-switch.loading .toggle-slider::before {
+    animation: pulse 1s infinite;
+}
+
+/* Old .active class support (移行用) */
+.toggle-switch.active {
+    /* 空のルール - 新しい実装では不要 */
+}
+
+/* Remove any ::after pseudo elements that might create double circles */
+.toggle-switch::after,
+.toggle-slider::after {
+    display: none !important;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .toggle-group {
+        padding: 16px;
+    }
+    
+    .toggle-info {
+        margin-right: 16px;
+    }
+    
+    .toggle-info strong {
+        font-size: 15px;
+    }
+    
+    .toggle-info p {
+        font-size: 13px;
+    }
+    
+    .toggle-switch {
+        min-width: 48px;
+        height: 28px;
+    }
+    
+    .toggle-slider::before {
+        height: 20px;
+        width: 20px;
+        left: 4px;
+        bottom: 4px;
+    }
+    
+    .toggle-input:checked + .toggle-slider::before,
+    .toggle-switch input:checked + .toggle-slider::before {
+        transform: translateX(20px);
+    }
+}
+
+@media (max-width: 480px) {
+    .toggle-group {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 12px;
+    }
+    
+    .toggle-info {
+        margin-right: 0;
+        width: 100%;
+    }
+    
+    .toggle-switch {
+        align-self: flex-end;
+    }
+}
+
+/* Animation */
+@keyframes pulse {
+    0% { opacity: 1; }
+    50% { opacity: 0.5; }
+    100% { opacity: 1; }
+}
+
+/* Accessibility */
+.toggle-switch:focus-within {
+    outline: 2px solid #0066ff;
+    outline-offset: 2px;
+}
+
+/* Disabled State */
+.toggle-switch.disabled,
+.toggle-switch[disabled] {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.toggle-switch.disabled .toggle-slider,
+.toggle-switch[disabled] .toggle-slider {
+    cursor: not-allowed;
+}
+
+/* Dark Mode Support */
+@media (prefers-color-scheme: dark) {
+    .toggle-group {
+        background: #1a1a1a;
+        border-color: #2a2a2a;
+    }
+    
+    .toggle-group:hover {
+        background: #2a2a2a;
+        border-color: #3a3a3a;
+    }
+    
+    .toggle-info strong {
+        color: #e0e0e0;
+    }
+    
+    .toggle-info p {
+        color: #a0a0a0;
+    }
+    
+    .toggle-slider {
+        background-color: #4a4a4a;
+    }
+    
+    .toggle-input:checked + .toggle-slider,
+    .toggle-switch input:checked + .toggle-slider {
+        background-color: #0066ff;
+    }
+}

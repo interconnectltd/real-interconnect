@@ -1,0 +1,28 @@
+# Supabase Project Configuration
+
+[api]
+enabled = true
+port = 54321
+schemas = ["public", "storage", "graphql_public"]
+extra_search_path = ["extensions"]
+max_rows = 1000
+
+[db]
+port = 54322
+
+[storage]
+enabled = true
+file_size_limit = 52428800
+
+[auth]
+enable_signup = true
+jwt_expiry = 3600
+
+[auth.external.github]
+enabled = true
+client_id = "YOUR_GITHUB_CLIENT_ID"
+secret = "YOUR_GITHUB_SECRET"
+
+[studio]
+enabled = true
+port = 54323

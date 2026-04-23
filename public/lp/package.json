@@ -1,0 +1,31 @@
+{
+  "name": "interconnect-project",
+  "version": "1.0.0",
+  "description": "INTERCONNECT - Member Management Web Application",
+  "main": "index.html",
+  "scripts": {
+    "dev": "netlify dev",
+    "build": "echo 'No build step required for static site'",
+    "test": "echo 'No tests configured yet'"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/interconnectltd/interconnect-system.git"
+  },
+  "keywords": [
+    "member-management",
+    "dashboard",
+    "supabase",
+    "netlify"
+  ],
+  "author": "Your Name",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/interconnectltd/interconnect-system/issues"
+  },
+  "homepage": "https://github.com/interconnectltd/interconnect-system#readme",
+  "devDependencies": {
+    "netlify-cli": "^15.0.0"
+  },
+  "dependencies": {}
+}

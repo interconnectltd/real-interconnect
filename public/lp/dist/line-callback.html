@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <link rel="icon" type="image/svg+xml" href="favicon.svg">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LINE認証中 - INTERCONNECT</title>
+    
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Noto+Sans+JP:wght@300;400;500;700&display=swap" rel="stylesheet">
+    
+    <!-- Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" integrity="sha384-iw3OoTErCYJJB9mCa8LNS2hbsQ7M3C0EpIsO/H5+EGAkPGc6rk+V8i04oW/K5xq0" crossorigin="anonymous">
+    
+    <!-- Styles -->
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/auth-unified.css">
+    
+    <link rel="stylesheet" href="css/line-callback.css">
+</head>
+<body>
+    <div class="callback-container">
+        <div class="callback-card">
+            <i class="fab fa-line callback-icon"></i>
+            <h2 class="callback-title">LINE認証処理中</h2>
+            <p class="callback-message">しばらくお待ちください...</p>
+            <div id="errorMessage" class="error-message"></div>
+        </div>
+    </div>
+    
+    <!-- Scripts -->
+    <script>
+        // Supabaseが準備できるまで待つ
+        window.addEventListener('supabaseReady', function() {
+            console.log('📍 supabaseReady event fired in line-callback.html');
+            handleLineCallback();
+        });
+        
+        // フォールバック：Supabaseが既に準備済みの場合
+        if (window.supabase) {
+            console.log('📍 Supabase already ready, calling handleLineCallback');
+            handleLineCallback();
+        }
+        
+        // さらなるフォールバック：DOMContentLoadedで実行
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('📍 DOMContentLoaded in line-callback.html');
+            setTimeout(function() {
+                if (window.supabase && !window._callbackHandled) {
+                    console.log('📍 Fallback: calling handleLineCallback');
+                    handleLineCallback();
+                }
+            }, 1000);
+        });
+        
+        async function handleLineCallback() {
+            // 重複実行を防ぐ
+            if (window._callbackHandled) {
+                console.log('⚠️ Callback already handled, skipping');
+                return;
+            }
+            window._callbackHandled = true;
+            
+            console.log('🚀 handleLineCallback started');
+            
+            const urlParams = new URLSearchParams(window.location.search);
+            const code = urlParams.get('code');
+            const state = urlParams.get('state');
+            const error = urlParams.get('error');
+            const errorDescription = urlParams.get('error_description');
+            
+            console.log('📌 Processing callback with:', {
+                code: code ? code.substring(0, 10) + '...' : null,
+                state: state ? state.substring(0, 10) + '...' : null,
+                error: error
+            });
+            
+            // エラーチェック
+            if (error) {
+                showError(`認証エラー: ${errorDescription || error}`);
+                setTimeout(() => {
+                    window.location.href = 'login.html';
+                }, 3000);
+                return;
+            }
+            
+            // stateチェック（CSRF対策）
+            const savedState = sessionStorage.getItem('line_state');
+            if (!state || state !== savedState) {
+                showError('不正なリクエストです');
+                setTimeout(() => {
+                    window.location.href = 'login.html';
+                }, 3000);
+                return;
+            }
+            
+            // codeが存在しない場合
+            if (!code) {
+                showError('認証コードが取得できませんでした');
+                setTimeout(() => {
+                    window.location.href = 'login.html';
+                }, 3000);
+                return;
+            }
+            
+            try {
+                console.log('📡 Calling Netlify Function...');
+                const apiUrl = '/.netlify/functions/line-auth-simple-v4';
+                const requestBody = {
+                    code: code,
+                    redirect_uri: window.location.origin + '/line-callback.html'
+                };
+                
+                console.log('API URL:', apiUrl);
+                console.log('Request Body:', requestBody);
+                
+                // バックエンドAPIを呼び出してLINE認証を処理（v2を使用）
+                const response = await fetch(apiUrl, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(requestBody)
+                });
+                
+                console.log('📡 Response received:', {
+                    status: response.status,
+                    statusText: response.statusText,
+                    ok: response.ok
+                });
+                
+                if (!response.ok) {
+                    const error = await response.json();
+                    console.error('Auth API Error:', error);
+                    
+                    // エラーメッセージをユーザーフレンドリーに
+                    let userMessage = '認証処理に失敗しました';
+                    if (error.error) {
+                        if (error.error.includes('Database')) {
+                            userMessage = 'データベース接続エラーが発生しました。しばらくしてからお試しください。';
+                        } else if (error.error.includes('token')) {
+                            userMessage = 'LINE認証でエラーが発生しました。もう一度お試しください。';
+                        } else if (error.error.includes('configuration')) {
+                            userMessage = 'サーバー設定エラーが発生しました。管理者にお問い合わせください。';
+                        }
+                    }
+                    
+                    showError(userMessage);
+                    setTimeout(() => {
+                        window.location.href = 'login.html';
+                    }, 5000);
+                    return;
+                }
+                
+                const data = await response.json();
+                console.log('📡 Auth response data:', data);
+
+                // Supabaseセッションを確立（verifyOtp）
+                let sessionEstablished = false;
+                if (data.session && data.session.token_hash && window.supabaseClient) {
+                    try {
+                        const { data: authData, error: authError } = await window.supabaseClient.auth.verifyOtp({
+                            token_hash: data.session.token_hash,
+                            type: 'magiclink'
+                        });
+                        if (authError) {
+                            console.error('Supabase session error:', authError);
+                        } else {
+                            console.log('✅ Supabase session established');
+                            sessionEstablished = true;
+                        }
+                    } catch (sessionErr) {
+                        console.error('Session verification error:', sessionErr);
+                    }
+                } else {
+                    console.warn('⚠️ No session token or Supabase client not ready');
+                }
+
+                if (!sessionEstablished) {
+                    // セッション確立に失敗 → ログイン画面へ戻す
+                    showError('セッションの確立に失敗しました。再度ログインしてください。');
+                    setTimeout(() => {
+                        window.location.href = 'login.html';
+                    }, 3000);
+                    return;
+                }
+
+                // ユーザー情報を保存（セッション確立後のみ）
+                const userData = {
+                    id: data.user.id,
+                    email: data.user.email,
+                    name: data.user.display_name,
+                    display_name: data.user.display_name,
+                    picture: data.user.picture_url,
+                    picture_url: data.user.picture_url,
+                    provider: 'line',
+                    line_user_id: data.user.line_user_id
+                };
+
+                console.log('Saving user data:', userData);
+                localStorage.setItem('user', JSON.stringify(userData));
+
+                // 成功メッセージ
+                const msgEl = document.querySelector('.callback-message');
+                if (msgEl) msgEl.textContent = '認証成功！リダイレクトしています...';
+
+                // 成功アイコンに変更
+                const icon = document.querySelector('.callback-icon');
+                if (icon) {
+                    icon.className = 'fas fa-check-circle callback-icon success';
+                }
+
+                // ダッシュボードへリダイレクト
+                console.log('Redirecting to dashboard...');
+                setTimeout(() => {
+                    window.location.href = data.redirect_to || 'dashboard.html';
+                }, 1000);
+                
+            } catch (err) {
+                console.error('LINE認証エラー:', err);
+                showError('認証処理中にエラーが発生しました');
+                setTimeout(() => {
+                    window.location.href = 'login.html';
+                }, 3000);
+            }
+        }
+        
+        function showError(message) {
+            const errorDiv = document.getElementById('errorMessage');
+            errorDiv.textContent = message;
+            errorDiv.style.display = 'block';
+        }
+    </script>
+    <script src="js/supabase-unified.js?v=1.1"></script>
+</body>
+</html>

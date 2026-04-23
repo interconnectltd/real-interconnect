@@ -1,0 +1,312 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <link rel="icon" type="image/svg+xml" href="favicon.svg">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>メッセージ - INTERCONNECT</title>
+    
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Noto+Sans+JP:wght@300;400;500;700&display=swap" rel="stylesheet">
+    
+    <!-- Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" integrity="sha384-iw3OoTErCYJJB9mCa8LNS2hbsQ7M3C0EpIsO/H5+EGAkPGc6rk+V8i04oW/K5xq0" crossorigin="anonymous">
+    
+    <!-- Styles -->
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/buttons.css">
+    <link rel="stylesheet" href="css/dashboard.css">
+    <!-- ログアウトボタンUI修正 -->
+    <link rel="stylesheet" href="css/logout-button-fix.css">
+    <!-- Messages page bundle (messages + info-card-contrast-fix) -->
+    <link rel="stylesheet" href="css/messages-page.css">
+    <link rel="stylesheet" href="css/notifications.css">
+    <link rel="stylesheet" href="css/responsive-layout.css">
+    <!-- ユーザーメニューCSS（統合済み） -->
+    <link rel="stylesheet" href="css/user-menu.css">
+</head>
+<body>
+    <!-- Mobile Header -->
+    <header class="mobile-header">
+        <button class="mobile-menu-toggle" id="messagesSidebarToggle">
+            <i class="fas fa-bars"></i>
+        </button>
+        <h1>INTERCONNECT</h1>
+        <div class="mobile-header-actions">
+            <a href="notifications.html" class="notification-btn">
+                <i class="fas fa-bell"></i>
+                                <span class="notification-badge" style="display:none;">0</span>
+            </a>
+        </div>
+    </header>
+
+    <!-- Mobile Navigation -->
+    <nav class="mobile-nav">
+        <div class="mobile-nav-header">
+            <h1>INTERCONNECT</h1>
+            <button class="mobile-nav-close">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+        
+        <div class="mobile-nav-menu">
+            <ul>
+                <li>
+                    <a href="dashboard.html" class="mobile-nav-link">
+                        <i class="fas fa-home"></i>
+                        <span>ダッシュボード</span>
+                    </a>
+                </li>
+                <li>
+                    <a href="connections.html" class="mobile-nav-link">
+                            <i class="fas fa-link"></i>
+                            <span>コネクション</span>
+                    </a>
+                </li>
+                <li>
+                    <a href="events.html" class="mobile-nav-link">
+                        <i class="fas fa-calendar-alt"></i>
+                        <span>イベント</span>
+                    </a>
+                </li>
+                <li>
+                    <a href="#" class="mobile-nav-link active">
+                        <i class="fas fa-envelope"></i>
+                        <span>メッセージ</span>
+                    </a>
+                </li>
+                <li>
+                    <a href="matching.html" class="mobile-nav-link">
+                        <i class="fas fa-handshake"></i>
+                        <span>マッチング</span>
+                    </a>
+                </li>
+                <li>
+                    <a href="referral.html" class="mobile-nav-link">
+                        <i class="fas fa-user-plus"></i>
+                        <span>紹介プログラム</span>
+                    </a>
+                </li>
+                <li>
+                    <a href="profile.html" class="mobile-nav-link">
+                        <i class="fas fa-user"></i>
+                        <span>プロフィール</span>
+                    </a>
+                </li>
+                <li>
+                    <a href="settings.html" class="mobile-nav-link">
+                        <i class="fas fa-cog"></i>
+                        <span>設定</span>
+                    </a>
+                </li>
+            </ul>
+        </div>
+        
+        <div class="mobile-nav-footer">
+            <a href="#" class="mobile-nav-link" onclick="logout(); return false;">
+                <i class="fas fa-sign-out-alt"></i>
+                <span>ログアウト</span>
+            </a>
+        </div>
+    </nav>
+    
+    <!-- Mobile Backdrop -->
+    <div class="mobile-backdrop"></div>
+
+    <div class="dashboard">
+        <!-- Sidebar -->
+        <aside class="sidebar" id="messagesSidebar">
+            <div class="sidebar-header">
+                <h1>INTERCONNECT</h1>
+                <button class="sidebar-toggle" id="sidebarToggle" aria-label="メニュー">
+                    <i class="fas fa-bars"></i>
+                </button>
+            </div>
+            
+            <nav class="sidebar-nav">
+                <ul>
+                    <li>
+                        <a href="dashboard.html" class="sidebar-link">
+                            <i class="fas fa-home"></i>
+                            <span>ダッシュボード</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="connections.html" class="sidebar-link">
+                            <i class="fas fa-link"></i>
+                            <span>コネクション</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="events.html" class="sidebar-link">
+                            <i class="fas fa-calendar-alt"></i>
+                            <span>イベント</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="#" class="sidebar-link active">
+                            <i class="fas fa-envelope"></i>
+                            <span>メッセージ</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="matching.html" class="sidebar-link">
+                            <i class="fas fa-handshake"></i>
+                            <span>マッチング</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="referral.html" class="sidebar-link">
+                            <i class="fas fa-user-plus"></i>
+                            <span>紹介プログラム</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="profile.html" class="sidebar-link">
+                            <i class="fas fa-user"></i>
+                            <span>プロフィール</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="settings.html" class="sidebar-link">
+                            <i class="fas fa-cog"></i>
+                            <span>設定</span>
+                        </a>
+                    </li>
+                </ul>
+            </nav>
+            
+            <div class="sidebar-footer">
+                <a href="#" class="sidebar-link" onclick="logout(); return false;">
+                    <i class="fas fa-sign-out-alt"></i>
+                    <span>ログアウト</span>
+                </a>
+            </div>
+        </aside>
+        
+        <!-- Main Content -->
+        <main class="main-content">
+            <!-- Header -->
+            <div class="content-header">
+                <div class="header-left">
+                    <div>
+                        <h1 class="page-title">
+                            <i class="fas fa-envelope"></i>
+                            メッセージ
+                        </h1>
+                        <nav class="breadcrumb">
+                            <a href="dashboard.html">ダッシュボード</a>
+                            <i class="fas fa-chevron-right"></i>
+                            <span>メッセージ</span>
+                        </nav>
+                    </div>
+                </div>
+                <div class="header-right">
+                    <div class="user-menu">
+                        <div class="notification-wrapper">
+                            <button class="notification-btn" aria-label="通知">
+                                <i class="fas fa-bell"></i>
+                                <span class="notification-badge" style="display:none;">0</span>
+                            </button>
+                            <div class="notification-dropdown">
+                                <div class="notification-header">
+                                    <h3>通知</h3>
+                                    <button class="mark-all-read">すべて既読にする</button>
+                                </div>
+                                <div class="notification-list">
+                                    <div class="empty-notifications">
+                                        <i class="fas fa-bell-slash"></i>
+                                        <p>新しい通知はありません</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="user-profile">
+                            <img src="assets/default-avatar.svg" alt="User Avatar" class="user-avatar">
+                            <span class="user-name">ゲスト</span>
+                            <i class="fas fa-chevron-down"></i>
+                            <div class="user-dropdown">
+                                <a href="profile.html"><i class="fas fa-user"></i> プロフィール</a>
+                                <a href="settings.html"><i class="fas fa-cog"></i> 設定</a>
+                                <a href="#" id="logoutBtn"><i class="fas fa-sign-out-alt"></i> ログアウト</a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Chat Content -->
+            <div class="content-container">
+                <div class="chat-container" id="chatContainer">
+                    <!-- 会話リスト -->
+                    <div class="chat-sidebar" id="chatSidebar">
+                        <div class="chat-sidebar-header">
+                            <h3>会話</h3>
+                        </div>
+                        <div class="chat-conversations" id="chatConversations">
+                            <div class="loading-spinner">
+                                <i class="fas fa-spinner fa-spin"></i>
+                                <p>読み込み中...</p>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- メッセージスレッド -->
+                    <div class="chat-main" id="chatMain">
+                        <div class="chat-empty-state" id="chatEmptyState">
+                            <i class="fas fa-comments"></i>
+                            <h3>メッセージを始めましょう</h3>
+                            <p>左の会話リストからコネクション済みのユーザーを選択してください。</p>
+                        </div>
+                        <div class="chat-thread" id="chatThread" style="display:none;">
+                            <div class="chat-thread-header" id="chatThreadHeader">
+                                <button class="chat-back-btn" id="chatBackBtn">
+                                    <i class="fas fa-arrow-left"></i>
+                                </button>
+                                <img src="assets/default-avatar.svg" alt="" class="chat-thread-avatar" id="chatThreadAvatar">
+                                <div class="chat-thread-info">
+                                    <h4 id="chatThreadName">ユーザー名</h4>
+                                    <span id="chatThreadCompany" class="chat-thread-company"></span>
+                                </div>
+                                <a href="#" class="chat-profile-link" id="chatProfileLink" title="プロフィールを見る">
+                                    <i class="fas fa-user"></i>
+                                </a>
+                            </div>
+                            <div class="chat-messages" id="chatMessages">
+                                <div class="loading-spinner">
+                                    <i class="fas fa-spinner fa-spin"></i>
+                                </div>
+                            </div>
+                            <div class="chat-input-area" id="chatInputArea">
+                                <form id="chatForm" class="chat-form">
+                                    <input type="text" id="chatInput" class="chat-input" placeholder="メッセージを入力..." autocomplete="off" maxlength="2000">
+                                    <button type="submit" class="chat-send-btn" id="chatSendBtn" disabled>
+                                        <i class="fas fa-paper-plane"></i>
+                                    </button>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+    
+    <!-- Scripts -->
+    <!-- Core initialization (must be first) -->
+    <script src="js/supabase-unified.js?v=1.1"></script>
+    <script src="js/core-utils.js"></script>
+    <script src="js/global-functions.js"></script>
+    <script src="js/profile-sync.js"></script>
+    <script src="js/notification-system-unified.js"></script>
+    <script src="js/notifications-realtime-unified.js"></script>
+    <script src="js/responsive-menu-simple.js"></script>
+    <script src="js/dashboard.js"></script>
+    <!-- ページ固有 -->
+    <script src="js/messages-bundle.js"></script>
+    <!-- 後処理 -->
+    <script src="js/user-dropdown-handler.js"></script>
+    <script src="js/avatar-size-enforcer.js"></script>
+</body>
+</html>

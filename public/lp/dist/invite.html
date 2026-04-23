@@ -1,0 +1,354 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <link rel="icon" type="image/svg+xml" href="favicon.svg">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>INTERCONNECTへようこそ - 招待</title>
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/buttons.css">
+    <link rel="stylesheet" href="css/auth-unified.css">
+    <link rel="stylesheet" href="css/invite.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" integrity="sha384-iw3OoTErCYJJB9mCa8LNS2hbsQ7M3C0EpIsO/H5+EGAkPGc6rk+V8i04oW/K5xq0" crossorigin="anonymous">
+    <style>
+        .invite-container {
+            max-width: 500px;
+            margin: 0 auto;
+            padding: 2rem;
+            text-align: center;
+        }
+
+        .invite-header {
+            margin-bottom: 3rem;
+        }
+
+        .invite-header h1 {
+            font-size: 2.5rem;
+            color: #1a202c;
+            margin-bottom: 1rem;
+        }
+
+        .invite-info {
+            background: #f7fafc;
+            border-radius: 1rem;
+            padding: 2rem;
+            margin-bottom: 2rem;
+        }
+
+        .inviter-info {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .inviter-avatar {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            background: #667eea;
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            font-weight: bold;
+        }
+
+        .inviter-name {
+            font-size: 1.25rem;
+            font-weight: 600;
+            color: #2d3748;
+        }
+
+        .invite-message {
+            font-size: 1.125rem;
+            color: #4a5568;
+            line-height: 1.6;
+            margin-bottom: 1rem;
+        }
+
+        .invite-code {
+            display: inline-block;
+            background: white;
+            padding: 0.5rem 1rem;
+            border-radius: 0.5rem;
+            font-family: monospace;
+            font-size: 1rem;
+            color: #667eea;
+            border: 1px solid #e2e8f0;
+        }
+
+        .benefits-section {
+            margin: 3rem 0;
+        }
+
+        .benefits-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1.5rem;
+            margin-top: 2rem;
+        }
+
+        .benefit-item {
+            text-align: center;
+        }
+
+        .benefit-icon {
+            width: 60px;
+            height: 60px;
+            margin: 0 auto 1rem;
+            background: #edf2f7;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.75rem;
+            color: #667eea;
+        }
+
+        .benefit-title {
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+            color: #2d3748;
+        }
+
+        .benefit-description {
+            font-size: 0.875rem;
+            color: #718096;
+        }
+
+        .cta-section {
+            margin-top: 3rem;
+        }
+
+        .cta-button {
+            display: inline-block;
+            padding: 1rem 3rem;
+            background: #667eea;
+            color: white;
+            border-radius: 0.5rem;
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 1.125rem;
+            transition: all 0.2s;
+        }
+
+        .cta-button:hover {
+            background: #5a67d8;
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(102, 126, 234, 0.3);
+        }
+
+        .already-member {
+            margin-top: 2rem;
+            color: #718096;
+        }
+
+        .already-member a {
+            color: #667eea;
+            text-decoration: none;
+            font-weight: 500;
+        }
+
+        .already-member a:hover {
+            text-decoration: underline;
+        }
+
+        .error-message {
+            background: #fed7d7;
+            color: #c53030;
+            padding: 1rem;
+            border-radius: 0.5rem;
+            margin-bottom: 2rem;
+            display: none;
+        }
+
+        .loading {
+            display: none;
+            color: #718096;
+            margin: 2rem 0;
+        }
+
+        .loading i {
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+    <div class="auth-container">
+        <div class="auth-box invite-container">
+            <div class="invite-header">
+                <h1>INTERCONNECTへようこそ</h1>
+                <p>ビジネスコミュニティで新しいつながりを</p>
+            </div>
+
+            <div class="error-message" id="error-message"></div>
+            
+            <div class="loading" id="loading">
+                <i class="fas fa-spinner"></i>
+                <p>招待情報を読み込んでいます...</p>
+            </div>
+
+            <div id="invite-content" style="display: none;">
+                <div class="invite-info">
+                    <div class="inviter-info">
+                        <div class="inviter-avatar" id="inviter-avatar">
+                            <i class="fas fa-user"></i>
+                        </div>
+                        <div>
+                            <div class="inviter-name" id="inviter-name">読み込み中...</div>
+                            <div>から招待されています</div>
+                        </div>
+                    </div>
+                    
+                    <p class="invite-message">
+                        INTERCONNECTは、ビジネスプロフェッショナルのための
+                        革新的なネットワーキングプラットフォームです。
+                    </p>
+                    
+                    <div class="invite-code" id="invite-code">招待コード: ----</div>
+                </div>
+
+                <div class="benefits-section">
+                    <h2>INTERCONNECTでできること</h2>
+                    <div class="benefits-grid">
+                        <div class="benefit-item">
+                            <div class="benefit-icon">
+                                <i class="fas fa-users"></i>
+                            </div>
+                            <div class="benefit-title">ネットワーキング</div>
+                            <div class="benefit-description">
+                                同じ志を持つビジネスパーソンとつながる
+                            </div>
+                        </div>
+                        <div class="benefit-item">
+                            <div class="benefit-icon">
+                                <i class="fas fa-calendar-alt"></i>
+                            </div>
+                            <div class="benefit-title">イベント参加</div>
+                            <div class="benefit-description">
+                                限定イベントやセミナーに参加できる
+                            </div>
+                        </div>
+                        <div class="benefit-item">
+                            <div class="benefit-icon">
+                                <i class="fas fa-handshake"></i>
+                            </div>
+                            <div class="benefit-title">マッチング</div>
+                            <div class="benefit-description">
+                                AIが最適なビジネスパートナーを提案
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="cta-section">
+                    <a href="#" id="register-button" class="cta-button">
+                        <i class="fas fa-user-plus"></i> 無料で登録する
+                    </a>
+                    
+                    <div class="already-member">
+                        すでにアカウントをお持ちですか？
+                        <a href="/login.html">ログイン</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.95.3" integrity="sha384-aRAaCbKYByQpx0fjPuC0PQ9P9moWMEsHXP9tyzP7tbyD5fPK6oTp+THsxdWiq02L" crossorigin="anonymous"></script>
+    <script src="js/supabase-unified.js?v=1.1"></script>
+    <script>
+        // supabase-unified.jsの統一クライアントを使用
+        // window.supabaseClientが初期化される
+
+        // URLパラメータから招待コードを取得
+        const pathParts = window.location.pathname.split('/');
+        const inviteCode = pathParts[pathParts.length - 1] || new URLSearchParams(window.location.search).get('code');
+
+        if (!inviteCode) {
+            showError('招待リンクが無効です');
+        } else {
+            // Supabase初期化を待ってから実行
+            (window.waitForSupabase ? window.waitForSupabase() : Promise.resolve())
+                .then(() => loadInviteInfo(inviteCode))
+                .catch(() => showError('初期化に失敗しました'));
+        }
+
+        async function loadInviteInfo(code) {
+            const loading = document.getElementById('loading');
+            const content = document.getElementById('invite-content');
+            
+            loading.style.display = 'block';
+
+            try {
+                // 招待リンク情報を取得
+                const { data: inviteLink, error: linkError } = await supabaseClient
+                    .from('invite_links')
+                    .select(`
+                        *,
+                        creator:profiles!invite_links_created_by_fkey(name, company)
+                    `)
+                    .eq('link_code', code)
+                    .eq('is_active', true)
+                    .maybeSingle();
+
+                if (linkError || !inviteLink) {
+                    throw new Error('招待リンクが見つかりません');
+                }
+
+                // 使用回数チェック
+                if (inviteLink.max_uses && inviteLink.used_count >= inviteLink.max_uses) {
+                    throw new Error('この招待リンクは使用上限に達しています');
+                }
+
+                // 有効期限チェック
+                if (inviteLink.expires_at && new Date(inviteLink.expires_at) < new Date()) {
+                    throw new Error('この招待リンクは有効期限が切れています');
+                }
+
+                // 招待者情報を表示
+                const inviterName = inviteLink.creator?.name || '招待者';
+                document.getElementById('inviter-name').textContent = inviterName;
+                
+                // アバターに頭文字を表示
+                const avatar = document.getElementById('inviter-avatar');
+                if (inviterName && inviterName !== '招待者') {
+                    avatar.textContent = inviterName.charAt(0).toUpperCase();
+                }
+
+                // 招待コードを表示
+                document.getElementById('invite-code').textContent = `招待コード: ${code}`;
+
+                // 登録ボタンに招待コードを設定
+                const registerButton = document.getElementById('register-button');
+                registerButton.href = `/register.html?invite=${code}`;
+
+                // セッションストレージに招待情報を保存
+                sessionStorage.setItem('inviteCode', code);
+                sessionStorage.setItem('inviterId', inviteLink.created_by);
+
+                loading.style.display = 'none';
+                content.style.display = 'block';
+
+            } catch (error) {
+                showError(error.message || '招待情報の読み込みに失敗しました');
+                loading.style.display = 'none';
+            }
+        }
+
+        function showError(message) {
+            const errorElement = document.getElementById('error-message');
+            errorElement.textContent = message;
+            errorElement.style.display = 'block';
+        }
+    </script>
+</body>
+</html>

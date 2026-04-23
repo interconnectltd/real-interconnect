@@ -1,0 +1,753 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>INTERCONNECT システム要件定義書</title>
+    <style>
+        @page {
+            size: A4;
+            margin: 2cm;
+        }
+        body {
+            font-family: 'Noto Sans JP', 'メイリオ', sans-serif;
+            line-height: 1.8;
+            color: #333;
+            max-width: 210mm;
+            margin: 0 auto;
+            padding: 20px;
+            background: white;
+        }
+        h1 {
+            color: #2c3e50;
+            border-bottom: 3px solid #3498db;
+            padding-bottom: 10px;
+            margin-top: 40px;
+            page-break-before: always;
+        }
+        h1:first-child {
+            page-break-before: avoid;
+        }
+        h2 {
+            color: #34495e;
+            border-bottom: 1px solid #bdc3c7;
+            padding-bottom: 5px;
+            margin-top: 30px;
+        }
+        h3 {
+            color: #7f8c8d;
+            margin-top: 20px;
+        }
+        table {
+            border-collapse: collapse;
+            width: 100%;
+            margin: 20px 0;
+        }
+        th, td {
+            border: 1px solid #ddd;
+            padding: 12px;
+            text-align: left;
+        }
+        th {
+            background-color: #f8f9fa;
+            font-weight: bold;
+        }
+        code {
+            background-color: #f4f4f4;
+            padding: 2px 4px;
+            border-radius: 3px;
+            font-family: 'Fira Code', monospace;
+        }
+        pre {
+            background-color: #f4f4f4;
+            padding: 15px;
+            border-radius: 5px;
+            overflow-x: auto;
+            border-left: 4px solid #3498db;
+        }
+        ul, ol {
+            margin-left: 20px;
+        }
+        li {
+            margin: 5px 0;
+        }
+        .toc {
+            background-color: #f8f9fa;
+            padding: 20px;
+            border-radius: 5px;
+            margin: 20px 0;
+        }
+        .toc h2 {
+            margin-top: 0;
+            border: none;
+        }
+        .highlight {
+            background-color: #fff3cd;
+            padding: 15px;
+            border-left: 4px solid #ffc107;
+            margin: 20px 0;
+        }
+        .cover-page {
+            text-align: center;
+            padding: 100px 0;
+            page-break-after: always;
+        }
+        .cover-page h1 {
+            font-size: 48px;
+            border: none;
+            margin-bottom: 20px;
+        }
+        .cover-page h2 {
+            font-size: 32px;
+            border: none;
+            color: #666;
+        }
+        .version-info {
+            margin-top: 50px;
+            font-size: 18px;
+            color: #666;
+        }
+        @media print {
+            body {
+                padding: 0;
+            }
+            h1 {
+                page-break-before: always;
+            }
+            h1:first-child {
+                page-break-before: avoid;
+            }
+            .cover-page {
+                page-break-after: always;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="cover-page">
+        <h1>INTERCONNECT</h1>
+        <h2>システム要件定義書</h2>
+        <div class="version-info">
+            <p>Version 1.0</p>
+            <p>2025年1月31日</p>
+        </div>
+    </div>
+
+    <div class="toc">
+        <h2>目次</h2>
+        <ol>
+            <li><a href="#overview">プロジェクト概要</a></li>
+            <li><a href="#architecture">システムアーキテクチャ</a></li>
+            <li><a href="#features">機能要件</a></li>
+            <li><a href="#database">データベース設計</a></li>
+            <li><a href="#ui-ux">UI/UXデザイン</a></li>
+            <li><a href="#security">セキュリティ要件</a></li>
+            <li><a href="#performance">パフォーマンス要件</a></li>
+            <li><a href="#operations">運用・保守</a></li>
+            <li><a href="#future">今後の拡張予定</a></li>
+            <li><a href="#schedule">開発スケジュール</a></li>
+            <li><a href="#deliverables">成果物</a></li>
+            <li><a href="#constraints">制約事項</a></li>
+            <li><a href="#glossary">用語定義</a></li>
+            <li><a href="#history">改訂履歴</a></li>
+        </ol>
+    </div>
+
+    <h1 id="overview">1. プロジェクト概要</h1>
+    
+    <h2>1.1 システム名</h2>
+    <p>INTERCONNECT（インターコネクト）</p>
+    
+    <h2>1.2 システムの目的</h2>
+    <p>ビジネスプロフェッショナル向けのマッチングプラットフォームを提供し、適切なビジネスパートナーや協業相手を見つけることを支援する。</p>
+    
+    <h2>1.3 主要機能</h2>
+    <ul>
+        <li>ユーザー認証・プロファイル管理</li>
+        <li>AIを活用したマッチング機能</li>
+        <li>リアルタイムメッセージング</li>
+        <li>イベント管理</li>
+        <li>ダッシュボード分析</li>
+    </ul>
+
+    <h1 id="architecture">2. システムアーキテクチャ</h1>
+    
+    <h2>2.1 技術スタック</h2>
+    
+    <h3>フロントエンド</h3>
+    <ul>
+        <li>HTML5, CSS3, JavaScript (ES6+)</li>
+        <li>レスポンシブデザイン対応</li>
+        <li>プログレッシブウェブアプリ（PWA）対応</li>
+    </ul>
+    
+    <h3>バックエンド</h3>
+    <ul>
+        <li>Supabase (PostgreSQL + リアルタイムサブスクリプション)</li>
+        <li>Row Level Security (RLS) による認証・認可</li>
+    </ul>
+    
+    <h3>インフラ</h3>
+    <ul>
+        <li>GitHub (バージョン管理)</li>
+        <li>Supabase Cloud (ホスティング)</li>
+    </ul>
+
+    <h2>2.2 システム構成図</h2>
+    <pre>
+┌─────────────────┐     ┌─────────────────┐     ┌─────────────────┐
+│   ブラウザ      │────▶│   Supabase      │────▶│  PostgreSQL     │
+│  (JavaScript)   │     │   (Auth/API)    │     │  (Database)     │
+└─────────────────┘     └─────────────────┘     └─────────────────┘
+    </pre>
+
+    <h1 id="features">3. 機能要件</h1>
+    
+    <h2>3.1 認証機能</h2>
+    
+    <h3>3.1.1 ユーザー登録</h3>
+    <p><strong>機能概要:</strong> メールアドレスとパスワードによる新規登録</p>
+    <p><strong>入力項目:</strong></p>
+    <ul>
+        <li>メールアドレス（必須）</li>
+        <li>パスワード（必須、8文字以上）</li>
+        <li>名前（必須）</li>
+    </ul>
+    <p><strong>バリデーション:</strong></p>
+    <ul>
+        <li>メールアドレス形式チェック</li>
+        <li>パスワード強度チェック</li>
+        <li>重複登録チェック</li>
+    </ul>
+    
+    <h3>3.1.2 ログイン/ログアウト</h3>
+    <p><strong>機能概要:</strong> 登録済みユーザーのログイン・ログアウト</p>
+    <p><strong>セッション管理:</strong> JWTトークンによる認証</p>
+    <p><strong>自動ログアウト:</strong> 7日間の非アクティブ後</p>
+    
+    <h2>3.2 プロファイル機能</h2>
+    
+    <h3>3.2.1 プロファイル作成・編集</h3>
+    <p><strong>基本情報:</strong></p>
+    <ul>
+        <li>名前</li>
+        <li>プロフィール画像</li>
+        <li>役職（title）</li>
+        <li>会社名（company）</li>
+        <li>業界（industry）</li>
+        <li>地域（location）</li>
+        <li>自己紹介（bio）</li>
+    </ul>
+    
+    <p><strong>スキル・興味:</strong></p>
+    <ul>
+        <li>スキルタグ（複数選択可能）</li>
+        <li>興味・関心タグ（複数選択可能）</li>
+    </ul>
+    
+    <h3>3.2.2 プロファイル表示</h3>
+    <p><strong>公開範囲:</strong> 全ユーザーに公開</p>
+    <p><strong>プライバシー設定:</strong> 連絡先情報は接続後のみ表示</p>
+    
+    <h2>3.3 マッチング機能</h2>
+    
+    <h3>3.3.1 マッチングアルゴリズム</h3>
+    <p><strong>基本スコア計算:</strong></p>
+    <pre>
+// スコア計算要素
+- プロファイル充実度: 15-30%
+- スキルマッチ: 最大15%
+- 地域一致: 8%
+- 業界一致: 8%
+- 興味の共通性: 最大6%
+- ランダム要素: ±10%（ガウス分布）
+    </pre>
+    
+    <p><strong>スコア範囲:</strong> 15%〜95%</p>
+    <p><strong>表示順序:</strong> スコアの高い順</p>
+    
+    <h3>3.3.2 マッチング表示</h3>
+    <p><strong>カード形式表示:</strong></p>
+    <ul>
+        <li>プロフィール画像</li>
+        <li>名前・役職・会社</li>
+        <li>マッチングスコア（%表示）</li>
+        <li>スキルタグ（最大3個表示）</li>
+        <li>レーダーチャート（6軸評価）</li>
+    </ul>
+    
+    <p><strong>レーダーチャート項目:</strong></p>
+    <ol>
+        <li>スキル充実度</li>
+        <li>経験値</li>
+        <li>地域適合性</li>
+        <li>業界適合性</li>
+        <li>活動レベル</li>
+        <li>興味の一致度</li>
+    </ol>
+    
+    <h3>3.3.3 フィルタリング機能</h3>
+    <p><strong>フィルター項目:</strong></p>
+    <ul>
+        <li>業界</li>
+        <li>地域</li>
+        <li>興味・関心</li>
+    </ul>
+    
+    <p><strong>検索機能:</strong></p>
+    <ul>
+        <li>キーワード検索（全文検索）</li>
+        <li>リアルタイム検索（300msデバウンス）</li>
+    </ul>
+
+    <h2>3.4 コネクション機能</h2>
+    
+    <h3>3.4.1 コネクト申請</h3>
+    <p><strong>申請フロー:</strong></p>
+    <ol>
+        <li>「コネクト申請」ボタンクリック</li>
+        <li>申請送信（pending状態）</li>
+        <li>相手に通知送信</li>
+    </ol>
+    
+    <p><strong>ステータス管理:</strong></p>
+    <ul>
+        <li>pending: 申請中</li>
+        <li>accepted: 承認済み</li>
+        <li>rejected: 拒否</li>
+        <li>blocked: ブロック</li>
+    </ul>
+    
+    <h3>3.4.2 プロファイル詳細表示</h3>
+    <p><strong>モーダル表示内容:</strong></p>
+    <ul>
+        <li>完全なプロファイル情報</li>
+        <li>マッチング詳細分析</li>
+        <li>共通のスキル・興味</li>
+        <li>レーダーチャート（拡大版）</li>
+        <li>アクションボタン（コネクト申請、メッセージ、ブックマーク）</li>
+    </ul>
+
+    <h2>3.5 ダッシュボード機能</h2>
+    
+    <h3>3.5.1 統計情報表示</h3>
+    <p><strong>表示項目:</strong></p>
+    <ul>
+        <li>総メンバー数</li>
+        <li>今月のイベント数</li>
+        <li>マッチング成功数</li>
+    </ul>
+    
+    <p><strong>リアルタイム更新:</strong> 1分ごとに自動更新</p>
+    
+    <h3>3.5.2 アクティビティフィード</h3>
+    <p><strong>表示内容:</strong></p>
+    <ul>
+        <li>最新の活動履歴</li>
+        <li>新規メンバー参加</li>
+        <li>イベント情報</li>
+    </ul>
+    
+    <p><strong>フィルタリング:</strong></p>
+    <ul>
+        <li>期間指定（今日/今週/今月）</li>
+        <li>タイプ別（全て/メンバー/イベント）</li>
+    </ul>
+
+    <h2>3.6 メッセージング機能</h2>
+    
+    <h3>3.6.1 メッセージ送受信</h3>
+    <p><strong>送信条件:</strong> コネクション成立後のみ</p>
+    <p><strong>メッセージ形式:</strong> テキストのみ（初期版）</p>
+    <p><strong>既読管理:</strong> 未実装（将来対応）</p>
+
+    <h2>3.7 イベント機能</h2>
+    
+    <h3>3.7.1 イベント一覧表示</h3>
+    <p><strong>表示項目:</strong></p>
+    <ul>
+        <li>イベント名</li>
+        <li>開催日時</li>
+        <li>場所</li>
+        <li>参加者数</li>
+    </ul>
+    
+    <p><strong>ソート機能:</strong> 日付順/人気順</p>
+
+    <h1 id="database">4. データベース設計</h1>
+    
+    <h2>4.1 テーブル構造</h2>
+    
+    <h3>4.1.1 profiles テーブル</h3>
+    <pre>
+CREATE TABLE profiles (
+    id UUID PRIMARY KEY REFERENCES auth.users(id),
+    name TEXT NOT NULL,
+    email TEXT NOT NULL,
+    avatar_url TEXT,
+    title TEXT,
+    company TEXT,
+    industry TEXT,
+    location TEXT,
+    bio TEXT,
+    skills TEXT[] DEFAULT '{}',
+    interests TEXT[] DEFAULT '{}',
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+    updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
+    </pre>
+    
+    <h3>4.1.2 connections テーブル</h3>
+    <pre>
+CREATE TABLE connections (
+    id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+    user_id UUID REFERENCES profiles(id),
+    connected_user_id UUID REFERENCES profiles(id),
+    status TEXT CHECK (status IN ('pending', 'accepted', 'rejected', 'blocked')),
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+    updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+    UNIQUE(user_id, connected_user_id)
+);
+    </pre>
+    
+    <h3>4.1.3 messages テーブル</h3>
+    <pre>
+CREATE TABLE messages (
+    id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+    sender_id UUID REFERENCES profiles(id),
+    receiver_id UUID REFERENCES profiles(id),
+    content TEXT NOT NULL,
+    is_read BOOLEAN DEFAULT FALSE,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
+    </pre>
+    
+    <h3>4.1.4 events テーブル</h3>
+    <pre>
+CREATE TABLE events (
+    id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+    title TEXT NOT NULL,
+    description TEXT,
+    event_date TIMESTAMP WITH TIME ZONE,
+    location TEXT,
+    organizer_id UUID REFERENCES profiles(id),
+    max_participants INTEGER,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
+    </pre>
+    
+    <h3>4.1.5 meeting_minutes テーブル（将来実装）</h3>
+    <pre>
+CREATE TABLE meeting_minutes (
+    id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+    profile_id UUID REFERENCES profiles(id),
+    meeting_title TEXT,
+    meeting_date TIMESTAMP WITH TIME ZONE,
+    summary TEXT,
+    content TEXT,
+    participants TEXT[],
+    topics TEXT[],
+    action_items JSONB,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
+    </pre>
+
+    <h2>4.2 Row Level Security (RLS) ポリシー</h2>
+    
+    <h3>4.2.1 profiles テーブル</h3>
+    <ul>
+        <li><strong>読み取り:</strong> 全ユーザーが全プロファイルを閲覧可能</li>
+        <li><strong>更新:</strong> 自分のプロファイルのみ編集可能</li>
+    </ul>
+    
+    <h3>4.2.2 connections テーブル</h3>
+    <ul>
+        <li><strong>読み取り:</strong> 自分が関係するコネクションのみ</li>
+        <li><strong>作成:</strong> 自分からの申請のみ</li>
+        <li><strong>更新:</strong> 双方向の承認が可能</li>
+    </ul>
+    
+    <h3>4.2.3 messages テーブル</h3>
+    <ul>
+        <li><strong>読み取り:</strong> 送信者または受信者のみ</li>
+        <li><strong>作成:</strong> コネクション成立者同士のみ</li>
+    </ul>
+
+    <h1 id="ui-ux">5. UI/UXデザイン</h1>
+    
+    <h2>5.1 デザイン原則</h2>
+    <ul>
+        <li><strong>レスポンシブデザイン:</strong> モバイル、タブレット、デスクトップ対応</li>
+        <li><strong>アクセシビリティ:</strong> WCAG 2.1 AA準拠</li>
+        <li><strong>パフォーマンス:</strong> 初期表示3秒以内</li>
+    </ul>
+    
+    <h2>5.2 カラースキーム</h2>
+    <ul>
+        <li><strong>プライマリカラー:</strong> #3498db（青）</li>
+        <li><strong>セカンダリカラー:</strong> #2ecc71（緑）</li>
+        <li><strong>アクセントカラー:</strong> #e74c3c（赤）</li>
+        <li><strong>背景色:</strong> #f8f9fa</li>
+        <li><strong>テキスト色:</strong> #2c3e50</li>
+    </ul>
+    
+    <h2>5.3 フォント</h2>
+    <ul>
+        <li><strong>見出し:</strong> Inter (font-weight: 600-800)</li>
+        <li><strong>本文:</strong> Noto Sans JP (font-weight: 400)</li>
+        <li><strong>コード:</strong> Fira Code (等幅フォント)</li>
+    </ul>
+    
+    <h2>5.4 レイアウト</h2>
+    <ul>
+        <li><strong>グリッドシステム:</strong> 12カラムグリッド</li>
+        <li><strong>最大幅:</strong> 1200px（デスクトップ）</li>
+        <li><strong>余白:</strong> 16px/24px/32px（モバイル/タブレット/デスクトップ）</li>
+    </ul>
+
+    <h1 id="security">6. セキュリティ要件</h1>
+    
+    <h2>6.1 認証・認可</h2>
+    <ul>
+        <li><strong>パスワード:</strong> bcryptによるハッシュ化</li>
+        <li><strong>セッション:</strong> JWT (JSON Web Token)</li>
+        <li><strong>HTTPS:</strong> 全通信をSSL/TLSで暗号化</li>
+    </ul>
+    
+    <h2>6.2 データ保護</h2>
+    <ul>
+        <li><strong>個人情報:</strong> RLSによるアクセス制御</li>
+        <li><strong>SQLインジェクション対策:</strong> パラメータ化クエリ使用</li>
+        <li><strong>XSS対策:</strong> 入力値のサニタイゼーション</li>
+    </ul>
+    
+    <h2>6.3 プライバシー</h2>
+    <ul>
+        <li><strong>データ収集:</strong> 最小限の必要情報のみ</li>
+        <li><strong>第三者提供:</strong> なし（ユーザー同意なし）</li>
+        <li><strong>データ削除:</strong> ユーザーリクエストによる完全削除</li>
+    </ul>
+
+    <h1 id="performance">7. パフォーマンス要件</h1>
+    
+    <h2>7.1 レスポンスタイム</h2>
+    <ul>
+        <li><strong>ページ読み込み:</strong> 3秒以内（3G回線）</li>
+        <li><strong>API応答:</strong> 500ms以内</li>
+        <li><strong>検索結果:</strong> 1秒以内</li>
+    </ul>
+    
+    <h2>7.2 同時接続数</h2>
+    <ul>
+        <li><strong>想定:</strong> 1,000ユーザー同時接続</li>
+        <li><strong>ピーク時:</strong> 5,000ユーザー/時</li>
+    </ul>
+    
+    <h2>7.3 データ容量</h2>
+    <ul>
+        <li><strong>プロファイル画像:</strong> 最大5MB/ユーザー</li>
+        <li><strong>メッセージ:</strong> 無制限（テキストのみ）</li>
+        <li><strong>バックアップ:</strong> 日次自動バックアップ</li>
+    </ul>
+
+    <h1 id="operations">8. 運用・保守</h1>
+    
+    <h2>8.1 監視項目</h2>
+    <ul>
+        <li><strong>システム稼働率:</strong> 99.9%以上</li>
+        <li><strong>エラー率:</strong> 0.1%以下</li>
+        <li><strong>レスポンスタイム:</strong> 継続監視</li>
+    </ul>
+    
+    <h2>8.2 バックアップ</h2>
+    <ul>
+        <li><strong>頻度:</strong> 日次（深夜2時）</li>
+        <li><strong>保持期間:</strong> 30日間</li>
+        <li><strong>リストア時間:</strong> 1時間以内</li>
+    </ul>
+    
+    <h2>8.3 アップデート</h2>
+    <ul>
+        <li><strong>定期メンテナンス:</strong> 月1回（深夜）</li>
+        <li><strong>緊急パッチ:</strong> 随時対応</li>
+        <li><strong>機能追加:</strong> 四半期ごと</li>
+    </ul>
+
+    <h1 id="future">9. 今後の拡張予定</h1>
+    
+    <h2>9.1 Phase 2（3ヶ月後）</h2>
+    <ul>
+        <li>AIによる自動マッチング提案</li>
+        <li>ビデオ通話機能</li>
+        <li>カレンダー連携</li>
+    </ul>
+    
+    <h2>9.2 Phase 3（6ヶ月後）</h2>
+    <ul>
+        <li>モバイルアプリ（iOS/Android）</li>
+        <li>多言語対応（英語・中国語）</li>
+        <li>有料プラン導入</li>
+    </ul>
+    
+    <h2>9.3 Phase 4（1年後）</h2>
+    <ul>
+        <li>AI議事録解析（tl;dv連携）</li>
+        <li>企業アカウント機能</li>
+        <li>APIプラットフォーム公開</li>
+    </ul>
+
+    <h1 id="schedule">10. 開発スケジュール</h1>
+    
+    <h2>10.1 開発フェーズ</h2>
+    <table>
+        <tr>
+            <th>フェーズ</th>
+            <th>期間</th>
+            <th>内容</th>
+        </tr>
+        <tr>
+            <td>要件定義</td>
+            <td>2週間</td>
+            <td>要件の詳細化、仕様確定</td>
+        </tr>
+        <tr>
+            <td>基本設計</td>
+            <td>2週間</td>
+            <td>システム構成、画面設計</td>
+        </tr>
+        <tr>
+            <td>詳細設計</td>
+            <td>1週間</td>
+            <td>データベース設計、API設計</td>
+        </tr>
+        <tr>
+            <td>実装</td>
+            <td>6週間</td>
+            <td>フロントエンド・バックエンド開発</td>
+        </tr>
+        <tr>
+            <td>テスト</td>
+            <td>2週間</td>
+            <td>単体・結合・総合テスト</td>
+        </tr>
+        <tr>
+            <td>リリース準備</td>
+            <td>1週間</td>
+            <td>本番環境構築、データ移行</td>
+        </tr>
+    </table>
+    <p><strong>合計:</strong> 約3ヶ月</p>
+    
+    <h2>10.2 マイルストーン</h2>
+    <ul>
+        <li><strong>M1:</strong> 認証・プロファイル機能完成</li>
+        <li><strong>M2:</strong> マッチング機能完成</li>
+        <li><strong>M3:</strong> メッセージング機能完成</li>
+        <li><strong>M4:</strong> 全機能統合テスト完了</li>
+        <li><strong>M5:</strong> 本番リリース</li>
+    </ul>
+
+    <h1 id="deliverables">11. 成果物</h1>
+    
+    <h2>11.1 ドキュメント</h2>
+    <ul>
+        <li>要件定義書（本書）</li>
+        <li>基本設計書</li>
+        <li>詳細設計書</li>
+        <li>テスト仕様書</li>
+        <li>運用マニュアル</li>
+    </ul>
+    
+    <h2>11.2 ソースコード</h2>
+    <ul>
+        <li>フロントエンド（HTML/CSS/JavaScript）</li>
+        <li>データベーススキーマ（SQL）</li>
+        <li>設定ファイル</li>
+        <li>デプロイスクリプト</li>
+    </ul>
+    
+    <h2>11.3 テスト</h2>
+    <ul>
+        <li>単体テストコード</li>
+        <li>統合テストシナリオ</li>
+        <li>性能テスト結果</li>
+        <li>セキュリティ診断レポート</li>
+    </ul>
+
+    <h1 id="constraints">12. 制約事項</h1>
+    
+    <h2>12.1 技術的制約</h2>
+    <ul>
+        <li>ブラウザ対応：Chrome, Firefox, Safari, Edge（最新2バージョン）</li>
+        <li>JavaScript有効必須</li>
+        <li>Cookie有効必須</li>
+    </ul>
+    
+    <h2>12.2 運用制約</h2>
+    <ul>
+        <li>メンテナンス時間：月1回、最大2時間</li>
+        <li>サポート時間：平日9:00-18:00</li>
+        <li>SLA：99.9%</li>
+    </ul>
+    
+    <h2>12.3 法的制約</h2>
+    <ul>
+        <li>個人情報保護法準拠</li>
+        <li>GDPR対応（EU圏ユーザー）</li>
+        <li>利用規約・プライバシーポリシー必須</li>
+    </ul>
+
+    <h1 id="glossary">13. 用語定義</h1>
+    
+    <table>
+        <tr>
+            <th>用語</th>
+            <th>説明</th>
+        </tr>
+        <tr>
+            <td>プロファイル</td>
+            <td>ユーザーの基本情報、スキル、興味などを含む情報</td>
+        </tr>
+        <tr>
+            <td>マッチング</td>
+            <td>ユーザー間の適合度を算出し、推奨する機能</td>
+        </tr>
+        <tr>
+            <td>コネクション</td>
+            <td>ユーザー間の繋がり、承認により成立</td>
+        </tr>
+        <tr>
+            <td>スコア</td>
+            <td>マッチング度を示す百分率（15%〜95%）</td>
+        </tr>
+        <tr>
+            <td>レーダーチャート</td>
+            <td>6軸でユーザーの特性を視覚化したグラフ</td>
+        </tr>
+    </table>
+
+    <h1 id="history">14. 改訂履歴</h1>
+    
+    <table>
+        <tr>
+            <th>版数</th>
+            <th>日付</th>
+            <th>改訂内容</th>
+            <th>作成者</th>
+        </tr>
+        <tr>
+            <td>1.0</td>
+            <td>2025-01-31</td>
+            <td>初版作成</td>
+            <td>INTERCONNECT開発チーム</td>
+        </tr>
+    </table>
+
+    <hr>
+    
+    <p style="text-align: center; margin-top: 50px; color: #666;">
+        本要件定義書は、INTERCONNECTシステムの開発において、<br>
+        関係者間の認識を統一し、プロジェクトの成功を確実にするための基準文書として作成されました。
+    </p>
+</body>
+</html>

@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <link rel="icon" type="image/svg+xml" href="favicon.svg">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>予約完了 - INTERCONNECT</title>
+    
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Noto+Sans+JP:wght@300;400;500;700&display=swap" rel="stylesheet">
+    
+    <!-- Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" integrity="sha384-iw3OoTErCYJJB9mCa8LNS2hbsQ7M3C0EpIsO/H5+EGAkPGc6rk+V8i04oW/K5xq0" crossorigin="anonymous">
+    
+    <!-- Styles -->
+    <link rel="stylesheet" href="css/style.css">
+    
+    <link rel="stylesheet" href="css/booking-complete.css">
+</head>
+<body>
+    <div class="complete-page">
+        <div class="complete-container">
+            <!-- Success Icon -->
+            <div class="complete-icon">
+                <i class="fas fa-check"></i>
+            </div>
+            
+            <!-- Title -->
+            <h1 class="complete-title">予約が完了しました！</h1>
+            
+            <!-- Message -->
+            <p class="complete-message">
+                無料相談のご予約ありがとうございます。<br>
+                確認メールをお送りしましたので、ご確認ください。
+            </p>
+            
+            <!-- Booking Details -->
+            <div class="booking-details-card" id="booking-details">
+                <!-- 動的に挿入されます -->
+            </div>
+            
+            <!-- Next Steps -->
+            <div class="next-steps">
+                <h3 class="next-steps-title">
+                    <i class="fas fa-info-circle"></i>
+                    次のステップ
+                </h3>
+                <ul class="next-steps-list">
+                    <li>確認メールに記載されているGoogle MeetのURLを確認してください</li>
+                    <li>当日は開始5分前にURLにアクセスしてください</li>
+                    <li>カメラとマイクの動作確認をお願いします</li>
+                    <li>ご相談内容をまとめておくとスムーズです</li>
+                </ul>
+            </div>
+            
+            <!-- Action Buttons -->
+            <div class="action-buttons">
+                <button class="action-btn primary" onclick="addToCalendar()">
+                    <i class="fas fa-calendar-plus"></i>
+                    カレンダーに追加
+                </button>
+                <a href="register.html" class="action-btn secondary">
+                    <i class="fas fa-user-plus"></i>
+                    アカウント登録
+                </a>
+                <a href="index.html" class="action-btn secondary">
+                    <i class="fas fa-home"></i>
+                    トップページへ
+                </a>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        // 予約情報を表示
+        document.addEventListener('DOMContentLoaded', function() {
+            const bookingInfo = JSON.parse(sessionStorage.getItem('latestBooking') || '{}');
+            const detailsContainer = document.getElementById('booking-details');
+            
+            if (bookingInfo.date) {
+                detailsContainer.innerHTML = `
+                    <div class="booking-detail-row">
+                        <div class="booking-detail-icon">
+                            <i class="fas fa-calendar"></i>
+                        </div>
+                        <div class="booking-detail-content">
+                            <div class="booking-detail-label">日時</div>
+                            <div class="booking-detail-value">${bookingInfo.date} ${bookingInfo.time || ''}</div>
+                        </div>
+                    </div>
+                    <div class="booking-detail-row">
+                        <div class="booking-detail-icon">
+                            <i class="fas fa-user-tie"></i>
+                        </div>
+                        <div class="booking-detail-content">
+                            <div class="booking-detail-label">担当者</div>
+                            <div class="booking-detail-value">${bookingInfo.staff || 'INTERCONNECT担当者'}</div>
+                        </div>
+                    </div>
+                    <div class="booking-detail-row">
+                        <div class="booking-detail-icon">
+                            <i class="fas fa-video"></i>
+                        </div>
+                        <div class="booking-detail-content">
+                            <div class="booking-detail-label">開催方法</div>
+                            <div class="booking-detail-value">オンライン（Google Meet）</div>
+                        </div>
+                    </div>
+                `;
+            } else {
+                // デフォルトの表示
+                detailsContainer.innerHTML = `
+                    <p class="booking-fallback-message">
+                        予約詳細は確認メールをご確認ください。
+                    </p>
+                `;
+            }
+        });
+        
+        // Googleカレンダーに追加
+        function addToCalendar() {
+            const bookingInfo = JSON.parse(sessionStorage.getItem('latestBooking') || '{}');
+            
+            if (!bookingInfo.date) {
+                alert('予約情報が見つかりません。確認メールをご確認ください。');
+                return;
+            }
+            
+            // 日時の解析（仮の実装）
+            const startDateTime = new Date(`${bookingInfo.date} ${bookingInfo.time || '10:00'}`);
+            const endDateTime = new Date(startDateTime.getTime() + 30 * 60000); // 30分後
+            
+            const event = {
+                text: 'INTERCONNECT 無料相談',
+                dates: `${formatDateForGoogle(startDateTime)}/${formatDateForGoogle(endDateTime)}`,
+                details: 'INTERCONNECTの無料相談です。Google Meetで実施します。',
+                location: 'オンライン（Google Meet）'
+            };
+            
+            const googleCalendarUrl = `https://calendar.google.com/calendar/render?action=TEMPLATE&text=${encodeURIComponent(event.text)}&dates=${event.dates}&details=${encodeURIComponent(event.details)}&location=${encodeURIComponent(event.location)}`;
+            
+            window.open(googleCalendarUrl, '_blank');
+        }
+        
+        function formatDateForGoogle(date) {
+            const year = date.getFullYear();
+            const month = String(date.getMonth() + 1).padStart(2, '0');
+            const day = String(date.getDate()).padStart(2, '0');
+            const hours = String(date.getHours()).padStart(2, '0');
+            const minutes = String(date.getMinutes()).padStart(2, '0');
+            const seconds = '00';
+            
+            return `${year}${month}${day}T${hours}${minutes}${seconds}`;
+        }
+    </script>
+    <script src="js/supabase-unified.js?v=1.1"></script>
+</body>
+</html>

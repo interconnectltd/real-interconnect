@@ -1,0 +1,791 @@
+/* ===========================
+   法的ページ（利用規約・プライバシーポリシー・運営会社）用スタイル
+   =========================== */
+
+/* 共通スタイル */
+.legal-section {
+    padding: 120px 0 80px;
+    background: #f8fafc;
+    min-height: calc(100vh - 80px);
+}
+
+.legal-header {
+    text-align: center;
+    margin-bottom: 60px;
+}
+
+.legal-header .section-title {
+    font-size: 3rem;
+    font-weight: 800;
+    background: linear-gradient(135deg, #0066ff 0%, #004fc4 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    margin-bottom: 20px;
+}
+
+.legal-header .section-description {
+    font-size: 1.125rem;
+    color: #64748b;
+    font-weight: 500;
+}
+
+.legal-content {
+    max-width: 900px;
+    margin: 0 auto;
+    background: white;
+    border-radius: 20px;
+    padding: 60px;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.05);
+}
+
+/* 目次 */
+.legal-toc {
+    background: linear-gradient(135deg, #f0f7ff 0%, #e6f2ff 100%);
+    border-radius: 16px;
+    padding: 30px;
+    margin-bottom: 50px;
+}
+
+.legal-toc h3 {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: #0066ff;
+    margin-bottom: 20px;
+}
+
+.legal-toc ol {
+    list-style: none;
+    counter-reset: toc-counter;
+    margin: 0;
+    padding: 0;
+}
+
+.legal-toc ol li {
+    counter-increment: toc-counter;
+    position: relative;
+    padding-left: 40px;
+    margin-bottom: 12px;
+}
+
+.legal-toc ol li::before {
+    content: counter(toc-counter, decimal);
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 28px;
+    height: 28px;
+    background: #0066ff;
+    color: white;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+    font-size: 0.875rem;
+}
+
+.legal-toc a {
+    color: #1e293b;
+    text-decoration: none;
+    font-weight: 500;
+    transition: all 0.3s ease;
+}
+
+.legal-toc a:hover {
+    color: #0066ff;
+    padding-left: 5px;
+}
+
+/* 条文・記事 */
+.legal-article {
+    margin-bottom: 50px;
+    padding-bottom: 50px;
+    border-bottom: 1px solid #e5e7eb;
+}
+
+.legal-article:last-child {
+    border-bottom: none;
+    margin-bottom: 0;
+    padding-bottom: 0;
+}
+
+.legal-article h2 {
+    font-size: 1.75rem;
+    font-weight: 700;
+    color: #0066ff;
+    margin-bottom: 25px;
+    position: relative;
+    padding-left: 20px;
+}
+
+.legal-article h2::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 4px;
+    height: 80%;
+    background: linear-gradient(135deg, #0066ff 0%, #00d4ff 100%);
+    border-radius: 2px;
+}
+
+.legal-article h3 {
+    font-size: 1.25rem;
+    font-weight: 600;
+    color: #1e293b;
+    margin: 30px 0 15px;
+}
+
+.legal-article p {
+    line-height: 1.8;
+    color: #475569;
+    margin-bottom: 20px;
+}
+
+.legal-article ol,
+.legal-article ul {
+    margin: 20px 0;
+    padding-left: 30px;
+}
+
+.legal-article li {
+    margin-bottom: 10px;
+    line-height: 1.8;
+    color: #475569;
+}
+
+/* セキュリティ対策セクション */
+.security-measures {
+    background: #f0f7ff;
+    border-radius: 16px;
+    padding: 30px;
+    margin: 30px 0;
+}
+
+.security-measures h3 {
+    color: #0066ff;
+    margin-bottom: 20px;
+}
+
+.security-measures ul {
+    list-style: none;
+    padding: 0;
+}
+
+.security-measures li {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    margin-bottom: 15px;
+    padding: 15px 20px;
+    background: white;
+    border-radius: 10px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+}
+
+.security-measures i {
+    color: #0066ff;
+    font-size: 1.25rem;
+    width: 30px;
+}
+
+/* Cookie情報 */
+.cookie-info {
+    background: #fefefe;
+    border: 1px solid #e5e7eb;
+    border-radius: 12px;
+    padding: 25px;
+    margin: 20px 0;
+}
+
+/* 問い合わせ先 */
+.contact-info-legal {
+    background: linear-gradient(135deg, #0066ff 0%, #004fc4 100%);
+    color: white;
+    border-radius: 16px;
+    padding: 30px;
+    margin-top: 30px;
+}
+
+.contact-info-legal h3 {
+    color: white;
+    margin-bottom: 20px;
+    font-size: 1.5rem;
+}
+
+.contact-info-legal p {
+    color: white;
+    margin-bottom: 10px;
+}
+
+.contact-info-legal strong {
+    display: block;
+    font-size: 1.125rem;
+    margin-bottom: 15px;
+}
+
+/* 運営会社ページ専用スタイル */
+.company-section .legal-content {
+    max-width: 1200px;
+    padding: 0;
+    background: transparent;
+    box-shadow: none;
+}
+
+.company-content {
+    background: white;
+}
+
+/* 会社ヒーローセクション */
+.company-hero {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 60px;
+    align-items: center;
+    padding: 80px;
+    background: linear-gradient(135deg, #f0f7ff 0%, #ffffff 100%);
+    border-radius: 20px;
+    margin-bottom: 60px;
+}
+
+.company-hero-content h2 {
+    font-size: 2.5rem;
+    font-weight: 700;
+    color: #1e293b;
+    margin-bottom: 20px;
+    line-height: 1.3;
+}
+
+.company-hero-content p {
+    font-size: 1.125rem;
+    color: #64748b;
+    line-height: 1.8;
+}
+
+.company-hero-image img {
+    width: 100%;
+    border-radius: 16px;
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+}
+
+/* 会社情報テーブル */
+.company-info-section {
+    padding: 60px;
+    background: white;
+}
+
+.section-subtitle {
+    font-size: 2rem;
+    font-weight: 700;
+    color: #0066ff;
+    text-align: center;
+    margin-bottom: 50px;
+    position: relative;
+}
+
+.section-subtitle::after {
+    content: '';
+    position: absolute;
+    bottom: -15px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 60px;
+    height: 4px;
+    background: linear-gradient(135deg, #0066ff 0%, #00d4ff 100%);
+    border-radius: 2px;
+}
+
+.company-info-table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.company-info-table th {
+    background: #f0f7ff;
+    color: #0066ff;
+    font-weight: 700;
+    padding: 20px 30px;
+    text-align: left;
+    width: 200px;
+    vertical-align: top;
+}
+
+.company-info-table td {
+    padding: 20px 30px;
+    border-bottom: 1px solid #e5e7eb;
+    line-height: 1.8;
+}
+
+.company-info-table tr:last-child td {
+    border-bottom: none;
+}
+
+.company-info-table ul {
+    margin: 0;
+    padding-left: 20px;
+}
+
+.company-info-table li {
+    margin-bottom: 5px;
+}
+
+.address-info .map-link {
+    margin-top: 10px;
+}
+
+.address-info .map-link a {
+    color: #0066ff;
+    text-decoration: none;
+    font-weight: 500;
+    transition: all 0.3s ease;
+}
+
+.address-info .map-link a:hover {
+    text-decoration: underline;
+}
+
+/* ミッション・ビジョン */
+.mission-vision-section {
+    padding: 80px 60px;
+    background: #f8fafc;
+}
+
+.mission-vision-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 40px;
+}
+
+.mission-card,
+.vision-card {
+    background: white;
+    padding: 50px;
+    border-radius: 20px;
+    text-align: center;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05);
+    transition: all 0.3s ease;
+}
+
+.mission-card:hover,
+.vision-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 15px 40px rgba(0, 0, 0, 0.1);
+}
+
+.mv-icon {
+    width: 80px;
+    height: 80px;
+    background: linear-gradient(135deg, #0066ff 0%, #00d4ff 100%);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 30px;
+}
+
+.mv-icon i {
+    font-size: 2rem;
+    color: white;
+}
+
+.mission-card h3,
+.vision-card h3 {
+    font-size: 1.75rem;
+    font-weight: 700;
+    color: #1e293b;
+    margin-bottom: 20px;
+}
+
+.mission-card p,
+.vision-card p {
+    color: #64748b;
+    line-height: 1.8;
+}
+
+/* 価値観 */
+.values-section {
+    padding: 80px 60px;
+    background: white;
+}
+
+.values-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 30px;
+}
+
+.value-item {
+    text-align: center;
+    padding: 30px;
+    border-radius: 16px;
+    background: #f8fafc;
+    transition: all 0.3s ease;
+}
+
+.value-item:hover {
+    background: linear-gradient(135deg, #f0f7ff 0%, #e6f2ff 100%);
+    transform: translateY(-3px);
+}
+
+.value-number {
+    font-size: 3rem;
+    font-weight: 800;
+    background: linear-gradient(135deg, #0066ff 0%, #00d4ff 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    margin-bottom: 20px;
+}
+
+.value-item h4 {
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: #1e293b;
+    margin-bottom: 15px;
+}
+
+.value-item p {
+    color: #64748b;
+    line-height: 1.6;
+}
+
+/* 経営陣 */
+.team-section {
+    padding: 80px 60px;
+    background: #f8fafc;
+}
+
+.team-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 40px;
+}
+
+.team-member {
+    background: white;
+    border-radius: 20px;
+    padding: 40px;
+    text-align: center;
+    box-shadow: 0 5px 20px rgba(0, 0, 0, 0.05);
+}
+
+.member-photo {
+    width: 150px;
+    height: 150px;
+    margin: 0 auto 30px;
+    overflow: hidden;
+    border-radius: 50%;
+    border: 5px solid #f0f7ff;
+}
+
+.member-photo img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.team-member h4 {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: #1e293b;
+    margin-bottom: 10px;
+}
+
+.member-title {
+    color: #0066ff;
+    font-weight: 600;
+    margin-bottom: 20px;
+}
+
+.member-bio {
+    color: #64748b;
+    line-height: 1.6;
+}
+
+/* 沿革 */
+.history-section {
+    padding: 80px 60px;
+    background: white;
+}
+
+.history-timeline {
+    position: relative;
+    padding-left: 100px;
+}
+
+.history-timeline::before {
+    content: '';
+    position: absolute;
+    left: 40px;
+    top: 0;
+    bottom: 0;
+    width: 3px;
+    background: linear-gradient(135deg, #0066ff 0%, #00d4ff 100%);
+}
+
+.history-item {
+    position: relative;
+    margin-bottom: 50px;
+}
+
+.history-year {
+    position: absolute;
+    left: -100px;
+    top: 0;
+    width: 80px;
+    height: 80px;
+    background: white;
+    border: 3px solid #0066ff;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: #0066ff;
+}
+
+.history-content {
+    background: #f8fafc;
+    padding: 30px;
+    border-radius: 16px;
+    margin-left: 20px;
+}
+
+.history-content h4 {
+    color: #0066ff;
+    font-weight: 700;
+    margin-bottom: 10px;
+}
+
+.history-content p {
+    color: #64748b;
+    margin-bottom: 15px;
+}
+
+.history-content p:last-child {
+    margin-bottom: 0;
+}
+
+/* パートナー */
+.partners-section {
+    padding: 80px 60px;
+    background: #f8fafc;
+}
+
+.partners-grid {
+    display: grid;
+    grid-template-columns: repeat(6, 1fr);
+    gap: 30px;
+    align-items: center;
+}
+
+.partner-logo {
+    background: white;
+    padding: 30px;
+    border-radius: 16px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 120px;
+    transition: all 0.3s ease;
+}
+
+.partner-logo:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+}
+
+.partner-logo img {
+    max-width: 100%;
+    max-height: 60px;
+    filter: grayscale(100%);
+    opacity: 0.6;
+    transition: all 0.3s ease;
+}
+
+.partner-logo:hover img {
+    filter: grayscale(0%);
+    opacity: 1;
+}
+
+/* アクセス */
+.access-section {
+    padding: 80px 60px;
+    background: white;
+}
+
+.access-content {
+    display: grid;
+    grid-template-columns: 1fr 2fr;
+    gap: 60px;
+}
+
+.access-info h3 {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: #1e293b;
+    margin-bottom: 20px;
+}
+
+.access-info p {
+    color: #64748b;
+    line-height: 1.8;
+    margin-bottom: 30px;
+}
+
+.access-details p {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    margin-bottom: 15px;
+    color: #475569;
+}
+
+.access-details i {
+    color: #0066ff;
+    width: 20px;
+}
+
+.access-map {
+    border-radius: 16px;
+    overflow: hidden;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+}
+
+/* レスポンシブ対応 */
+@media (max-width: 768px) {
+    .legal-section {
+        padding: 80px 0 60px;
+    }
+    
+    .legal-header .section-title {
+        font-size: 2rem;
+    }
+    
+    .legal-content {
+        padding: 40px 30px;
+    }
+    
+    .legal-article h2 {
+        font-size: 1.5rem;
+    }
+    
+    /* 運営会社ページ */
+    .company-hero {
+        grid-template-columns: 1fr;
+        padding: 40px;
+        gap: 40px;
+    }
+    
+    .company-hero-content h2 {
+        font-size: 2rem;
+    }
+    
+    .company-info-table th {
+        display: block;
+        width: 100%;
+        border-bottom: 1px solid #e5e7eb;
+    }
+    
+    .company-info-table td {
+        display: block;
+        width: 100%;
+        padding: 15px 30px 30px;
+    }
+    
+    .mission-vision-grid,
+    .values-grid,
+    .team-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .partners-grid {
+        grid-template-columns: repeat(3, 1fr);
+    }
+    
+    .access-content {
+        grid-template-columns: 1fr;
+    }
+}
+
+@media (max-width: 480px) {
+    .legal-header .section-title {
+        font-size: 1.75rem;
+    }
+    
+    .legal-content {
+        padding: 30px 20px;
+        border-radius: 16px;
+    }
+    
+    .legal-toc {
+        padding: 20px;
+    }
+    
+    .legal-article h2 {
+        font-size: 1.25rem;
+        padding-left: 15px;
+    }
+    
+    .legal-article h3 {
+        font-size: 1.125rem;
+    }
+    
+    /* 運営会社ページ */
+    .company-info-section,
+    .mission-vision-section,
+    .values-section,
+    .team-section,
+    .history-section,
+    .partners-section,
+    .access-section {
+        padding: 40px 20px;
+    }
+    
+    .company-hero {
+        padding: 30px 20px;
+    }
+    
+    .company-hero-content h2 {
+        font-size: 1.5rem;
+    }
+    
+    .section-subtitle {
+        font-size: 1.5rem;
+    }
+    
+    .values-grid {
+        grid-template-columns: 1fr;
+        gap: 20px;
+    }
+    
+    .value-number {
+        font-size: 2rem;
+    }
+    
+    .partners-grid {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 20px;
+    }
+    
+    .partner-logo {
+        padding: 20px;
+        height: 100px;
+    }
+    
+    .history-timeline {
+        padding-left: 60px;
+    }
+    
+    .history-year {
+        width: 60px;
+        height: 60px;
+        font-size: 1rem;
+        left: -60px;
+    }
+    
+    .history-content {
+        padding: 20px;
+    }
+}

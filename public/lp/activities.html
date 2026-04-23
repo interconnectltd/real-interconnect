@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <link rel="icon" type="image/svg+xml" href="favicon.svg">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>アクティビティ一覧 - INTERCONNECT</title>
+    
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Noto+Sans+JP:wght@300;400;500;700&display=swap" rel="stylesheet">
+    
+    <!-- Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" integrity="sha384-iw3OoTErCYJJB9mCa8LNS2hbsQ7M3C0EpIsO/H5+EGAkPGc6rk+V8i04oW/K5xq0" crossorigin="anonymous">
+    
+    <!-- Styles -->
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/buttons.css">
+    <link rel="stylesheet" href="css/activities.css">
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <header class="page-header">
+            <div class="header-left">
+                <button class="btn-icon" onclick="history.back()">
+                    <i class="fas fa-arrow-left"></i>
+                </button>
+                <h1>アクティビティ一覧</h1>
+            </div>
+            <div class="header-right">
+                <button class="btn-icon" id="filterToggle">
+                    <i class="fas fa-filter"></i>
+                </button>
+                <button class="btn-icon" id="refreshBtn">
+                    <i class="fas fa-sync-alt"></i>
+                </button>
+            </div>
+        </header>
+
+        <!-- Filter Section -->
+        <div class="filter-section" id="filterSection" style="display: none;">
+            <div class="filter-group">
+                <label>アクティビティタイプ</label>
+                <select id="activityTypeFilter" class="filter-select">
+                    <option value="">すべて</option>
+                    <option value="member_join">新規参加</option>
+                    <option value="event_complete">イベント完了</option>
+                    <option value="matching_success">マッチング成立</option>
+                    <option value="profile_update">プロフィール更新</option>
+                    <option value="message_sent">メッセージ送信</option>
+                </select>
+            </div>
+            <div class="filter-group">
+                <label>期間</label>
+                <select id="periodFilter" class="filter-select">
+                    <option value="">すべて</option>
+                    <option value="today">今日</option>
+                    <option value="week">今週</option>
+                    <option value="month">今月</option>
+                    <option value="3months">過去3ヶ月</option>
+                </select>
+            </div>
+            <div class="filter-actions">
+                <button class="btn-secondary" id="applyFilter">適用</button>
+                <button class="btn-outline" id="clearFilter">クリア</button>
+            </div>
+        </div>
+
+        <!-- Stats Summary -->
+        <div class="stats-summary">
+            <div class="stat-item">
+                <span class="stat-label">総アクティビティ</span>
+                <span class="stat-value" id="totalActivities">0</span>
+            </div>
+            <div class="stat-item">
+                <span class="stat-label">今日</span>
+                <span class="stat-value" id="todayActivities">0</span>
+            </div>
+            <div class="stat-item">
+                <span class="stat-label">今週</span>
+                <span class="stat-value" id="weekActivities">0</span>
+            </div>
+        </div>
+
+        <!-- Activities List -->
+        <div class="activities-container">
+            <div class="loading-state" id="loadingState">
+                <div class="loading-spinner">
+                    <i class="fas fa-spinner fa-spin"></i>
+                </div>
+                <div class="loading-message">アクティビティを読み込んでいます...</div>
+            </div>
+            
+            <div class="activity-list" id="activityList" style="display: none;">
+                <!-- Activities will be dynamically inserted here -->
+            </div>
+            
+            <div class="empty-state" id="emptyState" style="display: none;">
+                <div class="empty-icon">
+                    <i class="fas fa-inbox"></i>
+                </div>
+                <div class="empty-message">アクティビティがありません</div>
+            </div>
+            
+            <div class="error-state" id="errorState" style="display: none;">
+                <div class="error-icon">
+                    <i class="fas fa-exclamation-triangle"></i>
+                </div>
+                <div class="error-message">データの読み込みに失敗しました</div>
+                <button class="btn-primary" onclick="location.reload()">再読み込み</button>
+            </div>
+        </div>
+
+        <!-- Load More Button -->
+        <div class="load-more-container" id="loadMoreContainer" style="display: none;">
+            <button class="btn-outline" id="loadMoreBtn">もっと見る</button>
+        </div>
+    </div>
+
+    <!-- Activity Detail Modal -->
+    <div class="modal" id="activityModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>アクティビティ詳細</h3>
+                <button class="btn-icon" onclick="closeActivityModal()">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="modal-body" id="modalBody">
+                <!-- Activity details will be inserted here -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="js/supabase-unified.js?v=1.1"></script>
+    <script src="js/core-utils.js"></script>
+    <script src="js/global-functions.js"></script>
+    <script src="js/profile-sync.js"></script>
+    <script src="js/notification-system-unified.js"></script>
+    <script src="js/guest-mode-manager.js"></script>
+    <script src="js/notifications-realtime-unified.js"></script>
+    <script src="js/responsive-menu-simple.js"></script>
+    <script src="js/dashboard.js"></script>
+    <script src="js/activities.js"></script>
+    <script src="js/user-dropdown-handler.js"></script>
+    <script src="js/avatar-size-enforcer.js"></script>
+</body>
+</html>

@@ -1,0 +1,53 @@
+[build]
+  publish = "dist"
+  command = "npm install --prefix netlify/functions && bash build.sh"
+
+[build.environment]
+  NODE_VERSION = "18"
+
+[functions]
+  directory = "netlify/functions"
+  node_bundler = "esbuild"
+
+[[plugins]]
+  package = "@netlify/plugin-functions-install-core"
+
+[[headers]]
+  for = "/.netlify/functions/*"
+  [headers.values]
+    Access-Control-Allow-Origin = "https://inter-connect.app"
+    Access-Control-Allow-Headers = "Content-Type, Authorization"
+    Access-Control-Allow-Methods = "POST, OPTIONS"
+
+[[headers]]
+  for = "/*"
+  [headers.values]
+    X-Frame-Options = "DENY"
+    X-XSS-Protection = "1; mode=block"
+    X-Content-Type-Options = "nosniff"
+    Referrer-Policy = "strict-origin-when-cross-origin"
+    Strict-Transport-Security = "max-age=31536000; includeSubDomains"
+    Permissions-Policy = "camera=(), microphone=(), geolocation=()"
+    Content-Security-Policy = "default-src 'self'; script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net https://apis.google.com https://static.line-scdn.net https://asset.timerex.net https://use.typekit.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://cdnjs.cloudflare.com https://cdn.jsdelivr.net https://use.typekit.net https://p.typekit.net; font-src 'self' https://fonts.gstatic.com https://cdnjs.cloudflare.com https://use.typekit.net; img-src 'self' data: blob: https://*.supabase.co https://ui-avatars.com https://profile.line-scdn.net; connect-src 'self' https://*.supabase.co wss://*.supabase.co https://www.googleapis.com https://api.line.me https://access.line.me https://liff.line.me https://timerex.net https://performance.typekit.net; media-src 'self'; frame-src https://www.google.com https://timerex.net; frame-ancestors 'none'"
+
+# 紹介リンクのリダイレクト
+[[redirects]]
+  from = "/invite/*"
+  to = "/invite.html"
+  status = 200
+
+# TimeRex Webhook受信（Supabase Edge Functionにプロキシ）
+[[redirects]]
+  from = "/api/timerex-webhook"
+  to = "https://zrddqaaaoerbguwxrlic.supabase.co/functions/v1/timerex-webhook"
+  status = 200
+  force = true
+  headers = {X-Forwarded-Host = "inter-connect.app"}
+
+# TimeRex予約セッション作成API
+[[redirects]]
+  from = "/api/timerex-booking"
+  to = "https://zrddqaaaoerbguwxrlic.supabase.co/functions/v1/timerex-booking"
+  status = 200
+  force = true
+  headers = {X-Forwarded-Host = "inter-connect.app"}

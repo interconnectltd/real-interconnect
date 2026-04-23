@@ -1,0 +1,1482 @@
+/* ============================================================ */
+/* Referral Page Bundle                                        */
+/* Consolidated from: referral.css, share-modal-enhanced.css   */
+/* ============================================================ */
+
+/* ============================================================ */
+/* Source: referral.css                                        */
+/* ============================================================ */
+
+/* ============================================================ */
+/* Source: referral-unified.css                                  */
+/* ============================================================ */
+
+/* ===========================
+   紹介ページ統一CSS
+   全ての紹介ページ関連スタイルを整理統合
+   =========================== */
+
+/* ===========================
+   1. 基本レイアウト
+   =========================== */
+/* ダッシュボードレイアウト */
+.dashboard {
+    display: flex;
+    min-height: 100vh;
+    background: #f8f9fa;
+}
+
+/* サイドバー */
+.sidebar {
+    width: 260px;
+    flex-shrink: 0;
+    background: white;
+    box-shadow: 2px 0 4px rgba(0, 0, 0, 0.05);
+}
+
+/* メインコンテンツ - 統一定義 */
+.main-content {
+    flex: 1;
+    width: calc(100% - 260px);
+    overflow-y: auto;
+    background: #f8f9fa;
+}
+
+/* コンテンツヘッダー */
+.content-header {
+    background: white;
+    padding: 1.5rem 2rem;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+    margin-bottom: 2rem;
+}
+
+/* コンテンツボディ */
+.content-body {
+    padding: 0 2rem;
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+/* ===========================
+   2. 紹介ページ専用要素
+   =========================== */
+/* ページ説明 */
+.page-intro {
+    margin-bottom: 2rem;
+}
+
+.page-description {
+    background: linear-gradient(135deg, #e0eaff 0%, #f0f4ff 100%);
+    border-left: 4px solid #0066ff;
+    padding: 1.25rem 1.5rem;
+    border-radius: 8px;
+    font-size: 0.9375rem;
+    line-height: 1.6;
+    color: #1f2937;
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+
+.page-description i {
+    font-size: 1.25rem;
+    color: #0066ff;
+    flex-shrink: 0;
+}
+
+/* ポイントサマリー */
+.points-summary {
+    background: linear-gradient(135deg, #e8f8ff 0%, #f0f9ff 100%);
+    border-radius: 12px;
+    padding: 2rem;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    margin-bottom: 2rem;
+}
+
+.points-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 2rem;
+    margin-bottom: 2rem;
+}
+
+.point-item {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 1rem;
+    background: rgba(255, 255, 255, 0.8);
+    border-radius: 8px;
+    transition: all 0.3s ease;
+}
+
+.point-item:hover {
+    background: white;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.point-icon {
+    width: 48px;
+    height: 48px;
+    background: linear-gradient(135deg, #0066ff 0%, #0052cc 100%);
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-size: 1.25rem;
+    flex-shrink: 0;
+}
+
+/* 紹介の流れ */
+.referral-steps {
+    background: white;
+    border-radius: 12px;
+    padding: 2rem;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    margin-bottom: 2rem;
+}
+
+.steps-container {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-top: 2rem;
+}
+
+.step {
+    flex: 1;
+    text-align: center;
+    position: relative;
+}
+
+.step-icon {
+    width: 80px;
+    height: 80px;
+    background: #f3f4f6;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 1rem;
+    font-size: 2rem;
+    color: #0066ff;
+}
+
+/* 紹介リンク管理 - 統一定義 */
+.referral-links {
+    background: #f8f9fa;
+    border: 1px solid #e9ecef;
+    border-radius: 12px;
+    padding: 2rem;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+    margin-bottom: 2rem;
+}
+
+.section-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1.5rem;
+}
+
+.section-header h2 {
+    color: #212529;
+    font-size: 1.5rem;
+    font-weight: 700;
+}
+
+/* リンクアイテム - 統一定義 */
+.link-item {
+    background: white;
+    border: 1px solid #e5e7eb;
+    border-radius: 12px;
+    padding: 1.5rem;
+    margin-bottom: 1rem;
+    transition: all 0.3s ease;
+    position: relative;
+    overflow: hidden;
+}
+
+.link-item:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
+    border-color: #dbeafe;
+}
+
+.link-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 1rem;
+}
+
+.link-info h3 {
+    font-size: 1.125rem;
+    font-weight: 600;
+    color: #1f2937;
+    margin-bottom: 0.5rem;
+}
+
+.link-actions {
+    display: flex;
+    gap: 0.5rem;
+}
+
+.link-actions .btn {
+    padding: 0.5rem 1rem;
+    font-size: 0.875rem;
+    border-radius: 6px;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.link-actions .btn i {
+    color: #ffffff;
+}
+
+/* タブセクション */
+.tabs-section {
+    background: white;
+    border-radius: 12px;
+    padding: 0;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.tab-navigation {
+    display: flex;
+    border-bottom: 1px solid #e5e7eb;
+}
+
+.tab-button {
+    flex: 1;
+    padding: 1rem;
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-size: 1rem;
+    font-weight: 500;
+    color: #6b7280;
+    transition: all 0.3s ease;
+    position: relative;
+}
+
+.tab-button.active {
+    color: #0066ff;
+}
+
+.tab-button.active::after {
+    content: '';
+    position: absolute;
+    bottom: -1px;
+    left: 0;
+    right: 0;
+    height: 2px;
+    background: #0066ff;
+}
+
+/* ===========================
+   3. モーダル関連（統一定義）
+   =========================== */
+.modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.5);
+    backdrop-filter: blur(4px);
+    display: none;
+    align-items: center;
+    justify-content: center;
+    z-index: 5000;
+    padding: 1rem;
+}
+
+.modal.active {
+    display: flex;
+}
+
+.modal-content {
+    background: white;
+    border-radius: 16px;
+    padding: 0;
+    max-width: 500px;
+    width: 90%;
+    max-height: 90vh;
+    overflow-y: auto;
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
+    position: relative;
+    animation: modalFadeIn 0.3s ease-out;
+}
+
+.modal-content.compact {
+    max-width: 400px;
+    padding: 1.5rem;
+}
+
+@keyframes modalFadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(-20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* 共有ボタン - 統一定義 */
+.share-options {
+    display: flex;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+    justify-content: center;
+    margin: 1rem 0;
+    padding: 0 0.5rem;
+}
+
+.share-button {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    padding: 0.6rem 1rem;
+    border: none;
+    border-radius: 8px;
+    font-size: 0.875rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    background: #f3f4f6;
+    color: #6b7280;
+    position: relative;
+    overflow: hidden;
+    flex: 1;
+    min-width: 0;
+    max-width: 120px;
+    white-space: nowrap;
+}
+
+.share-button:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+/* SNS別カラー */
+.share-button.twitter {
+    background: #e8f3fd;
+    color: #1DA1F2;
+}
+
+.share-button.twitter:hover {
+    background: #d6eafc;
+    box-shadow: 0 4px 12px rgba(29, 161, 242, 0.15);
+}
+
+.share-button.line {
+    background: #e8f7e8;
+    color: #00B900;
+}
+
+.share-button.line:hover {
+    background: #d6f0d6;
+    box-shadow: 0 4px 12px rgba(0, 185, 0, 0.15);
+}
+
+.share-button.facebook {
+    background: #e8f0fe;
+    color: #1877F2;
+}
+
+.share-button.facebook:hover {
+    background: #d6e4fd;
+    box-shadow: 0 4px 12px rgba(24, 119, 242, 0.15);
+}
+
+.share-button.email {
+    background: #f3e8ff;
+    color: #7c3aed;
+}
+
+.share-button.email:hover {
+    background: #e9d5ff;
+    box-shadow: 0 4px 12px rgba(124, 58, 237, 0.15);
+}
+
+/* ===========================
+   4. フォーム要素
+   =========================== */
+/* 基本フォーム要素 */
+.form-input,
+.form-select,
+.form-textarea {
+    width: 100%;
+    padding: 0.75rem 1rem;
+    border: 1px solid #e5e7eb;
+    border-radius: 8px;
+    font-size: 1rem;
+    transition: all 0.2s ease;
+    background: white;
+}
+
+.form-input:focus,
+.form-select:focus,
+.form-textarea:focus {
+    outline: none;
+    border-color: #3b82f6;
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
+/* リンク作成フォーム */
+.link-create-form {
+    background: #f3f4f6;
+    padding: 1.5rem;
+    border-radius: 8px;
+    margin-top: 1rem;
+}
+
+.form-actions {
+    display: flex;
+    gap: 0.75rem;
+    margin-top: 1rem;
+}
+
+/* フィルターセクション */
+.filter-section {
+    padding: 1rem 0;
+    border-bottom: 1px solid #e5e7eb;
+    margin-bottom: 1.5rem;
+}
+
+.filter-wrapper {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+
+.filter-label {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.875rem;
+    font-weight: 500;
+    color: #6b7280;
+}
+
+/* キャッシュアウトボタン */
+.cashout-button {
+    display: block;
+    width: 100%;
+    max-width: 400px;
+    margin: 1.5rem auto 0;
+    padding: 1rem 2rem;
+    background: #0066ff;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    text-align: center;
+}
+
+.cashout-button:not(:disabled):hover {
+    background: #0052cc;
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(0, 102, 255, 0.4);
+}
+
+.cashout-button:disabled {
+    background: #e5e7eb;
+    color: #9ca3af;
+    cursor: not-allowed;
+    opacity: 0.6;
+}
+
+/* ===========================
+   5. z-index管理（統一）
+   =========================== */
+.sidebar { z-index: 100; }
+.mobile-sidebar { z-index: 999; }
+.user-dropdown { z-index: 3000; }
+.notification-dropdown { z-index: 3000; }
+.modal { z-index: 5000; }
+
+/* ===========================
+   5. レスポンシブデザイン
+   =========================== */
+/* PC画面（1024px以上） */
+@media (min-width: 1024px) {
+    .main-content {
+        padding: 2rem;
+    }
+
+    .content-body {
+        padding: 0 3rem;
+        max-width: 1400px;
+    }
+
+    .points-summary,
+    .referral-steps,
+    .referral-links,
+    .tabs-section {
+        margin-bottom: 2.5rem;
+    }
+}
+
+/* 大画面（1440px以上） */
+@media (min-width: 1440px) {
+    .main-content {
+        padding: 2rem 3rem;
+    }
+
+    .content-body {
+        padding: 0 4rem;
+        max-width: 1600px;
+    }
+}
+
+/* 超大画面（1920px以上） */
+@media (min-width: 1920px) {
+    .content-body {
+        max-width: 1800px;
+        padding: 0 5rem;
+    }
+}
+
+/* タブレット（768px〜1023px） */
+@media (max-width: 1023px) {
+    .sidebar {
+        display: none;
+    }
+
+    .main-content {
+        width: 100%;
+        padding: 1rem;
+    }
+
+    .content-body {
+        padding: 0 1rem;
+        max-width: 100%;
+    }
+
+    .points-grid {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 1rem;
+    }
+
+    .steps-container {
+        flex-direction: column;
+        gap: 2rem;
+    }
+}
+
+/* モバイル（640px以下） */
+@media (max-width: 640px) {
+    .points-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .share-button {
+        padding: 0.5rem;
+        font-size: 0.75rem;
+        gap: 0.25rem;
+        min-width: 60px;
+        max-width: 80px;
+    }
+
+    .modal-content {
+        width: 95%;
+        margin: 0.5rem;
+        max-height: 95vh;
+    }
+
+    .modal-content.compact {
+        padding: 1rem;
+    }
+}
+
+/* 極小画面（480px以下） */
+@media (max-width: 480px) {
+    .share-button {
+        font-size: 0;
+        padding: 0.75rem;
+        width: 44px;
+        height: 44px;
+        min-width: unset;
+        max-width: unset;
+        justify-content: center;
+    }
+
+    .share-button i {
+        font-size: 1.25rem;
+        margin: 0;
+    }
+
+    .share-button span {
+        display: none;
+    }
+}
+
+/* ============================================================ */
+/* Source: referral-final-fix.css                                 */
+/* ============================================================ */
+
+/**
+ * 紹介プログラムページ最終修正
+ * 競合解消とサイズ正常化
+ */
+
+/* =============================
+   リセットと基本設定
+   ============================= */
+/* box-sizingを全要素に適用 */
+* {
+    box-sizing: border-box;
+}
+
+/* =============================
+   メインレイアウト（最高優先度）
+   ============================= */
+/* ダッシュボード全体 */
+body .dashboard {
+    display: flex;
+    min-height: 100vh;
+    width: 100%;
+    background: #f8f9fa;
+}
+
+/* サイドバー */
+body .dashboard .sidebar {
+    width: 260px !important;
+    flex-shrink: 0;
+    background: white;
+    box-shadow: 2px 0 4px rgba(0, 0, 0, 0.05);
+}
+
+/* メインコンテンツ - デフォルトは全幅 */
+body .dashboard .main-content {
+    margin-left: 0 !important;
+    width: 100% !important;
+    padding: 0 !important;
+    overflow-y: auto;
+}
+
+/* コンテンツヘッダー */
+body .dashboard .content-header {
+    background: white;
+    padding: 1.5rem 2rem !important;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+    margin-bottom: 2rem !important;
+    width: 100%;
+}
+
+/* コンテンツボディ */
+body .dashboard .main-content .content-body {
+    padding: 0 2rem !important;
+    max-width: 1200px !important;
+    margin: 0 auto !important;
+    width: 100%;
+}
+
+/* =============================
+   紹介ページ専用要素
+   ============================= */
+/* ページ説明 */
+.page-intro {
+    margin-bottom: 2rem !important;
+    width: 100%;
+}
+
+.page-description {
+    background: linear-gradient(135deg, #e0eaff 0%, #f0f4ff 100%);
+    border-left: 4px solid #0066ff;
+    padding: 1.25rem 1.5rem !important;
+    border-radius: 8px;
+    width: 100%;
+}
+
+/* ポイントサマリー */
+.points-summary {
+    background: linear-gradient(135deg, #e8f8ff 0%, #f0f9ff 100%);
+    border-radius: 12px;
+    padding: 2rem !important;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    margin-bottom: 2rem !important;
+    width: 100%;
+}
+
+.points-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 2rem;
+    margin-bottom: 2rem !important;
+    width: 100%;
+}
+
+/* 紹介ステップ */
+.referral-steps {
+    background: white;
+    border-radius: 12px;
+    padding: 2rem !important;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    margin-bottom: 2rem !important;
+    width: 100%;
+}
+
+.steps-container {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 1rem;
+    width: 100%;
+}
+
+/* 紹介リンク管理 */
+.referral-links {
+    background: white;
+    border-radius: 12px;
+    padding: 2rem !important;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    margin-bottom: 2rem !important;
+    width: 100%;
+}
+
+/* タブセクション */
+.tabs-section {
+    background: white;
+    border-radius: 12px;
+    padding: 0 !important;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    margin-bottom: 2rem !important;
+    width: 100%;
+}
+
+.tab-navigation {
+    display: flex;
+    border-bottom: 1px solid #e9ecef;
+    padding: 0 !important;
+    margin: 0 !important;
+}
+
+.tab-content {
+    padding: 2rem !important;
+}
+
+/* カード要素 */
+.card {
+    background: white;
+    border-radius: 12px;
+    padding: 2rem !important;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    margin-bottom: 2rem !important;
+    width: 100%;
+}
+
+/* =============================
+   PC画面対応（1024px以上）でサイドバー表示
+   ============================= */
+@media (min-width: 1024px) {
+    /* サイドバー固定 */
+    body .dashboard .sidebar {
+        position: fixed;
+        left: 0;
+        top: 0;
+        height: 100vh;
+        overflow-y: auto;
+        display: block !important;
+    }
+
+    /* メインコンテンツをサイドバー分ずらす */
+    body .dashboard .main-content {
+        margin-left: 260px !important;
+        width: calc(100% - 260px) !important;
+    }
+
+    /* モバイルヘッダーを非表示 */
+    .mobile-header {
+        display: none !important;
+    }
+}
+
+/* =============================
+   大画面対応（1440px以上）
+   ============================= */
+@media (min-width: 1440px) {
+    /* コンテンツボディの最大幅を拡大 */
+    body .dashboard .main-content .content-body {
+        max-width: 1400px !important;
+        padding: 0 3rem !important;
+    }
+}
+
+/* 超大画面（1920px以上） */
+@media (min-width: 1920px) {
+    body .dashboard .main-content .content-body {
+        max-width: 1600px !important;
+        padding: 0 4rem !important;
+    }
+}
+
+/* =============================
+   タブレット対応（768px〜1023px）
+   ============================= */
+@media (min-width: 768px) and (max-width: 1023px) {
+    /* サイドバーを非表示 */
+    body .dashboard .sidebar {
+        display: none;
+    }
+
+    /* メインコンテンツ全幅 */
+    body .dashboard .main-content {
+        margin-left: 0 !important;
+        width: 100% !important;
+    }
+
+    /* ポイントグリッドを2列に */
+    .points-grid {
+        grid-template-columns: repeat(2, 1fr) !important;
+    }
+}
+
+/* =============================
+   モバイル対応（767px以下）
+   ============================= */
+@media (max-width: 767px) {
+    /* サイドバーを非表示 */
+    body .dashboard .sidebar {
+        display: none;
+    }
+
+    /* メインコンテンツ調整 */
+    body .dashboard .main-content {
+        margin-left: 0 !important;
+        width: 100% !important;
+    }
+
+    /* コンテンツボディのパディング削減 */
+    body .dashboard .main-content .content-body {
+        padding: 0 1rem !important;
+    }
+
+    /* ポイントグリッドを1列に */
+    .points-grid {
+        grid-template-columns: 1fr !important;
+        gap: 1rem !important;
+    }
+
+    /* ステップを縦並びに */
+    .steps-container {
+        flex-direction: column !important;
+    }
+
+    .step-arrow {
+        transform: rotate(90deg);
+        margin: 1rem 0;
+    }
+
+    /* カードのパディング削減 */
+    .card,
+    .points-summary,
+    .referral-steps,
+    .referral-links,
+    .tab-content {
+        padding: 1.5rem !important;
+    }
+}
+
+/* =============================
+   キャッシュアウトボタン
+   ============================= */
+.cashout-button {
+    width: 100%;
+    max-width: 400px;
+    margin: 2rem auto 0;
+    display: block;
+    padding: 1rem 2rem !important;
+    font-size: 1rem !important;
+}
+
+/* =============================
+   ボタンとフォーム要素
+   ============================= */
+.btn {
+    padding: 0.75rem 1.5rem !important;
+    font-size: 0.9375rem !important;
+    border-radius: 8px !important;
+    transition: all 0.3s ease;
+}
+
+.form-input,
+.form-select {
+    width: 100%;
+    padding: 0.75rem 1rem !important;
+    border: 1px solid #dee2e6;
+    border-radius: 8px;
+    font-size: 0.9375rem !important;
+}
+
+/* =============================
+   余白の最適化
+   ============================= */
+.section-header {
+    margin-bottom: 1.5rem !important;
+}
+
+h2 {
+    margin-bottom: 1.5rem !important;
+}
+
+/* =============================
+   スクロールバー
+   ============================= */
+.main-content::-webkit-scrollbar {
+    width: 8px;
+}
+
+.main-content::-webkit-scrollbar-track {
+    background: #f1f1f1;
+}
+
+.main-content::-webkit-scrollbar-thumb {
+    background: #888;
+    border-radius: 4px;
+}
+
+.main-content::-webkit-scrollbar-thumb:hover {
+    background: #555;
+}
+
+/* ============================================================ */
+/* Source: referral-link-card-redesign.css                        */
+/* ============================================================ */
+
+/**
+ * 紹介リンクカードのリデザイン
+ * モダンで洗練されたデザインに改善
+ */
+
+/* リンクアイテムカード */
+.link-item {
+    background: white;
+    border-radius: 16px;
+    padding: 1.5rem;
+    margin-bottom: 1rem;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+    transition: all 0.3s ease;
+    border: 1px solid rgba(0, 102, 255, 0.1);
+}
+
+.link-item:hover {
+    box-shadow: 0 8px 24px rgba(0, 102, 255, 0.15);
+    transform: translateY(-2px);
+    border-color: rgba(0, 102, 255, 0.2);
+}
+
+/* リンクヘッダー */
+.link-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 1.25rem;
+}
+
+.link-info h3 {
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: #1a202c;
+    margin: 0 0 0.5rem 0;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.link-info h3::before {
+    content: '#';
+    color: #0066ff;
+    font-weight: 400;
+}
+
+.link-code {
+    font-family: 'SF Mono', 'Monaco', 'Inconsolata', monospace;
+    font-size: 0.875rem;
+    color: #4a5568;
+    background: #f7fafc;
+    padding: 0.25rem 0.75rem;
+    border-radius: 6px;
+    display: inline-block;
+    letter-spacing: 0.05em;
+}
+
+/* 統計情報 */
+.link-stats {
+    display: flex;
+    gap: 1.5rem;
+}
+
+.link-stats .stat {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.875rem;
+    color: #4a5568;
+    padding: 0.5rem 1rem;
+    background: #f8f9fa;
+    border-radius: 8px;
+    transition: all 0.2s ease;
+}
+
+.link-stats .stat:hover {
+    background: #e9ecef;
+    color: #2d3748;
+}
+
+.link-stats .stat i {
+    color: #0066ff;
+    font-size: 1rem;
+}
+
+/* URLセクション */
+.link-url {
+    margin-bottom: 1.25rem;
+    position: relative;
+}
+
+.link-input {
+    width: 100%;
+    padding: 0.875rem 1rem;
+    background: #f8f9fb;
+    border: 2px solid #e9ecef;
+    border-radius: 10px;
+    font-family: 'SF Mono', monospace;
+    font-size: 0.875rem;
+    color: #2d3748;
+    transition: all 0.2s ease;
+}
+
+.link-input:focus {
+    outline: none;
+    border-color: #0066ff;
+    background: white;
+    box-shadow: 0 0 0 3px rgba(0, 102, 255, 0.1);
+}
+
+/* アクションボタン */
+.link-actions {
+    display: flex;
+    gap: 0.75rem;
+    flex-wrap: wrap;
+}
+
+.link-actions .btn {
+    flex: 1;
+    min-width: 100px;
+    padding: 0.625rem 1rem;
+    font-size: 0.875rem;
+    font-weight: 500;
+    border-radius: 8px;
+    transition: all 0.2s ease;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+}
+
+.link-actions .btn i {
+    font-size: 0.875rem;
+}
+
+/* コピーボタン */
+.link-actions .copy-btn {
+    background: #f0f4f8;
+    color: #4a5568;
+    border: 1px solid #e2e8f0;
+}
+
+.link-actions .copy-btn:hover {
+    background: #e2e8f0;
+    border-color: #cbd5e0;
+    transform: translateY(-1px);
+}
+
+/* 共有ボタン */
+.link-actions .share-btn {
+    background: linear-gradient(135deg, #0066ff 0%, #0052cc 100%);
+    color: white;
+    border: none;
+    box-shadow: 0 2px 4px rgba(0, 102, 255, 0.2);
+}
+
+.link-actions .share-btn:hover {
+    background: linear-gradient(135deg, #0052cc 0%, #0041a8 100%);
+    box-shadow: 0 4px 8px rgba(0, 102, 255, 0.3);
+    transform: translateY(-1px);
+}
+
+/* 削除ボタン */
+.link-actions .delete-btn {
+    background: #fff5f5;
+    color: #e53e3e;
+    border: 1px solid #feb2b2;
+}
+
+.link-actions .delete-btn:hover {
+    background: #fed7d7;
+    border-color: #fc8181;
+    transform: translateY(-1px);
+}
+
+/* モバイルレスポンシブ */
+@media (max-width: 640px) {
+    .link-header {
+        flex-direction: column;
+        gap: 1rem;
+    }
+
+    .link-stats {
+        width: 100%;
+        justify-content: space-around;
+    }
+
+    .link-actions {
+        flex-direction: column;
+    }
+
+    .link-actions .btn {
+        width: 100%;
+    }
+}
+
+/* ============================================================ */
+/* Source: share-modal-enhanced.css                            */
+/* ============================================================ */
+
+/**
+ * シェアモーダル改善CSS
+ * より洗練されたデザインと完璧なレスポンシブ対応
+ */
+
+/* シェアオプションコンテナ */
+.share-options {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+    gap: 12px;
+    margin: 20px 0;
+    padding: 0 5px;
+}
+
+/* シェアボタン基本スタイル */
+.share-button {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 16px 12px;
+    border: none;
+    border-radius: 12px;
+    background: #f8f9fa;
+    color: #333;
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    position: relative;
+    overflow: hidden;
+    min-height: 80px;
+}
+
+.share-button:before {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 0;
+    height: 0;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.5);
+    transform: translate(-50%, -50%);
+    transition: width 0.6s, height 0.6s;
+}
+
+.share-button:hover:before {
+    width: 300px;
+    height: 300px;
+}
+
+.share-button:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.12);
+}
+
+.share-button:active {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+}
+
+/* アイコンスタイル */
+.share-button i {
+    font-size: 24px;
+    margin-bottom: 8px;
+    transition: transform 0.3s ease;
+}
+
+.share-button:hover i {
+    transform: scale(1.1);
+}
+
+.share-button span {
+    font-size: 12px;
+    margin-top: 4px;
+    white-space: nowrap;
+}
+
+/* 各SNSのブランドカラー */
+.share-button.twitter {
+    background: linear-gradient(135deg, #1DA1F2, #1a91da);
+    color: white;
+}
+
+.share-button.twitter:hover {
+    background: linear-gradient(135deg, #1a91da, #1681c4);
+    box-shadow: 0 8px 20px rgba(29, 161, 242, 0.3);
+}
+
+.share-button.line {
+    background: linear-gradient(135deg, #00C300, #00b200);
+    color: white;
+}
+
+.share-button.line:hover {
+    background: linear-gradient(135deg, #00b200, #00a000);
+    box-shadow: 0 8px 20px rgba(0, 195, 0, 0.3);
+}
+
+.share-button.facebook {
+    background: linear-gradient(135deg, #1877F2, #166fe5);
+    color: white;
+}
+
+.share-button.facebook:hover {
+    background: linear-gradient(135deg, #166fe5, #1461d1);
+    box-shadow: 0 8px 20px rgba(24, 119, 242, 0.3);
+}
+
+.share-button.email {
+    background: linear-gradient(135deg, #EA4335, #dc3e31);
+    color: white;
+}
+
+.share-button.email:hover {
+    background: linear-gradient(135deg, #dc3e31, #c5362a);
+    box-shadow: 0 8px 20px rgba(234, 67, 53, 0.3);
+}
+
+/* コピーボタン（追加） */
+.share-button.copy {
+    background: linear-gradient(135deg, #6c757d, #5a6268);
+    color: white;
+}
+
+.share-button.copy:hover {
+    background: linear-gradient(135deg, #5a6268, #4e555b);
+    box-shadow: 0 8px 20px rgba(108, 117, 125, 0.3);
+}
+
+.share-button.copy.success {
+    background: linear-gradient(135deg, #28a745, #24963e);
+    animation: successPulse 0.5s ease;
+}
+
+@keyframes successPulse {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.05); }
+    100% { transform: scale(1); }
+}
+
+/* シェアテキストエリア */
+.share-text {
+    margin: 20px 0;
+    padding: 0 5px;
+}
+
+.share-text textarea {
+    width: 100%;
+    padding: 12px;
+    border: 2px solid #e9ecef;
+    border-radius: 8px;
+    font-size: 14px;
+    line-height: 1.6;
+    resize: vertical;
+    transition: border-color 0.3s ease;
+    font-family: inherit;
+    background: #f8f9fa;
+}
+
+.share-text textarea:focus {
+    outline: none;
+    border-color: #4a90e2;
+    background: white;
+}
+
+/* モーダルヘッダーの改善 */
+.modal-header h3 {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 18px;
+    font-weight: 600;
+    color: #2c3e50;
+}
+
+.modal-header h3 i {
+    color: #4a90e2;
+}
+
+/* クローズボタンの改善 */
+.modal-header .close-button {
+    width: 36px;
+    height: 36px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: none;
+    background: #f1f3f5;
+    border-radius: 50%;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.modal-header .close-button:hover {
+    background: #e9ecef;
+    transform: rotate(90deg);
+}
+
+/* タブレット対応 */
+@media (max-width: 768px) {
+    .share-options {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 10px;
+    }
+    
+    .share-button {
+        min-height: 70px;
+        padding: 12px 8px;
+    }
+    
+    .share-button i {
+        font-size: 20px;
+    }
+    
+    .share-button span {
+        font-size: 11px;
+    }
+}
+
+/* スマートフォン対応 */
+@media (max-width: 480px) {
+    .share-options {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 8px;
+        margin: 15px 0;
+    }
+    
+    .share-button {
+        min-height: 65px;
+        padding: 10px 6px;
+        border-radius: 10px;
+    }
+    
+    .share-button i {
+        font-size: 18px;
+        margin-bottom: 6px;
+    }
+    
+    .share-button span {
+        font-size: 10px;
+    }
+    
+    .share-text textarea {
+        font-size: 13px;
+        padding: 10px;
+    }
+    
+    .modal-header h3 {
+        font-size: 16px;
+    }
+}
+
+/* 超小型デバイス対応 */
+@media (max-width: 360px) {
+    .share-options {
+        grid-template-columns: 1fr 1fr;
+        gap: 6px;
+    }
+    
+    .share-button {
+        min-height: 60px;
+        padding: 8px 4px;
+    }
+    
+    .share-button i {
+        font-size: 16px;
+    }
+    
+    .share-button span {
+        font-size: 9px;
+    }
+}
+
+/* ダークモード対応 */
+@media (prefers-color-scheme: dark) {
+    .modal-content {
+        background: #2b2b2b;
+        color: #e0e0e0;
+    }
+    
+    .share-button:not(.twitter):not(.line):not(.facebook):not(.email):not(.copy) {
+        background: #3a3a3a;
+        color: #e0e0e0;
+    }
+    
+    .share-text textarea {
+        background: #3a3a3a;
+        border-color: #4a4a4a;
+        color: #e0e0e0;
+    }
+    
+    .modal-header .close-button {
+        background: #3a3a3a;
+        color: #e0e0e0;
+    }
+    
+    .modal-header .close-button:hover {
+        background: #4a4a4a;
+    }
+}
+
+/* アクセシビリティ改善 */
+.share-button:focus-visible {
+    outline: 3px solid #4a90e2;
+    outline-offset: 2px;
+}
+
+/* アニメーション無効化（アクセシビリティ） */
+@media (prefers-reduced-motion: reduce) {
+    .share-button,
+    .share-button:before,
+    .share-button i,
+    .modal-header .close-button {
+        transition: none;
+    }
+    
+    .share-button:hover {
+        transform: none;
+    }
+    
+    @keyframes successPulse {
+        0%, 100% { transform: none; }
+    }
+}

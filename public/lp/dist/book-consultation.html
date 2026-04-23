@@ -1,0 +1,402 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <link rel="icon" type="image/svg+xml" href="favicon.svg">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>無料相談予約 - INTERCONNECT</title>
+    
+    <!-- SEO Meta Tags -->
+    <meta name="description" content="INTERCONNECTの無料相談予約ページ。ビジネスの課題解決から成長戦略まで、経験豊富なコンサルタントがサポートします。">
+    <meta name="keywords" content="ビジネス相談,無料相談,経営相談,INTERCONNECT">
+    
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Noto+Sans+JP:wght@300;400;500;700&display=swap" rel="stylesheet">
+    
+    <!-- Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" integrity="sha384-iw3OoTErCYJJB9mCa8LNS2hbsQ7M3C0EpIsO/H5+EGAkPGc6rk+V8i04oW/K5xq0" crossorigin="anonymous">
+    
+    <!-- Styles -->
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/buttons.css">
+    <link rel="stylesheet" href="css/notifications.css">
+    <link rel="stylesheet" href="css/navbar-fresh.css">
+    
+    <!-- Booking Page Specific Styles -->
+    <style>
+        /* 予約ページ専用スタイル */
+        body {
+            background: #f9fafb;
+        }
+        
+        .booking-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+        
+        .booking-header-section {
+            text-align: center;
+            margin-bottom: 3rem;
+            padding-top: 2rem;
+        }
+        
+        .booking-header-section h1 {
+            font-size: 2.5rem;
+            font-weight: 700;
+            color: #1f2937;
+            margin-bottom: 1rem;
+        }
+        
+        .booking-header-section p {
+            font-size: 1.125rem;
+            color: #6b7280;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+        
+        .booking-content {
+            display: flex;
+            flex-direction: column;
+            gap: 2rem;
+            max-width: 700px;
+            margin: 0 auto;
+        }
+        
+        .booking-info {
+            background: white;
+            padding: 2rem;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+        }
+        
+        .booking-info h2 {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: #1f2937;
+            margin-bottom: 1.5rem;
+        }
+        
+        .booking-features {
+            list-style: none;
+            padding: 0;
+            margin: 0 0 2rem 0;
+        }
+        
+        .booking-features li {
+            display: flex;
+            align-items: flex-start;
+            gap: 0.75rem;
+            padding: 0.75rem 0;
+            color: #4b5563;
+        }
+        
+        .booking-features i {
+            color: #3b82f6;
+            margin-top: 0.125rem;
+        }
+        
+        .consultation-topics {
+            background: #f3f4f6;
+            padding: 1.5rem;
+            border-radius: 8px;
+            margin-bottom: 2rem;
+        }
+        
+        .consultation-topics h3 {
+            font-size: 1.125rem;
+            font-weight: 600;
+            color: #1f2937;
+            margin-bottom: 1rem;
+        }
+        
+        .topic-list {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 0.5rem;
+        }
+        
+        .topic-list span {
+            font-size: 0.875rem;
+            color: #6b7280;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        
+        .topic-list span::before {
+            content: "•";
+            color: #3b82f6;
+        }
+        
+        .booking-calendar {
+            background: white;
+            padding: 2rem;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+        }
+        
+        .calendar-header {
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+        
+        .calendar-header h3 {
+            font-size: 1.25rem;
+            font-weight: 600;
+            color: #1f2937;
+            margin-bottom: 0.5rem;
+        }
+        
+        .calendar-header p {
+            font-size: 0.875rem;
+            color: #6b7280;
+        }
+        
+        /* カレンダープレースホルダー */
+        .calendar-placeholder {
+            background: #f9fafb;
+            border: 2px dashed #e5e7eb;
+            border-radius: 8px;
+            padding: 3rem;
+            text-align: center;
+        }
+        
+        .calendar-placeholder i {
+            font-size: 3rem;
+            color: #d1d5db;
+            margin-bottom: 1rem;
+        }
+        
+        .calendar-placeholder p {
+            color: #6b7280;
+            margin-bottom: 1.5rem;
+        }
+        
+        .temp-booking-btn {
+            background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+            color: white;
+            border: none;
+            padding: 0.75rem 2rem;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: inline-flex !important;
+            align-items: center;
+            gap: 0.5rem;
+            margin-top: 1rem;
+            visibility: visible !important;
+            opacity: 1 !important;
+        }
+        
+        .temp-booking-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(59, 130, 246, 0.3);
+        }
+        
+        /* モバイル対応 */
+        @media (max-width: 768px) {
+            .booking-container {
+                padding: 1rem;
+            }
+            
+            .booking-header-section h1 {
+                font-size: 1.875rem;
+            }
+            
+            .topic-list {
+                grid-template-columns: 1fr;
+            }
+        }
+        
+        /* navbarの調整 - navbar-fresh.cssのスタイルを上書きしない */
+        
+        main {
+            padding-top: 80px;
+            min-height: calc(100vh - 80px);
+        }
+        
+        /* フッターのスタイル調整 */
+        .footer {
+            background: #1a1a1a;
+            color: #f9fafb;
+            padding: 3rem 0 1.5rem;
+            margin-top: 5rem;
+        }
+        
+        /* フッタースタイルは style.css で統一定義済み */
+    </style>
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="navbar" role="navigation" aria-label="メインナビゲーション">
+        <div class="container">
+            <div class="navbar-brand">
+                <h1>INTERCONNECT</h1>
+                <span class="tagline">ビジネスをつなぐ</span>
+            </div>
+            
+            <button class="navbar-toggler" aria-label="メニューを開く" aria-expanded="false">
+                <span></span>
+                <span></span>
+                <span></span>
+            </button>
+            
+            <ul class="navbar-nav" role="menu">
+                <li><a href="/index.html" class="nav-link" role="menuitem">ホーム</a></li>
+                <li><a href="/index.html#features" class="nav-link" role="menuitem">特徴</a></li>
+                <li><a href="/index.html#services" class="nav-link" role="menuitem">サービス</a></li>
+                <li><a href="/index.html#contact" class="nav-link" role="menuitem">お問い合わせ</a></li>
+                <li><a href="/login.html" class="nav-link btn-login">ログイン</a></li>
+                <li><a href="/register.html" class="nav-link btn-register">無料で始める</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main>
+        <div class="booking-container">
+            <!-- Header Section -->
+            <div class="booking-header-section">
+                <h1>無料相談のご予約</h1>
+                <p>ビジネスの課題解決から成長戦略まで、経験豊富なコンサルタントがサポートします</p>
+            </div>
+            
+            <!-- Content Grid -->
+            <div class="booking-content">
+                <!-- Left Column: Info -->
+                <div class="booking-info">
+                    <h2>相談内容について</h2>
+                    
+                    <ul class="booking-features">
+                        <li>
+                            <i class="fas fa-check-circle"></i>
+                            <span>初回相談は完全無料（30分）</span>
+                        </li>
+                        <li>
+                            <i class="fas fa-check-circle"></i>
+                            <span>オンライン（Zoom/Google Meet）で実施</span>
+                        </li>
+                        <li>
+                            <i class="fas fa-check-circle"></i>
+                            <span>経験豊富な専門コンサルタントが対応</span>
+                        </li>
+                        <li>
+                            <i class="fas fa-check-circle"></i>
+                            <span>相談内容は秘密厳守</span>
+                        </li>
+                    </ul>
+                    
+                    <div class="consultation-topics">
+                        <h3>よくご相談いただくテーマ</h3>
+                        <div class="topic-list">
+                            <span>事業戦略立案</span>
+                            <span>売上向上施策</span>
+                            <span>組織づくり</span>
+                            <span>マーケティング</span>
+                            <span>資金調達</span>
+                            <span>DX推進</span>
+                            <span>人材採用</span>
+                            <span>新規事業開発</span>
+                        </div>
+                    </div>
+                    
+                    <div class="info-note" style="background: #eff6ff; padding: 1rem; border-radius: 8px; display: flex; align-items: start; gap: 0.75rem; color: #1e40af;">
+                        <i class="fas fa-info-circle" style="margin-top: 0.125rem;"></i>
+                        <p style="margin: 0; font-size: 0.875rem;">まずはお気軽にご相談ください。課題の整理から一緒に始めましょう。</p>
+                    </div>
+                </div>
+                
+                <!-- Right Column: Calendar -->
+                <div class="booking-calendar">
+                    <div class="calendar-header">
+                        <h3>ご希望の日時を選択</h3>
+                        <p>空いている時間帯からお選びください</p>
+                    </div>
+                    
+                    <!-- Calendar Container -->
+                    <div id="booking-calendar-container">
+                        <!-- 予約フォーム -->
+                        <div class="calendar-placeholder">
+                            <i class="fas fa-envelope"></i>
+                            <p>メールで簡単に予約できます</p>
+                            <button class="temp-booking-btn" id="open-booking-btn">
+                                <i class="fas fa-envelope"></i>
+                                <span>メールで予約する</span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-grid">
+                <div class="footer-brand">
+                    <h3>INTER CONNECT</h3>
+                    <p>日本最高峰の経営者専用コミュニティ</p>
+                </div>
+                <div class="footer-nav">
+                    <h4>サービス</h4>
+                    <ul>
+                        <li><a href="index.html#features">特徴</a></li>
+                        <li><a href="index.html#pricing">料金プラン</a></li>
+                        <li><a href="news.html?filter=event">イベント</a></li>
+                    </ul>
+                </div>
+                <div class="footer-nav">
+                    <h4>サポート</h4>
+                    <ul>
+                        <li><a href="index.html#faq">よくある質問</a></li>
+                        <li><a href="index.html#contact">お問い合わせ</a></li>
+                        <li><a href="news.html">お知らせ</a></li>
+                    </ul>
+                </div>
+                <div class="footer-nav">
+                    <h4>会社情報</h4>
+                    <ul>
+                        <li><a href="about.html">運営会社</a></li>
+                        <li><a href="terms.html">利用規約</a></li>
+                        <li><a href="privacy.html">プライバシーポリシー</a></li>
+                    </ul>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; 2026 INTER CONNECT. All rights reserved.</p>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Scripts -->
+    <script src="js/supabase-unified.js?v=1.1"></script>
+    <script src="js/responsive-menu-simple.js"></script>
+    
+    <script>
+        // 予約ボタンの動作
+        document.addEventListener('DOMContentLoaded', function() {
+            const btn = document.getElementById('open-booking-btn');
+            if (btn) {
+                btn.addEventListener('click', function() {
+                    // メールで予約を受け付ける（TimeRexが利用できないため）
+                    window.location.href = 'mailto:support@interconnects.info?subject=無料相談のご予約&body=お名前：%0D%0A会社名：%0D%0A希望日時（第1希望）：%0D%0A希望日時（第2希望）：%0D%0A相談内容：%0D%0A';
+                });
+            }
+            
+            // プレースホルダーのテキストを更新
+            const placeholder = document.querySelector('.calendar-placeholder p');
+            if (placeholder) {
+                placeholder.textContent = 'お気軽にメールでご予約ください';
+            }
+            
+            // モバイルメニューは responsive-menu-simple.js で処理
+        });
+    </script>
+</body>
+</html>

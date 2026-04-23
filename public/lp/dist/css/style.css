@@ -1,0 +1,1467 @@
+/* ===========================
+   Reset & Base Styles
+   =========================== */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+html {
+    scroll-behavior: smooth;
+}
+
+body {
+    font-family: 'Noto Sans JP', 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+    font-size: 16px;
+    line-height: 1.6;
+    color: #333;
+    background-color: #fff;
+}
+
+img {
+    max-width: 100%;
+    height: auto;
+}
+
+a {
+    text-decoration: none;
+    color: inherit;
+}
+
+ul {
+    list-style: none;
+}
+
+/* ===========================
+   Variables
+   =========================== */
+:root {
+    /* Colors */
+    --primary-color: #2563eb;
+    --primary-dark: #1d4ed8;
+    --primary-light: #3b82f6;
+    --secondary-color: #10b981;
+    --accent-color: #f59e0b;
+    --success-color: #10b981;
+    --success-dark: #059669;
+    --danger-color: #ef4444;
+    --danger-dark: #dc2626;
+    --text-primary: #1f2937;
+    --text-secondary: #6b7280;
+    --bg-primary: #ffffff;
+    --bg-secondary: #f3f4f6;
+    --bg-dark: #111827;
+    --border-color: #e5e7eb;
+    
+    /* Spacing */
+    --space-xs: 0.25rem;
+    --space-sm: 0.5rem;
+    --space-md: 1rem;
+    --space-lg: 1.5rem;
+    --space-xl: 2rem;
+    --space-2xl: 3rem;
+    --space-3xl: 4rem;
+    
+    /* Container */
+    --container-max: 1200px;
+    --container-padding: 1rem;
+    
+    /* Transitions */
+    --transition-base: all 0.3s ease;
+    
+    /* Shadows */
+    --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+    --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+    --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+    --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
+    
+    /* Border Radius */
+    --radius-sm: 0.25rem;
+    --radius-md: 0.5rem;
+    --radius-lg: 1rem;
+    --radius-full: 9999px;
+}
+
+/* ===========================
+   Container
+   =========================== */
+.container {
+    max-width: var(--container-max);
+    margin: 0 auto;
+    padding: 0 var(--container-padding);
+}
+
+/* ===========================
+   Navigation
+   =========================== */
+.navbar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    background: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(10px);
+    box-shadow: var(--shadow-sm);
+    z-index: 1000;
+    transition: var(--transition-base);
+}
+
+.navbar .container {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding-top: var(--space-md);
+    padding-bottom: var(--space-md);
+}
+
+.navbar-brand {
+    display: flex;
+    align-items: center;
+    gap: var(--space-sm);
+}
+
+.navbar-brand h1 {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: var(--primary-color);
+}
+
+.navbar-brand .tagline {
+    font-size: 0.875rem;
+    color: var(--text-secondary);
+}
+
+.navbar-toggler {
+    display: none;
+    background: none;
+    border: none;
+    cursor: pointer;
+    width: 30px;
+    height: 30px;
+    position: relative;
+}
+
+.navbar-toggler span {
+    display: block;
+    width: 100%;
+    height: 2px;
+    background: var(--text-primary);
+    position: absolute;
+    left: 0;
+    transition: var(--transition-base);
+}
+
+.navbar-toggler span:nth-child(1) {
+    top: 6px;
+}
+
+.navbar-toggler span:nth-child(2) {
+    top: 14px;
+}
+
+.navbar-toggler span:nth-child(3) {
+    top: 22px;
+}
+
+.navbar-nav {
+    display: flex;
+    align-items: center;
+    gap: var(--space-lg);
+}
+
+.nav-link {
+    font-weight: 500;
+    color: var(--text-primary);
+    transition: var(--transition-base);
+    padding: var(--space-sm) var(--space-md);
+    border-radius: var(--radius-md);
+}
+
+.nav-link:hover {
+    color: var(--primary-color);
+}
+
+.nav-link.btn-login {
+    background: var(--bg-secondary);
+}
+
+.nav-link.btn-register {
+    background: var(--primary-color);
+    color: white;
+}
+
+.nav-link.btn-register:hover {
+    background: var(--primary-dark);
+}
+
+.nav-link.btn-contact {
+    background: var(--secondary-color);
+    color: white;
+}
+
+.nav-link.btn-contact:hover {
+    background: #0ea068;
+}
+
+/* ===========================
+   Hero Section
+   =========================== */
+.hero {
+    position: relative;
+    height: 100vh;
+    min-height: 600px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+}
+
+.hero-video-container {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 0;
+}
+
+.hero-video {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    min-width: 100%;
+    min-height: 100%;
+    width: auto;
+    height: auto;
+    transform: translate(-50%, -50%);
+    object-fit: cover;
+}
+
+.hero-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.4);
+    z-index: 1;
+}
+
+/* Fallback image styles */
+.hero-fallback-image {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    z-index: 0;
+}
+
+/* Video loading state - 無効化 */
+.hero-video.loading {
+    opacity: 1; /* 常に表示 */
+    transition: none;
+}
+
+.hero-video.loaded {
+    opacity: 1;
+}
+
+.hero-content {
+    position: relative;
+    z-index: 2;
+    text-align: center;
+    color: white;
+}
+
+.hero-title {
+    font-size: 3rem;
+    font-weight: 700;
+    line-height: 1.2;
+    margin-bottom: var(--space-lg);
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+}
+
+.hero-subtitle {
+    font-size: 1.25rem;
+    line-height: 1.6;
+    text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.3);
+}
+
+.scroll-indicator {
+    position: absolute;
+    bottom: 30px;
+    left: 50%;
+    transform: translateX(-50%);
+    text-align: center;
+    color: white;
+    cursor: pointer;
+    animation: bounce 2s infinite;
+}
+
+.scroll-icon {
+    width: 30px;
+    height: 50px;
+    border: 2px solid white;
+    border-radius: 25px;
+    margin: 0 auto var(--space-sm);
+    position: relative;
+}
+
+.scroll-icon::before {
+    content: '';
+    position: absolute;
+    top: 10px;
+    left: 50%;
+    width: 6px;
+    height: 6px;
+    background: white;
+    border-radius: 50%;
+    transform: translateX(-50%);
+    animation: scroll 2s infinite;
+}
+
+.scroll-text {
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+}
+
+@keyframes bounce {
+    0%, 20%, 50%, 80%, 100% {
+        transform: translateX(-50%) translateY(0);
+    }
+    40% {
+        transform: translateX(-50%) translateY(-10px);
+    }
+    60% {
+        transform: translateX(-50%) translateY(-5px);
+    }
+}
+
+@keyframes scroll {
+    0% {
+        transform: translateX(-50%) translateY(0);
+        opacity: 0;
+    }
+    40% {
+        opacity: 1;
+    }
+    80% {
+        transform: translateX(-50%) translateY(20px);
+        opacity: 0;
+    }
+    100% {
+        opacity: 0;
+    }
+}
+
+/* ===========================
+   Section Styles
+   =========================== */
+.section-title {
+    font-size: 2.5rem;
+    font-weight: 700;
+    text-align: center;
+    margin-bottom: var(--space-2xl);
+    color: var(--text-primary);
+}
+
+.section-subtitle {
+    font-size: 0.875rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: var(--primary-color);
+    text-align: center;
+    margin-bottom: var(--space-sm);
+}
+
+.section-description {
+    font-size: 1.125rem;
+    color: var(--text-secondary);
+    text-align: center;
+    max-width: 600px;
+    margin: 0 auto var(--space-2xl);
+}
+
+/* ===========================
+   About Section
+   =========================== */
+.about {
+    padding: var(--space-3xl) 0;
+    background: var(--bg-secondary);
+}
+
+.about-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: var(--space-xl);
+}
+
+.about-item {
+    text-align: center;
+    padding: var(--space-xl);
+    background: white;
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-md);
+    transition: var(--transition-base);
+}
+
+.about-item:hover {
+    transform: translateY(-5px);
+    box-shadow: var(--shadow-lg);
+}
+
+.icon-wrapper {
+    width: 80px;
+    height: 80px;
+    margin: 0 auto var(--space-lg);
+    background: linear-gradient(135deg, var(--primary-color), var(--primary-light));
+    border-radius: var(--radius-full);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 2rem;
+    color: white;
+}
+
+.about-item h3 {
+    font-size: 1.5rem;
+    font-weight: 600;
+    margin-bottom: var(--space-md);
+    color: var(--text-primary);
+}
+
+.about-item p {
+    color: var(--text-secondary);
+    line-height: 1.8;
+}
+
+/* ===========================
+   Features Section
+   =========================== */
+.features {
+    padding: var(--space-3xl) 0;
+    background: white;
+}
+
+.features-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+    gap: var(--space-xl);
+}
+
+.feature-card {
+    padding: var(--space-xl);
+    background: var(--bg-secondary);
+    border-radius: var(--radius-lg);
+    transition: var(--transition-base);
+}
+
+.feature-card:hover {
+    transform: translateY(-5px);
+    box-shadow: var(--shadow-lg);
+}
+
+.feature-icon {
+    width: 60px;
+    height: 60px;
+    margin-bottom: var(--space-lg);
+    background: var(--primary-color);
+    border-radius: var(--radius-md);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.5rem;
+    color: white;
+}
+
+.feature-card h3 {
+    font-size: 1.25rem;
+    font-weight: 600;
+    margin-bottom: var(--space-md);
+    color: var(--text-primary);
+}
+
+.feature-card p {
+    color: var(--text-secondary);
+    line-height: 1.8;
+}
+
+/* ===========================
+   Members Section
+   =========================== */
+.members {
+    padding: var(--space-3xl) 0;
+    background: var(--bg-secondary);
+}
+
+.member-stats {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: var(--space-xl);
+    margin-bottom: var(--space-3xl);
+}
+
+.stat {
+    text-align: center;
+    padding: var(--space-xl);
+    background: white;
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-md);
+}
+
+.stat-number {
+    font-size: 3rem;
+    font-weight: 700;
+    color: var(--primary-color);
+    line-height: 1;
+    margin-bottom: var(--space-sm);
+}
+
+.stat p {
+    font-size: 1.125rem;
+    color: var(--text-secondary);
+}
+
+.industries {
+    text-align: center;
+}
+
+.industries h3 {
+    font-size: 1.75rem;
+    font-weight: 600;
+    margin-bottom: var(--space-xl);
+    color: var(--text-primary);
+}
+
+.industry-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-md);
+    justify-content: center;
+}
+
+.tag {
+    padding: var(--space-sm) var(--space-lg);
+    background: var(--primary-color);
+    color: white;
+    border-radius: var(--radius-full);
+    font-size: 0.875rem;
+    font-weight: 500;
+    transition: var(--transition-base);
+}
+
+.tag:hover {
+    background: var(--primary-dark);
+    transform: scale(1.05);
+}
+
+/* ===========================
+   Events Section
+   =========================== */
+.events {
+    padding: var(--space-3xl) 0;
+    background: white;
+}
+
+.events-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: var(--space-xl);
+}
+
+.event-card {
+    padding: var(--space-xl);
+    background: var(--bg-secondary);
+    border-radius: var(--radius-lg);
+    text-align: center;
+    transition: var(--transition-base);
+}
+
+.event-card:hover {
+    transform: translateY(-5px);
+    box-shadow: var(--shadow-lg);
+}
+
+.event-date {
+    display: inline-block;
+    padding: var(--space-sm) var(--space-lg);
+    background: var(--primary-color);
+    color: white;
+    border-radius: var(--radius-full);
+    font-size: 0.875rem;
+    font-weight: 600;
+    margin-bottom: var(--space-lg);
+}
+
+.event-card h3 {
+    font-size: 1.5rem;
+    font-weight: 600;
+    margin-bottom: var(--space-md);
+    color: var(--text-primary);
+}
+
+.event-card p {
+    color: var(--text-secondary);
+    line-height: 1.8;
+}
+
+/* ===========================
+   Achievements Section
+   =========================== */
+.achievements {
+    padding: var(--space-3xl) 0;
+    background: var(--bg-secondary);
+}
+
+.achievement-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: var(--space-xl);
+    max-width: 1000px;
+    margin: 0 auto;
+}
+
+.achievement-item {
+    padding: var(--space-xl);
+    background: white;
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-md);
+    text-align: center;
+    transition: var(--transition-base);
+}
+
+.achievement-item:hover {
+    transform: translateY(-5px);
+    box-shadow: var(--shadow-lg);
+}
+
+.achievement-number {
+    font-size: 3rem;
+    font-weight: 700;
+    color: var(--primary-color);
+    line-height: 1;
+    margin-bottom: var(--space-sm);
+}
+
+.achievement-label {
+    font-size: 1.25rem;
+    font-weight: 600;
+    color: var(--text-primary);
+    margin-bottom: var(--space-xs);
+}
+
+.achievement-sublabel {
+    font-size: 0.875rem;
+    color: var(--text-secondary);
+}
+
+.mobile-break {
+    display: inline;
+}
+
+/* ===========================
+   Contact Section
+   =========================== */
+.contact {
+    padding: var(--space-3xl) 0;
+    background: white;
+}
+
+.contact-form {
+    max-width: 600px;
+    margin: 0 auto;
+}
+
+.form-group {
+    margin-bottom: var(--space-lg);
+}
+
+.form-group input,
+.form-group textarea {
+    width: 100%;
+    padding: var(--space-md) var(--space-lg);
+    border: 2px solid var(--border-color);
+    border-radius: var(--radius-md);
+    font-size: 1rem;
+    font-family: inherit;
+    transition: var(--transition-base);
+}
+
+.form-group input:focus,
+.form-group textarea:focus {
+    outline: none;
+    border-color: var(--primary-color);
+}
+
+.submit-button {
+    width: 100%;
+    padding: var(--space-md) var(--space-xl);
+    background: var(--primary-color);
+    color: white;
+    border: none;
+    border-radius: var(--radius-md);
+    font-size: 1.125rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: var(--transition-base);
+}
+
+.submit-button:hover {
+    background: var(--primary-dark);
+    transform: translateY(-2px);
+}
+
+/* ===========================
+   Footer
+   =========================== */
+.footer {
+    padding: 60px 0 30px;
+    background: #0f172a;
+    color: white;
+}
+
+.footer-grid {
+    display: grid;
+    grid-template-columns: 2fr 1fr 1fr 1fr;
+    gap: 40px;
+    margin-bottom: 40px;
+}
+
+.footer-brand h3 {
+    font-size: 1.5rem;
+    font-weight: 700;
+    margin-bottom: 12px;
+    letter-spacing: 0.05em;
+}
+
+.footer-brand p {
+    color: rgba(255, 255, 255, 0.6);
+    font-size: 0.9rem;
+    line-height: 1.6;
+}
+
+.footer-nav h4 {
+    font-size: 0.95rem;
+    font-weight: 600;
+    margin-bottom: 16px;
+    color: rgba(255, 255, 255, 0.9);
+}
+
+.footer-nav ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.footer-nav ul li {
+    margin-bottom: 10px;
+}
+
+.footer-nav ul li a {
+    color: rgba(255, 255, 255, 0.55);
+    font-size: 0.9rem;
+    transition: color 0.2s ease;
+    text-decoration: none;
+}
+
+.footer-nav ul li a:hover {
+    color: white;
+}
+
+.footer-bottom {
+    text-align: center;
+    padding-top: 24px;
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+    color: rgba(255, 255, 255, 0.4);
+    font-size: 0.85rem;
+}
+
+/* 旧フッタークラスの互換性 */
+.copyright {
+    text-align: center;
+    padding-top: 24px;
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+    color: rgba(255, 255, 255, 0.4);
+}
+
+/* ===========================
+   Responsive Design
+   =========================== */
+@media (max-width: 768px) {
+    /* Navigation - navbar-fresh.css で管理 */
+    
+    /* Hero */
+    .hero-title {
+        font-size: 2rem;
+    }
+    
+    .hero-subtitle {
+        font-size: 1rem;
+    }
+    
+    /* Sections */
+    .section-title {
+        font-size: 2rem;
+    }
+    
+    /* Grids */
+    .about-grid,
+    .features-grid,
+    .member-stats,
+    .events-grid,
+    .achievement-grid {
+        grid-template-columns: 1fr;
+        gap: var(--space-lg);
+    }
+    
+    /* Footer */
+    .footer-grid {
+        grid-template-columns: 1fr 1fr;
+        gap: 30px;
+        text-align: left;
+    }
+
+    .footer-brand {
+        grid-column: 1 / -1;
+        text-align: center;
+    }
+    
+    /* Mobile break */
+    .mobile-break {
+        display: block;
+    }
+}
+
+@media (max-width: 480px) {
+    .footer-grid {
+        grid-template-columns: 1fr;
+        gap: 24px;
+        text-align: center;
+    }
+}
+
+/* Source: z-index-priority.css */
+/* ==========================================
+   z-index優先順位管理CSS
+   優先順位: サイドバー > プロフィール・通知ボタン > その他
+   ========================================== */
+
+/* ローディング画面のみ最高優先度 */
+#instantLoadingScreen {
+  z-index: 9998 !important; /* ローディングはトースト(9999)の下 */
+}
+
+/* 最優先: サイドバー関連 (z-index: 2000番台に変更) */
+.sidebar,
+.mobile-sidebar,
+.sidebar-overlay,
+nav.sidebar,
+aside.sidebar,
+[class*="sidebar"] {
+  z-index: 2000 !important;
+}
+
+.sidebar-toggle,
+.menu-toggle,
+.hamburger-menu {
+  z-index: 2001 !important;
+}
+
+/* 第2優先: プロフィール・通知ボタン (z-index: 1900番台) */
+.profile-button,
+.profile-menu,
+.profile-dropdown,
+.user-profile-button,
+[class*="profile"][class*="button"],
+[class*="profile"][class*="menu"] {
+  z-index: 1950 !important;
+}
+
+.notification-button,
+.notification-icon,
+.notification-bell,
+.notification-badge,
+.notification-dropdown,
+[class*="notification"][class*="button"],
+[class*="notification"][class*="icon"] {
+  z-index: 1940 !important;
+}
+
+/* 通知ドロップダウン */
+.notification-list,
+.notification-panel,
+.notification-dropdown-content {
+  z-index: 1930 !important;
+}
+
+/* カレンダー関連 (z-index: 1850) */
+.fc-popover,
+.fc-daygrid-event-harness,
+.fc-event,
+.fc-daygrid-day-frame,
+.fc-more-popover {
+  z-index: 1850 !important;
+}
+
+/* 第3優先: ヘッダー・ナビゲーション (z-index: 1800) */
+header,
+.header,
+.navbar,
+.nav-bar,
+.top-bar {
+  z-index: 1800 !important;
+}
+
+/* 第4優先: モーダル・ダイアログ (z-index: 5000番台) */
+.modal,
+.modal-backdrop,
+.modal-overlay,
+.dialog {
+  z-index: 5000 !important;
+}
+
+.modal-content,
+.dialog-content {
+  z-index: 5100 !important;
+}
+
+/* メンバープロフィールモーダル専用 */
+#memberProfileModal {
+  z-index: 5200 !important;
+}
+
+#memberProfileModal .modal-overlay {
+  z-index: 5199 !important;
+}
+
+#memberProfileModal .modal-content {
+  z-index: 5201 !important;
+}
+
+/* 第5優先: ドロップダウン・ポップアップ (z-index: 3000番台) */
+.dropdown,
+.dropdown-menu,
+.popover,
+.tooltip {
+  z-index: 3000 !important;
+}
+
+/* 第6優先: カード・パネル (z-index: 1000番台) */
+.card:hover,
+.panel:hover,
+.elevated-card {
+  z-index: 1100 !important;
+}
+
+/* 基本レイヤー (z-index: 1-100) */
+.card,
+.panel,
+.content-section {
+  z-index: 10 !important;
+}
+
+/* 特別な調整 */
+/* 予約確認モーダル */
+.booking-confirmation-modal {
+  z-index: 5500 !important;
+}
+
+/* イベント詳細モーダル */
+#eventDetailModal {
+  z-index: 5500 !important;
+}
+
+#eventDetailModal .modal-overlay {
+  z-index: 5499 !important;
+  pointer-events: auto !important;
+}
+
+#eventDetailModal .modal-content {
+  z-index: 5501 !important;
+  pointer-events: auto !important;
+}
+
+/* 通知トースト */
+.notification-toast,
+.toast-notification,
+.notification.show {
+  z-index: 9999 !important; /* サイドバーの下、ほぼ最前面 */
+}
+
+/* モバイル対応 */
+@media (max-width: 768px) {
+  /* モバイルサイドバーは最優先 */
+  .mobile-sidebar,
+  .sidebar.mobile-open {
+    z-index: 2100 !important;
+  }
+
+  /* モバイルメニューボタン */
+  .mobile-menu-button,
+  .mobile-nav-toggle {
+    z-index: 2101 !important;
+  }
+
+  /* モバイル時のプロフィール・通知 */
+  .mobile .profile-button,
+  .mobile .notification-button {
+    z-index: 1960 !important;
+  }
+}
+
+/* Source: header-padding-fix.css */
+/**
+ * ヘッダー余白修正CSS
+ * 全ページのヘッダー左側に適切な余白を設定
+ */
+
+/* =============================
+   コンテンツヘッダー共通修正
+   ============================= */
+
+/* ダッシュボードページのヘッダー */
+.dashboard-header {
+    padding-left: 2rem !important;
+    padding-right: 2rem !important;
+}
+
+.dashboard-header .header-left {
+    padding-left: 0 !important; /* 親要素でパディング設定済み */
+}
+
+/* その他のページのコンテンツヘッダー */
+.content-header {
+    padding-left: 2rem !important;
+    padding-right: 2rem !important;
+}
+
+.content-header .header-left {
+    padding-left: 0 !important; /* 親要素でパディング設定済み */
+}
+
+/* 紹介プログラムページ特有の調整 */
+.main-content .content-header {
+    padding: 1.5rem 2rem !important;
+}
+
+/* =============================
+   レスポンシブ対応
+   ============================= */
+
+/* PC画面（1024px以上） */
+@media (min-width: 1024px) {
+    .dashboard-header,
+    .content-header {
+        padding-left: 3rem !important;
+        padding-right: 3rem !important;
+    }
+}
+
+/* 大画面（1440px以上） */
+@media (min-width: 1440px) {
+    .dashboard-header,
+    .content-header {
+        padding-left: 4rem !important;
+        padding-right: 4rem !important;
+    }
+}
+
+/* 超大画面（1920px以上） */
+@media (min-width: 1920px) {
+    .dashboard-header,
+    .content-header {
+        padding-left: 5rem !important;
+        padding-right: 5rem !important;
+    }
+}
+
+/* タブレット（768px〜1023px） */
+@media (min-width: 768px) and (max-width: 1023px) {
+    .dashboard-header,
+    .content-header {
+        padding-left: 1.5rem !important;
+        padding-right: 1.5rem !important;
+    }
+}
+
+/* モバイル（767px以下） */
+@media (max-width: 767px) {
+    .dashboard-header,
+    .content-header {
+        padding-left: 1rem !important;
+        padding-right: 1rem !important;
+    }
+}
+
+/* =============================
+   紹介プログラムページ特別修正
+   ============================= */
+
+/* 紹介ページのメインコンテンツエリア全体 */
+.referral-page .main-content,
+body[data-page="referral"] .main-content {
+    /* 左余白の調整 */
+}
+
+/* 紹介ページのコンテンツボディ */
+.referral-page .content-body,
+body[data-page="referral"] .content-body {
+    padding-left: 2rem !important;
+    padding-right: 2rem !important;
+}
+
+@media (min-width: 1024px) {
+    .referral-page .content-body,
+    body[data-page="referral"] .content-body {
+        padding-left: 3rem !important;
+        padding-right: 3rem !important;
+    }
+}
+
+/* =============================
+   ヘッダー内要素の配置調整
+   ============================= */
+
+/* ヘッダー左側のテキスト */
+.header-left h1 {
+    margin: 0 0 0.5rem 0;
+    font-size: 1.75rem;
+    font-weight: 700;
+    color: #1f2937;
+}
+
+.header-left p {
+    margin: 0;
+    color: #6b7280;
+    font-size: 0.875rem;
+}
+
+.header-left .user-name {
+    color: #0066ff;
+    font-weight: 500;
+}
+
+/* ヘッダー右側の要素 */
+.header-right {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+
+/* Source: avatar-size-unified.css */
+/**
+ * アバターサイズ統一管理CSS
+ * 全ページで一貫したアバターサイズを強制
+ *
+ * 問題: 5つの異なるCSSファイルが競合していた
+ * 解決: 最高特異性で統一
+ */
+
+/* ==========================================
+   統一アバターサイズ（最高優先度）
+   ========================================== */
+
+/* ヘッダー内のユーザーアバター（全ページ共通） */
+.navbar .user-profile .user-avatar,
+.header .user-profile .user-avatar,
+#userAvatar {
+    width: 36px !important;
+    height: 36px !important;
+    border-radius: 50% !important;
+    object-fit: cover !important;
+    border: 2px solid rgba(255, 255, 255, 0.9) !important;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1) !important;
+    transition: all 0.3s ease !important;
+}
+
+/* ホバー時のエフェクト */
+.navbar .user-profile:hover .user-avatar,
+.header .user-profile:hover .user-avatar {
+    transform: scale(1.05);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+}
+
+/* ==========================================
+   コンテキスト別サイズ定義
+   ========================================== */
+
+/* メンバーリスト・検索結果用（大きめ） */
+.member-card .user-avatar,
+.search-result .user-avatar,
+.member-item .user-avatar {
+    width: 60px !important;
+    height: 60px !important;
+    border-radius: 50% !important;
+    object-fit: cover !important;
+    border: 3px solid #f0f0f0 !important;
+}
+
+/* プロフィールページ（特大） */
+.profile-header .user-avatar,
+.profile-main .user-avatar {
+    width: 120px !important;
+    height: 120px !important;
+    border-radius: 50% !important;
+    object-fit: cover !important;
+    border: 4px solid #fff !important;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15) !important;
+}
+
+/* メッセージ・チャット用（小さめ） */
+.message-item .user-avatar,
+.chat-message .user-avatar,
+.notification-item .user-avatar {
+    width: 32px !important;
+    height: 32px !important;
+    border-radius: 50% !important;
+    object-fit: cover !important;
+    border: none !important;
+}
+
+/* サイドバー内 */
+.sidebar .user-avatar {
+    width: 40px !important;
+    height: 40px !important;
+    border-radius: 50% !important;
+    object-fit: cover !important;
+    border: 2px solid rgba(255, 255, 255, 0.2) !important;
+}
+
+/* ==========================================
+   競合CSS無効化（既存の定義を上書き）
+   ========================================== */
+
+/* presentation.cssの60px定義を無効化 */
+.user-avatar:not(.member-card *):not(.search-result *):not(.profile-header *) {
+    width: 36px !important;
+    height: 36px !important;
+}
+
+/* advanced-search.cssの80px定義を無効化 */
+.advanced-search .user-avatar {
+    width: 60px !important;  /* 検索結果用に調整 */
+    height: 60px !important;
+}
+
+/* ==========================================
+   レスポンシブ対応
+   ========================================== */
+
+@media (max-width: 768px) {
+    /* モバイルではヘッダーアバターを少し小さく */
+    .navbar .user-profile .user-avatar,
+    .header .user-profile .user-avatar,
+    #userAvatar {
+        width: 32px !important;
+        height: 32px !important;
+    }
+
+    /* メンバーカードも調整 */
+    .member-card .user-avatar,
+    .search-result .user-avatar {
+        width: 48px !important;
+        height: 48px !important;
+    }
+
+    /* プロフィールページ */
+    .profile-header .user-avatar {
+        width: 100px !important;
+        height: 100px !important;
+    }
+}
+
+/* ==========================================
+   アニメーション統一
+   ========================================== */
+
+.user-avatar {
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+}
+
+.user-avatar:hover {
+    filter: brightness(1.05);
+}
+
+/* ==========================================
+   デフォルト画像の処理
+   ========================================== */
+
+.user-avatar[src*="default-avatar"],
+.user-avatar[src*="placeholder"],
+.user-avatar:not([src]),
+.user-avatar[src=""] {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-weight: 600;
+    position: relative;
+}
+
+/* デフォルト時はイニシャルを表示 */
+.user-avatar[src*="default-avatar"]::after {
+    content: attr(data-initials);
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    font-size: 14px;
+    text-transform: uppercase;
+}
+
+/* Source: css-conflict-fix.css */
+/* ===========================
+   CSS競合修正
+   =========================== */
+
+/* register.htmlの重複CSS修正 */
+.auth-page .auth-container {
+    background: linear-gradient(135deg, #f0f7ff 0%, #e6f2ff 50%, #f0f7ff 100%) !important;
+}
+
+/* auth.cssとauth-unified.cssの競合を解決 */
+.auth-page body::before {
+    z-index: 0;
+}
+
+/* ダッシュボードのCSS競合修正 */
+.dashboard-page .card {
+    isolation: isolate;
+}
+
+/* z-index統一スケール: Cards 10-1100, Navbar 1800, Dropdowns 3000, Modals 5000-5500, Toasts 9999, Loading 9998 */
+.modal {
+    z-index: 5000;
+}
+
+.notification-popup {
+    z-index: 9999;
+}
+
+.user-menu-dropdown {
+    z-index: 3000;
+}
+
+/* レスポンシブメニューの競合修正 */
+.mobile-nav {
+    z-index: 1800;
+}
+
+/* ボタンスタイルの統一 */
+.btn-primary,
+.button-primary {
+    background-color: var(--primary-color) !important;
+    color: white !important;
+    border: none !important;
+}
+
+.btn-secondary,
+.button-secondary {
+    background-color: var(--secondary-color) !important;
+    color: white !important;
+    border: none !important;
+}
+
+/* グラスエフェクトの統一 */
+.glass-effect,
+.glass {
+    background: rgba(255, 255, 255, 0.9) !important;
+    backdrop-filter: blur(10px) !important;
+    -webkit-backdrop-filter: blur(10px) !important;
+    border: 1px solid rgba(255, 255, 255, 0.3) !important;
+}
+
+/* カードスタイルの統一 */
+.card {
+    background: white;
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow);
+    padding: var(--space-md);
+    margin-bottom: var(--space-md);
+}
+
+/* フォントサイズの統一 */
+body {
+    font-size: 16px !important;
+    line-height: 1.6 !important;
+}
+
+/* リンクホバーエフェクトの統一 */
+a:hover {
+    opacity: 0.8;
+    transition: opacity 0.3s ease;
+}
+
+/* フォーム要素の統一 */
+input[type="text"],
+input[type="email"],
+input[type="password"],
+textarea,
+select {
+    width: 100%;
+    padding: var(--space-sm);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius);
+    font-size: 16px;
+    font-family: inherit;
+}
+
+/* レスポンシブ調整 */
+@media (max-width: 768px) {
+    .mobile-only {
+        display: block !important;
+    }
+
+    .desktop-only {
+        display: none !important;
+    }
+}
+
+@media (min-width: 769px) {
+    .mobile-only {
+        display: none !important;
+    }
+
+    .desktop-only {
+        display: block !important;
+    }
+}
+
+/* アニメーション競合の修正 */
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* スクロールバーの統一 */
+::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+}
+
+::-webkit-scrollbar-track {
+    background: #f1f1f1;
+}
+
+::-webkit-scrollbar-thumb {
+    background: #888;
+    border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: #555;
+}

@@ -1,0 +1,1675 @@
+/* ============================================================
+   register-page.css
+   Consolidated from:
+   - auth.css
+   - auth-register-fix.css
+   - register-ui-fix.css
+   - register-responsive.css
+   ============================================================ */
+
+/* ============================================================
+   Source: auth.css
+   ============================================================ */
+
+/* ===========================
+   Auth Pages Styles
+   =========================== */
+
+.auth-container {
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: linear-gradient(135deg, #e6f4ff 0%, #b3d9ff 50%, #e6f4ff 100%);
+    padding: var(--space-sm);
+    position: relative;
+    overflow: auto;
+}
+
+/* 背景パターン */
+.auth-container::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-image:
+        radial-gradient(circle at 20% 50%, rgba(0, 102, 255, 0.1) 0%, transparent 50%),
+        radial-gradient(circle at 80% 80%, rgba(0, 212, 255, 0.1) 0%, transparent 50%),
+        radial-gradient(circle at 40% 20%, rgba(0, 79, 196, 0.1) 0%, transparent 50%);
+    pointer-events: none;
+}
+
+.auth-card {
+    width: 100%;
+    max-width: 800px;
+    height: auto;
+    max-height: none;
+    background: rgba(255, 255, 255, 0.85);
+    backdrop-filter: blur(10px);
+    border-radius: var(--radius-lg);
+    box-shadow: 0 10px 40px rgba(0, 102, 255, 0.1);
+    padding: var(--space-md) var(--space-lg);
+    margin: auto;
+    overflow: visible;
+    position: relative;
+    z-index: 1;
+    display: flex;
+    flex-direction: column;
+}
+
+.auth-header {
+    text-align: center;
+    margin-bottom: var(--space-lg);
+}
+
+.auth-header h1 {
+    font-size: 1.75rem;
+    font-weight: 700;
+    color: var(--primary-color);
+    margin-bottom: var(--space-xs);
+}
+
+.auth-header p {
+    color: var(--text-secondary);
+    font-size: 0.875rem;
+}
+
+.auth-title {
+    font-size: 1.5rem;
+    font-weight: 600;
+    text-align: center;
+    margin-bottom: var(--space-lg);
+    color: var(--text-primary);
+}
+
+.auth-form {
+    margin-bottom: var(--space-xl);
+}
+
+.auth-form .form-group {
+    margin-bottom: var(--space-md);
+}
+
+.auth-form label {
+    display: block;
+    font-weight: 500;
+    margin-bottom: var(--space-sm);
+    color: var(--text-primary);
+}
+
+.auth-form input[type="text"],
+.auth-form input[type="email"],
+.auth-form input[type="password"],
+.auth-form input[type="tel"] {
+    width: 100%;
+    padding: var(--space-md);
+    border: 2px solid var(--border-color);
+    border-radius: var(--radius-md);
+    font-size: 1rem;
+    transition: var(--transition-base);
+}
+
+.auth-form input:focus {
+    outline: none;
+    border-color: var(--primary-color);
+}
+
+.password-input-wrapper {
+    position: relative;
+}
+
+.password-toggle {
+    position: absolute;
+    right: var(--space-md);
+    top: 50%;
+    transform: translateY(-50%);
+    background: none;
+    border: none;
+    color: var(--text-secondary);
+    cursor: pointer;
+    padding: var(--space-sm);
+}
+
+.password-toggle:hover {
+    color: var(--text-primary);
+}
+
+.form-options {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: var(--space-xl);
+    font-size: 0.875rem;
+}
+
+.checkbox-label {
+    display: flex;
+    align-items: center;
+    gap: var(--space-sm);
+    cursor: pointer;
+}
+
+.checkbox-label input[type="checkbox"] {
+    width: auto;
+    margin: 0;
+}
+
+.forgot-link {
+    color: var(--primary-color);
+    transition: var(--transition-base);
+}
+
+.forgot-link:hover {
+    text-decoration: underline;
+}
+
+.auth-button {
+    width: 100%;
+    padding: var(--space-md);
+    background: var(--primary-color);
+    color: white;
+    border: none;
+    border-radius: var(--radius-md);
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: var(--transition-base);
+}
+
+.auth-button.line-button {
+    width: 66% !important;
+    padding: 14px 1rem !important;
+    font-size: 1rem !important;
+    display: inline-flex !important;
+    margin: 0 auto 12px !important;
+}
+
+.auth-button:hover {
+    background: var(--primary-dark);
+    transform: translateY(-2px);
+}
+
+/* ゲストボタン */
+.guest-button {
+    background: var(--secondary-color, #6c757d);
+    text-decoration: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--space-sm);
+}
+
+.guest-button:hover {
+    background: var(--secondary-dark, #5a6268);
+}
+
+/* 区切り線 */
+.auth-divider {
+    text-align: center;
+    margin: var(--space-lg) 0;
+    position: relative;
+}
+
+.auth-divider span {
+    background: white;
+    padding: 0 var(--space-md);
+    color: var(--text-secondary);
+    font-size: 0.875rem;
+}
+
+.auth-divider::before {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 0;
+    right: 0;
+    height: 1px;
+    background: var(--border-color);
+    z-index: -1;
+}
+
+.auth-footer {
+    text-align: center;
+    font-size: 0.875rem;
+    color: var(--text-secondary);
+    margin-top: var(--space-md);
+}
+
+.auth-footer a {
+    color: var(--primary-color);
+    font-weight: 500;
+    transition: var(--transition-base);
+}
+
+.auth-footer a:hover {
+    text-decoration: underline;
+}
+
+.auth-back {
+    text-align: center;
+    margin-top: var(--space-sm);
+    padding-top: var(--space-sm);
+    border-top: 1px solid var(--border-color);
+}
+
+.auth-back a {
+    color: var(--text-secondary);
+    font-size: 0.875rem;
+    transition: var(--transition-base);
+}
+
+.auth-back a:hover {
+    color: var(--primary-color);
+}
+
+/* Error and Success Messages */
+.auth-message {
+    padding: var(--space-md);
+    border-radius: var(--radius-md);
+    margin-bottom: var(--space-lg);
+    font-size: 0.875rem;
+}
+
+.auth-message.error {
+    background: #fef2f2;
+    color: #dc2626;
+    border: 1px solid #fecaca;
+}
+
+.auth-message.success {
+    background: #f0fdf4;
+    color: #15803d;
+    border: 1px solid #bbf7d0;
+}
+
+/* Multi-step Registration Form */
+.registration-progress {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: var(--space-lg);
+    width: 100%;
+    max-width: 600px;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.progress-step {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: var(--space-xs);
+    flex-shrink: 0;
+}
+
+.step-number {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background: var(--border-color);
+    color: var(--text-secondary);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 600;
+    transition: var(--transition-base);
+}
+
+.progress-step.active .step-number {
+    background: var(--primary-color);
+    color: white;
+}
+
+.progress-step.completed .step-number {
+    background: var(--secondary-color);
+    color: white;
+}
+
+.step-label {
+    font-size: 0.75rem;
+    color: var(--text-secondary);
+    font-weight: 500;
+    white-space: nowrap;
+}
+
+.progress-step.active .step-label {
+    color: var(--primary-color);
+}
+
+.progress-line {
+    width: 40px;
+    height: 2px;
+    background: var(--border-color);
+    margin: 0 var(--space-xs);
+    flex-shrink: 0;
+}
+
+.form-step {
+    display: none;
+    position: relative;
+}
+
+.form-step.active {
+    display: block;
+}
+
+/* 4,5ページ目は特別な処理 */
+.form-step[data-step="4"].active,
+.form-step[data-step="5"].active {
+    padding-bottom: 120px;
+    height: calc(90vh - 250px);
+    display: flex;
+    flex-direction: column;
+}
+
+.form-step[data-step="4"] > *:not(.form-navigation),
+.form-step[data-step="5"] > *:not(.form-navigation) {
+    flex-shrink: 0;
+}
+
+/* 各ステップの高さを制限 */
+.form-step {
+    max-height: calc(90vh - 200px);
+    overflow-y: auto;
+    overflow-x: hidden;
+}
+
+.form-step h3 {
+    font-size: 1.125rem;
+    font-weight: 600;
+    color: var(--text-primary);
+    margin-bottom: var(--space-lg);
+}
+
+.challenges-section {
+    margin-bottom: var(--space-xl);
+}
+
+.challenge-group {
+    margin-bottom: var(--space-md);
+    padding: var(--space-md);
+    background: var(--bg-secondary);
+    border-radius: var(--radius-md);
+}
+
+.challenge-group h4 {
+    font-size: 1rem;
+    font-weight: 600;
+    color: white;
+    margin-bottom: var(--space-md);
+    padding: var(--space-sm) var(--space-md);
+    background: linear-gradient(135deg, #0080ff 0%, #00b4ff 100%);
+    border-radius: var(--radius-md);
+    border: 1px solid rgba(0, 180, 255, 0.3);
+    box-shadow: 0 4px 20px rgba(0, 128, 255, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.2);
+    display: flex;
+    align-items: center;
+    gap: var(--space-sm);
+    position: relative;
+    overflow: hidden;
+}
+
+.challenge-group h4::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+    animation: shimmer 3s infinite;
+}
+
+@keyframes shimmer {
+    0% { left: -100%; }
+    100% { left: 100%; }
+}
+
+.challenge-group h4 i {
+    color: white;
+    font-size: 1.125rem;
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+.challenge-group .checkbox-label {
+    display: flex;
+    align-items: center;
+    gap: var(--space-sm);
+    margin-bottom: var(--space-xs);
+    cursor: pointer;
+}
+
+.challenge-group .checkbox-label:last-child {
+    margin-bottom: 0;
+}
+
+.auth-form select {
+    width: 100%;
+    padding: var(--space-md);
+    border: 2px solid var(--border-color);
+    border-radius: var(--radius-md);
+    font-size: 1rem;
+    background: white;
+    cursor: pointer;
+    transition: var(--transition-base);
+}
+
+.auth-form select:focus {
+    outline: none;
+    border-color: var(--primary-color);
+}
+
+.form-help {
+    display: block;
+    font-size: 0.875rem;
+    color: var(--text-secondary);
+    margin-top: var(--space-xs);
+}
+
+.form-navigation {
+    display: flex;
+    gap: var(--space-md);
+    margin-top: var(--space-xl);
+}
+
+/* 4,5ページ目のナビゲーション */
+.form-step[data-step="4"] .form-navigation,
+.form-step[data-step="5"] .form-navigation {
+    position: fixed;
+    bottom: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 100%;
+    max-width: 760px;
+    padding: var(--space-lg) var(--space-lg);
+    background: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(10px);
+    border-radius: var(--radius-lg);
+    box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.1);
+    margin-top: 0;
+    z-index: 10;
+}
+
+.form-navigation button {
+    flex: 1;
+}
+
+.auth-button-outline {
+    width: 100%;
+    padding: var(--space-md);
+    background: white;
+    color: var(--primary-color);
+    border: 2px solid var(--primary-color);
+    border-radius: var(--radius-md);
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: var(--transition-base);
+}
+
+.auth-button-outline:hover {
+    background: var(--primary-light);
+}
+
+/* Responsive */
+/* Textarea styles for challenge details */
+.auth-form textarea {
+    width: 100%;
+    padding: var(--space-md);
+    border: 2px solid var(--border-color);
+    border-radius: var(--radius-md);
+    font-size: 1rem;
+    transition: var(--transition-base);
+    resize: vertical;
+    min-height: 100px;
+    margin-top: var(--space-sm);
+}
+
+.auth-form textarea:focus {
+    outline: none;
+    border-color: var(--primary-color);
+}
+
+/* Character count */
+.char-count {
+    display: block;
+    text-align: right;
+    font-size: 0.75rem;
+    color: var(--text-secondary);
+    margin-top: var(--space-xs);
+}
+
+/* Required field indicator */
+.required {
+    color: var(--error-color);
+    margin-left: var(--space-xs);
+}
+
+@media (max-width: 1024px) {
+    .challenges-section {
+        grid-template-columns: repeat(2, 1fr);
+        gap: var(--space-md);
+    }
+}
+
+@media (max-width: 768px) {
+    .auth-card {
+        max-width: 100%;
+        margin: var(--space-md);
+    }
+
+    .registration-progress {
+        font-size: 0.875rem;
+        max-width: 100%;
+        padding: 0 var(--space-sm);
+    }
+
+    .step-number {
+        width: 32px;
+        height: 32px;
+        font-size: 0.75rem;
+    }
+
+    .step-label {
+        font-size: 0.625rem;
+    }
+
+    .progress-line {
+        width: 25px;
+        margin: 0 2px;
+    }
+
+    .challenges-section {
+        grid-template-columns: 1fr;
+        gap: var(--space-md);
+    }
+
+    .challenge-group {
+        padding: var(--space-md);
+    }
+}
+
+/* Skills and Interests Selection */
+.skills-selection-container,
+.interests-selection-container {
+    margin-bottom: var(--space-lg);
+    max-height: 500px;
+    overflow-y: auto;
+    padding-right: var(--space-sm);
+}
+
+.skill-category-section,
+.interest-category-section {
+    margin-bottom: var(--space-lg);
+}
+
+.skill-category-section h4,
+.interest-category-section h4 {
+    font-size: 1rem;
+    font-weight: 600;
+    color: white;
+    margin-bottom: var(--space-md);
+    padding: var(--space-sm) var(--space-md) var(--space-sm) calc(var(--space-md) + 24px);
+    background: linear-gradient(135deg, #0080ff 0%, #00b4ff 100%);
+    border-radius: var(--radius-md);
+    border: 1px solid rgba(0, 180, 255, 0.3);
+    box-shadow: 0 4px 20px rgba(0, 128, 255, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.2);
+    position: relative;
+    overflow: hidden;
+}
+
+.skill-category-section h4::before,
+.interest-category-section h4::before {
+    content: '\25C6';
+    position: absolute;
+    left: var(--space-md);
+    color: white;
+    font-weight: 700;
+    font-size: 0.875rem;
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+.skill-category-section h4::after,
+.interest-category-section h4::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+    animation: shimmer 3s infinite;
+}
+
+.skills-checkbox-grid,
+.interests-checkbox-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: var(--space-sm);
+}
+
+.skill-checkbox,
+.interest-checkbox {
+    display: flex;
+    align-items: center;
+    padding: var(--space-sm) var(--space-md);
+    background: var(--bg-secondary);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-md);
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.skill-checkbox:hover,
+.interest-checkbox:hover {
+    background: var(--primary-light);
+    border-color: var(--primary-color);
+}
+
+.skill-checkbox input[type="checkbox"],
+.interest-checkbox input[type="checkbox"] {
+    margin-right: var(--space-sm);
+    cursor: pointer;
+}
+
+.skill-checkbox input[type="checkbox"]:checked + span,
+.interest-checkbox input[type="checkbox"]:checked + span {
+    font-weight: 600;
+    color: var(--primary-color);
+}
+
+.skill-checkbox:has(input:checked),
+.interest-checkbox:has(input:checked) {
+    background: var(--primary-light);
+    border-color: var(--primary-color);
+}
+
+.step-description {
+    color: var(--text-secondary);
+    margin-bottom: var(--space-lg);
+    font-size: 0.875rem;
+}
+
+@media (max-width: 768px) {
+    .skills-checkbox-grid,
+    .interests-checkbox-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .skills-selection-container,
+    .interests-selection-container {
+        max-height: 400px;
+    }
+
+    /* モバイルでのナビゲーション調整 */
+    .form-step[data-step="4"] .form-navigation,
+    .form-step[data-step="5"] .form-navigation {
+        max-width: calc(100% - 40px);
+        padding: var(--space-md);
+    }
+}
+
+@media (max-width: 480px) {
+    .auth-card {
+        padding: var(--space-lg);
+        margin: var(--space-sm);
+    }
+
+    .step-label {
+        display: none;
+    }
+
+    .challenge-group {
+        padding: var(--space-sm);
+    }
+
+    .challenge-group h4 {
+        font-size: 0.9375rem;
+    }
+
+    .challenge-group .checkbox-label {
+        font-size: 0.875rem;
+    }
+
+    .auth-form textarea {
+        min-height: 80px;
+        font-size: 0.875rem;
+    }
+
+    .skill-checkbox,
+    .interest-checkbox {
+        padding: var(--space-xs) var(--space-sm);
+        font-size: 0.875rem;
+    }
+}
+
+/* ============================================================
+   Source: auth-register-fix.css
+   ============================================================ */
+
+/**
+ * Auth Register Fix
+ * 新規登録ページのレイアウト問題を修正
+ */
+
+/* 認証カードの高さ制限を解除 */
+.auth-card {
+    height: auto !important;
+    max-height: none !important;
+    min-height: auto !important;
+    overflow: visible !important;
+}
+
+/* フォームステップの高さ制限を解除 */
+.form-step {
+    max-height: none !important;
+    height: auto !important;
+    overflow: visible !important;
+}
+
+/* ステップ4,5の特別な高さ設定を無効化 */
+.form-step[data-step="4"].active,
+.form-step[data-step="5"].active {
+    height: auto !important;
+    padding-bottom: 20px !important;
+}
+
+/* フォームナビゲーションの固定位置を解除 */
+.form-step[data-step="4"] .form-navigation,
+.form-step[data-step="5"] .form-navigation {
+    position: relative !important;
+    bottom: auto !important;
+    left: auto !important;
+    transform: none !important;
+    width: 100% !important;
+    max-width: none !important;
+    margin-top: 40px !important;
+}
+
+/* 認証コンテナのパディング調整 */
+.auth-container {
+    padding: 40px 20px !important;
+    min-height: auto !important;
+}
+
+/* 進捗インジケーターのマージン調整 */
+.registration-progress {
+    margin: 30px auto !important;
+    max-width: 100% !important;
+    padding: 0 15px !important;
+}
+
+/* チャレンジセクションのレイアウト改善 */
+.challenges-section {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 30px;
+    margin-bottom: 30px !important;
+}
+
+/* チャレンジグループのスタイル調整 */
+.challenge-group {
+    background: #f8f9fa;
+    padding: 20px;
+    border-radius: 12px;
+    border: 1px solid #e9ecef;
+}
+
+/* スキル・興味セクションのコンテナ修正 */
+.skills-selection-container,
+.interests-selection-container {
+    max-height: none !important;
+    overflow: visible !important;
+    padding: 0 !important;
+}
+
+/* カテゴリーセクションのマージン調整 */
+.skill-category-section,
+.interest-category-section {
+    margin-bottom: 30px !important;
+}
+
+/* チェックボックスグリッドの改善 */
+.skills-checkbox-grid,
+.interests-checkbox-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 10px;
+    margin-top: 15px;
+}
+
+/* フォームグループのマージン調整 */
+.form-group {
+    margin-bottom: 20px !important;
+}
+
+/* テキストエリアの高さ調整 */
+textarea {
+    min-height: 100px !important;
+    resize: vertical;
+}
+
+/* レスポンシブ対応 */
+@media (max-width: 768px) {
+    .auth-card {
+        padding: 30px 20px !important;
+        margin: 20px 10px !important;
+    }
+
+    .challenges-section {
+        gap: 20px;
+    }
+
+    .challenge-group {
+        padding: 15px;
+    }
+
+    .skills-checkbox-grid,
+    .interests-checkbox-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .registration-progress {
+        overflow-x: auto;
+        padding-bottom: 10px;
+    }
+
+    /* プログレスステップの最小幅 */
+    .progress-step {
+        min-width: 60px;
+    }
+}
+
+/* タブレット対応 */
+@media (min-width: 769px) and (max-width: 1024px) {
+    .challenges-section {
+        grid-template-columns: repeat(2, 1fr);
+    }
+
+    .skills-checkbox-grid,
+    .interests-checkbox-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+/* デスクトップ対応 */
+@media (min-width: 1025px) {
+    .challenges-section {
+        grid-template-columns: repeat(2, 1fr);
+    }
+
+    .auth-card:has(.form-step[data-step="2"].active) {
+        max-width: 900px !important;
+    }
+}
+
+/* スクロールバーのスタイル */
+.auth-card::-webkit-scrollbar {
+    width: 8px;
+}
+
+.auth-card::-webkit-scrollbar-track {
+    background: #f1f1f1;
+    border-radius: 4px;
+}
+
+.auth-card::-webkit-scrollbar-thumb {
+    background: #888;
+    border-radius: 4px;
+}
+
+.auth-card::-webkit-scrollbar-thumb:hover {
+    background: #555;
+}
+
+/* ボタンの一貫性 */
+.auth-button,
+.auth-button-outline {
+    width: 100%;
+    margin-top: 10px;
+}
+
+.form-navigation {
+    display: flex;
+    gap: 10px;
+    margin-top: 30px;
+}
+
+.form-navigation button {
+    flex: 1;
+}
+
+/* ============================================================
+   Source: register-ui-fix.css
+   ============================================================ */
+
+/**
+ * 登録ページUI修正
+ * 招待リンクから遷移した際の表示問題を解決
+ */
+
+/* 文字カウントのスタイル修正 */
+.char-count {
+    color: #6c757d !important;
+    font-size: 0.875rem;
+    margin-top: 5px;
+    display: block;
+}
+
+/* 文字数が不足している場合 */
+.char-count.error {
+    color: #ef4444 !important;
+}
+
+/* 文字数が十分な場合 */
+.char-count.success {
+    color: #10b981 !important;
+}
+
+/* ボタンの無効化スタイルを修正 */
+.auth-button:disabled,
+.auth-button.disabled {
+    opacity: 0.5 !important;
+    cursor: not-allowed !important;
+    background: #94a3b8 !important;
+}
+
+/* ボタンが有効な場合 */
+.auth-button:not(:disabled):not(.disabled) {
+    opacity: 1 !important;
+    cursor: pointer !important;
+    background: linear-gradient(135deg, #0066ff 0%, #004fc4 100%) !important;
+}
+
+/* フォームナビゲーションボタンの修正 */
+.form-navigation .auth-button {
+    width: auto;
+    flex: 1;
+}
+
+/* 紹介情報の表示位置修正 */
+.referral-info {
+    background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+    color: white;
+    padding: 1rem 1.5rem;
+    border-radius: 12px;
+    margin-bottom: 1.5rem;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    box-shadow: 0 4px 12px rgba(79, 172, 254, 0.3);
+    animation: slideIn 0.5s ease-out;
+    flex-direction: column;
+    text-align: center;
+}
+
+@media (min-width: 768px) {
+    .referral-info {
+        flex-direction: row;
+        text-align: left;
+    }
+}
+
+.referral-info i {
+    font-size: 1.5rem;
+    opacity: 0.9;
+}
+
+.referral-info strong {
+    font-weight: 600;
+    background: rgba(255, 255, 255, 0.2);
+    padding: 0.25rem 0.5rem;
+    border-radius: 6px;
+    font-family: monospace;
+}
+
+.referral-info small {
+    display: block;
+    opacity: 0.9;
+    font-size: 0.875rem;
+    margin-top: 0.25rem;
+}
+
+/* フォーム要素の間隔調整 */
+.form-group {
+    margin-bottom: 1.5rem;
+}
+
+/* チャレンジグループの詳細テキストエリア */
+.challenge-group textarea {
+    width: 100%;
+    margin-top: 1rem;
+}
+
+/* チェックボックスラベルのホバー効果 */
+.checkbox-label:hover {
+    background: #f0f7ff;
+    border-radius: 8px;
+    transition: background 0.2s ease;
+}
+
+/* 必須フィールドマーク */
+.required {
+    color: #ef4444;
+    margin-left: 4px;
+}
+
+/* ファイルアップロードエリアの改善 */
+.file-upload-wrapper {
+    position: relative;
+    margin-top: 0.5rem;
+}
+
+.file-upload-label {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.75rem;
+    padding: 2rem;
+    border: 2px dashed #e5e7eb;
+    border-radius: 12px;
+    background: #f8fafc;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.file-upload-label:hover {
+    border-color: #0066ff;
+    background: #f0f7ff;
+}
+
+.file-input {
+    position: absolute;
+    width: 0;
+    height: 0;
+    opacity: 0;
+    pointer-events: none;
+}
+
+.file-preview {
+    margin-top: 1rem;
+    text-align: center;
+}
+
+.file-preview img {
+    max-width: 200px;
+    max-height: 200px;
+    border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+/* アニメーション */
+@keyframes slideIn {
+    from {
+        opacity: 0;
+        transform: translateY(-20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* ステップ遷移アニメーション（G1修正） */
+.slide-left {
+    animation: slideLeft 0.4s ease forwards;
+}
+
+.slide-right {
+    animation: slideRight 0.4s ease forwards;
+}
+
+@keyframes slideLeft {
+    from {
+        opacity: 0;
+        transform: translateX(-30px);
+    }
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+@keyframes slideRight {
+    from {
+        opacity: 0;
+        transform: translateX(30px);
+    }
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+/* エラーメッセージ */
+.error-message {
+    color: #ef4444;
+    font-size: 0.875rem;
+    margin-top: 0.5rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.error-message i {
+    font-size: 1rem;
+}
+
+/* 成功メッセージ */
+.success-message {
+    color: #10b981;
+    font-size: 0.875rem;
+    margin-top: 0.5rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.success-message i {
+    font-size: 1rem;
+}
+
+/* プログレスステップの改善 */
+.registration-progress {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0;
+    margin: 2rem 0;
+    position: relative;
+    padding: 0 1rem;
+    overflow-x: auto;
+    overflow-y: visible;
+}
+
+.progress-step {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    position: relative;
+    z-index: 2;
+    flex-shrink: 0;
+    min-width: 70px;
+}
+
+.step-number {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background: #e5e7eb;
+    color: #6c757d;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+    transition: all 0.3s ease;
+}
+
+.progress-step.active .step-number {
+    background: #0066ff;
+    color: white;
+    box-shadow: 0 4px 12px rgba(0, 102, 255, 0.3);
+}
+
+.progress-step.completed .step-number {
+    background: #10b981;
+    color: white;
+}
+
+.step-label {
+    font-size: 0.75rem;
+    color: #6c757d;
+    white-space: nowrap;
+}
+
+.progress-line {
+    width: 40px;
+    height: 2px;
+    background: #e5e7eb;
+    margin: 0 -5px;
+    position: relative;
+    top: -24px;
+    flex-shrink: 0;
+}
+
+/* レスポンシブ調整 */
+@media (max-width: 640px) {
+    .registration-progress {
+        justify-content: flex-start;
+        padding: 0 0.5rem 1rem;
+        margin: 1.5rem -0.5rem;
+    }
+
+    .progress-step {
+        min-width: 60px;
+    }
+
+    .step-label {
+        font-size: 0.625rem;
+    }
+
+    .auth-card {
+        padding: 30px 20px;
+    }
+
+    .auth-title {
+        font-size: 1.5rem;
+    }
+}
+
+/* フォームステップの表示/非表示アニメーション */
+.form-step {
+    display: none;
+    animation: fadeIn 0.3s ease-out;
+}
+
+.form-step.active {
+    display: block;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* スキル・興味選択のグリッドレイアウト改善 */
+.skills-checkbox-grid,
+.interests-checkbox-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+    gap: 0.75rem;
+    margin-top: 1rem;
+}
+
+.skill-checkbox,
+.interest-checkbox {
+    display: flex;
+    align-items: center;
+    padding: 0.5rem;
+    border-radius: 8px;
+    transition: background 0.2s ease;
+}
+
+.skill-checkbox:hover,
+.interest-checkbox:hover {
+    background: #f0f7ff;
+}
+
+.skill-checkbox input[type="checkbox"],
+.interest-checkbox input[type="checkbox"] {
+    margin-right: 0.5rem;
+}
+
+/* カテゴリーセクションのスタイル */
+.skill-category-section,
+.interest-category-section {
+    margin-bottom: 2rem;
+    padding: 1.5rem;
+    background: #f8fafc;
+    border-radius: 12px;
+    border: 1px solid #e5e7eb;
+}
+
+.skill-category-section h4,
+.interest-category-section h4 {
+    margin: 0 0 1rem 0;
+    color: #1e293b;
+    font-size: 1.125rem;
+    font-weight: 600;
+}
+
+/* フォームオプション（チェックボックス）のスタイル */
+.form-options {
+    margin: 1rem 0;
+}
+
+.form-options .checkbox-label {
+    display: flex;
+    align-items: center;
+    padding: 0.75rem;
+    background: #f8fafc;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.form-options .checkbox-label:hover {
+    background: #f0f7ff;
+}
+
+.form-options .checkbox-label input[type="checkbox"] {
+    margin-right: 0.75rem;
+}
+
+/* 利用規約リンク */
+.form-options a {
+    color: #0066ff;
+    text-decoration: none;
+    font-weight: 500;
+}
+
+.form-options a:hover {
+    text-decoration: underline;
+}
+
+/* ============================================================
+   Source: register-responsive.css
+   ============================================================ */
+
+/**
+ * 登録ページレスポンシブ対応
+ * モバイル・タブレット・デスクトップ対応
+ */
+
+/* モバイル対応（640px以下） */
+@media (max-width: 640px) {
+    /* 認証コンテナ */
+    .auth-container {
+        padding: 20px 10px !important;
+    }
+
+    /* 認証カード */
+    .auth-card {
+        padding: 30px 20px !important;
+        margin: 0 !important;
+        border-radius: 20px !important;
+    }
+
+    /* ヘッダー */
+    .auth-header h1 {
+        font-size: 1.5rem !important;
+    }
+
+    .auth-title {
+        font-size: 1.25rem !important;
+        margin-bottom: 20px !important;
+    }
+
+    /* プログレスインジケーター */
+    .registration-progress {
+        overflow-x: auto;
+        padding-bottom: 10px;
+        margin: 20px -10px;
+        padding: 0 10px 10px;
+    }
+
+    .progress-step {
+        min-width: 50px;
+    }
+
+    .step-number {
+        width: 30px;
+        height: 30px;
+        font-size: 0.875rem;
+    }
+
+    .step-label {
+        font-size: 0.625rem;
+    }
+
+    /* フォーム要素 */
+    .auth-form input,
+    .auth-form textarea,
+    .auth-form select {
+        padding: 12px 16px !important;
+        font-size: 16px !important; /* iOSのズーム防止 */
+    }
+
+    /* ボタン */
+    .auth-button {
+        padding: 14px 24px !important;
+        font-size: 1rem !important;
+    }
+
+    /* チャレンジセクション */
+    .challenges-section {
+        gap: 15px !important;
+    }
+
+    .challenge-group {
+        padding: 15px !important;
+    }
+
+    .challenge-group h4 {
+        font-size: 1rem !important;
+        margin-bottom: 10px !important;
+    }
+
+    /* スキル・興味グリッド */
+    .skills-checkbox-grid,
+    .interests-checkbox-grid {
+        grid-template-columns: 1fr !important;
+        gap: 8px !important;
+    }
+
+    .skill-category-section,
+    .interest-category-section {
+        padding: 15px !important;
+        margin-bottom: 15px !important;
+    }
+
+    /* フォームナビゲーション */
+    .form-navigation {
+        flex-direction: column !important;
+        gap: 10px !important;
+    }
+
+    .form-navigation button {
+        width: 100% !important;
+    }
+
+    /* 紹介情報 */
+    .referral-info {
+        padding: 12px !important;
+        font-size: 0.875rem !important;
+    }
+
+    .referral-info i {
+        font-size: 1.25rem !important;
+    }
+
+    /* ファイルアップロード */
+    .file-upload-label {
+        padding: 1.5rem !important;
+        font-size: 0.875rem !important;
+    }
+
+    /* SNSボタン */
+    .line-button {
+        padding: 14px !important;
+        font-size: 0.9375rem !important;
+    }
+}
+
+/* タブレット対応（641px〜1024px） */
+@media (min-width: 641px) and (max-width: 1024px) {
+    /* 認証カード */
+    .auth-card {
+        max-width: 600px !important;
+        padding: 40px 35px !important;
+    }
+
+    /* チャレンジセクション（2列） */
+    .challenges-section {
+        grid-template-columns: 1fr 1fr !important;
+        gap: 20px !important;
+    }
+
+    /* スキル・興味グリッド（2列） */
+    .skills-checkbox-grid,
+    .interests-checkbox-grid {
+        grid-template-columns: repeat(2, 1fr) !important;
+    }
+
+    /* プログレスステップ */
+    .step-label {
+        font-size: 0.75rem !important;
+    }
+}
+
+/* 大画面デスクトップ対応（1025px以上） */
+@media (min-width: 1025px) {
+    /* ステップ2の特別な幅 */
+    .auth-card:has(.form-step[data-step="2"].active) {
+        max-width: 1000px !important;
+    }
+
+    /* チャレンジセクション（2列） */
+    .challenges-section {
+        grid-template-columns: repeat(2, 1fr) !important;
+        gap: 25px !important;
+    }
+
+    /* スキル・興味グリッド（3列） */
+    .skills-checkbox-grid,
+    .interests-checkbox-grid {
+        grid-template-columns: repeat(3, 1fr) !important;
+    }
+}
+
+/* 横向きモバイル対応 */
+@media (max-height: 600px) and (orientation: landscape) {
+    .auth-container {
+        padding: 20px !important;
+        min-height: auto !important;
+    }
+
+    .auth-card {
+        margin: 0 auto !important;
+        max-height: 90vh !important;
+        overflow-y: auto !important;
+    }
+
+    .registration-progress {
+        margin: 15px 0 !important;
+    }
+}
+
+/* タッチデバイス対応 */
+@media (hover: none) and (pointer: coarse) {
+    /* タッチしやすいボタンサイズ */
+    .auth-button,
+    .auth-button-outline {
+        min-height: 48px !important;
+    }
+
+    /* チェックボックスのタッチエリア拡大 */
+    .checkbox-label {
+        padding: 12px !important;
+        margin: 4px 0 !important;
+    }
+
+    /* ドロップダウンのタッチエリア */
+    .auth-form select {
+        min-height: 48px !important;
+    }
+}
+
+/* ダークモード対応 */
+@media (prefers-color-scheme: dark) {
+    /* 必要に応じてダークモードスタイルを追加 */
+}
+
+/* 印刷対応 */
+@media print {
+    .auth-container {
+        background: white !important;
+    }
+
+    .auth-card {
+        box-shadow: none !important;
+        border: 1px solid #ddd !important;
+    }
+
+    .auth-button,
+    .form-navigation {
+        display: none !important;
+    }
+}
+
+/* アクセシビリティ対応 */
+@media (prefers-reduced-motion: reduce) {
+    * {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+    }
+}
+
+/* 高コントラストモード対応 */
+@media (prefers-contrast: high) {
+    .auth-card {
+        border: 2px solid currentColor !important;
+    }
+
+    .auth-form input,
+    .auth-form textarea,
+    .auth-form select {
+        border-width: 2px !important;
+    }
+}
+
+/* Retinaディスプレイ対応 */
+@media (-webkit-min-device-pixel-ratio: 2), (min-resolution: 192dpi) {
+    .auth-card {
+        border-width: 0.5px !important;
+    }
+}
+
+/* スクロールバーのカスタマイズ（モバイル） */
+@media (max-width: 768px) {
+    .auth-card::-webkit-scrollbar {
+        width: 4px !important;
+    }
+
+    .auth-card::-webkit-scrollbar-thumb {
+        background: rgba(0, 0, 0, 0.2) !important;
+    }
+}
+
+/* フォームステップの高さ調整 */
+.form-step {
+    min-height: auto !important;
+    padding-bottom: 20px !important;
+}
+
+/* オーバーフロー処理 */
+.auth-card {
+    max-height: none !important;
+    overflow: visible !important;
+}
+
+/* フレックスボックスのフォールバック */
+.form-navigation {
+    display: -webkit-box;
+    display: -ms-flexbox;
+    display: flex;
+}
+
+/* グリッドのフォールバック */
+.challenges-section {
+    display: -ms-grid;
+    display: grid;
+}
+
+/* iOS Safariの100vh問題対策 */
+.auth-container {
+    min-height: 100vh;
+    min-height: -webkit-fill-available;
+}
+
+/* Androidキーボード表示時の対策 */
+@media (max-height: 500px) {
+    .auth-container {
+        min-height: auto !important;
+    }
+}

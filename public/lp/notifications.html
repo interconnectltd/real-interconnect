@@ -1,0 +1,365 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <link rel="icon" type="image/svg+xml" href="favicon.svg">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>通知一覧 - INTERCONNECT</title>
+    
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Noto+Sans+JP:wght@300;400;500;700&display=swap" rel="stylesheet">
+    
+    <!-- Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" integrity="sha384-iw3OoTErCYJJB9mCa8LNS2hbsQ7M3C0EpIsO/H5+EGAkPGc6rk+V8i04oW/K5xq0" crossorigin="anonymous">
+    
+    <!-- Styles -->
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/buttons.css">
+    <link rel="stylesheet" href="css/dashboard.css">
+    <!-- ログアウトボタンUI修正 -->
+    <link rel="stylesheet" href="css/logout-button-fix.css">
+    <link rel="stylesheet" href="css/notifications.css">
+    <link rel="stylesheet" href="css/responsive-layout.css">
+    <!-- ユーザーメニューCSS（統合済み） -->
+    <link rel="stylesheet" href="css/user-menu.css">
+</head>
+<body>
+    <!-- Mobile Header -->
+    <header class="mobile-header">
+        <button class="mobile-menu-toggle" id="notificationsSidebarToggle">
+            <i class="fas fa-bars"></i>
+        </button>
+        <h1>INTERCONNECT</h1>
+        <div class="mobile-header-actions">
+            <a href="notifications.html" class="notification-btn">
+                <i class="fas fa-bell"></i>
+                                <span class="notification-badge" style="display:none;">0</span>
+            </a>
+        </div>
+    </header>
+
+    <!-- Mobile Navigation -->
+    <nav class="mobile-nav">
+        <div class="mobile-nav-header">
+            <h1>INTERCONNECT</h1>
+            <button class="mobile-nav-close">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+        
+        <div class="mobile-nav-menu">
+            <ul>
+                <li>
+                    <a href="dashboard.html" class="mobile-nav-link">
+                        <i class="fas fa-home"></i>
+                        <span>ダッシュボード</span>
+                    </a>
+                </li>
+                <li>
+                    <a href="connections.html" class="mobile-nav-link">
+                        <i class="fas fa-link"></i>
+                        <span>コネクション</span>
+                    </a>
+                </li>
+                <li>
+                    <a href="events.html" class="mobile-nav-link">
+                        <i class="fas fa-calendar-alt"></i>
+                        <span>イベント</span>
+                    </a>
+                </li>
+                <li>
+                    <a href="messages.html" class="mobile-nav-link">
+                        <i class="fas fa-envelope"></i>
+                        <span>メッセージ</span>
+                    </a>
+                </li>
+                <li>
+                    <a href="matching.html" class="mobile-nav-link">
+                        <i class="fas fa-handshake"></i>
+                        <span>マッチング</span>
+                    </a>
+                </li>
+                <li>
+                    <a href="referral.html" class="mobile-nav-link">
+                        <i class="fas fa-user-plus"></i>
+                        <span>紹介プログラム</span>
+                    </a>
+                </li>
+                <li>
+                    <a href="profile.html" class="mobile-nav-link">
+                        <i class="fas fa-user"></i>
+                        <span>プロフィール</span>
+                    </a>
+                </li>
+                <li>
+                    <a href="settings.html" class="mobile-nav-link">
+                        <i class="fas fa-cog"></i>
+                        <span>設定</span>
+                    </a>
+                </li>
+            </ul>
+        </div>
+        
+        <div class="mobile-nav-footer">
+            <a href="#" class="mobile-nav-link" onclick="logout(); return false;">
+                <i class="fas fa-sign-out-alt"></i>
+                <span>ログアウト</span>
+            </a>
+        </div>
+    </nav>
+    
+    <!-- Mobile Backdrop -->
+    <div class="mobile-backdrop"></div>
+
+    <div class="dashboard">
+        <!-- Sidebar -->
+        <aside class="sidebar" id="notificationsSidebar">
+            <div class="sidebar-header">
+                <h1>INTERCONNECT</h1>
+                <button class="sidebar-toggle" id="sidebarToggle" aria-label="メニュー">
+                    <i class="fas fa-bars"></i>
+                </button>
+            </div>
+            
+            <nav class="sidebar-nav">
+                <ul>
+                    <li>
+                        <a href="dashboard.html" class="sidebar-link">
+                            <i class="fas fa-home"></i>
+                            <span>ダッシュボード</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="connections.html" class="sidebar-link">
+                            <i class="fas fa-link"></i>
+                            <span>コネクション</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="events.html" class="sidebar-link">
+                            <i class="fas fa-calendar-alt"></i>
+                            <span>イベント</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="messages.html" class="sidebar-link">
+                            <i class="fas fa-envelope"></i>
+                            <span>メッセージ</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="matching.html" class="sidebar-link">
+                            <i class="fas fa-handshake"></i>
+                            <span>マッチング</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="referral.html" class="sidebar-link">
+                            <i class="fas fa-user-plus"></i>
+                            <span>紹介プログラム</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="profile.html" class="sidebar-link">
+                            <i class="fas fa-user"></i>
+                            <span>プロフィール</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="settings.html" class="sidebar-link">
+                            <i class="fas fa-cog"></i>
+                            <span>設定</span>
+                        </a>
+                    </li>
+                </ul>
+            </nav>
+            
+            <div class="sidebar-footer">
+                <a href="#" class="sidebar-link" onclick="logout(); return false;">
+                    <i class="fas fa-sign-out-alt"></i>
+                    <span>ログアウト</span>
+                </a>
+            </div>
+        </aside>
+        
+        <!-- Main Content -->
+        <main class="main-content">
+            <div class="content-header">
+                <div class="header-left">
+                    <div>
+                        <h1 class="page-title">
+                            <i class="fas fa-bell"></i>
+                                <span class="notification-badge" style="display:none;">0</span>
+                            通知一覧
+                        </h1>
+                        <nav class="breadcrumb">
+                            <a href="dashboard.html">ダッシュボード</a>
+                            <i class="fas fa-chevron-right"></i>
+                            <span>通知</span>
+                        </nav>
+                    </div>
+                </div>
+                <div class="header-right">
+                    <div class="user-menu">
+                        <div class="notification-wrapper">
+                            <button class="notification-btn" aria-label="通知">
+                                <i class="fas fa-bell"></i>
+                                <span class="notification-badge" style="display:none;">0</span>
+                            </button>
+                            <div class="notification-dropdown">
+                                <div class="notification-header">
+                                    <h3>通知</h3>
+                                    <button class="mark-all-read">すべて既読にする</button>
+                                </div>
+                                <div class="notification-list">
+                                    <div class="empty-notifications">
+                                        <i class="fas fa-bell-slash"></i>
+                                        <p>新しい通知はありません</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="user-profile">
+                            <img src="assets/default-avatar.svg" alt="User Avatar" class="user-avatar">
+                            <span class="user-name">ゲスト</span>
+                            <i class="fas fa-chevron-down"></i>
+                            <div class="user-dropdown">
+                                <a href="profile.html"><i class="fas fa-user"></i> プロフィール</a>
+                                <a href="settings.html"><i class="fas fa-cog"></i> 設定</a>
+                                <a href="#" id="logoutBtn"><i class="fas fa-sign-out-alt"></i> ログアウト</a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Notifications Content -->
+            <div class="notifications-page">
+                <!-- Filters -->
+                <div class="notifications-filters">
+                    <button class="filter-btn active" data-filter="all">すべて</button>
+                    <button class="filter-btn" data-filter="event">イベント</button>
+                    <button class="filter-btn" data-filter="message">メッセージ</button>
+                    <button class="filter-btn" data-filter="match">マッチング</button>
+                    <button class="filter-btn" data-filter="system">システム</button>
+                </div>
+                
+                <!-- 通知はJSにより動的に読み込まれます -->
+                <div id="notifications-dynamic-container">
+                    <div class="notifications-group">
+                        <div class="filter-loading"><i class="fas fa-spinner fa-spin"></i> 通知を読み込み中...</div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+    
+    <!-- Scripts -->
+    <!-- Core initialization (must be first) -->
+    <script src="js/supabase-unified.js?v=1.1"></script>
+    <script src="js/core-utils.js"></script>
+    <script src="js/global-functions.js"></script>
+    <script src="js/profile-sync.js"></script>
+    <script src="js/notification-system-unified.js"></script>
+    <script src="js/guest-mode-manager.js"></script>
+    <script src="js/notifications-realtime-unified.js?v=1.0"></script>
+    <script src="js/responsive-menu-simple.js"></script>
+    <script src="js/dashboard.js"></script>
+    <!-- 通知システム統一JavaScript -->
+    <script src="js/notifications-unified.js?v=1.0"></script>
+    <!-- 後処理 -->
+    <script src="js/user-dropdown-handler.js"></script>
+    <script src="js/avatar-size-enforcer.js"></script>
+    
+    <!-- コネクト申請承認機能 -->
+    <script>
+    // コネクト申請を承認
+    async function acceptConnectionRequest(userId, userName) {
+        try {
+            // Supabaseでコネクション状態を更新
+            const { data: { user } } = await window.supabaseClient.auth.getUser();
+            if (!user) {
+                showNotification('ログインが必要です', 'error');
+                return;
+            }
+            
+            // connections テーブルを更新
+            const { error } = await window.supabaseClient
+                .from('connections')
+                .update({ 
+                    status: 'accepted',
+                    responded_at: new Date().toISOString()
+                })
+                .or(`user_id.eq.${userId},connected_user_id.eq.${userId}`)
+                .or(`user_id.eq.${user.id},connected_user_id.eq.${user.id}`);
+            
+            if (error) throw error;
+            
+            // 承認通知を相手に送信
+            await window.supabaseClient
+                .from('notifications')
+                .insert({
+                    user_id: userId,
+                    type: 'connection_accepted',
+                    title: 'コネクト承認',
+                    message: `あなたのコネクト申請が承認されました`,
+                    related_id: user.id,
+                    is_read: false,
+                    created_at: new Date().toISOString()
+                });
+            
+            // UI更新
+            const notificationItem = event.target.closest('.notification-item-full');
+            if (notificationItem) {
+                notificationItem.querySelector('.notification-actions').innerHTML = 
+                    '<span class="text-success"><i class="fas fa-check"></i> 承認済み</span>';
+                notificationItem.classList.remove('unread');
+            }
+            
+            showNotification(`${userName}さんとコネクトしました`, 'success');
+            
+        } catch (error) {
+            console.error('承認エラー:', error);
+            showNotification('承認に失敗しました', 'error');
+        }
+    }
+    
+    // コネクト申請を拒否
+    async function rejectConnectionRequest(userId, userName) {
+        try {
+            // Supabaseでコネクション状態を更新
+            const { data: { user } } = await window.supabaseClient.auth.getUser();
+            if (!user) {
+                showNotification('ログインが必要です', 'error');
+                return;
+            }
+            
+            // connections テーブルから削除
+            const { error } = await window.supabaseClient
+                .from('connections')
+                .delete()
+                .or(`user_id.eq.${userId},connected_user_id.eq.${userId}`)
+                .or(`user_id.eq.${user.id},connected_user_id.eq.${user.id}`);
+            
+            if (error) throw error;
+            
+            // UI更新
+            const notificationItem = event.target.closest('.notification-item-full');
+            if (notificationItem) {
+                notificationItem.querySelector('.notification-actions').innerHTML = 
+                    '<span class="text-muted"><i class="fas fa-times"></i> 拒否済み</span>';
+                notificationItem.classList.remove('unread');
+            }
+            
+            showNotification(`コネクト申請を拒否しました`, 'info');
+            
+        } catch (error) {
+            console.error('拒否エラー:', error);
+            showNotification('拒否に失敗しました', 'error');
+        }
+    }
+    </script>
+</body>
+</html>

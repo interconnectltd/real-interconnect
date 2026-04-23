@@ -1,0 +1,584 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <link rel="icon" type="image/svg+xml" href="favicon.svg">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>サイト設定 - INTERCONNECT マスター管理</title>
+    
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Noto+Sans+JP:wght@300;400;500;700;900&display=swap" rel="stylesheet">
+    
+    <!-- Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" integrity="sha384-iw3OoTErCYJJB9mCa8LNS2hbsQ7M3C0EpIsO/H5+EGAkPGc6rk+V8i04oW/K5xq0" crossorigin="anonymous">
+    
+    <!-- Styles -->
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/buttons.css">
+    <link rel="stylesheet" href="css/dashboard.css">
+    <link rel="stylesheet" href="css/notifications.css">
+    <link rel="stylesheet" href="css/responsive-layout.css">
+    <link rel="stylesheet" href="css/super-admin.css">
+    <link rel="stylesheet" href="css/admin-forms.css">
+</head>
+<body class="admin-theme">
+    <!-- 管理者認証ガード -->
+    <script>
+    (async function() {
+        function waitForClient() {
+            return new Promise(function(resolve) {
+                if (window.supabaseClient) return resolve(window.supabaseClient);
+                var interval = setInterval(function() {
+                    if (window.supabaseClient) { clearInterval(interval); resolve(window.supabaseClient); }
+                }, 100);
+                setTimeout(function() { clearInterval(interval); resolve(null); }, 5000);
+            });
+        }
+        var client = await waitForClient();
+        if (!client) { window.location.href = 'login.html'; return; }
+        try {
+            var result = await client.auth.getUser();
+            var user = result.data && result.data.user;
+            if (!user) { window.location.href = 'login.html'; return; }
+            var profileResult = await client.from('user_profiles').select('is_admin').eq('id', user.id).maybeSingle();
+            if (!profileResult.data || !profileResult.data.is_admin) {
+                window.location.href = 'dashboard.html';
+                return;
+            }
+        } catch (e) { window.location.href = 'login.html'; return; }
+        document.body.style.visibility = 'visible';
+    })();
+    </script>
+    <style>body { visibility: hidden; }</style>
+
+    <div class="admin-container">
+        <!-- Main Content -->
+        <main class="admin-main full-width">
+            <!-- Top Bar -->
+            <header class="admin-topbar">
+                <div class="topbar-left">
+                    <div class="breadcrumb">
+                        <a href="super-admin.html" class="breadcrumb-item">管理画面</a>
+                        <i class="fas fa-chevron-right breadcrumb-separator"></i>
+                        <span class="breadcrumb-item current">サイト設定</span>
+                    </div>
+                </div>
+                
+                <div class="topbar-right">
+                    <button class="btn btn-primary" id="saveAllSettings">
+                        <i class="fas fa-save"></i>
+                        すべて保存
+                    </button>
+                </div>
+            </header>
+            
+            <!-- Site Settings Content -->
+            <div class="admin-content">
+                <div class="settings-container">
+                    <!-- Settings Navigation -->
+                    <div class="settings-nav">
+                        <h2>設定カテゴリ</h2>
+                        <ul class="settings-nav-list">
+                            <li>
+                                <a href="#basic-info" class="settings-nav-link active" data-section="basic-info">
+                                    <i class="fas fa-info-circle"></i>
+                                    <span>基本情報</span>
+                                </a>
+                            </li>
+                            <li>
+                                <a href="#contact" class="settings-nav-link" data-section="contact">
+                                    <i class="fas fa-address-book"></i>
+                                    <span>連絡先情報</span>
+                                </a>
+                            </li>
+                            <li>
+                                <a href="#hero-content" class="settings-nav-link" data-section="hero-content">
+                                    <i class="fas fa-image"></i>
+                                    <span>ヒーローコンテンツ</span>
+                                </a>
+                            </li>
+                            <li>
+                                <a href="#services" class="settings-nav-link" data-section="services">
+                                    <i class="fas fa-cogs"></i>
+                                    <span>サービス概要</span>
+                                </a>
+                            </li>
+                            <li>
+                                <a href="#pricing" class="settings-nav-link" data-section="pricing">
+                                    <i class="fas fa-dollar-sign"></i>
+                                    <span>料金プラン</span>
+                                </a>
+                            </li>
+                            <li>
+                                <a href="#performance" class="settings-nav-link" data-section="performance">
+                                    <i class="fas fa-tachometer-alt"></i>
+                                    <span>実績データ</span>
+                                </a>
+                            </li>
+                            <li>
+                                <a href="#seo" class="settings-nav-link" data-section="seo">
+                                    <i class="fas fa-search"></i>
+                                    <span>SEO設定</span>
+                                </a>
+                            </li>
+                        </ul>
+                    </div>
+                    
+                    <!-- Settings Content -->
+                    <div class="settings-content">
+                        <!-- Basic Info Section -->
+                        <section class="settings-section active" id="basic-info">
+                            <div class="section-header">
+                                <h2>基本情報</h2>
+                                <p>サイトの基本的な情報を設定します</p>
+                            </div>
+                            
+                            <div class="settings-form">
+                                <div class="form-grid">
+                                    <div class="form-group">
+                                        <label for="site-title">サイトタイトル</label>
+                                        <input type="text" id="site-title" value="INTER CONNECT - 日本最高峰の経営者専用コミュニティ" class="form-input">
+                                        <small class="form-help">ブラウザのタイトルバーに表示されます</small>
+                                    </div>
+                                    
+                                    <div class="form-group">
+                                        <label for="site-tagline">サイトのキャッチフレーズ</label>
+                                        <input type="text" id="site-tagline" value="経営者コミュニティ" class="form-input">
+                                    </div>
+                                    
+                                    <div class="form-group full-width">
+                                        <label for="site-description">サイト説明</label>
+                                        <textarea id="site-description" rows="3" class="form-textarea">日本最高峰の経営者専用コミュニティ。78.5%のマッチング成功率で、あなたのビジネスを次のステージへ。</textarea>
+                                    </div>
+                                    
+                                    <div class="form-group">
+                                        <label for="company-name">運営会社名</label>
+                                        <input type="text" id="company-name" value="INTERCONNECT運営事務局" class="form-input">
+                                    </div>
+                                    
+                                    <div class="form-group">
+                                        <label for="brand-name">ブランド名</label>
+                                        <input type="text" id="brand-name" value="INTER CONNECT" class="form-input">
+                                    </div>
+                                    
+                                    <div class="form-group">
+                                        <label for="powered-by">パワードバイ</label>
+                                        <input type="text" id="powered-by" value="ベテランAI" class="form-input">
+                                    </div>
+                                </div>
+                                
+                                <div class="form-actions">
+                                    <button type="button" class="btn btn-outline" id="resetBasicInfo">リセット</button>
+                                    <button type="button" class="btn btn-primary" id="saveBasicInfo">保存</button>
+                                </div>
+                            </div>
+                        </section>
+                        
+                        <!-- Contact Section -->
+                        <section class="settings-section" id="contact">
+                            <div class="section-header">
+                                <h2>連絡先情報</h2>
+                                <p>お問い合わせ情報を設定します</p>
+                            </div>
+                            
+                            <div class="settings-form">
+                                <div class="form-grid">
+                                    <div class="form-group">
+                                        <label for="phone-number">電話番号</label>
+                                        <input type="tel" id="phone-number" value="03-XXXX-XXXX" class="form-input">
+                                    </div>
+                                    
+                                    <div class="form-group">
+                                        <label for="email-address">メールアドレス</label>
+                                        <input type="email" id="email-address" value="info@inter-connect.jp" class="form-input">
+                                    </div>
+                                    
+                                    <div class="form-group">
+                                        <label for="line-id">LINE ID</label>
+                                        <input type="text" id="line-id" value="@inter-connect" class="form-input">
+                                    </div>
+                                    
+                                    <div class="form-group">
+                                        <label for="business-hours">営業時間</label>
+                                        <input type="text" id="business-hours" value="平日9:00-18:00" class="form-input">
+                                    </div>
+                                    
+                                    <div class="form-group">
+                                        <label for="weekend-hours">土日祝営業時間</label>
+                                        <input type="text" id="weekend-hours" value="土日祝10:00-17:00" class="form-input">
+                                    </div>
+                                    
+                                    <div class="form-group full-width">
+                                        <label for="office-address">住所</label>
+                                        <textarea id="office-address" rows="2" class="form-textarea">東京都渋谷区◯◯</textarea>
+                                    </div>
+                                </div>
+                                
+                                <div class="form-actions">
+                                    <button type="button" class="btn btn-outline">リセット</button>
+                                    <button type="button" class="btn btn-primary">保存</button>
+                                </div>
+                            </div>
+                        </section>
+                        
+                        <!-- Hero Content Section -->
+                        <section class="settings-section" id="hero-content">
+                            <div class="section-header">
+                                <h2>ヒーローコンテンツ</h2>
+                                <p>トップページのメインビジュアルとテキストを設定します</p>
+                            </div>
+                            
+                            <div class="settings-form">
+                                <div class="form-group">
+                                    <label for="hero-title">ヒーロータイトル</label>
+                                    <textarea id="hero-title" rows="2" class="form-textarea">日本最高峰の
+経営者専用コミュニティ</textarea>
+                                </div>
+                                
+                                <div class="form-group">
+                                    <label for="hero-subtitle">ヒーローサブタイトル</label>
+                                    <textarea id="hero-subtitle" rows="2" class="form-textarea">独自技術で78.5%のマッチング成功率を実現
+あなたのビジネスを確実に次のステージへ</textarea>
+                                </div>
+                                
+                                <div class="form-group">
+                                    <label for="hero-video-url">ヒーロー動画URL</label>
+                                    <input type="url" id="hero-video-url" value="assets/interconnect-top.mp4" class="form-input">
+                                    <small class="form-help">動画ファイルのパスまたはURL</small>
+                                </div>
+                                
+                                <div class="form-group">
+                                    <label for="hero-image-url">フォールバック画像URL</label>
+                                    <input type="url" id="hero-image-url" value="assets/hero-fallback.svg" class="form-input">
+                                    <small class="form-help">画像ファイルのパスまたはURL</small>
+                                </div>
+                                
+                                <div class="form-actions">
+                                    <button type="button" class="btn btn-outline">リセット</button>
+                                    <button type="button" class="btn btn-primary">保存</button>
+                                </div>
+                            </div>
+                        </section>
+                        
+                        <!-- Services Section -->
+                        <section class="settings-section" id="services">
+                            <div class="section-header">
+                                <h2>サービス概要</h2>
+                                <p>サービスの特徴と内容を設定します</p>
+                            </div>
+                            
+                            <div class="settings-form">
+                                <div class="service-card-editor">
+                                    <div class="card-header">
+                                        <h3>メインサービス</h3>
+                                    </div>
+                                    <div class="card-content">
+                                        <div class="form-group">
+                                            <label>アイコン（Font Awesomeクラス）</label>
+                                            <div class="icon-selector">
+                                                <input type="text" value="fas fa-handshake" class="form-input icon-input">
+                                                <div class="icon-preview">
+                                                    <i class="fas fa-handshake"></i>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="form-group">
+                                            <label>タイトル</label>
+                                            <input type="text" value="厳選された経営者コミュニティ" class="form-input">
+                                        </div>
+                                        <div class="form-group">
+                                            <label>説明文</label>
+                                            <textarea rows="3" class="form-textarea">審査制により質の高い経営者のみが参加。IT、製造業、サービス業など多様な業界から成長志向の経営者が集結。</textarea>
+                                        </div>
+                                        <div class="form-group">
+                                            <label>特徴１</label>
+                                            <input type="text" value="承認率約75%の厳格な審査" class="form-input">
+                                        </div>
+                                        <div class="form-group">
+                                            <label>特徴２</label>
+                                            <input type="text" value="平均年商8,500万円の成長企業" class="form-input">
+                                        </div>
+                                        <div class="form-group">
+                                            <label>特徴３</label>
+                                            <input type="text" value="全国から200名以上が参加" class="form-input">
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <div class="form-actions">
+                                    <button type="button" class="btn btn-primary">保存</button>
+                                </div>
+                            </div>
+                        </section>
+                        
+                        <!-- Pricing Section -->
+                        <section class="settings-section" id="pricing">
+                            <div class="section-header">
+                                <h2>料金プラン</h2>
+                                <p>料金設定とプラン内容を管理します</p>
+                            </div>
+                            
+                            <div class="settings-form">
+                                <div class="pricing-card-editor">
+                                    <div class="card-header">
+                                        <h3>スタンダード会員</h3>
+                                        <div class="card-controls">
+                                            <label class="toggle-switch">
+                                                <input type="checkbox" checked>
+                                                <span class="slider"></span>
+                                            </label>
+                                            <span>表示</span>
+                                        </div>
+                                    </div>
+                                    <div class="card-content">
+                                        <div class="form-grid">
+                                            <div class="form-group">
+                                                <label>プラン名</label>
+                                                <input type="text" value="スタンダード会員" class="form-input">
+                                            </div>
+                                            <div class="form-group">
+                                                <label>月額料金</label>
+                                                <div class="price-input">
+                                                    <span class="currency">¥</span>
+                                                    <input type="number" value="30000" class="form-input">
+                                                    <span class="period">/月</span>
+                                                </div>
+                                            </div>
+                                            <div class="form-group full-width">
+                                                <label>契約条件</label>
+                                                <input type="text" value="最低3ヶ月契約・いつでも解約可能" class="form-input">
+                                            </div>
+                                            <div class="form-group">
+                                                <label>特徴１</label>
+                                                <input type="text" value="厳選された経営者コミュニティ参加" class="form-input">
+                                            </div>
+                                            <div class="form-group">
+                                                <label>特徴２</label>
+                                                <input type="text" value="LINEコミュニティでの情報交換" class="form-input">
+                                            </div>
+                                            <div class="form-group">
+                                                <label>特徴３</label>
+                                                <input type="text" value="月1回の特別イベント参加権" class="form-input">
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <div class="form-actions">
+                                    <button type="button" class="btn btn-primary">保存</button>
+                                </div>
+                            </div>
+                        </section>
+                        
+                        <!-- Performance Data Section -->
+                        <section class="settings-section" id="performance">
+                            <div class="section-header">
+                                <h2>実績データ</h2>
+                                <p>コミュニティの実績数値を設定します</p>
+                            </div>
+                            
+                            <div class="settings-form">
+                                <div class="performance-grid">
+                                    <div class="performance-item">
+                                        <label>マッチング成功率</label>
+                                        <div class="input-with-unit">
+                                            <input type="number" value="78.5" step="0.1" class="form-input">
+                                            <span class="unit">%</span>
+                                        </div>
+                                    </div>
+                                    <div class="performance-item">
+                                        <label>年間マッチング件数</label>
+                                        <div class="input-with-unit">
+                                            <input type="number" value="480" class="form-input">
+                                            <span class="unit">件</span>
+                                        </div>
+                                    </div>
+                                    <div class="performance-item">
+                                        <label>年間資金調達総額</label>
+                                        <div class="input-with-unit">
+                                            <input type="number" value="18" class="form-input">
+                                            <span class="unit">億円</span>
+                                        </div>
+                                    </div>
+                                    <div class="performance-item">
+                                        <label>平均ROI</label>
+                                        <div class="input-with-unit">
+                                            <input type="number" value="180" class="form-input">
+                                            <span class="unit">%</span>
+                                        </div>
+                                    </div>
+                                    <div class="performance-item">
+                                        <label>継続率</label>
+                                        <div class="input-with-unit">
+                                            <input type="number" value="82.3" step="0.1" class="form-input">
+                                            <span class="unit">%</span>
+                                        </div>
+                                    </div>
+                                    <div class="performance-item">
+                                        <label>平均収益向上</label>
+                                        <div class="input-with-unit">
+                                            <input type="number" value="320" class="form-input">
+                                            <span class="unit">万円</span>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <div class="form-actions">
+                                    <button type="button" class="btn btn-outline">リセット</button>
+                                    <button type="button" class="btn btn-primary">保存</button>
+                                </div>
+                            </div>
+                        </section>
+                        
+                        <!-- SEO Section -->
+                        <section class="settings-section" id="seo">
+                            <div class="section-header">
+                                <h2>SEO設定</h2>
+                                <p>検索エンジン最適化の設定を行います</p>
+                            </div>
+                            
+                            <div class="settings-form">
+                                <div class="form-group">
+                                    <label for="meta-title">メタタイトル</label>
+                                    <input type="text" id="meta-title" value="INTER CONNECT - 日本最高峰の経営者専用コミュニティ" class="form-input">
+                                    <div class="character-count">
+                                        <span class="current">45</span>/<span class="max">60</span> 文字
+                                    </div>
+                                </div>
+                                
+                                <div class="form-group">
+                                    <label for="meta-description">メタディスクリプション</label>
+                                    <textarea id="meta-description" rows="3" class="form-textarea">独自技術で78.5%のマッチング成功率を実現。日本最高峰の経営者専用コミュニティで、あなたのビジネスを次のステージへ。</textarea>
+                                    <div class="character-count">
+                                        <span class="current">72</span>/<span class="max">160</span> 文字
+                                    </div>
+                                </div>
+                                
+                                <div class="form-group">
+                                    <label for="meta-keywords">キーワード</label>
+                                    <input type="text" id="meta-keywords" value="経営者,コミュニティ,ビジネスマッチング,INTERCONNECT" class="form-input">
+                                    <small class="form-help">カンマ区切りで入力してください</small>
+                                </div>
+                                
+                                <div class="form-group">
+                                    <label for="og-title">OGタイトル</label>
+                                    <input type="text" id="og-title" value="INTER CONNECT - 日本最高峰の経営者専用コミュニティ" class="form-input">
+                                </div>
+                                
+                                <div class="form-group">
+                                    <label for="og-description">OG説明</label>
+                                    <textarea id="og-description" rows="2" class="form-textarea">独自技術で78.5%のマッチング成功率を実現</textarea>
+                                </div>
+                                
+                                <div class="form-group">
+                                    <label for="og-image-url">OG画像URL</label>
+                                    <input type="url" id="og-image-url" value="assets/og-image.png" class="form-input">
+                                    <small class="form-help">推奨: 1200x630px、JPGまたはPNG</small>
+                                </div>
+                                
+                                <div class="form-actions">
+                                    <button type="button" class="btn btn-outline">リセット</button>
+                                    <button type="button" class="btn btn-primary">保存</button>
+                                </div>
+                            </div>
+                        </section>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Scripts -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.95.3" integrity="sha384-aRAaCbKYByQpx0fjPuC0PQ9P9moWMEsHXP9tyzP7tbyD5fPK6oTp+THsxdWiq02L" crossorigin="anonymous"></script>
+    <script src="js/supabase-unified.js?v=1.1"></script>
+    <script src="js/core-utils.js"></script>
+    <script src="js/global-functions.js"></script>
+    <script src="js/profile-sync.js"></script>
+    <script src="js/notifications-realtime-unified.js"></script>
+    <script>
+        // Simple navigation functionality
+        document.addEventListener('DOMContentLoaded', function() {
+            const navLinks = document.querySelectorAll('.settings-nav-link');
+            const sections = document.querySelectorAll('.settings-section');
+            
+            navLinks.forEach(link => {
+                link.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    
+                    // Remove active class from all nav links
+                    navLinks.forEach(l => l.classList.remove('active'));
+                    
+                    // Add active class to clicked nav link
+                    this.classList.add('active');
+                    
+                    // Hide all sections
+                    sections.forEach(section => section.classList.remove('active'));
+                    
+                    // Show target section
+                    const targetSection = document.getElementById(this.dataset.section);
+                    if (targetSection) {
+                        targetSection.classList.add('active');
+                    }
+                });
+            });
+            
+            // Save functionality (static alerts)
+            const saveButtons = document.querySelectorAll('.btn-primary');
+            saveButtons.forEach(button => {
+                button.addEventListener('click', function() {
+                    alert('設定が保存されました（デモ機能）');
+                });
+            });
+            
+            // Reset functionality
+            const resetButtons = document.querySelectorAll('.btn-outline');
+            resetButtons.forEach(button => {
+                if (button.textContent.trim() === 'リセット') {
+                    button.addEventListener('click', function() {
+                        if (confirm('設定をリセットしますか？')) {
+                            alert('設定がリセットされました（デモ機能）');
+                        }
+                    });
+                }
+            });
+            
+            // Icon preview update
+            const iconInput = document.querySelector('.icon-input');
+            const iconPreview = document.querySelector('.icon-preview i');
+            
+            if (iconInput && iconPreview) {
+                iconInput.addEventListener('input', function() {
+                    iconPreview.className = this.value || 'fas fa-question';
+                });
+            }
+            
+            // Character count updates
+            const metaTitle = document.getElementById('meta-title');
+            const metaDescription = document.getElementById('meta-description');
+            
+            if (metaTitle) {
+                metaTitle.addEventListener('input', function() {
+                    const count = this.value.length;
+                    const counter = this.parentNode.querySelector('.current');
+                    if (counter) counter.textContent = count;
+                });
+            }
+            
+            if (metaDescription) {
+                metaDescription.addEventListener('input', function() {
+                    const count = this.value.length;
+                    const counter = this.parentNode.querySelector('.current');
+                    if (counter) counter.textContent = count;
+                });
+            }
+        });
+    </script>
+    <script src="js/notification-system-unified.js"></script>
+    <script src="js/responsive-menu-simple.js"></script>
+    <script src="js/dashboard.js"></script>
+    <script src="js/user-dropdown-handler.js"></script>
+    <script src="js/avatar-size-enforcer.js"></script>
+</body>
+</html>

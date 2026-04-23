@@ -1,0 +1,316 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <link rel="icon" type="image/svg+xml" href="favicon.svg">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>お知らせ - INTERCONNECT</title>
+
+    <!-- SEO Meta Tags -->
+    <meta name="description" content="INTERCONNECTの最新お知らせ・ニュース一覧。システム更新、イベント情報、会員情報などをお届けします。">
+    <meta name="keywords" content="お知らせ,ニュース,INTERCONNECT,経営者コミュニティ">
+
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Noto+Sans+JP:wght@300;400;500;700&display=swap" rel="stylesheet">
+
+    <!-- Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" integrity="sha384-iw3OoTErCYJJB9mCa8LNS2hbsQ7M3C0EpIsO/H5+EGAkPGc6rk+V8i04oW/K5xq0" crossorigin="anonymous">
+
+    <!-- Styles -->
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/navbar-fresh.css">
+    <link rel="stylesheet" href="css/homepage-complete.css">
+    <link rel="stylesheet" href="css/legal-pages.css">
+    <style>
+        .news-page-section {
+            padding-top: 100px;
+            padding-bottom: 60px;
+            min-height: 80vh;
+        }
+        .news-page-header {
+            text-align: center;
+            margin-bottom: 48px;
+        }
+        .news-page-header h1 {
+            font-size: clamp(1.75rem, 3vw, 2.5rem);
+            font-weight: 800;
+            color: #1e293b;
+            margin-bottom: 12px;
+        }
+        .news-page-header p {
+            color: #64748b;
+            font-size: 1rem;
+        }
+        .news-filter-bar {
+            display: flex;
+            gap: 8px;
+            justify-content: center;
+            flex-wrap: wrap;
+            margin-bottom: 40px;
+        }
+        .news-filter-btn {
+            padding: 8px 20px;
+            border: 1px solid #e2e8f0;
+            border-radius: 24px;
+            background: white;
+            color: #64748b;
+            font-size: 0.875rem;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+        .news-filter-btn:hover {
+            border-color: #0066ff;
+            color: #0066ff;
+        }
+        .news-filter-btn.active {
+            background: #0066ff;
+            border-color: #0066ff;
+            color: white;
+        }
+        .news-list {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+        .news-list-item {
+            display: flex;
+            gap: 16px;
+            align-items: baseline;
+            padding: 20px 0;
+            border-bottom: 1px solid #f1f5f9;
+        }
+        .news-list-item:last-child {
+            border-bottom: none;
+        }
+        .news-date {
+            color: #94a3b8;
+            font-size: 0.85rem;
+            white-space: nowrap;
+            min-width: 100px;
+        }
+        .news-cat {
+            display: inline-block;
+            padding: 3px 12px;
+            border-radius: 12px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            white-space: nowrap;
+        }
+        .news-cat-system { background: #eff6ff; color: #2563eb; }
+        .news-cat-event { background: #f0fdf4; color: #16a34a; }
+        .news-cat-member { background: #fef3c7; color: #d97706; }
+        .news-cat-general { background: #f1f5f9; color: #475569; }
+        .news-cat-media { background: #fae8ff; color: #a855f7; }
+        .news-cat-campaign { background: #ffe4e6; color: #e11d48; }
+        .news-text {
+            color: #334155;
+            font-size: 0.95rem;
+            line-height: 1.6;
+            flex: 1;
+        }
+        .news-empty {
+            text-align: center;
+            padding: 60px 20px;
+            color: #94a3b8;
+        }
+        .news-empty i {
+            font-size: 3rem;
+            margin-bottom: 16px;
+            display: block;
+        }
+        @media (max-width: 640px) {
+            .news-list-item {
+                flex-direction: column;
+                gap: 8px;
+            }
+            .news-date {
+                min-width: auto;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="navbar">
+        <div class="container">
+            <a href="index.html" class="navbar-brand">INTERCONNECT</a>
+            <button class="navbar-toggler" aria-label="メニュー">
+                <span></span>
+                <span></span>
+                <span></span>
+            </button>
+            <div class="navbar-nav">
+                <a href="index.html#about">私たちについて</a>
+                <a href="index.html#features">特徴</a>
+                <a href="index.html#members">メンバー</a>
+                <a href="news.html?filter=event">イベント</a>
+                <a href="index.html#contact">お問い合わせ</a>
+                <a href="login.html" class="btn btn-primary">ログイン</a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- News Section -->
+    <section class="news-page-section">
+        <div class="container">
+            <div class="news-page-header">
+                <h1><i class="fas fa-bullhorn"></i> お知らせ</h1>
+                <p>INTERCONNECTの最新情報をお届けします</p>
+            </div>
+
+            <div class="news-filter-bar">
+                <button class="news-filter-btn active" data-filter="all">すべて</button>
+                <button class="news-filter-btn" data-filter="system">システム更新</button>
+                <button class="news-filter-btn" data-filter="event">イベント</button>
+                <button class="news-filter-btn" data-filter="member">会員情報</button>
+                <button class="news-filter-btn" data-filter="general">お知らせ</button>
+            </div>
+
+            <div class="news-list" id="newsList">
+                <div class="news-empty">
+                    <i class="fas fa-spinner fa-spin"></i>
+                    <p>お知らせを読み込み中...</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-grid">
+                <div class="footer-brand">
+                    <h3>INTER CONNECT</h3>
+                    <p>日本最高峰の経営者専用コミュニティ</p>
+                </div>
+                <div class="footer-nav">
+                    <h4>サービス</h4>
+                    <ul>
+                        <li><a href="index.html#features">特徴</a></li>
+                        <li><a href="index.html#pricing">料金プラン</a></li>
+                        <li><a href="news.html?filter=event">イベント</a></li>
+                    </ul>
+                </div>
+                <div class="footer-nav">
+                    <h4>サポート</h4>
+                    <ul>
+                        <li><a href="index.html#faq">よくある質問</a></li>
+                        <li><a href="index.html#contact">お問い合わせ</a></li>
+                        <li><a href="news.html">お知らせ</a></li>
+                    </ul>
+                </div>
+                <div class="footer-nav">
+                    <h4>会社情報</h4>
+                    <ul>
+                        <li><a href="about.html">運営会社</a></li>
+                        <li><a href="terms.html">利用規約</a></li>
+                        <li><a href="privacy.html">プライバシーポリシー</a></li>
+                    </ul>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; 2026 INTER CONNECT. All rights reserved.</p>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Scripts -->
+    <script src="js/supabase-unified.js?v=1.1"></script>
+    <script src="js/core-utils.js"></script>
+    <script src="js/main.js"></script>
+    <script>
+    (async function() {
+        const categoryLabels = {
+            general: 'お知らせ', event: 'イベント開催', system: 'システム更新',
+            member: '会員数増加', media: 'メディア掲載', campaign: 'キャンペーン'
+        };
+        const categoryClass = {
+            general: 'news-cat-general', event: 'news-cat-event', system: 'news-cat-system',
+            member: 'news-cat-member', media: 'news-cat-media', campaign: 'news-cat-campaign'
+        };
+
+        // フォールバックデータ
+        const fallbackNews = [
+            { category: 'system', title: '1:1メッセージ機能をリリース', content: 'コネクション済みのメンバー間でチャットが可能になりました', published_at: '2026-02-10T00:00:00Z' },
+            { category: 'member', title: '累計会員数200名突破', content: 'おかげさまで多くの経営者にご参加いただいています', published_at: '2026-02-05T00:00:00Z' },
+            { category: 'event', title: '今月のマッチング成功件数28件を達成', content: '過去最高を更新しました', published_at: '2026-02-01T00:00:00Z' },
+            { category: 'system', title: 'マッチングアルゴリズムの改善', content: 'より精度の高いビジネスマッチングを実現します', published_at: '2026-01-20T00:00:00Z' },
+            { category: 'event', title: '新年特別ネットワーキングイベント開催', content: '50名以上の経営者が参加し大盛況でした', published_at: '2026-01-15T00:00:00Z' },
+            { category: 'general', title: '年末年始の営業のお知らせ', content: '12/29〜1/3はサポート窓口をお休みいたします', published_at: '2025-12-25T00:00:00Z' }
+        ];
+
+        let allNews = [];
+        const newsList = document.getElementById('newsList');
+
+        function renderNews(items) {
+            if (!items || items.length === 0) {
+                newsList.innerHTML = '<div class="news-empty"><i class="fas fa-inbox"></i><p>お知らせはまだありません</p></div>';
+                return;
+            }
+            newsList.innerHTML = items.map(function(item) {
+                var d = new Date(item.published_at);
+                var dateStr = d.getFullYear() + '/' + (d.getMonth() + 1) + '/' + d.getDate();
+                var cat = item.category || 'general';
+                var label = categoryLabels[cat] || cat;
+                var cls = categoryClass[cat] || 'news-cat-general';
+                var text = (item.title || '') + (item.content ? ' - ' + item.content : '');
+                return '<div class="news-list-item" data-category="' + cat + '">' +
+                    '<span class="news-date">' + dateStr + '</span>' +
+                    '<span class="news-cat ' + cls + '">' + label + '</span>' +
+                    '<span class="news-text">' + text + '</span>' +
+                    '</div>';
+            }).join('');
+        }
+
+        // DBから読み込み
+        try {
+            if (window.waitForSupabase) await window.waitForSupabase();
+            if (window.supabaseClient) {
+                var result = await window.supabaseClient
+                    .from('news_items')
+                    .select('*')
+                    .eq('is_published', true)
+                    .order('published_at', { ascending: false })
+                    .limit(30);
+                if (!result.error && result.data && result.data.length > 0) {
+                    allNews = result.data;
+                } else {
+                    allNews = fallbackNews;
+                }
+            } else {
+                allNews = fallbackNews;
+            }
+        } catch (e) {
+            allNews = fallbackNews;
+        }
+
+        // URLパラメータからフィルター適用
+        var urlFilter = new URLSearchParams(window.location.search).get('filter');
+        if (urlFilter && urlFilter !== 'all') {
+            // フィルターボタンをアクティブに
+            document.querySelectorAll('.news-filter-btn').forEach(function(b) { b.classList.remove('active'); });
+            var targetBtn = document.querySelector('.news-filter-btn[data-filter="' + urlFilter + '"]');
+            if (targetBtn) targetBtn.classList.add('active');
+            renderNews(allNews.filter(function(item) { return item.category === urlFilter; }));
+        } else {
+            renderNews(allNews);
+        }
+
+        // フィルター
+        document.querySelectorAll('.news-filter-btn').forEach(function(btn) {
+            btn.addEventListener('click', function() {
+                document.querySelectorAll('.news-filter-btn').forEach(function(b) { b.classList.remove('active'); });
+                btn.classList.add('active');
+                var filter = btn.dataset.filter;
+                if (filter === 'all') {
+                    renderNews(allNews);
+                } else {
+                    renderNews(allNews.filter(function(item) { return item.category === filter; }));
+                }
+            });
+        });
+    })();
+    </script>
+</body>
+</html>

@@ -1,0 +1,559 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <link rel="icon" type="image/svg+xml" href="favicon.svg">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>プロフィール - INTERCONNECT</title>
+    
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Noto+Sans+JP:wght@300;400;500;700&display=swap" rel="stylesheet">
+    
+    <!-- Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" integrity="sha384-iw3OoTErCYJJB9mCa8LNS2hbsQ7M3C0EpIsO/H5+EGAkPGc6rk+V8i04oW/K5xq0" crossorigin="anonymous">
+    
+    <!-- Styles -->
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/buttons.css">
+    <link rel="stylesheet" href="css/dashboard.css">
+    <!-- ログアウトボタンUI修正 -->
+    <link rel="stylesheet" href="css/logout-button-fix.css">
+    <link rel="stylesheet" href="css/profile.css?v=20250729-2">
+    <link rel="stylesheet" href="css/notifications.css">
+    <link rel="stylesheet" href="css/responsive-layout.css">
+    <!-- ユーザーメニューCSS（統合済み） -->
+    <link rel="stylesheet" href="css/user-menu.css">
+</head>
+<body>
+    <!-- Mobile Header -->
+    <header class="mobile-header">
+        <button class="mobile-menu-toggle" id="profileSidebarToggle">
+            <i class="fas fa-bars"></i>
+        </button>
+        <h1>INTERCONNECT</h1>
+        <div class="mobile-header-actions">
+            <a href="notifications.html" class="notification-btn">
+                <i class="fas fa-bell"></i>
+                                <span class="notification-badge" style="display:none;">0</span>
+            </a>
+        </div>
+    </header>
+
+    <!-- Mobile Navigation -->
+    <nav class="mobile-nav">
+        <div class="mobile-nav-header">
+            <h1>INTERCONNECT</h1>
+            <button class="mobile-nav-close">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+        
+        <div class="mobile-nav-menu">
+            <ul>
+                <li>
+                    <a href="dashboard.html" class="mobile-nav-link">
+                        <i class="fas fa-home"></i>
+                        <span>ダッシュボード</span>
+                    </a>
+                </li>
+                <li>
+                        <a href="connections.html" class="mobile-nav-link">
+                            <i class="fas fa-link"></i>
+                            <span>コネクション</span>
+                        </a>
+                </li>
+                <li>
+                    <a href="events.html" class="mobile-nav-link">
+                        <i class="fas fa-calendar-alt"></i>
+                        <span>イベント</span>
+                    </a>
+                </li>
+                <li>
+                    <a href="messages.html" class="mobile-nav-link">
+                        <i class="fas fa-envelope"></i>
+                        <span>メッセージ</span>
+                    </a>
+                </li>
+                <li>
+                    <a href="matching.html" class="mobile-nav-link">
+                        <i class="fas fa-handshake"></i>
+                        <span>マッチング</span>
+                    </a>
+                </li>
+                <li>
+                    <a href="referral.html" class="mobile-nav-link">
+                        <i class="fas fa-user-plus"></i>
+                        <span>紹介プログラム</span>
+                    </a>
+                </li>
+                <li>
+                    <a href="#" class="mobile-nav-link active">
+                        <i class="fas fa-user"></i>
+                        <span>プロフィール</span>
+                    </a>
+                </li>
+                <li>
+                    <a href="settings.html" class="mobile-nav-link">
+                        <i class="fas fa-cog"></i>
+                        <span>設定</span>
+                    </a>
+                </li>
+            </ul>
+        </div>
+        
+        <div class="mobile-nav-footer">
+            <a href="#" class="mobile-nav-link" onclick="logout(); return false;">
+                <i class="fas fa-sign-out-alt"></i>
+                <span>ログアウト</span>
+            </a>
+        </div>
+    </nav>
+    
+    <!-- Mobile Backdrop -->
+    <div class="mobile-backdrop"></div>
+
+    <div class="dashboard">
+        <!-- Sidebar -->
+        <aside class="sidebar" id="profileSidebar">
+            <div class="sidebar-header">
+                <h1>INTERCONNECT</h1>
+                <button class="sidebar-toggle" aria-label="メニュー">
+                    <i class="fas fa-bars"></i>
+                </button>
+            </div>
+            
+            <nav class="sidebar-nav">
+                <ul>
+                    <li>
+                        <a href="dashboard.html" class="sidebar-link">
+                            <i class="fas fa-home"></i>
+                            <span>ダッシュボード</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="connections.html" class="sidebar-link">
+                            <i class="fas fa-link"></i>
+                            <span>コネクション</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="events.html" class="sidebar-link">
+                            <i class="fas fa-calendar-alt"></i>
+                            <span>イベント</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="messages.html" class="sidebar-link">
+                            <i class="fas fa-envelope"></i>
+                            <span>メッセージ</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="matching.html" class="sidebar-link">
+                            <i class="fas fa-handshake"></i>
+                            <span>マッチング</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="referral.html" class="sidebar-link">
+                            <i class="fas fa-user-plus"></i>
+                            <span>紹介プログラム</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="#" class="sidebar-link active">
+                            <i class="fas fa-user"></i>
+                            <span>プロフィール</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="settings.html" class="sidebar-link">
+                            <i class="fas fa-cog"></i>
+                            <span>設定</span>
+                        </a>
+                    </li>
+                </ul>
+            </nav>
+            
+            <div class="sidebar-footer">
+                <a href="#" class="sidebar-link" onclick="logout(); return false;">
+                    <i class="fas fa-sign-out-alt"></i>
+                    <span>ログアウト</span>
+                </a>
+            </div>
+        </aside>
+        
+        <!-- Main Content -->
+        <main class="main-content">
+            <div class="content-header">
+                <div class="header-left">
+                    <div>
+                        <h1 class="page-title">
+                            <i class="fas fa-user"></i>
+                            プロフィール
+                        </h1>
+                        <nav class="breadcrumb">
+                            <a href="dashboard.html">ダッシュボード</a>
+                            <i class="fas fa-chevron-right"></i>
+                            <span>プロフィール</span>
+                        </nav>
+                    </div>
+                </div>
+                <div class="header-right">
+                    <div class="user-menu">
+                        <div class="notification-wrapper">
+                            <button class="notification-btn" aria-label="通知">
+                                <i class="fas fa-bell"></i>
+                                <span class="notification-badge" style="display:none;">0</span>
+                            </button>
+                            <div class="notification-dropdown">
+                                <div class="notification-header">
+                                    <h3>通知</h3>
+                                    <button class="mark-all-read">すべて既読にする</button>
+                                </div>
+                                <div class="notification-list">
+                                    <div class="empty-notifications">
+                                        <i class="fas fa-bell-slash"></i>
+                                        <p>新しい通知はありません</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="user-profile">
+                            <img src="assets/default-avatar.svg" alt="User Avatar" class="user-avatar">
+                            <span class="user-name">ゲスト</span>
+                            <i class="fas fa-chevron-down"></i>
+                            <div class="user-dropdown">
+                                <a href="profile.html"><i class="fas fa-user"></i> プロフィール</a>
+                                <a href="#" onclick="window.InterConnect?.Profile?.openEditModal(); return false;"><i class="fas fa-edit"></i> プロフィール編集</a>
+                                <a href="settings.html"><i class="fas fa-cog"></i> 設定</a>
+                                <a href="#" id="logoutBtn"><i class="fas fa-sign-out-alt"></i> ログアウト</a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Profile Content -->
+            <div class="profile-container">
+                <div class="profile-header">
+                    <div class="profile-cover">
+                        <img src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" alt="Cover" style="display:none;">
+                        <button class="btn-icon btn-edit-cover">
+                            <i class="fas fa-camera"></i>
+                        </button>
+                    </div>
+                    
+                    <div class="profile-info">
+                        <div class="profile-avatar">
+                            <img src="assets/default-avatar.svg" alt="Avatar">
+                            <span class="online-indicator" style="display: none;"></span>
+                            <button class="btn-icon btn-edit-avatar">
+                                <i class="fas fa-camera"></i>
+                            </button>
+                        </div>
+                        
+                        <div class="profile-details">
+                            <h2>ユーザー名</h2>
+                            <p class="profile-member-id" style="color:#6366f1;font-size:0.85rem;font-weight:600;margin:2px 0 4px;"></p>
+                            <p class="profile-title">役職・肩書き</p>
+                            <p class="profile-company">会社名</p>
+                            <div class="profile-stats">
+                                <div class="stat">
+                                    <span class="stat-value connection-count">0</span>
+                                    <span class="stat-label">コネクション</span>
+                                </div>
+                                <div class="stat">
+                                    <span class="stat-value event-count">0</span>
+                                    <span class="stat-label">イベント参加</span>
+                                </div>
+                                <div class="stat">
+                                    <span class="stat-value matching-count">0</span>
+                                    <span class="stat-label">マッチング</span>
+                                </div>
+                            </div>
+                        </div>
+                        
+                    </div>
+                </div>
+                
+                <div class="profile-tabs">
+                    <button class="tab-btn active" data-tab="about">基本情報</button>
+                    <button class="tab-btn" data-tab="experience">経歴</button>
+                    <button class="tab-btn" data-tab="skills">スキル</button>
+                    <button class="tab-btn" data-tab="interests">興味・関心</button>
+                    <button class="tab-btn" data-tab="challenges">事業課題</button>
+                </div>
+                
+                <div class="profile-content">
+                    <!-- Tab content will be dynamically loaded here -->
+                    <div class="tab-content active" data-tab="about">
+                        <div class="profile-section">
+                            <h3 class="section-title">自己紹介</h3>
+                            <p id="profileBioDisplay">読み込み中...</p>
+                        </div>
+                        
+                        <div class="profile-section">
+                            <h3 class="section-title">事業課題</h3>
+                            <div class="business-challenges">
+                                <div class="challenge-category">
+                                    <h4><i class="fas fa-chart-line"></i> 売上向上</h4>
+                                    <p id="revenueDetailText">読み込み中...</p>
+                                </div>
+                                <div class="challenge-category">
+                                    <h4><i class="fas fa-users"></i> 人事・組織</h4>
+                                    <p id="hrDetailText">読み込み中...</p>
+                                </div>
+                                <div class="challenge-category">
+                                    <h4><i class="fas fa-laptop-code"></i> DX推進</h4>
+                                    <p id="dxDetailText">読み込み中...</p>
+                                </div>
+                                <div class="challenge-category">
+                                    <h4><i class="fas fa-chess-king"></i> 経営戦略</h4>
+                                    <p id="strategyDetailText">読み込み中...</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+    
+    <!-- Profile Edit Modal -->
+    <div id="profileEditModal" class="modal" style="display: none;">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>プロフィール編集</h2>
+                <button class="modal-close" onclick="window.InterConnect.Profile.closeEditModal()">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <form id="profileEditForm">
+                    <div class="form-section">
+                        <h3>基本情報</h3>
+                        <div class="form-group">
+                            <label for="edit-name">名前 <span class="required">*</span></label>
+                            <input type="text" id="edit-name" name="name" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="edit-company">会社名 <span class="required">*</span></label>
+                            <input type="text" id="edit-company" name="company" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="edit-position">役職</label>
+                            <input type="text" id="edit-position" name="position">
+                        </div>
+                        <div class="form-group">
+                            <label for="edit-bio">自己紹介</label>
+                            <textarea id="edit-bio" name="bio" rows="4" placeholder="ビジネスに対する情熱や専門分野について"></textarea>
+                        </div>
+                    </div>
+                    
+                    <div class="form-section">
+                        <h3>連絡先情報</h3>
+                        <div class="form-group">
+                            <label for="edit-email">メールアドレス <span class="required">*</span></label>
+                            <input type="email" id="edit-email" name="email" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="edit-phone">電話番号</label>
+                            <input type="tel" id="edit-phone" name="phone">
+                        </div>
+                        <div class="form-group">
+                            <label for="edit-lineId">LINE ID</label>
+                            <input type="text" id="edit-lineId" name="lineId">
+                        </div>
+                    </div>
+
+                    <div class="form-section">
+                        <h3><i class="fas fa-robot" style="color: #667eea; margin-right: 6px;"></i>AIマッチング設定</h3>
+                        <div class="form-group">
+                            <label class="toggle-label" style="display: flex; align-items: flex-start; gap: 10px; cursor: pointer;">
+                                <input type="checkbox" id="edit-ai-consent" name="ai_consent" style="margin-top: 4px; accent-color: #667eea; width: 18px; height: 18px; flex-shrink: 0;">
+                                <div>
+                                    <span style="font-weight: 500;">AIによるマッチング分析を有効にする</span>
+                                    <p style="font-size: 12px; color: #6b7280; margin: 4px 0 0;">ミーティングの録画記録をAIが分析し、あなたのスキル・ニーズを自動的に抽出してマッチング精度を向上させます。分析結果は他のユーザーには公開されません。</p>
+                                </div>
+                            </label>
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-outline" onclick="window.InterConnect.Profile.closeEditModal()">キャンセル</button>
+                <button type="button" class="btn btn-primary" onclick="window.InterConnect.Profile.saveProfile()">保存</button>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Cover Image Edit Modal -->
+    <div id="coverEditModal" class="modal" style="display: none;">
+        <div class="modal-content modal-small">
+            <div class="modal-header">
+                <h2>カバー画像を変更</h2>
+                <button class="modal-close" onclick="window.ProfileImageUpload.closeCoverModal()">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="image-upload-area">
+                    <input type="file" id="cover-upload" accept="image/*" style="display: none;">
+                    <div class="upload-placeholder" onclick="document.getElementById('cover-upload').click()">
+                        <i class="fas fa-cloud-upload-alt"></i>
+                        <p>クリックして画像を選択</p>
+                        <small>推奨サイズ: 1200x300px</small>
+                    </div>
+                    <img id="cover-preview" style="display: none; width: 100%; height: auto;">
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-outline" onclick="window.ProfileImageUpload.closeCoverModal()">キャンセル</button>
+                <button type="button" class="btn btn-primary" onclick="window.ProfileImageUpload.saveCoverImage()">保存</button>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Avatar Edit Modal -->
+    <div id="avatarEditModal" class="modal" style="display: none;">
+        <div class="modal-content modal-small">
+            <div class="modal-header">
+                <h2>プロフィール画像を変更</h2>
+                <button class="modal-close" onclick="window.ProfileImageUpload.closeAvatarModal()">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="image-upload-area">
+                    <input type="file" id="avatar-upload" accept="image/*" style="display: none;">
+                    <div class="upload-placeholder" onclick="document.getElementById('avatar-upload').click()">
+                        <i class="fas fa-cloud-upload-alt"></i>
+                        <p>クリックして画像を選択</p>
+                        <small>推奨サイズ: 200x200px</small>
+                    </div>
+                    <img id="avatar-preview" style="display: none; width: 200px; height: 200px; object-fit: cover; margin: 0 auto;">
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-outline" onclick="window.ProfileImageUpload.closeAvatarModal()">キャンセル</button>
+                <button type="button" class="btn btn-primary" onclick="window.ProfileImageUpload.saveAvatarImage()">保存</button>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Experience Edit Modal -->
+    <div id="experienceEditModal" class="modal" style="display: none;">
+        <div class="modal-content modal-large">
+            <div class="modal-header">
+                <h2>経歴を編集</h2>
+                <button class="modal-close" onclick="window.InterConnect.Profile.closeExperienceModal()">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="experience-list" id="experienceList">
+                    <!-- 動的に経歴アイテムを生成 -->
+                </div>
+                <button type="button" class="btn btn-outline" onclick="window.InterConnect.Profile.addExperience()">
+                    <i class="fas fa-plus"></i> 経歴を追加
+                </button>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-outline" onclick="window.InterConnect.Profile.closeExperienceModal()">キャンセル</button>
+                <button type="button" class="btn btn-primary" onclick="window.InterConnect.Profile.saveExperience()">保存</button>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Skills Edit Modal -->
+    <div id="skillsEditModal" class="modal" style="display: none;">
+        <div class="modal-content modal-large">
+            <div class="modal-header">
+                <h2>スキル・専門分野を編集</h2>
+                <button class="modal-close" onclick="window.InterConnect.Profile.closeSkillsModal()">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="skills-edit-container">
+                    <!-- 動的にスキルカテゴリーを生成 -->
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-outline" onclick="window.InterConnect.Profile.closeSkillsModal()">キャンセル</button>
+                <button type="button" class="btn btn-primary" onclick="window.InterConnect.Profile.saveSkills()">保存</button>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Interests Edit Modal -->
+    <div id="interestsEditModal" class="modal" style="display: none;">
+        <div class="modal-content modal-large">
+            <div class="modal-header">
+                <h2>興味・関心分野を編集</h2>
+                <button class="modal-close" onclick="window.InterConnect.Profile.closeInterestsModal()">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="interests-edit-container">
+                    <!-- 動的に興味・関心カテゴリーを生成 -->
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-outline" onclick="window.InterConnect.Profile.closeInterestsModal()">キャンセル</button>
+                <button type="button" class="btn btn-primary" onclick="window.InterConnect.Profile.saveInterests()">保存</button>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Challenges Edit Modal -->
+    <div id="challengesEditModal" class="modal" style="display: none;">
+        <div class="modal-content modal-large">
+            <div class="modal-header">
+                <h2>事業課題を編集</h2>
+                <button class="modal-close" onclick="window.InterConnect.Profile.closeChallengesModal()">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <form id="challengesEditForm">
+                    <div class="challenges-edit-container">
+                        <!-- 動的に事業課題チェックボックスを生成 -->
+                    </div>
+                    
+                    <div class="form-section">
+                        <h3>予算規模</h3>
+                        <div class="form-group">
+                            <label for="edit-budget">年間予算規模（円）</label>
+                            <input type="number" id="edit-budget" name="budget" min="0" step="10000" placeholder="例：10000000">
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-outline" onclick="window.InterConnect.Profile.closeChallengesModal()">キャンセル</button>
+                <button type="button" class="btn btn-primary" onclick="window.InterConnect.Profile.saveChallenges()">保存</button>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Scripts -->
+    <!-- Core initialization (must be first) -->
+    <script src="js/supabase-unified.js?v=1.1"></script>
+    <script src="js/core-utils.js"></script>
+    <script src="js/global-functions.js"></script>
+    <script src="js/profile-sync.js"></script>
+    <script src="js/notification-system-unified.js"></script>
+    <script src="js/guest-mode-manager.js"></script>
+    <script src="js/notifications-realtime-unified.js"></script>
+    <script src="js/responsive-menu-simple.js"></script>
+    <script src="js/dashboard.js"></script>
+    <script src="js/profile-bundle.js"></script>
+    <script src="js/user-dropdown-handler.js"></script>
+    <script src="js/avatar-size-enforcer.js"></script>
+</body>
+</html>

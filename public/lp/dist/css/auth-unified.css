@@ -1,0 +1,501 @@
+/* ===========================
+   統一されたログインページデザイン
+   index.htmlと同じブルー系カラースキーム
+   =========================== */
+
+/* 背景グラデーション（index.htmlと統一） */
+body {
+    margin: 0;
+    padding: 0;
+    min-height: 100vh;
+    background: linear-gradient(135deg, #f0f7ff 0%, #e6f2ff 50%, #f0f7ff 100%) !important;
+    position: relative;
+    overflow-x: hidden;
+    overflow-y: auto;
+}
+
+/* 背景の装飾パターン */
+body::before {
+    content: '';
+    position: absolute;
+    top: -50%;
+    left: -50%;
+    width: 200%;
+    height: 200%;
+    background: 
+        radial-gradient(circle at 30% 40%, rgba(0, 102, 255, 0.05) 0%, transparent 40%),
+        radial-gradient(circle at 70% 60%, rgba(0, 212, 255, 0.05) 0%, transparent 40%),
+        radial-gradient(circle at 50% 50%, rgba(0, 79, 196, 0.03) 0%, transparent 60%);
+    animation: floatBackground 20s ease-in-out infinite;
+}
+
+@keyframes floatBackground {
+    0%, 100% { transform: translate(0, 0) rotate(0deg); }
+    33% { transform: translate(-10px, -10px) rotate(1deg); }
+    66% { transform: translate(10px, -5px) rotate(-1deg); }
+}
+
+/* 認証コンテナのリセット */
+.auth-container {
+    background: none !important;
+    padding: 40px 20px;
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+/* 認証カード - index.htmlのスタイルに合わせる */
+.auth-card {
+    background: rgba(255, 255, 255, 0.98);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border-radius: 30px;
+    padding: 60px 50px;
+    box-shadow: 
+        0 20px 60px rgba(0, 102, 255, 0.12),
+        0 4px 12px rgba(0, 0, 0, 0.05);
+    border: 1px solid rgba(0, 102, 255, 0.1);
+    max-width: 480px;
+    width: 100%;
+    position: relative;
+    overflow: visible;
+    margin-bottom: 40px;
+}
+
+/* ステップ2表示時の特別な処理 */
+.auth-card:has(.form-step[data-step="2"].active) {
+    max-width: 800px;
+    transition: max-width 0.3s ease;
+}
+
+/* カードの光沢効果 */
+.auth-card::before {
+    content: '';
+    position: absolute;
+    top: -2px;
+    left: -2px;
+    right: -2px;
+    bottom: -2px;
+    background: linear-gradient(135deg, rgba(0, 102, 255, 0.2), transparent 60%);
+    border-radius: 30px;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+    z-index: -1;
+}
+
+.auth-card:hover::before {
+    opacity: 1;
+}
+
+/* ヘッダーロゴ */
+.auth-header h1 {
+    font-family: 'Inter', sans-serif;
+    font-size: 2rem;
+    font-weight: 800;
+    color: #0066ff;
+    margin-bottom: 4px;
+    letter-spacing: -0.5px;
+}
+
+.auth-header p {
+    color: #64748b;
+    font-size: 0.875rem;
+    font-weight: 500;
+    letter-spacing: 0.05em;
+}
+
+/* タイトル */
+.auth-title {
+    font-size: 1.75rem;
+    font-weight: 700;
+    color: #1e293b;
+    margin-bottom: 32px;
+}
+
+/* フォーム入力フィールド */
+.auth-form input[type="text"],
+.auth-form input[type="email"],
+.auth-form input[type="password"],
+.auth-form input[type="tel"],
+.auth-form input[type="number"],
+.auth-form textarea,
+.auth-form select {
+    width: 100%;
+    padding: 16px 20px;
+    border: 2px solid #e5e7eb;
+    border-radius: 12px;
+    font-size: 1rem;
+    background: #f8fafc;
+    transition: all 0.3s ease;
+    font-family: inherit;
+}
+
+.auth-form input:focus,
+.auth-form textarea:focus,
+.auth-form select:focus {
+    outline: none;
+    border-color: #0066ff;
+    background: white;
+    box-shadow: 0 0 0 4px rgba(0, 102, 255, 0.1);
+}
+
+/* ラベル */
+.auth-form label {
+    display: block;
+    font-weight: 600;
+    margin-bottom: 8px;
+    color: #1e293b;
+    font-size: 0.875rem;
+}
+
+/* パスワード入力ラッパー */
+.password-input-wrapper {
+    position: relative;
+    width: 100%;
+}
+
+.password-input-wrapper input {
+    padding-right: 54px !important;
+}
+
+/* パスワード表示ボタン */
+.password-toggle {
+    position: absolute;
+    right: 8px;
+    top: 50%;
+    transform: translateY(-50%);
+    background: none;
+    border: none;
+    color: #64748b;
+    cursor: pointer;
+    padding: 8px;
+    min-width: 44px;
+    min-height: 44px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: color 0.2s ease;
+    z-index: 2;
+}
+
+.password-toggle:hover {
+    color: #0066ff;
+}
+
+.password-toggle:focus-visible {
+    outline: 2px solid #0066ff;
+    outline-offset: 2px;
+    border-radius: 6px;
+}
+
+.password-toggle[aria-pressed="true"] {
+    color: #0066ff;
+}
+
+/* ボタン（index.htmlと統一） */
+.auth-button {
+    width: 100%;
+    padding: 16px 32px;
+    background: linear-gradient(135deg, #0066ff 0%, #004fc4 100%);
+    color: white;
+    border: none;
+    border-radius: 50px;
+    font-size: 1.125rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    margin-top: 24px;
+}
+
+.auth-button:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 10px 30px rgba(0, 102, 255, 0.3);
+    background: linear-gradient(135deg, #0052d4 0%, #003ba3 100%);
+}
+
+/* リンク */
+.auth-links {
+    text-align: center;
+    margin-top: 32px;
+}
+
+.auth-links a {
+    color: #0066ff;
+    text-decoration: none;
+    font-weight: 600;
+    transition: all 0.2s ease;
+}
+
+.auth-links a:hover {
+    color: #004fc4;
+    text-decoration: underline;
+}
+
+/* フォームオプション */
+.form-options {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin: 20px 0;
+}
+
+.checkbox-label {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    color: #64748b;
+    font-size: 0.875rem;
+}
+
+.checkbox-label input[type="checkbox"] {
+    width: 18px;
+    height: 18px;
+    accent-color: #0066ff;
+}
+
+.forgot-password {
+    color: #0066ff;
+    text-decoration: none;
+    font-size: 0.875rem;
+    font-weight: 600;
+}
+
+.forgot-password:hover {
+    text-decoration: underline;
+}
+
+/* エラーメッセージ（バナー型） */
+.error-message {
+    background: rgba(239, 68, 68, 0.1);
+    border: 1px solid rgba(239, 68, 68, 0.2);
+    color: #dc2626;
+    padding: 12px 16px;
+    border-radius: 8px;
+    margin-bottom: 20px;
+    font-size: 0.875rem;
+}
+
+/* インラインフィールドエラー */
+.form-group.error input,
+.form-group.error textarea,
+.form-group.error select {
+    border-color: #ef4444 !important;
+    background: #fef2f2 !important;
+    animation: fieldShake 0.4s ease;
+}
+
+.form-group.error input:focus,
+.form-group.error textarea:focus,
+.form-group.error select:focus {
+    box-shadow: 0 0 0 4px rgba(239, 68, 68, 0.15) !important;
+    border-color: #ef4444 !important;
+}
+
+/* インラインエラーメッセージ（バナースタイルを上書き） */
+.form-group .error-message {
+    display: block;
+    color: #dc2626;
+    font-size: 0.8125rem;
+    margin-top: 6px;
+    margin-bottom: 0;
+    padding: 0;
+    background: none;
+    border: none;
+    border-radius: 0;
+}
+
+@keyframes fieldShake {
+    0%, 100% { transform: translateX(0); }
+    20% { transform: translateX(-4px); }
+    40% { transform: translateX(4px); }
+    60% { transform: translateX(-3px); }
+    80% { transform: translateX(3px); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .form-group.error input,
+    .form-group.error textarea,
+    .form-group.error select {
+        animation: none;
+    }
+}
+
+/* 成功メッセージ */
+.success-message {
+    background: rgba(34, 197, 94, 0.1);
+    border: 1px solid rgba(34, 197, 94, 0.2);
+    color: #16a34a;
+    padding: 12px 16px;
+    border-radius: 8px;
+    margin-bottom: 20px;
+    font-size: 0.875rem;
+}
+
+/* ゲストボタン */
+.guest-button {
+    background: white;
+    color: #0066ff;
+    border: 2px solid #0066ff;
+    text-decoration: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    padding: 16px 32px;
+    border-radius: 50px;
+    font-size: 1.125rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    margin-top: 16px;
+}
+
+.guest-button:hover {
+    background: #0066ff;
+    color: white;
+    transform: translateY(-2px);
+    box-shadow: 0 10px 30px rgba(0, 102, 255, 0.2);
+}
+
+/* フッターエリア */
+.auth-footer {
+    text-align: center;
+    margin-top: 32px;
+    padding-top: 24px;
+    border-top: 1px solid #e2e8f0;
+}
+
+.auth-footer p {
+    color: #64748b;
+    margin-bottom: 8px;
+    font-size: 0.9375rem;
+}
+
+.auth-footer a {
+    color: #0066ff;
+    font-weight: 600;
+    text-decoration: none;
+    font-size: 1rem;
+    transition: all 0.3s ease;
+}
+
+.auth-footer a:hover {
+    text-decoration: underline;
+}
+
+/* 戻るリンク */
+.auth-back {
+    text-align: center;
+    margin-top: 24px;
+}
+
+.auth-back a {
+    color: #64748b;
+    text-decoration: none;
+    font-size: 0.875rem;
+    font-weight: 500;
+    transition: all 0.3s ease;
+    display: inline-block;
+}
+
+.auth-back a:hover {
+    color: #0066ff;
+    transform: translateX(-4px);
+}
+
+/* レスポンシブ対応 */
+@media (max-width: 640px) {
+    .auth-container {
+        padding: 20px;
+    }
+    
+    .auth-card {
+        padding: 30px 20px;
+        border-radius: 20px;
+        margin: 0 auto;
+        max-width: calc(100% - 40px);
+    }
+    
+    /* ステップ2表示時のモバイル対応 */
+    .auth-card:has(.form-step[data-step="2"].active) {
+        max-width: calc(100% - 40px);
+    }
+    
+    .auth-header h1 {
+        font-size: 1.75rem;
+    }
+    
+    .auth-title {
+        font-size: 1.5rem;
+    }
+    
+    .form-group {
+        margin-bottom: 16px;
+    }
+    
+    .auth-form input[type="text"],
+    .auth-form input[type="email"],
+    .auth-form input[type="password"],
+    .auth-form input[type="tel"],
+    .auth-form input[type="number"],
+    .auth-form textarea,
+    .auth-form select {
+        padding: 14px 16px;
+        font-size: 16px; /* iOSのズーム防止 */
+    }
+}
+
+/* ゲストボタン */
+.guest-button {
+    background: #f8fafc;
+    color: #1a1a1a;
+    border: 2px solid #e5e7eb;
+}
+
+.guest-button:hover {
+    background: #f1f5f9;
+    border-color: #d1d5db;
+}
+
+/* LINEログインボタン - auth-buttonクラスと併用する場合も考慮 */
+.line-button,
+.auth-button.line-button {
+    background: #00C300 !important;
+    background-color: #00C300 !important;
+    color: white !important;
+    border: none !important;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    font-size: 1rem;
+    font-weight: 600;
+    transition: all 0.3s ease;
+    margin-bottom: 12px;
+    width: 33%;
+    padding-left: 1rem;
+    padding-right: 1rem;
+    font-size: 0.85rem;
+}
+
+.line-button:hover,
+.auth-button.line-button:hover {
+    background: #00B300 !important;
+    background-color: #00B300 !important;
+    transform: translateY(-2px);
+    box-shadow: 0 8px 20px rgba(0, 195, 0, 0.3);
+}
+
+.line-button:focus,
+.auth-button.line-button:focus {
+    background: #00C300 !important;
+    background-color: #00C300 !important;
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(0, 195, 0, 0.3);
+}
+
+.line-button i {
+    font-size: 1.25rem;
+    color: white !important;
+}
