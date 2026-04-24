@@ -26,27 +26,17 @@ export default function PublicLayout({
 
       <main className="flex-1">{children}</main>
 
-      <footer className="border-t border-border/50 py-8">
+      <footer className="border-t border-border/50 py-6">
         <div className="mx-auto max-w-5xl px-4">
-          <div className="flex flex-col items-center justify-between gap-4 sm:flex-row">
-            <p className="text-sm text-muted-foreground">
-              &copy; {new Date().getFullYear()} INTER CONNECT
-            </p>
-            <nav className="flex gap-6 text-sm text-muted-foreground">
-              <Link href="/" className="hover:text-foreground">
-                トップページ
-              </Link>
-              <Link href="/terms" className="hover:text-foreground">
-                利用規約
-              </Link>
-              <Link href="/privacy" className="hover:text-foreground">
-                プライバシーポリシー
-              </Link>
-              <Link href="/tokushoho" className="hover:text-foreground">
-                特定商取引法
-              </Link>
-            </nav>
-          </div>
+          <nav className="flex flex-wrap justify-center gap-x-5 gap-y-2 text-xs text-muted-foreground">
+            <Link href="/" className="hover:text-foreground">トップ</Link>
+            <Link href="/terms" className="hover:text-foreground">利用規約</Link>
+            <Link href="/privacy" className="hover:text-foreground">プライバシー</Link>
+            <Link href="/tokushoho" className="hover:text-foreground">特商法</Link>
+          </nav>
+          <p className="mt-3 text-center text-xs text-muted-foreground/60">
+            &copy; {new Date().getFullYear()} INTER CONNECT
+          </p>
         </div>
       </footer>
     </div>
