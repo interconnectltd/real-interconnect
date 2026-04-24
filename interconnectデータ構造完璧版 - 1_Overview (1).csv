@@ -1,0 +1,67 @@
+#,大分類,テーブル名,説明,行数目安,主要リレーション
+認証・ユーザー,,,,,
+T01,認証,auth.users,Supabase Auth管理。自前テーブルではない,200-1000,→user_profiles
+T02,認証,user_profiles,メンバーのプロフィール情報,200-1000,"auth.users(CASCADE)
+→connections,matching_scores等全テーブル"
+T03,認証,user_goals,メンバーが求めていること(複数行/人),400-2000,→user_profiles(CASCADE)
+T04,認証,user_offerings,メンバーが提供できること(複数行/人),400-2000,→user_profiles(CASCADE)
+T05,認証,settings,テーマ/通知/プライバシー設定,200-1000,→user_profiles(CASCADE) 1:1
+T06,認証,invitation_codes,招待コード管理,500-2000,"→user_profiles(created_by,used_by)"
+,,,,,
+マッチング・スコアリング,,,,,
+T07,マッチング,matching_scores_v3,双方向マッチングスコア(viewer→target),10000-500000,"→user_profiles×2(viewer,target)"
+T08,マッチング,mutual_match_notifications,相互マッチ通知の重複防止,1000-50000,"→user_profiles×2(user_a,user_b)"
+T09,マッチング,match_feedback,3段階フィードバック(直後/48h/30日),2000-50000,→user_profiles×2+meetings
+T10,マッチング,manual_recommendations,管理者手動マッチ推薦,50-500,"→user_profiles×3(admin,user_a,user_b)"
+T11,マッチング,user_signals,暗黙行動シグナル(閲覧/検索/クリック等),50000-2000000,"→user_profiles×2(user,target?)"
+T12,マッチング,signal_aggregates,日次集計済みシグナル,5000-100000,→user_profiles
+T13,マッチング,matrix_versions,属性マトリクス自動補正履歴,50-200,独立(バージョン管理)
+T14,マッチング,ab_tests,A/Bテスト定義,10-50,独立
+T15,マッチング,ab_test_assignments,ユーザーのテスト群割当,200-5000,→user_profiles+ab_tests
+,,,,,
+コネクション・会議,,,,,
+T16,コネクション,connections,つながり関係+メッセージ,2000-50000,"→user_profiles×2(user,connected_user)"
+T17,コネクション,introductions,紹介仲介(Warm Intro),200-5000,"→user_profiles×3(requester,introducer,target)"
+T18,会議,meeting_requests,会議リクエスト(候補日時付き),1000-20000,"→user_profiles×2(requester,target)"
+T19,会議,meetings,確定済み会議,500-10000,→meeting_requests
+T20,会議,meeting_participants,会議参加者(多対多),1000-30000,→meetings+user_profiles
+T21,会議,meeting_threads,会議スレッド(1会議=1スレッド),500-10000,→meetings 1:1
+T22,会議,meeting_messages,スレッド内メッセージ,2000-50000,→meeting_threads+user_profiles
+T23,会議,group_matches,グループマッチ/ラウンドテーブル,50-500,→user_profiles(created_by)
+T24,会議,group_match_members,グループマッチ参加者,200-2500,→group_matches+user_profiles
+,,,,,
+文字起こし・分析,,,,,
+T25,文字起こし,transcript_sources,BYOB連携設定(APIキー等),200-1000,→user_profiles
+T26,文字起こし,transcript_raw,取り込み済み生テキスト,500-10000,→meetings?+user_profiles
+T27,文字起こし,normalized_transcripts,正規化済み文字起こし,500-10000,→transcript_raw
+T28,分析,transcript_insights,Claude分析結果(JSONB),500-10000,→user_profiles+normalized_transcripts
+T29,分析,goal_change_events,goals変化検知ログ,500-5000,→user_profiles
+,,,,,
+通知・配信,,,,,
+T30,通知,notifications,アプリ内通知,5000-100000,→user_profiles
+T31,配信,email_digest_log,週次メール配信ログ,1000-50000,→user_profiles
+T32,配信,step_sequences,ステップ配信定義(管理者設定),10-50,独立
+T33,配信,step_delivery_log,ステップ配信実行ログ,2000-50000,→user_profiles+step_sequences
+,,,,,
+管理・監査,,,,,
+T34,管理,communities,コミュニティ(Stripe連携),1-10,独立(現状は1コミュニティ)
+T35,管理,profile_views,プロフィール閲覧ログ,10000-500000,"→user_profiles×2(viewer,target)"
+T36,管理,audit_logs,重要操作の監査ログ,5000-100000,→user_profiles?
+T37,管理,intervention_log,低評価介入の記録,100-2000,→user_profiles
+T38,パイプライン,job_queue,非同期ジョブキュー,1000-50000,独立
+,,,,,
+ENUM定義,,,,,
+E01,goal_type,"partnership, consulting, investment, recruitment, information, mentoring",目的/提供の6カテゴリ,"user_goals.goal_type
+user_offerings.offering_type",
+E02,connection_status,"pending, accepted, declined, cancelled, disconnected, reaccepted, blocked",コネクション状態7種,connections.status,CHECK制約で遷移制限
+E03,notification_type,"connection_request, meeting_request, meeting_confirmed, meeting_summary, introduction_request, introduction_completed, new_match_weekly, new_match_high, mutual_match, maturity_up, contact_exchange, intervention_alert, followup_reminder, system",通知種別14種,notifications.type,
+E04,meeting_status,"proposed, confirmed, completed, cancelled, no_show",会議ステータス5種,meetings.status,
+E05,introduction_status,"pending, approved, declined",紹介ステータス3種,introductions.status,
+E06,job_type,"analyze, score, notify, ingest, calibrate",ジョブ種別5種,job_queue.type,
+E07,job_status,"pending, processing, completed, failed, dead",ジョブ状態5種,job_queue.status,
+E08,subscription_status,"free, active, past_due, cancelled",課金状態4種,communities.subscription_status,
+E09,signal_type,"profile_view, search_query, filter_use, card_click, card_ignore, request_sent, request_accepted, request_declined, meeting_booked, followup_sent, second_meeting, profile_scroll_depth",暗黙シグナル種別12種,user_signals.signal_type,
+E10,transcript_source,"recall_ai, tldv, notta, otter, manual",文字起こしソース5種,"transcript_sources.source_type
+transcript_raw.source",
+E11,meeting_platform,"zoom, google_meet, teams, slack, other",会議プラットフォーム5種,meetings.platform,
+E12,feedback_stage,"immediate, behavior_48h, outcome_30d",フィードバック段階3種,match_feedback.stage,
