@@ -1,22 +1,29 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { createClient } from "@/lib/supabase/client";
 
 export function LinkedInLoginButton() {
   const [loading, setLoading] = useState(false);
 
+  // ページに戻ってきた時にローディング状態をリセット
+  useEffect(() => {
+    setLoading(false);
+  }, []);
+
   async function handleClick() {
     setLoading(true);
     const supabase = createClient();
 
-    await supabase.auth.signInWithOAuth({
+    const { error } = await supabase.auth.signInWithOAuth({
       provider: "linkedin_oidc",
       options: {
         redirectTo: `${window.location.origin}/auth/callback`,
       },
     });
+
+    if (error) setLoading(false);
   }
 
   return (
@@ -37,16 +44,22 @@ export function LinkedInLoginButton() {
 export function FacebookLoginButton() {
   const [loading, setLoading] = useState(false);
 
+  useEffect(() => {
+    setLoading(false);
+  }, []);
+
   async function handleClick() {
     setLoading(true);
     const supabase = createClient();
 
-    await supabase.auth.signInWithOAuth({
+    const { error } = await supabase.auth.signInWithOAuth({
       provider: "facebook",
       options: {
         redirectTo: `${window.location.origin}/auth/callback`,
       },
     });
+
+    if (error) setLoading(false);
   }
 
   return (
