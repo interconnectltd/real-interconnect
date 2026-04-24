@@ -2627,4 +2627,50 @@ $(function() {
   });
 });
 </script>
+<script>
+$(function(){
+  // モバイルメニューのリンクをクリック可能にする
+  $('.sp_menu_wrap a, .sp_menu_btn a').on('click', function(e){
+    var href = $(this).attr('href');
+    if (!href) return;
+    // メニューを閉じる
+    if ($('.sp_menu').hasClass('is_show')) {
+      $('.menu_trigger').removeClass('active');
+      $('body').removeClass('fixed');
+      $('.sp_menu_block .sp_menu_list').removeClass('is_show');
+      $('.sp_menu_block .sp_menu_btn').removeClass('is_show');
+      $('.sp_menu').removeClass('is_show');
+      $('.sp_menu .sp_menu_bg').removeClass('is_show');
+    }
+    // ページ遷移
+    if (href.indexOf('#') === -1) {
+      window.location.href = href;
+    } else {
+      var hash = href.split('#')[1];
+      var target = document.getElementById(hash);
+      if (target) {
+        e.preventDefault();
+        setTimeout(function(){
+          target.scrollIntoView({ behavior: 'smooth' });
+        }, 300);
+      } else {
+        window.location.href = href;
+      }
+    }
+  });
+  // デスクトップメニューも同様
+  $('.h_menu_wrap a').on('click', function(e){
+    var href = $(this).attr('href');
+    if (!href) return;
+    if (href.indexOf('#') !== -1) {
+      var hash = href.split('#')[1];
+      var target = document.getElementById(hash);
+      if (target) {
+        e.preventDefault();
+        target.scrollIntoView({ behavior: 'smooth' });
+      }
+    }
+  });
+});
+</script>
 </body></html>
