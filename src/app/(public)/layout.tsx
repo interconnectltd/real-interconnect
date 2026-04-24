@@ -14,10 +14,10 @@ export default function PublicLayout({
             INTER CONNECT
           </Link>
           <div className="flex items-center gap-3">
-            <Button variant="ghost" size="sm" render={<Link href="/login" />}>
+            <Button variant="outline" size="sm" render={<Link href="/login" />}>
               ログイン
             </Button>
-            <Button size="sm" render={<Link href="/register" />}>
+            <Button size="sm" className="bg-black text-white hover:bg-black/80" render={<Link href="/register" />}>
               はじめる
             </Button>
           </div>
