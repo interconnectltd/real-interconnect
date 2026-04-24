@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { ArrowLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 export default function PublicLayout({
@@ -10,9 +11,15 @@ export default function PublicLayout({
     <div className="flex min-h-dvh flex-col">
       <header className="border-b border-border/50">
         <div className="mx-auto flex h-16 max-w-5xl items-center justify-between px-4">
-          <Link href="/" className="text-xl font-bold text-primary">
-            INTER CONNECT
-          </Link>
+          <div className="flex items-center gap-3">
+            <Link href="/" className="flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground">
+              <ArrowLeft className="h-4 w-4" />
+              トップ
+            </Link>
+            <Link href="/" className="text-xl font-bold text-primary">
+              INTER CONNECT
+            </Link>
+          </div>
           <div className="flex items-center gap-3">
             <Button variant="outline" size="sm" render={<Link href="/login" />}>
               ログイン
