@@ -74,14 +74,14 @@ export function LoginForm() {
         )}
       </div>
 
-      <Button type="submit" className="w-full" disabled={loading}>
+      <Button type="submit" className="relative z-10 w-full py-3" disabled={loading}>
         {loading ? "ログイン中..." : "ログイン"}
       </Button>
 
-      <div className="text-center text-sm">
+      <div className="relative z-10 text-center text-sm py-2">
         <Link
           href="/forgot-password"
-          className="text-primary underline-offset-4 hover:underline"
+          className="inline-block px-4 py-2 text-primary underline-offset-4 hover:underline"
         >
           パスワードをお忘れですか？
         </Link>
