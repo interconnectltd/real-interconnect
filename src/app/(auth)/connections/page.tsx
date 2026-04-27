@@ -1,7 +1,8 @@
 "use client";
 
 import { useState } from "react";
-import { UserCheck, Clock, Send, Star } from "lucide-react";
+import { useRouter } from "next/navigation";
+import { UserCheck, Clock, Send, Star, MessageCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -11,6 +12,7 @@ import { useFeedbackStatus } from "@/hooks/queries/use-feedback-status";
 import { FeedbackModal } from "@/components/shared/feedback-modal";
 import { useFilterStore } from "@/stores/filter-store";
 import { useSupabase } from "@/providers/supabase-provider";
+import { api } from "@/lib/api-client";
 import type { Connection } from "@/types";
 
 const STATUS_LABELS: Record<string, string> = {
@@ -24,12 +26,35 @@ const STATUS_LABELS: Record<string, string> = {
 };
 
 export default function ConnectionsPage() {
+  const router = useRouter();
   const { user } = useSupabase();
   const { connectionTab, setConnectionTab } = useFilterStore();
   const [feedbackTarget, setFeedbackTarget] = useState<{
     id: string;
     name: string;
   } | null>(null);
+  const [chatLoading, setChatLoading] = useState<string | null>(null);
+
+  const handleChat = async (connectionId: string) => {
+    setChatLoading(connectionId);
+    try {
+      const room = await api.post<{ id: string }>("/chat/rooms", {
+        connection_id: connectionId,
+      });
+      router.push(`/chat?room=${room.id}`);
+    } catch {
+      // Room already exists — fetch rooms and find the one for this connection
+      try {
+        const rooms = await api.get<Array<{ id: string; connection_id: string }>>("/chat/rooms");
+        const existing = rooms.find((r) => r.connection_id === connectionId);
+        if (existing) router.push(`/chat?room=${existing.id}`);
+      } catch {
+        // silently fail
+      }
+    } finally {
+      setChatLoading(null);
+    }
+  };
 
   const statusFilter =
     connectionTab === "pending" ? "pending"
@@ -90,8 +115,8 @@ export default function ConnectionsPage() {
             return (
               <Card key={conn.id}>
                 <CardContent className="flex items-center justify-between p-4">
-                  <div>
-                    <p className="font-medium">{profile?.name ?? "ユーザー"}</p>
+                  <div className="min-w-0">
+                    <p className="truncate font-medium">{profile?.name ?? "ユーザー"}</p>
                     <p className="text-xs text-muted-foreground">
                       {profile?.company}
                       {profile?.position ? ` / ${profile.position}` : ""}
@@ -101,9 +126,10 @@ export default function ConnectionsPage() {
                     </Badge>
                   </div>
                   {conn.status === "pending" && isReceived && (
-                    <div className="flex gap-2">
+                    <div className="flex flex-wrap gap-2">
                       <Button
                         size="sm"
+                        disabled={updateConnection.isPending}
                         onClick={() => updateConnection.mutate({ id: conn.id, status: "accepted" })}
                       >
                         承認
@@ -111,15 +137,26 @@ export default function ConnectionsPage() {
                       <Button
                         size="sm"
                         variant="outline"
+                        disabled={updateConnection.isPending}
                         onClick={() => updateConnection.mutate({ id: conn.id, status: "declined" })}
                       >
                         拒否
                       </Button>
                     </div>
                   )}
-                  {conn.status === "accepted" && (
-                    <div className="flex gap-2">
-                      {!feedbackMap?.[conn.user_id === user?.id ? conn.connected_user_id : conn.user_id] && (
+                  {(conn.status === "accepted" || conn.status === "reaccepted") && (
+                    <div className="flex flex-wrap gap-2">
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        disabled={chatLoading === conn.id}
+                        onClick={() => handleChat(conn.id)}
+                      >
+                        <MessageCircle className="mr-1 h-3.5 w-3.5" />
+                        チャットを開始
+                      </Button>
+                      {conn.status === "accepted" &&
+                        !feedbackMap?.[conn.user_id === user?.id ? conn.connected_user_id : conn.user_id] && (
                         <Button
                           size="sm"
                           variant="outline"
@@ -137,8 +174,13 @@ export default function ConnectionsPage() {
                       )}
                       <Button
                         size="sm"
-                        variant="outline"
-                        onClick={() => updateConnection.mutate({ id: conn.id, status: "disconnected" })}
+                        variant="destructive"
+                        disabled={updateConnection.isPending}
+                        onClick={() => {
+                          if (window.confirm("このコネクションを解除しますか？")) {
+                            updateConnection.mutate({ id: conn.id, status: "disconnected" });
+                          }
+                        }}
                       >
                         解除
                       </Button>

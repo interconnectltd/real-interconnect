@@ -12,7 +12,7 @@ export default function AuthLayout({
   return (
     <SupabaseProvider>
       <QueryProvider>
-        <div className="flex min-h-dvh flex-col">
+        <div className="flex min-h-dvh flex-col pb-safe">
           <Header />
           <div className="flex flex-1">
             <aside className="hidden w-56 shrink-0 border-r lg:block">

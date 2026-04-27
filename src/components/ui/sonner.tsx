@@ -5,7 +5,7 @@ import { Toaster as SonnerToaster } from "sonner";
 export function Toaster() {
   return (
     <SonnerToaster
-      position="top-right"
+      position="top-center"
       richColors
       toastOptions={{
         className: "font-sans",

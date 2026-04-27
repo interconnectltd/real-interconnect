@@ -40,7 +40,7 @@ export default function ResetPasswordPage() {
   }
 
   return (
-    <div className="flex min-h-[60vh] items-center justify-center px-4">
+    <div className="flex min-h-[60dvh] items-center justify-center px-4">
       <div className="w-full max-w-sm space-y-6">
         <div className="text-center">
           <h1 className="text-2xl font-bold">新しいパスワード</h1>
@@ -59,6 +59,7 @@ export default function ResetPasswordPage() {
             <Input
               id="password"
               type="password"
+              autoComplete="new-password"
               placeholder="8文字以上"
               {...register("password", {
                 required: "パスワードを入力してください",
@@ -72,6 +73,7 @@ export default function ResetPasswordPage() {
             <Input
               id="confirm"
               type="password"
+              autoComplete="new-password"
               {...register("confirmPassword", { required: "パスワードを再入力してください" })}
             />
             {errors.confirmPassword && <p className="text-sm text-destructive">{errors.confirmPassword.message}</p>}

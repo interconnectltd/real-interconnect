@@ -173,7 +173,7 @@ export default function ProfilePage() {
                   <select
                     value={form.industry}
                     onChange={(e) => setForm({ ...form, industry: e.target.value })}
-                    className="w-full rounded-md border bg-background px-3 py-2 text-sm"
+                    className="w-full rounded-md border bg-background px-3 py-2 text-base md:text-sm"
                   >
                     <option value="">選択してください</option>
                     {INDUSTRIES.map((ind) => (
@@ -185,7 +185,7 @@ export default function ProfilePage() {
               <div className="space-y-2">
                 <Label>自己紹介</Label>
                 <textarea
-                  className="w-full rounded-md border bg-background px-3 py-2 text-sm"
+                  className="w-full rounded-md border bg-background px-3 py-2 text-base md:text-sm"
                   rows={4}
                   value={form.bio}
                   onChange={(e) => setForm({ ...form, bio: e.target.value })}

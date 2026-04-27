@@ -234,6 +234,19 @@
   --info: oklch(0.62 0.17 255);
 }
 
+/* Mobile touch feedback */
+* {
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* Safe area padding for notch/home bar */
+.pb-safe {
+  padding-bottom: env(safe-area-inset-bottom);
+}
+.pt-safe {
+  padding-top: env(safe-area-inset-top);
+}
+
 @layer base {
   * {
     @apply border-border outline-ring/50;

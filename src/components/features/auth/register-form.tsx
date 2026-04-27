@@ -117,6 +117,7 @@ export function RegisterForm() {
         <Label htmlFor="name">お名前 *</Label>
         <Input
           id="name"
+          autoComplete="name"
           placeholder="山田 太郎"
           {...register("name")}
         />
@@ -130,6 +131,7 @@ export function RegisterForm() {
         <Input
           id="reg-email"
           type="email"
+          autoComplete="email"
           placeholder="you@example.com"
           {...register("email")}
         />
@@ -143,6 +145,7 @@ export function RegisterForm() {
         <Input
           id="reg-password"
           type="password"
+          autoComplete="new-password"
           placeholder="8文字以上"
           {...register("password")}
         />
@@ -167,7 +170,7 @@ export function RegisterForm() {
         <select
           id="industry"
           {...register("industry")}
-          className="w-full rounded-md border bg-background px-3 py-2 text-sm"
+          className="w-full rounded-md border bg-background px-3 py-2 text-base md:text-sm"
         >
           <option value="">選択してください</option>
           {INDUSTRIES.map((ind) => (
@@ -184,7 +187,7 @@ export function RegisterForm() {
         <textarea
           id="bio"
           {...register("bio")}
-          className="w-full rounded-md border bg-background px-3 py-2 text-sm"
+          className="w-full rounded-md border bg-background px-3 py-2 text-base md:text-sm"
           rows={3}
           placeholder="あなたの専門領域や関心事を教えてください（マッチング精度が向上します）"
         />

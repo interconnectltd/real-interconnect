@@ -71,16 +71,23 @@ export default function NotificationsPage() {
       ) : notifications && notifications.length > 0 ? (
         <div className="space-y-1">
           {notifications.map((n: Notification) => (
-            <button
+            <div
               key={n.id}
-              type="button"
+              role="button"
+              tabIndex={0}
               className={cn(
-                "flex w-full items-start gap-3 rounded-lg px-4 py-3 text-left transition-colors hover:bg-muted",
+                "flex w-full items-start gap-3 rounded-lg px-4 py-3 text-left transition-colors hover:bg-muted cursor-pointer",
                 !n.is_read && "bg-primary/5",
               )}
               onClick={() => {
                 if (!n.is_read) markRead.mutate([n.id]);
                 if (n.link) router.push(n.link);
+              }}
+              onKeyDown={(e) => {
+                if (e.key === "Enter") {
+                  if (!n.is_read) markRead.mutate([n.id]);
+                  if (n.link) router.push(n.link);
+                }
               }}
             >
               <Bell
@@ -142,7 +149,7 @@ export default function NotificationsPage() {
               {!n.is_read && (
                 <span className="mt-1.5 h-2 w-2 shrink-0 rounded-full bg-primary" />
               )}
-            </button>
+            </div>
           ))}
         </div>
       ) : (

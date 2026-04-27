@@ -25,9 +25,9 @@ export default function DashboardPage() {
   const queryClient = useQueryClient();
   const [computeDone, setComputeDone] = useState(false);
   const { data: myProfile } = useMyProfile();
-  const { data: connections } = useConnections();
-  const { data: unreadCount } = useUnreadCount();
-  const { data: scores } = useMatchingScores({});
+  const { data: connections, isLoading: isLoadingConnections } = useConnections();
+  const { data: unreadCount, isLoading: isLoadingUnread } = useUnreadCount();
+  const { data: scores, isLoading: isLoadingScores } = useMatchingScores({});
   const { data: mutualMatches } = useMutualMatches();
   const { data: membersData } = useMembers("", { page: 1 });
   const { openProfileModal } = useUIStore();
@@ -72,6 +72,22 @@ export default function DashboardPage() {
     { label: "おすすめ", value: matchCount, icon: Heart, color: "text-primary", href: "/matching" },
     { label: "メンバー", value: memberCount, icon: Users, color: "text-muted-foreground", href: "/members" },
   ];
+
+  const isLoading = isLoadingConnections || isLoadingUnread || isLoadingScores;
+
+  if (isLoading) {
+    return (
+      <div className="space-y-6">
+        <div className="h-8 w-48 animate-pulse rounded bg-muted" />
+        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+          {[1, 2, 3, 4].map((i) => (
+            <div key={i} className="h-24 animate-pulse rounded-lg bg-muted" />
+          ))}
+        </div>
+        <div className="h-64 animate-pulse rounded-lg bg-muted" />
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-8">

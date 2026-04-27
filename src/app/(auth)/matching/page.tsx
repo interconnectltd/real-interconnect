@@ -72,7 +72,7 @@ export default function MatchingPage() {
                 >
                   <button
                     type="button"
-                    className="absolute right-2 top-2 rounded-full p-1 text-muted-foreground/60 hover:bg-muted hover:text-muted-foreground"
+                    className="absolute right-2 top-2 flex min-h-9 min-w-9 items-center justify-center rounded-full p-1 text-muted-foreground/60 hover:bg-muted hover:text-muted-foreground"
                     aria-label="この推薦を非表示にする"
                     onClick={(e) => {
                       e.stopPropagation();
@@ -85,8 +85,8 @@ export default function MatchingPage() {
                   <CardContent className="p-4 pr-8">
                     <div className="flex items-center gap-3">
                       <UserAvatar name={p?.name} avatarUrl={p?.avatar_url} size="sm" />
-                      <div>
-                        <p className="font-medium">{p?.name ?? "ユーザー"}</p>
+                      <div className="min-w-0">
+                        <p className="truncate font-medium">{p?.name ?? "ユーザー"}</p>
                         <p className="text-xs text-muted-foreground">
                           {p?.company}{p?.position ? ` / ${p.position}` : ""}
                         </p>
@@ -144,8 +144,8 @@ export default function MatchingPage() {
                   <div className="flex items-start justify-between">
                     <div className="flex items-center gap-3">
                       <UserAvatar name={p?.name} avatarUrl={p?.avatar_url} size="md" />
-                      <div>
-                        <CardTitle className="text-base">
+                      <div className="min-w-0">
+                        <CardTitle className="truncate text-base">
                           {p?.name ?? "ユーザー"}
                         </CardTitle>
                         <p className="text-xs text-muted-foreground">
@@ -174,7 +174,7 @@ export default function MatchingPage() {
                     )}
                     <button
                       type="button"
-                      className="rounded-full p-1 text-muted-foreground/60 hover:bg-muted hover:text-muted-foreground"
+                      className="flex min-h-9 min-w-9 items-center justify-center rounded-full p-1 text-muted-foreground/60 hover:bg-muted hover:text-muted-foreground"
                       aria-label="この推薦を非表示にする"
                       onClick={(e) => {
                         e.stopPropagation();

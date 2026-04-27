@@ -1,7 +1,7 @@
 "use client";
 
-import { useState } from "react";
-import { UserPlus, Bookmark, Calendar } from "lucide-react";
+import { useState, useEffect, useCallback } from "react";
+import { UserPlus, Bookmark, Calendar, Loader2 } from "lucide-react";
 import {
   Dialog,
   DialogContent,
@@ -19,10 +19,28 @@ import { useConnections } from "@/hooks/queries/use-connections";
 import { useRequestConnection } from "@/hooks/mutations/use-request-connection";
 import { useToggleBookmark } from "@/hooks/mutations/use-toggle-bookmark";
 import { useRequestMeeting } from "@/hooks/mutations/use-request-meeting";
+import { api } from "@/lib/api-client";
 // V2: SCORE_AXIS_LABELS 不要（おすすめ度のみ表示）
 import { ScoreBar, ReasonList } from "@/components/shared/score-bar";
 import { UserAvatar } from "@/components/shared/user-avatar";
 import type { MatchScore, Connection } from "@/types";
+
+interface TimeSuggestion {
+  date: string;
+  start: string;
+  end: string;
+  score: number;
+}
+
+/** 日付文字列を "4/29 (火)" 形式にフォーマット */
+function formatDateWithWeekday(dateStr: string): string {
+  const d = new Date(dateStr + "T00:00:00");
+  const weekdays = ["日", "月", "火", "水", "木", "金", "土"];
+  const month = d.getMonth() + 1;
+  const day = d.getDate();
+  const weekday = weekdays[d.getDay()]!;
+  return `${month}/${day} (${weekday})`;
+}
 
 export function ProfileModal() {
   const { profileModalUserId, closeProfileModal } = useUIStore();
@@ -37,6 +55,40 @@ export function ProfileModal() {
   const [showMeetingForm, setShowMeetingForm] = useState(false);
   const [meetingMessage, setMeetingMessage] = useState("");
   const [proposedTimes, setProposedTimes] = useState("");
+  const [suggestions, setSuggestions] = useState<TimeSuggestion[]>([]);
+  const [selectedSlotIndex, setSelectedSlotIndex] = useState<number | null>(null);
+  const [suggestionsLoading, setSuggestionsLoading] = useState(false);
+  const [useCustomTime, setUseCustomTime] = useState(false);
+
+  const fetchSuggestions = useCallback(async (targetId: string) => {
+    setSuggestionsLoading(true);
+    setSuggestions([]);
+    setSelectedSlotIndex(null);
+    setUseCustomTime(false);
+    try {
+      const res = await api.post<{ suggestions: TimeSuggestion[] }>(
+        "/scheduling/suggest",
+        { target_user_id: targetId, duration_min: 30 },
+      );
+      setSuggestions(res.suggestions ?? []);
+      if (!res.suggestions || res.suggestions.length === 0) {
+        setUseCustomTime(true);
+      }
+    } catch {
+      // Fallback to manual input on error
+      setSuggestions([]);
+      setUseCustomTime(true);
+    } finally {
+      setSuggestionsLoading(false);
+    }
+  }, []);
+
+  // Fetch suggestions when meeting form opens
+  useEffect(() => {
+    if (showMeetingForm && profileModalUserId) {
+      fetchSuggestions(profileModalUserId);
+    }
+  }, [showMeetingForm, profileModalUserId, fetchSuggestions]);
 
   const connectionWithUser = (connectionsData as Connection[] | undefined)
     ?.find((c) => c.user_id === profileModalUserId || c.connected_user_id === profileModalUserId);
@@ -55,7 +107,7 @@ export function ProfileModal() {
 
   return (
     <Dialog open={open} onOpenChange={(o) => { if (!o) closeProfileModal(); }}>
-      <DialogContent className="max-w-lg">
+      <DialogContent className="max-w-lg overflow-y-auto max-h-[90dvh]">
         {isLoading ? (
           <div className="space-y-4 p-4">
             <div className="h-6 w-40 animate-pulse rounded bg-muted" />
@@ -156,17 +208,88 @@ export function ProfileModal() {
                 <div className="space-y-2 rounded-md border p-3">
                   <p className="text-xs font-medium">会議リクエスト</p>
                   <textarea
-                    className="w-full rounded-md border border-input bg-transparent px-2.5 py-1.5 text-sm placeholder:text-muted-foreground focus-visible:border-ring focus-visible:outline-none focus-visible:ring-3 focus-visible:ring-ring/50"
+                    className="w-full rounded-md border border-input bg-transparent px-2.5 py-1.5 text-base md:text-sm placeholder:text-muted-foreground focus-visible:border-ring focus-visible:outline-none focus-visible:ring-3 focus-visible:ring-ring/50"
                     rows={2}
                     placeholder="メッセージ（任意）"
                     value={meetingMessage}
                     onChange={(e) => setMeetingMessage(e.target.value)}
                   />
-                  <Input
-                    placeholder="希望日時（例: 来週水曜午後）"
-                    value={proposedTimes}
-                    onChange={(e) => setProposedTimes(e.target.value)}
-                  />
+
+                  {/* Auto-suggested time slots */}
+                  {suggestionsLoading && (
+                    <div className="flex items-center gap-2 py-3 text-xs text-muted-foreground">
+                      <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                      <span>空き時間を確認中...</span>
+                    </div>
+                  )}
+
+                  {!suggestionsLoading && suggestions.length > 0 && (
+                    <div className="space-y-1.5">
+                      <p className="text-xs text-muted-foreground">おすすめの日時</p>
+                      <div className="space-y-1">
+                        {suggestions.map((slot, i) => {
+                          const isSelected = !useCustomTime && selectedSlotIndex === i;
+                          return (
+                            <button
+                              key={`${slot.date}-${slot.start}`}
+                              type="button"
+                              className={`flex w-full items-center gap-2 rounded-md border px-3 py-2 text-left text-sm transition-colors ${
+                                isSelected
+                                  ? "border-primary bg-primary/10 text-primary"
+                                  : "border-input hover:border-primary/50 hover:bg-muted/50"
+                              }`}
+                              onClick={() => {
+                                setSelectedSlotIndex(i);
+                                setUseCustomTime(false);
+                                setProposedTimes("");
+                              }}
+                            >
+                              <span
+                                className={`flex h-4 w-4 shrink-0 items-center justify-center rounded-full border ${
+                                  isSelected
+                                    ? "border-primary bg-primary"
+                                    : "border-muted-foreground/40"
+                                }`}
+                              >
+                                {isSelected && (
+                                  <span className="h-1.5 w-1.5 rounded-full bg-white" />
+                                )}
+                              </span>
+                              <span>
+                                {formatDateWithWeekday(slot.date)} {slot.start}〜{slot.end}
+                              </span>
+                            </button>
+                          );
+                        })}
+                      </div>
+                      <button
+                        type="button"
+                        className="text-xs text-muted-foreground underline-offset-2 hover:underline"
+                        onClick={() => {
+                          setUseCustomTime(true);
+                          setSelectedSlotIndex(null);
+                        }}
+                      >
+                        別の日時を指定する
+                      </button>
+                    </div>
+                  )}
+
+                  {!suggestionsLoading && suggestions.length === 0 && (
+                    <p className="text-xs text-muted-foreground">
+                      共通の空き時間が見つかりませんでした
+                    </p>
+                  )}
+
+                  {/* Custom time input (fallback or user-chosen) */}
+                  {!suggestionsLoading && useCustomTime && (
+                    <Input
+                      placeholder="希望日時（例: 来週水曜午後）"
+                      value={proposedTimes}
+                      onChange={(e) => setProposedTimes(e.target.value)}
+                    />
+                  )}
+
                   <div className="flex gap-2">
                     <Button
                       size="sm"
@@ -174,17 +297,29 @@ export function ProfileModal() {
                       disabled={requestMeeting.isPending}
                       onClick={() => {
                         if (profileModalUserId) {
+                          // Build proposed_times from selected slot or custom input
+                          let times: string | undefined;
+                          if (!useCustomTime && selectedSlotIndex !== null && suggestions[selectedSlotIndex]) {
+                            const slot = suggestions[selectedSlotIndex];
+                            times = `${formatDateWithWeekday(slot.date)} ${slot.start}〜${slot.end}`;
+                          } else if (proposedTimes) {
+                            times = proposedTimes;
+                          }
+
                           requestMeeting.mutate(
                             {
                               target_id: profileModalUserId,
                               message: meetingMessage || undefined,
-                              proposed_times: proposedTimes || undefined,
+                              proposed_times: times,
                             },
                             {
                               onSuccess: () => {
                                 setShowMeetingForm(false);
                                 setMeetingMessage("");
                                 setProposedTimes("");
+                                setSuggestions([]);
+                                setSelectedSlotIndex(null);
+                                setUseCustomTime(false);
                               },
                             },
                           );
@@ -200,6 +335,9 @@ export function ProfileModal() {
                         setShowMeetingForm(false);
                         setMeetingMessage("");
                         setProposedTimes("");
+                        setSuggestions([]);
+                        setSelectedSlotIndex(null);
+                        setUseCustomTime(false);
                       }}
                     >
                       キャンセル

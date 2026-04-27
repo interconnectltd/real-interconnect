@@ -7,9 +7,14 @@ import { createClient } from "@/lib/supabase/client";
 export function LinkedInLoginButton() {
   const [loading, setLoading] = useState(false);
 
-  // ページに戻ってきた時にローディング状態をリセット
+  // ページに戻ってきた時にローディング状態をリセット（Safari bfcache対応）
   useEffect(() => {
+    const handlePageShow = (e: PageTransitionEvent) => {
+      if (e.persisted) setLoading(false);
+    };
+    window.addEventListener('pageshow', handlePageShow);
     setLoading(false);
+    return () => window.removeEventListener('pageshow', handlePageShow);
   }, []);
 
   async function handleClick() {
@@ -44,8 +49,14 @@ export function LinkedInLoginButton() {
 export function FacebookLoginButton() {
   const [loading, setLoading] = useState(false);
 
+  // ページに戻ってきた時にローディング状態をリセット（Safari bfcache対応）
   useEffect(() => {
+    const handlePageShow = (e: PageTransitionEvent) => {
+      if (e.persisted) setLoading(false);
+    };
+    window.addEventListener('pageshow', handlePageShow);
     setLoading(false);
+    return () => window.removeEventListener('pageshow', handlePageShow);
   }, []);
 
   async function handleClick() {

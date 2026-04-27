@@ -33,7 +33,7 @@ export function Header() {
   }
 
   return (
-    <header className="sticky top-0 z-40 border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+    <header className="sticky top-0 z-40 border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 pt-safe">
       <div className="flex h-14 items-center gap-4 px-4 lg:px-6">
         {/* Mobile menu — render prop merges SheetTrigger onto Button */}
         <Sheet open={sidebarOpen} onOpenChange={setSidebarOpen}>
@@ -43,6 +43,7 @@ export function Header() {
             <Menu className="h-5 w-5" />
           </SheetTrigger>
           <SheetContent side="left" className="w-64 p-0">
+            <p className="sr-only">ナビゲーションメニュー</p>
             <div className="p-4">
               <Link href="/dashboard" className="text-lg font-bold text-primary">
                 INTERCONNECT

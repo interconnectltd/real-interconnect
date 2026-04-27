@@ -1,5 +1,7 @@
 "use client";
 
+import { useState } from "react";
+
 interface UserAvatarProps {
   name: string | null | undefined;
   avatarUrl: string | null | undefined;
@@ -15,15 +17,17 @@ const sizeClasses = {
 };
 
 export function UserAvatar({ name, avatarUrl, size = "md", className = "" }: UserAvatarProps) {
+  const [imgError, setImgError] = useState(false);
   const initial = (name ?? "?").charAt(0).toUpperCase();
   const sizeClass = sizeClasses[size];
 
-  if (avatarUrl) {
+  if (avatarUrl && !imgError) {
     return (
       <img
         src={avatarUrl}
         alt={name ?? "avatar"}
         className={`${sizeClass} shrink-0 rounded-full object-cover ${className}`}
+        onError={() => setImgError(true)}
       />
     );
   }

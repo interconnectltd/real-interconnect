@@ -54,6 +54,7 @@ export function LoginForm() {
         <Input
           id="email"
           type="email"
+          autoComplete="email"
           placeholder="you@example.com"
           {...register("email", { required: "メールアドレスを入力してください" })}
         />
@@ -67,6 +68,7 @@ export function LoginForm() {
         <Input
           id="password"
           type="password"
+          autoComplete="current-password"
           {...register("password", { required: "パスワードを入力してください" })}
         />
         {errors.password && (

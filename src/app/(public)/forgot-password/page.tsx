@@ -26,7 +26,7 @@ export default function ForgotPasswordPage() {
 
   if (sent) {
     return (
-      <div className="flex min-h-[60vh] items-center justify-center px-4">
+      <div className="flex min-h-[60dvh] items-center justify-center px-4">
         <div className="w-full max-w-sm space-y-4 text-center">
           <h1 className="text-2xl font-bold">メールを送信しました</h1>
           <p className="text-sm text-muted-foreground">
@@ -41,7 +41,7 @@ export default function ForgotPasswordPage() {
   }
 
   return (
-    <div className="flex min-h-[60vh] items-center justify-center px-4">
+    <div className="flex min-h-[60dvh] items-center justify-center px-4">
       <div className="w-full max-w-sm space-y-6">
         <div className="text-center">
           <h1 className="text-2xl font-bold">パスワードリセット</h1>
@@ -55,6 +55,7 @@ export default function ForgotPasswordPage() {
             <Input
               id="email"
               type="email"
+              autoComplete="email"
               {...register("email", { required: "メールアドレスを入力してください" })}
             />
             {errors.email && <p className="text-sm text-destructive">{errors.email.message}</p>}
