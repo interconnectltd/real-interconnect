@@ -69,6 +69,9 @@ export default function MatchingPage() {
                   key={m.user_id}
                   className="relative cursor-pointer border-primary/20 bg-primary/5 transition-shadow hover:shadow-md"
                   onClick={() => openProfileModal(m.user_id)}
+                  role="button"
+                  tabIndex={0}
+                  onKeyDown={(e) => { if (e.key === 'Enter') openProfileModal(m.user_id); }}
                 >
                   <button
                     type="button"
@@ -139,6 +142,9 @@ export default function MatchingPage() {
                 key={score.target_id}
                 className="cursor-pointer transition-shadow hover:shadow-md"
                 onClick={() => openProfileModal(score.target_id)}
+                role="button"
+                tabIndex={0}
+                onKeyDown={(e) => { if (e.key === 'Enter') openProfileModal(score.target_id); }}
               >
                 <CardHeader className="pb-2">
                   <div className="flex items-start justify-between">
@@ -261,7 +267,7 @@ export default function MatchingPage() {
         <div className="pt-2 text-center">
           <button
             type="button"
-            className="text-xs text-muted-foreground underline hover:text-foreground"
+            className="py-2 px-3 text-xs text-muted-foreground underline hover:text-foreground"
             onClick={() => {
               resetAll();
               toast.success("非表示を解除しました");

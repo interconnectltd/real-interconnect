@@ -32,7 +32,7 @@ export function TldvConnectCta() {
       </p>
       <p className="mt-1 text-xs text-muted-foreground/60">所要時間：約2分</p>
       <div className="mt-4 flex justify-center gap-3">
-        <Button size="sm" render={<a href="#tldv-connect" />}>
+        <Button size="sm" render={<a href="/settings#tldv-connect" />}>
           接続する
         </Button>
         <Button size="sm" variant="ghost" onClick={handleDismiss}>

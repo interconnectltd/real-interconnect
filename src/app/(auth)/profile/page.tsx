@@ -122,11 +122,6 @@ export default function ProfilePage() {
                   <Camera className="h-5 w-5 text-white" />
                 )}
               </div>
-              {uploadAvatar.isPending && (
-                <div className="absolute inset-0 flex items-center justify-center rounded-full bg-black/40">
-                  <Loader2 className="h-5 w-5 animate-spin text-white" />
-                </div>
-              )}
             </button>
             <input
               ref={fileInputRef}
@@ -136,7 +131,7 @@ export default function ProfilePage() {
               onChange={handleAvatarSelect}
             />
             <div>
-              <CardTitle className="text-lg">{profile.name}</CardTitle>
+              <CardTitle className="text-lg truncate">{profile.name}</CardTitle>
               {profile.industry && (
                 <Badge variant="secondary" className="mt-1">{profile.industry}</Badge>
               )}

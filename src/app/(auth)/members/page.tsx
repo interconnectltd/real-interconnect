@@ -69,7 +69,7 @@ export default function MembersPage() {
       </div>
 
       {/* Sort options */}
-      <div className="flex items-center gap-2">
+      <div className="flex items-center gap-2 overflow-x-auto">
         <span className="text-xs text-muted-foreground shrink-0">並び替え:</span>
         {MEMBER_SORT_OPTIONS.map((opt) => (
           <Button
@@ -140,12 +140,15 @@ export default function MembersPage() {
                 key={member.id}
                 className="cursor-pointer transition-shadow hover:shadow-md"
                 onClick={() => openProfileModal(member.id)}
+                role="button"
+                tabIndex={0}
+                onKeyDown={(e) => { if (e.key === 'Enter') openProfileModal(member.id); }}
               >
                 <CardContent className="p-4">
                   <div className="flex items-start justify-between">
                     <div>
-                      <p className="font-medium">{member.name}</p>
-                      <p className="text-xs text-muted-foreground">
+                      <p className="font-medium truncate">{member.name}</p>
+                      <p className="text-xs text-muted-foreground truncate">
                         {member.company}
                         {member.position ? ` / ${member.position}` : ""}
                       </p>

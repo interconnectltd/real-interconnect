@@ -38,7 +38,7 @@ export function Header() {
         {/* Mobile menu — render prop merges SheetTrigger onto Button */}
         <Sheet open={sidebarOpen} onOpenChange={setSidebarOpen}>
           <SheetTrigger
-            render={<Button variant="ghost" size="icon-lg" className="lg:hidden" />}
+            render={<Button variant="ghost" size="icon-lg" className="lg:hidden" aria-label="メニューを開く" />}
           >
             <Menu className="h-5 w-5" />
           </SheetTrigger>
@@ -68,6 +68,7 @@ export function Header() {
           size="icon-lg"
           render={<Link href="/notifications" />}
           className="relative"
+          aria-label="通知"
         >
           <Bell className="h-5 w-5" />
           {unreadCount && unreadCount > 0 ? (
@@ -80,7 +81,7 @@ export function Header() {
         {/* User menu — render prop merges DropdownMenuTrigger onto Button */}
         <DropdownMenu>
           <DropdownMenuTrigger
-            render={<Button variant="ghost" size="icon-lg" className="rounded-full" />}
+            render={<Button variant="ghost" size="icon-lg" className="rounded-full" aria-label="ユーザーメニュー" />}
           >
             {myProfile?.avatar_url ? (
               <UserAvatar

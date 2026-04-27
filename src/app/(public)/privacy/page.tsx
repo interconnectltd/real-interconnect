@@ -30,6 +30,7 @@ export default function PrivacyPage() {
         </p>
         <h2 className="mt-6 text-lg font-semibold text-foreground">3-2. データ保持期間</h2>
         <p>各データは以下の期間保持された後、自動的に削除または無効化されます。</p>
+        <div className="overflow-x-auto">
         <table className="mt-3 w-full text-left text-sm">
           <thead>
             <tr className="border-b">
@@ -71,6 +72,7 @@ export default function PrivacyPage() {
             </tr>
           </tbody>
         </table>
+        </div>
         <h2 className="mt-6 text-lg font-semibold text-foreground">4. 第三者提供</h2>
         <p>法令に基づく場合を除き、個人情報を第三者に提供することはありません。</p>
         <h2 className="mt-6 text-lg font-semibold text-foreground">5. お問い合わせ</h2>

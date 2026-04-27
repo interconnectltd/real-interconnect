@@ -7,7 +7,7 @@ export const metadata: Metadata = { title: "ログイン" };
 export default async function LoginPage({
   searchParams,
 }: {
-  searchParams: Promise<{ confirmed?: string; error?: string }>;
+  searchParams: Promise<{ confirmed?: string; error?: string; password_reset?: string }>;
 }) {
   const params = await searchParams;
 
@@ -20,6 +20,12 @@ export default async function LoginPage({
             アカウントにログインしてください
           </p>
         </div>
+
+        {params.password_reset === "true" && (
+          <div className="rounded-md bg-green-500/10 p-3 text-sm text-green-700">
+            パスワードが変更されました。新しいパスワードでログインしてください。
+          </div>
+        )}
 
         {params.confirmed === "true" && (
           <div className="rounded-md bg-primary/10 p-3 text-sm text-primary">

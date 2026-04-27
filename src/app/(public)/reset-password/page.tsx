@@ -1,8 +1,9 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { useRouter } from "next/navigation";
+import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -13,6 +14,14 @@ export default function ResetPasswordPage() {
   const router = useRouter();
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
+  const [hasSession, setHasSession] = useState<boolean | null>(null);
+
+  useEffect(() => {
+    const supabase = createClient();
+    supabase.auth.getUser().then(({ data }) => {
+      setHasSession(!!data.user);
+    });
+  }, []);
 
   const { register, handleSubmit, formState: { errors } } = useForm<ResetPasswordInput>();
 
@@ -36,7 +45,26 @@ export default function ResetPasswordPage() {
       return;
     }
 
-    router.push("/login");
+    router.push("/login?password_reset=true");
+  }
+
+  if (hasSession === null) {
+    return null;
+  }
+
+  if (hasSession === false) {
+    return (
+      <div className="flex min-h-[60dvh] items-center justify-center px-4">
+        <div className="w-full max-w-sm space-y-4 text-center">
+          <p className="text-sm text-destructive">
+            パスワードリセットリンクが無効または期限切れです。
+          </p>
+          <Link href="/forgot-password" className="text-primary underline-offset-4 hover:underline">
+            再度リセットを申請する
+          </Link>
+        </div>
+      </div>
+    );
   }
 
   return (

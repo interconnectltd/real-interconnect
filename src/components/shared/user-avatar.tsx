@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 
 interface UserAvatarProps {
   name: string | null | undefined;
@@ -18,6 +18,11 @@ const sizeClasses = {
 
 export function UserAvatar({ name, avatarUrl, size = "md", className = "" }: UserAvatarProps) {
   const [imgError, setImgError] = useState(false);
+
+  useEffect(() => {
+    setImgError(false);
+  }, [avatarUrl]);
+
   const initial = (name ?? "?").charAt(0).toUpperCase();
   const sizeClass = sizeClasses[size];
 

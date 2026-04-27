@@ -177,6 +177,9 @@ export default function DashboardPage() {
                   key={score.target_id}
                   className="cursor-pointer transition-shadow hover:shadow-md"
                   onClick={() => openProfileModal(score.target_id)}
+                  role="button"
+                  tabIndex={0}
+                  onKeyDown={(e) => { if (e.key === 'Enter') openProfileModal(score.target_id); }}
                 >
                   <CardContent className="p-4">
                     <p className="font-medium">{p?.name ?? "ユーザー"}</p>
@@ -216,6 +219,9 @@ export default function DashboardPage() {
                 key={m.user_id}
                 className="cursor-pointer border-primary/20 bg-primary/5 transition-shadow hover:shadow-md"
                 onClick={() => openProfileModal(m.user_id)}
+                role="button"
+                tabIndex={0}
+                onKeyDown={(e) => { if (e.key === 'Enter') openProfileModal(m.user_id); }}
               >
                 <CardContent className="p-4">
                   <p className="font-medium">{m.profile?.name ?? "ユーザー"}</p>
@@ -268,6 +274,9 @@ function NewMembersSection({ onViewProfile }: { onViewProfile: (id: string) => v
             key={member.id}
             className="cursor-pointer transition-shadow hover:shadow-md"
             onClick={() => onViewProfile(member.id)}
+            role="button"
+            tabIndex={0}
+            onKeyDown={(e) => { if (e.key === 'Enter') onViewProfile(member.id); }}
           >
             <CardContent className="p-4">
               <p className="font-medium">{member.name}</p>

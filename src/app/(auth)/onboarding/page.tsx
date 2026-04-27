@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import {
   Handshake, MessageCircle, TrendingUp, Users, RefreshCw, GraduationCap,
@@ -15,6 +15,7 @@ import { useSupabase } from "@/providers/supabase-provider";
 import { GOAL_TYPES } from "@/lib/constants";
 import { api } from "@/lib/api-client";
 import { cn } from "@/lib/utils";
+import { toast } from "sonner";
 
 const GOAL_ICONS: Record<string, React.ElementType> = {
   partnership: Handshake,
@@ -118,6 +119,10 @@ export default function OnboardingPage() {
   const [step, setStep] = useState(0);
   const [saving, setSaving] = useState(false);
 
+  useEffect(() => {
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  }, [step]);
+
   // Step 1: 基本情報
   const [profile, setProfile] = useState({
     name: user?.user_metadata?.name ?? "",
@@ -175,9 +180,10 @@ export default function OnboardingPage() {
 
       // 少し待ってからリダイレクト（Supabaseの書き込み反映を待つ）
       await new Promise((r) => setTimeout(r, 500));
-      window.location.href = "/dashboard";
+      window.location.href = "/dashboard?onboarding_complete=true";
     } catch (e) {
       console.error("Onboarding error:", e);
+      toast.error("保存に失敗しました。もう一度お試しください。");
       setSaving(false);
     }
   }
@@ -245,7 +251,7 @@ export default function OnboardingPage() {
           </Card>
 
           <div className="flex justify-end">
-            <Button onClick={() => setStep(1)}>
+            <Button onClick={() => setStep(1)} disabled={saving || !profile.name.trim()}>
               次へ <ChevronRight className="ml-1 h-4 w-4" />
             </Button>
           </div>

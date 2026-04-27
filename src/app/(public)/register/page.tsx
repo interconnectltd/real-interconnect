@@ -6,7 +6,7 @@ export const metadata: Metadata = { title: "新規登録" };
 
 export default function RegisterPage() {
   return (
-    <div className="flex items-center justify-center px-4 py-12">
+    <div className="flex items-start justify-center px-4 py-6 sm:py-12">
       <div className="w-full max-w-md space-y-6">
         <div className="text-center">
           <h1 className="text-2xl font-bold">アカウント作成</h1>
@@ -15,8 +15,8 @@ export default function RegisterPage() {
           </p>
         </div>
 
-        <LinkedInLoginButton />
-        <FacebookLoginButton />
+        <LinkedInLoginButton label="LinkedInで登録" />
+        <FacebookLoginButton label="Facebookで登録" />
 
         <div className="relative py-2">
           <div className="absolute inset-0 flex items-center">

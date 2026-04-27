@@ -13,14 +13,21 @@ import type { ForgotPasswordInput } from "@/validations/auth";
 export default function ForgotPasswordPage() {
   const [sent, setSent] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
   const { register, handleSubmit, formState: { errors } } = useForm<ForgotPasswordInput>();
 
   async function onSubmit(data: ForgotPasswordInput) {
     setLoading(true);
+    setError(null);
     const supabase = createClient();
-    await supabase.auth.resetPasswordForEmail(data.email, {
+    const { error: resetError } = await supabase.auth.resetPasswordForEmail(data.email, {
       redirectTo: `${getSiteUrl()}/auth/callback?next=/reset-password`,
     });
+    if (resetError) {
+      setError(resetError.message);
+      setLoading(false);
+      return;
+    }
     setSent(true);
     setLoading(false);
   }
@@ -50,6 +57,11 @@ export default function ForgotPasswordPage() {
             登録済みのメールアドレスを入力してください
           </p>
         </div>
+        {error && (
+          <div className="rounded-md bg-destructive/10 p-3 text-sm text-destructive">
+            {error}
+          </div>
+        )}
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
           <div className="space-y-2">
             <Label htmlFor="email">メールアドレス</Label>

@@ -204,9 +204,9 @@ export function RegisterForm() {
           onCheckedChange={(checked) => setValue("agreeToTerms", checked === true)}
         />
         <Label htmlFor="terms" className="text-sm leading-relaxed">
-          <Link href="/terms" className="text-primary underline-offset-4 hover:underline">
+          <a href="/terms" target="_blank" rel="noopener noreferrer" className="text-primary underline-offset-4 hover:underline">
             利用規約
-          </Link>
+          </a>
           （AI分析を含むサービス利用規約）に同意します
         </Label>
       </div>

@@ -7,6 +7,7 @@ export default function TokushohoPage() {
     <div className="mx-auto max-w-prose px-4 py-12">
       <h1 className="text-2xl font-bold">特定商取引法に基づく表記</h1>
       <div className="prose prose-neutral mt-8 max-w-none text-sm leading-relaxed text-muted-foreground">
+        <div className="overflow-x-auto">
         <table className="w-full border-collapse text-sm">
           <tbody>
             <tr className="border-b border-border">
@@ -106,6 +107,7 @@ export default function TokushohoPage() {
             </tr>
           </tbody>
         </table>
+        </div>
       </div>
     </div>
   );

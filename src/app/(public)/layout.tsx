@@ -29,10 +29,10 @@ export default function PublicLayout({
       <footer className="border-t border-border/50 py-6">
         <div className="mx-auto max-w-5xl px-4">
           <nav className="flex flex-wrap justify-center gap-x-5 gap-y-2 text-xs text-muted-foreground">
-            <Link href="/" className="hover:text-foreground">トップ</Link>
-            <Link href="/terms" className="hover:text-foreground">利用規約</Link>
-            <Link href="/privacy" className="hover:text-foreground">プライバシー</Link>
-            <Link href="/tokushoho" className="hover:text-foreground">特商法</Link>
+            <Link href="/" className="py-2 hover:text-foreground">トップ</Link>
+            <Link href="/terms" className="py-2 hover:text-foreground">利用規約</Link>
+            <Link href="/privacy" className="py-2 hover:text-foreground">プライバシー</Link>
+            <Link href="/tokushoho" className="py-2 hover:text-foreground">特商法</Link>
           </nav>
           <p className="mt-3 text-center text-xs text-muted-foreground/60">
             &copy; {new Date().getFullYear()} INTER CONNECT
