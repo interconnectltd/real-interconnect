@@ -9,6 +9,7 @@ interface MatchFilter extends Record<string, unknown> {
   sort?: "score" | "recent";
   minScore?: number;
   page?: number;
+  enabled?: boolean;
 }
 
 export function useMatchingScores(filter: MatchFilter = {}) {
@@ -22,6 +23,7 @@ export function useMatchingScores(filter: MatchFilter = {}) {
     queryKey: queryKeys.matching.scores(filter),
     queryFn: ({ signal }) =>
       api.get<MatchScore[]>(`/matching/scores${qs ? `?${qs}` : ""}`, { signal }),
+    enabled: filter.enabled,
   });
 }
 

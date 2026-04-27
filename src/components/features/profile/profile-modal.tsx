@@ -45,9 +45,9 @@ function formatDateWithWeekday(dateStr: string): string {
 export function ProfileModal() {
   const { profileModalUserId, closeProfileModal } = useUIStore();
   const { data: profile, isLoading } = useProfile(profileModalUserId ?? undefined);
-  const { data: allScores } = useMatchingScores({ minScore: 0 });
-  const { data: bookmarksData } = useBookmarks();
-  const { data: connectionsData } = useConnections();
+  const { data: allScores } = useMatchingScores({ minScore: 0, enabled: !!profileModalUserId });
+  const { data: bookmarksData } = useBookmarks({ enabled: !!profileModalUserId });
+  const { data: connectionsData } = useConnections(undefined, { enabled: !!profileModalUserId });
   const requestConnection = useRequestConnection();
   const toggleBookmark = useToggleBookmark();
   const requestMeeting = useRequestMeeting();
@@ -82,6 +82,17 @@ export function ProfileModal() {
       setSuggestionsLoading(false);
     }
   }, []);
+
+  // Reset form state when modal user changes
+  useEffect(() => {
+    setShowMeetingForm(false);
+    setMeetingMessage("");
+    setProposedTimes("");
+    setSuggestions([]);
+    setSelectedSlotIndex(null);
+    setSuggestionsLoading(false);
+    setUseCustomTime(false);
+  }, [profileModalUserId]);
 
   // Fetch suggestions when meeting form opens
   useEffect(() => {
@@ -294,7 +305,7 @@ export function ProfileModal() {
                     <Button
                       size="sm"
                       className="flex-1"
-                      disabled={requestMeeting.isPending}
+                      disabled={requestMeeting.isPending || (selectedSlotIndex == null && (!useCustomTime || !proposedTimes.trim()))}
                       onClick={() => {
                         if (profileModalUserId) {
                           // Build proposed_times from selected slot or custom input

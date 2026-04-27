@@ -23,6 +23,7 @@ export type NotificationType =
   | "contact_exchange"
   | "intervention_alert"
   | "followup_reminder"
+  | "chat_message"
   | "system";
 
 export type ConnectionStatus =
@@ -60,6 +61,7 @@ export interface Database {
           avatar_url: string | null;
           cover_url: string | null;
           contact_info: string | null;
+          timezone: string;
           is_admin: boolean;
           is_active: boolean;
           created_at: string;
@@ -76,6 +78,7 @@ export interface Database {
           avatar_url?: string | null;
           cover_url?: string | null;
           contact_info?: string | null;
+          timezone?: string;
           is_admin?: boolean;
           is_active?: boolean;
         };
@@ -646,6 +649,210 @@ export interface Database {
         };
         Insert: { name: string; slug: string; owner_id: string; };
         Update: { member_count?: number; subscription_status?: string; settings?: Json; };
+        Relationships: [];
+      };
+      calendar_connections: {
+        Row: {
+          id: string;
+          user_id: string;
+          provider: "google" | "microsoft" | "ics_feed";
+          provider_email: string;
+          access_token_enc: string;
+          // NOTE: SQL schema has NOT NULL but ICS feed connections need null.
+          // TODO: Update SQL migration to allow NULL for refresh_token_enc.
+          refresh_token_enc: string | null;
+          token_expires_at: string | null;
+          ics_url: string | null;
+          ics_etag: string | null;
+          sync_cursor: string | null;
+          last_synced_at: string | null;
+          is_active: boolean;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          user_id: string;
+          provider: "google" | "microsoft" | "ics_feed";
+          provider_email: string;
+          access_token_enc: string;
+          refresh_token_enc?: string | null;
+          token_expires_at?: string | null;
+          ics_url?: string | null;
+          ics_etag?: string | null;
+          sync_cursor?: string | null;
+          last_synced_at?: string | null;
+          is_active?: boolean;
+        };
+        Update: {
+          provider?: "google" | "microsoft" | "ics_feed";
+          provider_email?: string;
+          access_token_enc?: string;
+          refresh_token_enc?: string | null;
+          token_expires_at?: string | null;
+          ics_url?: string | null;
+          ics_etag?: string | null;
+          sync_cursor?: string | null;
+          last_synced_at?: string | null;
+          is_active?: boolean;
+        };
+        Relationships: [];
+      };
+      calendar_events: {
+        Row: {
+          id: string;
+          connection_id: string;
+          user_id: string;
+          external_event_id: string;
+          title: string | null;
+          start_at: string;
+          end_at: string;
+          video_url: string | null;
+          video_platform: string | null;
+          attendee_emails: string[];
+          is_interconnect: boolean;
+          recording_enabled: boolean;
+          linked_meeting_id: string | null;
+          etag: string | null;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          connection_id: string;
+          user_id: string;
+          external_event_id: string;
+          title?: string | null;
+          start_at: string;
+          end_at: string;
+          video_url?: string | null;
+          video_platform?: string | null;
+          attendee_emails?: string[];
+          is_interconnect?: boolean;
+          recording_enabled?: boolean;
+          linked_meeting_id?: string | null;
+          etag?: string | null;
+        };
+        Update: Partial<
+          Database["public"]["Tables"]["calendar_events"]["Insert"]
+        >;
+        Relationships: [];
+      };
+      chat_rooms: {
+        Row: {
+          id: string;
+          connection_id: string;
+          user_a_id: string;
+          user_b_id: string;
+          last_message_at: string | null;
+          last_message_preview: string | null;
+          created_at: string;
+        };
+        Insert: {
+          connection_id: string;
+          user_a_id: string;
+          user_b_id: string;
+          last_message_at?: string | null;
+          last_message_preview?: string | null;
+        };
+        Update: {
+          last_message_at?: string | null;
+          last_message_preview?: string | null;
+        };
+        Relationships: [];
+      };
+      chat_messages: {
+        Row: {
+          id: string;
+          room_id: string;
+          sender_id: string;
+          content: string;
+          content_type: "text" | "image" | "file" | "scheduling_card" | "meeting_suggestion" | "meeting_confirmed";
+          is_read: boolean;
+          created_at: string;
+        };
+        Insert: {
+          room_id: string;
+          sender_id: string;
+          content: string;
+          content_type?: "text" | "image" | "file" | "scheduling_card" | "meeting_suggestion" | "meeting_confirmed";
+          is_read?: boolean;
+        };
+        Update: {
+          is_read?: boolean;
+        };
+        Relationships: [];
+      };
+      chat_analysis: {
+        Row: {
+          id: string;
+          room_id: string;
+          analyzed_up_to_id: string;
+          extracted_topics: Json;
+          extracted_needs: Json;
+          extracted_offers: Json;
+          engagement_signals: Json;
+          analyzed_at: string;
+        };
+        Insert: {
+          room_id: string;
+          analyzed_up_to_id: string;
+          extracted_topics?: Json;
+          extracted_needs?: Json;
+          extracted_offers?: Json;
+          engagement_signals?: Json;
+        };
+        Update: Partial<
+          Database["public"]["Tables"]["chat_analysis"]["Insert"]
+        >;
+        Relationships: [];
+      };
+      availability_rules: {
+        Row: {
+          id: string;
+          user_id: string;
+          day_of_week: number;
+          start_time: string;
+          end_time: string;
+          is_active: boolean;
+          created_at: string;
+        };
+        Insert: {
+          user_id: string;
+          day_of_week: number;
+          start_time: string;
+          end_time: string;
+          is_active?: boolean;
+        };
+        Update: {
+          day_of_week?: number;
+          start_time?: string;
+          end_time?: string;
+          is_active?: boolean;
+        };
+        Relationships: [];
+      };
+      availability_overrides: {
+        Row: {
+          id: string;
+          user_id: string;
+          target_date: string;
+          override_type: string;
+          start_time: string | null;
+          end_time: string | null;
+          created_at: string;
+        };
+        Insert: {
+          user_id: string;
+          target_date: string;
+          override_type: string;
+          start_time?: string | null;
+          end_time?: string | null;
+        };
+        Update: {
+          target_date?: string;
+          override_type?: string;
+          start_time?: string | null;
+          end_time?: string | null;
+        };
         Relationships: [];
       };
     };

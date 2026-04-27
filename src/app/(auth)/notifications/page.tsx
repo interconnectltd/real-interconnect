@@ -104,8 +104,8 @@ export default function NotificationsPage() {
                 <p className="mt-1 text-xs text-muted-foreground/60">
                   {new Date(n.created_at).toLocaleString("ja-JP")}
                 </p>
-                {/* Action buttons — only show on unread notifications */}
-                {!n.is_read && n.actions && Array.isArray(n.actions) && n.actions.length > 0 && (
+                {/* Action buttons — show regardless of read status */}
+                {n.actions && Array.isArray(n.actions) && n.actions.length > 0 && (
                   <div className="mt-2 flex gap-2">
                     {(n.actions as NotificationAction[])
                       .filter((a) => NOTIFICATION_ACTION_WHITELIST.has(a.type))

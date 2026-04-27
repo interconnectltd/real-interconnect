@@ -1,7 +1,7 @@
 "use client";
 
 import { Suspense, useState, useCallback, useEffect } from "react";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useSearchParams } from "next/navigation";
 import { ArrowLeft, MessageCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -18,6 +18,7 @@ import { ChatConsentBanner } from "@/components/features/chat/chat-consent-banne
 function ChatPageInner() {
   const { user } = useSupabase();
   const searchParams = useSearchParams();
+  const queryClient = useQueryClient();
   const [selectedRoom, setSelectedRoom] = useState<ChatRoom | null>(null);
 
   const { data: rooms, isLoading } = useQuery({
@@ -41,25 +42,7 @@ function ChatPageInner() {
 
   const handleBack = useCallback(() => {
     setSelectedRoom(null);
-    window.history.pushState(null, "", "/chat");
-  }, []);
-
-  // Handle mobile keyboard - keep input visible
-  useEffect(() => {
-    const vv = window.visualViewport;
-    if (!vv) return;
-
-    const handleResize = () => {
-      // When keyboard opens, visualViewport.height shrinks
-      const container = document.getElementById('chat-container');
-      if (container) {
-        const offset = window.innerHeight - vv.height;
-        container.style.height = `calc(100dvh - 220px - ${offset}px)`;
-      }
-    };
-
-    vv.addEventListener('resize', handleResize);
-    return () => vv.removeEventListener('resize', handleResize);
+    window.history.replaceState(null, "", "/chat");
   }, []);
 
   // Handle browser back/forward button
@@ -190,7 +173,11 @@ function ChatPageInner() {
                 />
 
                 {/* Input */}
-                <ChatInput roomId={selectedRoom.id} otherUserId={selectedRoom.other_user.id} />
+                <ChatInput
+                  roomId={selectedRoom.id}
+                  otherUserId={selectedRoom.other_user.id}
+                  onMessageSent={() => queryClient.invalidateQueries({ queryKey: ["chat-rooms"] })}
+                />
               </>
             ) : (
               <div className="flex flex-1 flex-col items-center justify-center p-8 text-center">
