@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Heart, Users, Bell, UserCheck, Zap } from "lucide-react";
+import { Heart, Users, Bell, UserCheck, Zap, RefreshCw } from "lucide-react";
 import Link from "next/link";
 import { useQueryClient } from "@tanstack/react-query";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -91,11 +91,21 @@ export default function DashboardPage() {
 
   return (
     <div className="space-y-8">
-      <div>
-        <h1 className="text-2xl font-bold">ダッシュボード</h1>
-        <p className="mt-1 text-sm text-muted-foreground">
-          あなたのネットワーク状況の概要
-        </p>
+      <div className="flex items-center justify-between">
+        <div>
+          <h1 className="text-2xl font-bold">ダッシュボード</h1>
+          <p className="mt-1 text-sm text-muted-foreground">
+            あなたのネットワーク状況の概要
+          </p>
+        </div>
+        <Button
+          variant="ghost"
+          size="icon-sm"
+          onClick={() => queryClient.invalidateQueries()}
+          title="更新"
+        >
+          <RefreshCw className="h-4 w-4" />
+        </Button>
       </div>
 
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">

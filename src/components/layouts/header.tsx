@@ -38,7 +38,7 @@ export function Header() {
         {/* Mobile menu — render prop merges SheetTrigger onto Button */}
         <Sheet open={sidebarOpen} onOpenChange={setSidebarOpen}>
           <SheetTrigger
-            render={<Button variant="ghost" size="icon" className="lg:hidden" />}
+            render={<Button variant="ghost" size="icon-lg" className="lg:hidden" />}
           >
             <Menu className="h-5 w-5" />
           </SheetTrigger>
@@ -65,7 +65,7 @@ export function Header() {
         {/* Notifications */}
         <Button
           variant="ghost"
-          size="icon"
+          size="icon-lg"
           render={<Link href="/notifications" />}
           className="relative"
         >
@@ -80,7 +80,7 @@ export function Header() {
         {/* User menu — render prop merges DropdownMenuTrigger onto Button */}
         <DropdownMenu>
           <DropdownMenuTrigger
-            render={<Button variant="ghost" size="icon" className="rounded-full" />}
+            render={<Button variant="ghost" size="icon-lg" className="rounded-full" />}
           >
             {myProfile?.avatar_url ? (
               <UserAvatar

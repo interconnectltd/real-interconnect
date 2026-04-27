@@ -105,6 +105,7 @@ export function RegisterForm() {
         <Input
           id="invitation-code"
           placeholder="招待コードを入力"
+          enterKeyHint="next"
           {...register("invitationCode")}
           className="uppercase tracking-wider"
         />
@@ -119,6 +120,7 @@ export function RegisterForm() {
           id="name"
           autoComplete="name"
           placeholder="山田 太郎"
+          enterKeyHint="next"
           {...register("name")}
         />
         {errors.name && (
@@ -133,6 +135,7 @@ export function RegisterForm() {
           type="email"
           autoComplete="email"
           placeholder="you@example.com"
+          enterKeyHint="next"
           {...register("email")}
         />
         {errors.email && (
@@ -147,6 +150,7 @@ export function RegisterForm() {
           type="password"
           autoComplete="new-password"
           placeholder="8文字以上"
+          enterKeyHint="next"
           {...register("password")}
         />
         {errors.password && (
@@ -157,11 +161,11 @@ export function RegisterForm() {
       <div className="grid gap-4 sm:grid-cols-2">
         <div className="space-y-2">
           <Label htmlFor="company">会社名</Label>
-          <Input id="company" placeholder="株式会社○○" {...register("company")} />
+          <Input id="company" placeholder="株式会社○○" enterKeyHint="next" {...register("company")} />
         </div>
         <div className="space-y-2">
           <Label htmlFor="position">役職</Label>
-          <Input id="position" placeholder="エンジニア" {...register("position")} />
+          <Input id="position" placeholder="エンジニア" enterKeyHint="go" {...register("position")} />
         </div>
       </div>
 

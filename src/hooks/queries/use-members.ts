@@ -24,6 +24,7 @@ export function useMembers(
 
   return useQuery({
     queryKey: queryKeys.members.list(search, filters),
-    queryFn: () => api.get<MembersResponse>(`/members${qs ? `?${qs}` : ""}`),
+    queryFn: ({ signal }) =>
+      api.get<MembersResponse>(`/members${qs ? `?${qs}` : ""}`, { signal }),
   });
 }

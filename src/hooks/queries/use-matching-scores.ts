@@ -20,13 +20,14 @@ export function useMatchingScores(filter: MatchFilter = {}) {
 
   return useQuery({
     queryKey: queryKeys.matching.scores(filter),
-    queryFn: () => api.get<MatchScore[]>(`/matching/scores${qs ? `?${qs}` : ""}`),
+    queryFn: ({ signal }) =>
+      api.get<MatchScore[]>(`/matching/scores${qs ? `?${qs}` : ""}`, { signal }),
   });
 }
 
 export function useMutualMatches() {
   return useQuery({
     queryKey: queryKeys.matching.mutual(),
-    queryFn: () => api.get<MutualMatch[]>("/matching/mutual"),
+    queryFn: ({ signal }) => api.get<MutualMatch[]>("/matching/mutual", { signal }),
   });
 }

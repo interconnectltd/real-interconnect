@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { createClient } from "@/lib/supabase/client";
+import { getSiteUrl } from "@/lib/site-url";
 import type { ForgotPasswordInput } from "@/validations/auth";
 
 export default function ForgotPasswordPage() {
@@ -18,7 +19,7 @@ export default function ForgotPasswordPage() {
     setLoading(true);
     const supabase = createClient();
     await supabase.auth.resetPasswordForEmail(data.email, {
-      redirectTo: `${window.location.origin}/auth/callback?next=/reset-password`,
+      redirectTo: `${getSiteUrl()}/auth/callback?next=/reset-password`,
     });
     setSent(true);
     setLoading(false);

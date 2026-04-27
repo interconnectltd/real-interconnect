@@ -115,7 +115,7 @@ export default function ProfilePage() {
                   size="lg"
                 />
               )}
-              <div className="absolute inset-0 flex items-center justify-center rounded-full bg-black/40 opacity-0 transition-opacity group-hover:opacity-100">
+              <div className="absolute inset-0 flex items-center justify-center rounded-full bg-black/40 opacity-100 md:opacity-0 transition-opacity md:group-hover:opacity-100">
                 {uploadAvatar.isPending ? (
                   <Loader2 className="h-5 w-5 animate-spin text-white" />
                 ) : (

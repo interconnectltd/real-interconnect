@@ -56,6 +56,7 @@ export function LoginForm() {
           type="email"
           autoComplete="email"
           placeholder="you@example.com"
+          enterKeyHint="next"
           {...register("email", { required: "メールアドレスを入力してください" })}
         />
         {errors.email && (
@@ -69,6 +70,7 @@ export function LoginForm() {
           id="password"
           type="password"
           autoComplete="current-password"
+          enterKeyHint="go"
           {...register("password", { required: "パスワードを入力してください" })}
         />
         {errors.password && (
