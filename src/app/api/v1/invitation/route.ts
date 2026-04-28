@@ -1,5 +1,5 @@
 import { json, jsonError, handleApiError } from "@/lib/api-helpers";
-import { createClient } from "@/lib/supabase/server";
+import { createClient, createServiceClient } from "@/lib/supabase/server";
 import { checkAuthRateLimit } from "@/lib/rate-limit";
 import { headers } from "next/headers";
 
@@ -23,7 +23,7 @@ export async function POST(request: Request) {
     }
 
     const code = body.code.trim().toUpperCase();
-    const supabase = await createClient();
+    const supabase = await createServiceClient();
 
     const { data: invitation } = await supabase
       .from("invitation_codes")
@@ -68,7 +68,7 @@ export async function PATCH(request: Request) {
       return jsonError(400, "BAD_REQUEST", "invitation_id が必要です");
     }
 
-    const supabase = await createClient();
+    const supabase = await createServiceClient();
 
     // Read current use_count then increment
     const { data: invitation, error: fetchError } = await supabase
