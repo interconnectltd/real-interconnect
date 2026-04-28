@@ -6,10 +6,8 @@ import { queryKeys } from "./keys";
 
 export function useAnalysisCount() {
   return useQuery({
-    queryKey: queryKeys.aiProfile.analysisCount(),
-    queryFn: async () => {
-      const profile = await api.get<{ analysis_count: number }>("/profiles/me");
-      return profile.analysis_count ?? 0;
-    },
+    queryKey: queryKeys.profile.me(),
+    queryFn: () => api.get<{ analysis_count: number }>("/profiles/me"),
+    select: (data) => data.analysis_count ?? 0,
   });
 }

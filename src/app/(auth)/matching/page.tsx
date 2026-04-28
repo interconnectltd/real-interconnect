@@ -19,7 +19,7 @@ import type { MatchScore, MutualMatch, Profile, Connection } from "@/types";
 
 export default function MatchingPage() {
   const { matchingSortBy, setMatchingSortBy } = useFilterStore();
-  const { data: scores, isLoading } = useMatchingScores({ sort: matchingSortBy });
+  const { data: scores, isLoading, isError } = useMatchingScores({ sort: matchingSortBy });
   const { data: mutualMatches } = useMutualMatches();
   const { openProfileModal } = useUIStore();
   const requestConnection = useRequestConnection();
@@ -44,6 +44,17 @@ export default function MatchingPage() {
       ?.filter((c) => c.status === "pending")
       .flatMap((c) => [c.user_id, c.connected_user_id]) ?? [],
   );
+
+  if (isError) {
+    return (
+      <div className="rounded-lg border border-dashed p-6 sm:p-12 text-center">
+        <p className="text-sm text-muted-foreground">データの取得に失敗しました</p>
+        <Button variant="outline" size="sm" className="mt-3" onClick={() => window.location.reload()}>
+          再読み込み
+        </Button>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-8">

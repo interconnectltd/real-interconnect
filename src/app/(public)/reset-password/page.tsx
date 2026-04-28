@@ -88,6 +88,7 @@ export default function ResetPasswordPage() {
               id="password"
               type="password"
               autoComplete="new-password"
+              enterKeyHint="next"
               placeholder="8文字以上"
               {...register("password", {
                 required: "パスワードを入力してください",
@@ -102,6 +103,7 @@ export default function ResetPasswordPage() {
               id="confirm"
               type="password"
               autoComplete="new-password"
+              enterKeyHint="go"
               {...register("confirmPassword", { required: "パスワードを再入力してください" })}
             />
             {errors.confirmPassword && <p className="text-sm text-destructive">{errors.confirmPassword.message}</p>}

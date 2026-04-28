@@ -15,7 +15,7 @@ export function QueryProvider({ children }: { children: ReactNode }) {
             retry: 2,
             retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 10000),
             refetchOnWindowFocus: true,
-            refetchOnMount: "always",
+            refetchOnMount: true,
           },
         },
       }),

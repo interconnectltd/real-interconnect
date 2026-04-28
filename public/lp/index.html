@@ -1611,6 +1611,7 @@ setTimeout(function() {
 				</div>
 				<div class="movie_block fade fadeInUp is_inview">
 					<div id="dim_movie" class="p_dim_movie" style="transform: perspective(1000px) scale3d(1, 1, 1) rotateY(-8deg) rotateX(4deg)">
+						<!-- TODO: Replace with own hosted video -->
 						<a href="https://jp.aironworks.com/wp-content/themes/aironworks/video/service-animation.mp4" class="fullvideo_btn" data-lity=""><img data-src="img/fullvideo-btn.svg" class=" lazyloaded" src="img/fullvideo-btn.svg"></a>
 						<video class="video" autoplay="" loop="" muted="" playsinline="" id="service_video" preload="none">
 							<source type="video/mp4" src="https://jp.aironworks.com/wp-content/themes/aironworks/video/service-animation.mp4">
@@ -1875,7 +1876,7 @@ setTimeout(function() {
 					<button class="swiper-button-prev" tabindex="0" aria-label="Previous slide" aria-controls="swiper-wrapper-377849df549fb8e9"><svg class="swiper-navigation-icon" width="11" height="20" viewBox="0 0 11 20" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M0.38296 20.0762C0.111788 19.805 0.111788 19.3654 0.38296 19.0942L9.19758 10.2796L0.38296 1.46497C0.111788 1.19379 0.111788 0.754138 0.38296 0.482966C0.654131 0.211794 1.09379 0.211794 1.36496 0.482966L10.4341 9.55214C10.8359 9.9539 10.8359 10.6053 10.4341 11.007L1.36496 20.0762C1.09379 20.3474 0.654131 20.3474 0.38296 20.0762Z" fill="currentColor"></path></svg></button>
 				</div>
 				<div class="btn_wrap fade fadeInUp is_inview"><a href="#" title="Event" class="p_btn_circle"><span class="p_arrow_circle"></span><span class="eng">All Events</span></a></div>
-				<img data-src="img/event-letter.svg" alt="Event" class="p_bg_letter fade fadeInUp loading= is_inview lazyloaded" lazy""="" src="img/event-letter.svg">
+				<img data-src="img/event-letter.svg" alt="Event" class="p_bg_letter fade fadeInUp is_inview lazyloaded" loading="lazy" src="img/event-letter.svg">
 			</div>
 			<div class="mySwiper event_block fade fadeInUp swiper-initialized swiper-horizontal is_inview">
 				<div class="swiper-wrapper" id="swiper-wrapper-377849df549fb8e9" aria-live="polite">
@@ -2399,6 +2400,10 @@ function onWindowResize() {
 function animate() {
 
 	requestAnimationFrame(animate);
+
+	if (document.hidden) {
+		return;
+	}
 
 	render();
 

@@ -213,6 +213,8 @@ export default function OnboardingPage() {
                   <Label htmlFor="ob-name">お名前</Label>
                   <Input
                     id="ob-name"
+                    autoComplete="name"
+                    enterKeyHint="next"
                     value={profile.name}
                     onChange={(e) => setProfile({ ...profile, name: e.target.value })}
                   />
@@ -222,6 +224,8 @@ export default function OnboardingPage() {
                     <Label htmlFor="ob-company">会社名</Label>
                     <Input
                       id="ob-company"
+                      autoComplete="organization"
+                      enterKeyHint="next"
                       value={profile.company}
                       onChange={(e) => setProfile({ ...profile, company: e.target.value })}
                     />
@@ -230,6 +234,8 @@ export default function OnboardingPage() {
                     <Label htmlFor="ob-position">役職</Label>
                     <Input
                       id="ob-position"
+                      autoComplete="organization-title"
+                      enterKeyHint="next"
                       value={profile.position}
                       onChange={(e) => setProfile({ ...profile, position: e.target.value })}
                     />
@@ -239,6 +245,8 @@ export default function OnboardingPage() {
                   <Label htmlFor="ob-contact">連絡先（マッチング後に相手に表示されます）</Label>
                   <Input
                     id="ob-contact"
+                    autoComplete="off"
+                    enterKeyHint="done"
                     placeholder="例: LINE ID、電話番号、メールアドレスなど"
                     value={profile.contact_info}
                     onChange={(e) => setProfile({ ...profile, contact_info: e.target.value })}

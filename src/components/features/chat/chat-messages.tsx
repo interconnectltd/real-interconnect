@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useCallback, useState } from "react";
+import { useEffect, useRef, useCallback, useState, useMemo } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { api } from "@/lib/api-client";
 import { useSupabase } from "@/providers/supabase-provider";
@@ -157,7 +157,10 @@ export function ChatMessages({
     );
   }
 
-  const messageList = [...(messages ?? [])].reverse();
+  const messageList = useMemo(
+    () => [...(messages ?? [])].reverse(),
+    [messages],
+  );
 
   // Group messages by date for separators
   let lastDateKey = "";

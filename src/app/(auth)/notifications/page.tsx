@@ -19,7 +19,7 @@ import type { Notification, NotificationAction } from "@/types";
 
 export default function NotificationsPage() {
   const router = useRouter();
-  const { data: notifications, isLoading } = useNotifications();
+  const { data: notifications, isLoading, isError } = useNotifications();
   const markRead = useMarkNotificationRead();
   const markAllRead = useMarkAllNotificationsRead();
   const updateConnection = useUpdateConnection();
@@ -62,7 +62,14 @@ export default function NotificationsPage() {
         )}
       </div>
 
-      {isLoading ? (
+      {isError ? (
+        <div className="rounded-lg border border-dashed p-6 sm:p-12 text-center">
+          <p className="text-sm text-muted-foreground">データの取得に失敗しました</p>
+          <Button variant="outline" size="sm" className="mt-3" onClick={() => window.location.reload()}>
+            再読み込み
+          </Button>
+        </div>
+      ) : isLoading ? (
         <div className="space-y-2">
           {[1, 2, 3, 4].map((i) => (
             <div key={i} className="h-16 animate-pulse rounded-lg bg-muted" />
@@ -81,12 +88,12 @@ export default function NotificationsPage() {
               )}
               onClick={() => {
                 if (!n.is_read) markRead.mutate([n.id]);
-                if (n.link) router.push(n.link);
+                if (n.link && n.link.startsWith("/")) router.push(n.link);
               }}
               onKeyDown={(e) => {
                 if (e.key === "Enter") {
                   if (!n.is_read) markRead.mutate([n.id]);
-                  if (n.link) router.push(n.link);
+                  if (n.link && n.link.startsWith("/")) router.push(n.link);
                 }
               }}
             >

@@ -69,6 +69,7 @@ export default function ForgotPasswordPage() {
               id="email"
               type="email"
               autoComplete="email"
+              enterKeyHint="go"
               {...register("email", { required: "メールアドレスを入力してください" })}
             />
             {errors.email && <p className="text-sm text-destructive">{errors.email.message}</p>}

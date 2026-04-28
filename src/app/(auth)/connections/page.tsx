@@ -62,7 +62,7 @@ export default function ConnectionsPage() {
     : connectionTab === "sent" ? "pending"
     : undefined;
 
-  const { data: connections, isLoading } = useConnections(statusFilter);
+  const { data: connections, isLoading, isError } = useConnections(statusFilter);
   const updateConnection = useUpdateConnection();
   const { data: feedbackMap } = useFeedbackStatus();
 
@@ -102,7 +102,14 @@ export default function ConnectionsPage() {
         ))}
       </div>
 
-      {isLoading ? (
+      {isError ? (
+        <div className="rounded-lg border border-dashed p-6 sm:p-12 text-center">
+          <p className="text-sm text-muted-foreground">データの取得に失敗しました</p>
+          <Button variant="outline" size="sm" className="mt-3" onClick={() => window.location.reload()}>
+            再読み込み
+          </Button>
+        </div>
+      ) : isLoading ? (
         <div className="space-y-3">
           {[1, 2, 3].map((i) => (
             <div key={i} className="h-20 animate-pulse rounded-lg bg-muted" />
