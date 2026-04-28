@@ -43,10 +43,11 @@ export async function updateSession(request: NextRequest) {
     "/privacy",
     "/tokushoho",
     "/api/v1/health",
+    "/api/v1/invitation",
   ];
 
   const isPublicPath = publicPaths.some(
-    (p) => pathname === p || pathname.startsWith("/api/v1/health") || pathname.startsWith("/lp"),
+    (p) => pathname === p || pathname.startsWith("/api/v1/health") || pathname.startsWith("/api/v1/invitation") || pathname.startsWith("/lp") || pathname.startsWith("/api/v1/webhooks"),
   );
 
   // Redirect unauthenticated users to login
