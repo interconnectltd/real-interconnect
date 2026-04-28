@@ -53,18 +53,20 @@ body[unresolved] {opacity: 0; display: block; overflow: hidden; position: relati
 		<title>INTER CONNECT | ビジネスの出会いを、成果に変える - ビジネスコミュニティプラットフォーム</title>
 	<meta name="description" content="ビジネスの成功の85%は人のつながりが決める。AIが200以上のパラメータで最適なパートナーを厳選提案し、イベント・面談・メッセージで出会いを成果に変えるビジネスコミュニティプラットフォーム INTER CONNECT">
 	<meta name="robots" content="max-image-preview:large">
-	<link rel="canonical" href="https://interconnect-system.netlify.app/">
+	<link rel="canonical" href="https://inter-connect.app/">
 		<meta property="og:locale" content="ja_JP">
 		<meta property="og:site_name" content="INTER CONNECT | ビジネスコミュニティプラットフォーム">
 		<meta property="og:type" content="website">
 		<meta property="og:title" content="INTER CONNECT | ビジネスの出会いを、成果に変える">
 		<meta property="og:description" content="業界・職種を超えた質の高いビジネスマッチング。AIが最適なパートナーを提案し、イベント・面談・メッセージで深い関係構築を実現するビジネスコミュニティプラットフォーム">
-		<meta property="og:url" content="https://interconnect-system.netlify.app/">
+		<meta property="og:url" content="https://inter-connect.app/">
+		<meta property="og:image" content="https://inter-connect.app/lp/img/favicon-interconnect.png">
+		<meta name="twitter:image" content="https://inter-connect.app/lp/img/favicon-interconnect.png">
 		<meta name="twitter:card" content="summary_large_image">
 		<meta name="twitter:title" content="INTER CONNECT | ビジネスの出会いを、成果に変える">
 		<meta name="twitter:description" content="業界・職種を超えた質の高いビジネスマッチング。AIが最適なパートナーを提案し、イベント・面談・メッセージで深い関係構築を実現するビジネスコミュニティプラットフォーム">
 		<script type="application/ld+json">
-			{"@context":"https://schema.org","@graph":[{"@type":"WebSite","@id":"https://interconnect-system.netlify.app/#website","url":"https://interconnect-system.netlify.app/","name":"INTER CONNECT | ビジネスコミュニティプラットフォーム","description":"業界・職種を超えた質の高いビジネスマッチング。AIが最適なパートナーを提案し、イベント・面談・メッセージで深い関係構築を実現","inLanguage":"ja","publisher":{"@id":"https://interconnect-system.netlify.app/#organization"}},{"@type":"Organization","@id":"https://interconnect-system.netlify.app/#organization","name":"INTER CONNECT","description":"ビジネスの出会いを成果に変えるコミュニティプラットフォーム","url":"https://interconnect-system.netlify.app/"},{"@type":"WebPage","@id":"https://interconnect-system.netlify.app/#webpage","url":"https://interconnect-system.netlify.app/","name":"INTER CONNECT | ビジネスの出会いを、成果に変える","isPartOf":{"@id":"https://interconnect-system.netlify.app/#website"},"about":{"@id":"https://interconnect-system.netlify.app/#organization"},"inLanguage":"ja"}]}
+			{"@context":"https://schema.org","@graph":[{"@type":"WebSite","@id":"https://inter-connect.app/#website","url":"https://inter-connect.app/","name":"INTER CONNECT | ビジネスコミュニティプラットフォーム","description":"業界・職種を超えた質の高いビジネスマッチング。AIが最適なパートナーを提案し、イベント・面談・メッセージで深い関係構築を実現","inLanguage":"ja","publisher":{"@id":"https://inter-connect.app/#organization"}},{"@type":"Organization","@id":"https://inter-connect.app/#organization","name":"INTER CONNECT","description":"ビジネスの出会いを成果に変えるコミュニティプラットフォーム","url":"https://inter-connect.app/"},{"@type":"WebPage","@id":"https://inter-connect.app/#webpage","url":"https://inter-connect.app/","name":"INTER CONNECT | ビジネスの出会いを、成果に変える","isPartOf":{"@id":"https://inter-connect.app/#website"},"about":{"@id":"https://inter-connect.app/#organization"},"inLanguage":"ja"}]}
 		</script>
 
 	<link rel="stylesheet" id="wp-block-library-css" href="css/style.min.css" type="text/css" media="all">
@@ -1298,7 +1300,7 @@ setTimeout(function() {
       }, 100);
     }, 600);
   }
-}, 3000);
+}, 1500);
 </script>
 
 												<div class="loading" id="js-loading" style="display: none;">
@@ -2429,7 +2431,8 @@ var windowHeight = $(window).height();
 var headerHeight = $('header').height();
 var windowSwitch = 960;
 
-var serviceOffsetTop = $('#service').offset().top - $('#service').height();
+var serviceEl = $('#service');
+var serviceOffsetTop = serviceEl.length ? serviceEl.offset().top - serviceEl.height() : 99999;
 
 /*if (windowWidth <= windowSwitch) {
 	var featureOffsetTop = $('#feature').offset().top + $('#feature').height() + windowHeight;

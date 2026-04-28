@@ -6,6 +6,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { api } from "@/lib/api-client";
+import { toast } from "sonner";
 
 interface MeetingSuggestionCardProps {
   suggestion: {
@@ -84,6 +85,7 @@ export function MeetingSuggestionCard({
       });
       setState("confirmed");
     } catch {
+      toast.error("操作に失敗しました");
       setState("idle");
     }
   };
@@ -97,6 +99,7 @@ export function MeetingSuggestionCard({
       });
       setState("dismissed");
     } catch {
+      toast.error("操作に失敗しました");
       setState("idle");
     }
   };

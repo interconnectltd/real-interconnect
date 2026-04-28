@@ -38,7 +38,7 @@ export default function RootLayout({
   return (
     <html lang="ja" className={`${inter.variable} ${notoSansJP.variable}`} suppressHydrationWarning>
       <head>
-        <script dangerouslySetInnerHTML={{ __html: `try{if(window.matchMedia('(prefers-color-scheme:dark)').matches)document.documentElement.classList.add('dark')}catch(e){}` }} />
+        <script dangerouslySetInnerHTML={{ __html: `try{var m=window.matchMedia('(prefers-color-scheme:dark)');if(m.matches)document.documentElement.classList.add('dark');m.addEventListener('change',function(e){document.documentElement.classList.toggle('dark',e.matches)})}catch(e){}` }} />
       </head>
       <body className="min-h-dvh bg-background text-foreground antialiased">
         {children}

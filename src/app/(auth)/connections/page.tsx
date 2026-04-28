@@ -13,6 +13,7 @@ import { FeedbackModal } from "@/components/shared/feedback-modal";
 import { useFilterStore } from "@/stores/filter-store";
 import { useSupabase } from "@/providers/supabase-provider";
 import { api } from "@/lib/api-client";
+import { toast } from "sonner";
 import type { Connection } from "@/types";
 
 const STATUS_LABELS: Record<string, string> = {
@@ -49,7 +50,7 @@ export default function ConnectionsPage() {
         const existing = rooms.find((r) => r.connection_id === connectionId);
         if (existing) router.push(`/chat?room=${existing.id}`);
       } catch {
-        // silently fail
+        toast.error("チャットの開始に失敗しました");
       }
     } finally {
       setChatLoading(null);
@@ -114,7 +115,7 @@ export default function ConnectionsPage() {
             const isReceived = conn.connected_user_id === user?.id;
             return (
               <Card key={conn.id}>
-                <CardContent className="flex items-center justify-between p-4">
+                <CardContent className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between p-4">
                   <div className="min-w-0">
                     <p className="truncate font-medium">{profile?.name ?? "ユーザー"}</p>
                     <p className="text-xs text-muted-foreground">
@@ -192,7 +193,7 @@ export default function ConnectionsPage() {
           })}
         </div>
       ) : (
-        <div className="rounded-lg border border-dashed p-12 text-center">
+        <div className="rounded-lg border border-dashed p-6 sm:p-12 text-center">
           <UserCheck className="mx-auto h-8 w-8 text-muted-foreground/40" />
           <p className="mt-3 text-sm text-muted-foreground">
             {connectionTab === "pending"

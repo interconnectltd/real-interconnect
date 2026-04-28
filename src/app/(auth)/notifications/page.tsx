@@ -77,7 +77,7 @@ export default function NotificationsPage() {
               tabIndex={0}
               className={cn(
                 "flex w-full items-start gap-3 rounded-lg px-4 py-3 text-left transition-colors hover:bg-muted cursor-pointer",
-                !n.is_read && "bg-primary/5",
+                !n.is_read && "bg-primary/10",
               )}
               onClick={() => {
                 if (!n.is_read) markRead.mutate([n.id]);
@@ -153,7 +153,7 @@ export default function NotificationsPage() {
           ))}
         </div>
       ) : (
-        <div className="rounded-lg border border-dashed p-12 text-center">
+        <div className="rounded-lg border border-dashed p-6 sm:p-12 text-center">
           <Bell className="mx-auto h-8 w-8 text-muted-foreground/40" />
           <p className="mt-3 text-sm text-muted-foreground">通知はまだありません</p>
         </div>

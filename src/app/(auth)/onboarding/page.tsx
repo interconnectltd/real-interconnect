@@ -157,7 +157,7 @@ export default function OnboardingPage() {
     setSaving(true);
     try {
       // Step 1: プロフィール更新
-      await supabase
+      const { error: updateError } = await supabase
         .from("user_profiles")
         .update({
           name: profile.name,
@@ -167,6 +167,7 @@ export default function OnboardingPage() {
           onboarding_step: 3,
         })
         .eq("id", user!.id);
+      if (updateError) throw updateError;
 
       // Step 2: Goals 保存
       await api.post("/goals", {

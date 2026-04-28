@@ -21,7 +21,7 @@ export default function GlobalError({
   );
 
   return (
-    <div className="flex min-h-[50vh] flex-col items-center justify-center gap-6 px-4">
+    <div className="flex min-h-[50dvh] flex-col items-center justify-center gap-6 px-4">
       <div className="flex flex-col items-center gap-2">
         <span className="text-5xl">⚠️</span>
         <h2 className="text-xl font-bold">エラーが発生しました</h2>

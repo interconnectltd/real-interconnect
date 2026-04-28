@@ -17,7 +17,7 @@ export default function PublicLayout({
             <Button variant="outline" size="sm" render={<Link href="/login" />}>
               ログイン
             </Button>
-            <Button size="sm" className="bg-black text-white hover:bg-black/80" render={<Link href="/register" />}>
+            <Button size="sm" className="bg-black text-white hover:bg-black/80 dark:bg-white dark:text-black dark:hover:bg-white/80" render={<Link href="/register" />}>
               はじめる
             </Button>
           </div>

@@ -17,7 +17,12 @@ async function request<T>(
     throw new ApiError(0, "NETWORK_ERROR", "ネットワークに接続できません");
   }
 
-  const json = (await res.json()) as ApiResponse<T>;
+  let json: ApiResponse<T>;
+  try {
+    json = await res.json();
+  } catch {
+    throw new ApiError(res.status, "PARSE_ERROR", "サーバーからの応答を解析できません");
+  }
 
   if (!res.ok || json.error) {
     throw new ApiError(

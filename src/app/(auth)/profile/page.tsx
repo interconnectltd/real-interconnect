@@ -143,29 +143,36 @@ export default function ProfilePage() {
             <>
               <div className="grid gap-4 sm:grid-cols-2">
                 <div className="space-y-2">
-                  <Label>お名前</Label>
+                  <Label htmlFor="profile-name">お名前</Label>
                   <Input
+                    id="profile-name"
+                    autoComplete="name"
                     value={form.name}
                     onChange={(e) => setForm({ ...form, name: e.target.value })}
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label>会社名</Label>
+                  <Label htmlFor="profile-company">会社名</Label>
                   <Input
+                    id="profile-company"
+                    autoComplete="organization"
                     value={form.company}
                     onChange={(e) => setForm({ ...form, company: e.target.value })}
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label>役職</Label>
+                  <Label htmlFor="profile-position">役職</Label>
                   <Input
+                    id="profile-position"
+                    autoComplete="organization-title"
                     value={form.position}
                     onChange={(e) => setForm({ ...form, position: e.target.value })}
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label>業種</Label>
+                  <Label htmlFor="profile-industry">業種</Label>
                   <select
+                    id="profile-industry"
                     value={form.industry}
                     onChange={(e) => setForm({ ...form, industry: e.target.value })}
                     className="w-full rounded-md border bg-background px-3 py-2 text-base md:text-sm"
@@ -178,8 +185,9 @@ export default function ProfilePage() {
                 </div>
               </div>
               <div className="space-y-2">
-                <Label>自己紹介</Label>
+                <Label htmlFor="profile-bio">自己紹介</Label>
                 <textarea
+                  id="profile-bio"
                   className="w-full rounded-md border bg-background px-3 py-2 text-base md:text-sm"
                   rows={4}
                   value={form.bio}
@@ -187,8 +195,9 @@ export default function ProfilePage() {
                 />
               </div>
               <div className="space-y-2">
-                <Label>連絡先（コネクション成立後に公開）</Label>
+                <Label htmlFor="profile-contact">連絡先（コネクション成立後に公開）</Label>
                 <Input
+                  id="profile-contact"
                   value={form.contact_info}
                   onChange={(e) => setForm({ ...form, contact_info: e.target.value })}
                   placeholder="LINE ID、メールアドレス等"

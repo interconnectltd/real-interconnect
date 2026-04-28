@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { api } from "@/lib/api-client";
 import { cn } from "@/lib/utils";
+import { toast } from "sonner";
 
 interface TimeSlot {
   date: string;
@@ -82,6 +83,7 @@ export function SchedulingCard({
       setConfirmedSlot(slot);
       setState("confirmed");
     } catch {
+      toast.error("リクエストに失敗しました");
       setState("selecting");
     }
   };

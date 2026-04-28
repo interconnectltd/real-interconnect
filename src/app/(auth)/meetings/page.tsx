@@ -92,11 +92,11 @@ interface CalendarEvent {
 /* ---------- constants ---------- */
 
 const STATUS_LABELS: Record<string, { label: string; color: string }> = {
-  proposed: { label: "リクエスト中", color: "bg-yellow-100 text-yellow-800" },
-  confirmed: { label: "確定", color: "bg-green-100 text-green-800" },
+  proposed: { label: "リクエスト中", color: "bg-yellow-100 dark:bg-yellow-900 text-yellow-800 dark:text-yellow-200" },
+  confirmed: { label: "確定", color: "bg-green-100 dark:bg-green-900 text-green-800 dark:text-green-200" },
   completed: { label: "完了", color: "bg-muted text-muted-foreground" },
-  cancelled: { label: "キャンセル", color: "bg-red-100 text-red-800" },
-  no_show: { label: "不参加", color: "bg-red-100 text-red-800" },
+  cancelled: { label: "キャンセル", color: "bg-red-100 dark:bg-red-900 text-red-800 dark:text-red-200" },
+  no_show: { label: "不参加", color: "bg-red-100 dark:bg-red-900 text-red-800 dark:text-red-200" },
 };
 
 const PLATFORM_LABELS: Record<string, string> = {
@@ -210,7 +210,7 @@ export default function MeetingsPage() {
     };
     const msg = messages[tab];
     return (
-      <div className="rounded-lg border border-dashed p-12 text-center">
+      <div className="rounded-lg border border-dashed p-6 sm:p-12 text-center">
         <Calendar className="mx-auto h-8 w-8 text-muted-foreground/40" />
         <p className="mt-3 text-sm font-medium">{msg.title}</p>
         <p className="mt-1 text-xs text-muted-foreground">{msg.sub}</p>
@@ -479,7 +479,7 @@ export default function MeetingsPage() {
 
   function renderCalendarNotConnected() {
     return (
-      <div className="rounded-lg border border-dashed p-12 text-center">
+      <div className="rounded-lg border border-dashed p-6 sm:p-12 text-center">
         <CalendarX2 className="mx-auto h-8 w-8 text-muted-foreground/40" />
         <p className="mt-3 text-sm font-medium">カレンダー未接続</p>
         <p className="mt-1 text-xs text-muted-foreground">
@@ -645,7 +645,7 @@ export default function MeetingsPage() {
             <TabsTrigger value="proposed">
               提案中
               {proposed.length > 0 && (
-                <span className="ml-1.5 inline-flex h-5 min-w-5 items-center justify-center rounded-full bg-yellow-200 px-1.5 text-xs font-semibold text-yellow-900">
+                <span className="ml-1.5 inline-flex h-5 min-w-5 items-center justify-center rounded-full bg-yellow-200 dark:bg-yellow-900 px-1.5 text-xs font-semibold text-yellow-900 dark:text-yellow-200">
                   {proposed.length}
                 </span>
               )}
@@ -653,7 +653,7 @@ export default function MeetingsPage() {
             <TabsTrigger value="confirmed">
               確定済み
               {confirmed.length > 0 && (
-                <span className="ml-1.5 inline-flex h-5 min-w-5 items-center justify-center rounded-full bg-green-200 px-1.5 text-xs font-semibold text-green-900">
+                <span className="ml-1.5 inline-flex h-5 min-w-5 items-center justify-center rounded-full bg-green-200 dark:bg-green-900 px-1.5 text-xs font-semibold text-green-900 dark:text-green-200">
                   {confirmed.length}
                 </span>
               )}
