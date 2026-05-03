@@ -14,10 +14,20 @@ export default function PublicLayout({
             INTER CONNECT
           </Link>
           <div className="flex items-center gap-3">
-            <Button variant="outline" size="sm" render={<Link href="/login" />}>
+            <Button
+              variant="outline"
+              size="sm"
+              nativeButton={false}
+              render={<Link href="/login" />}
+            >
               ログイン
             </Button>
-            <Button size="sm" className="bg-black text-white hover:bg-black/80 dark:bg-white dark:text-black dark:hover:bg-white/80" render={<Link href="/register" />}>
+            <Button
+              size="sm"
+              nativeButton={false}
+              className="bg-black text-white hover:bg-black/80 dark:bg-white dark:text-black dark:hover:bg-white/80"
+              render={<Link href="/register" />}
+            >
               はじめる
             </Button>
           </div>
@@ -33,6 +43,7 @@ export default function PublicLayout({
             <Link href="/terms" className="py-2 hover:text-foreground">利用規約</Link>
             <Link href="/privacy" className="py-2 hover:text-foreground">プライバシー</Link>
             <Link href="/tokushoho" className="py-2 hover:text-foreground">特商法</Link>
+            <Link href="/contact" className="py-2 hover:text-foreground">お問い合わせ</Link>
           </nav>
           <p className="mt-3 text-center text-xs text-muted-foreground/60">
             &copy; {new Date().getFullYear()} INTER CONNECT

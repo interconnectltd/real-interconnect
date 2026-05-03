@@ -19,6 +19,12 @@ export const registerSchema = z.object({
   agreeToTerms: z.boolean().refine((v) => v === true, {
     message: "利用規約への同意が必要です",
   }),
+  agreeToPrivacy: z.boolean().refine((v) => v === true, {
+    message: "プライバシーポリシーへの同意が必要です",
+  }),
+  agreeToTokushoho: z.boolean().refine((v) => v === true, {
+    message: "特定商取引法に基づく表記への同意が必要です",
+  }),
 });
 
 export const forgotPasswordSchema = z.object({

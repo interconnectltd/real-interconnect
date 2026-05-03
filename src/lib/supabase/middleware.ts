@@ -42,12 +42,14 @@ export async function updateSession(request: NextRequest) {
     "/terms",
     "/privacy",
     "/tokushoho",
+    "/contact",
     "/api/v1/health",
     "/api/v1/invitation",
+    "/api/v1/legal/accept",
   ];
 
   const isPublicPath = publicPaths.some(
-    (p) => pathname === p || pathname.startsWith("/api/v1/health") || pathname.startsWith("/api/v1/invitation") || pathname.startsWith("/lp") || pathname.startsWith("/api/v1/webhooks"),
+    (p) => pathname === p || pathname.startsWith("/api/v1/health") || pathname.startsWith("/api/v1/invitation") || pathname.startsWith("/api/v1/legal/") || pathname.startsWith("/lp") || pathname.startsWith("/api/v1/webhooks"),
   );
 
   // Redirect unauthenticated users to login
