@@ -1,6 +1,11 @@
 import type { Metadata } from "next";
+import Image from "next/image";
+import { CheckCircle2, Mail, AlertCircle } from "lucide-react";
 import { LoginForm } from "@/components/features/auth/login-form";
-import { LinkedInLoginButton, FacebookLoginButton } from "@/components/features/auth/facebook-login-button";
+import {
+  LinkedInLoginButton,
+  FacebookLoginButton,
+} from "@/components/features/auth/facebook-login-button";
 
 export const metadata: Metadata = { title: "ログイン" };
 
@@ -12,48 +17,90 @@ export default async function LoginPage({
   const params = await searchParams;
 
   return (
-    <div className="flex min-h-[60dvh] items-center justify-center px-4 py-12">
-      <div className="w-full max-w-sm space-y-6">
-        <div className="text-center">
-          <h1 className="text-2xl font-bold">おかえりなさい</h1>
-          <p className="mt-1 text-sm text-muted-foreground">
-            アカウントにログインしてください
-          </p>
-        </div>
+    <div className="relative isolate flex min-h-[calc(100dvh-4rem)] items-center justify-center px-4 py-12 sm:py-16">
+      <div
+        aria-hidden="true"
+        className="pointer-events-none absolute inset-x-0 top-0 -z-10 h-[60%] bg-gradient-brand-soft opacity-80 [mask-image:linear-gradient(to_bottom,black,transparent)]"
+      />
 
-        {params.password_reset === "true" && (
-          <div className="rounded-md bg-green-500/10 p-3 text-sm text-green-700">
-            パスワードが変更されました。新しいパスワードでログインしてください。
+      <div className="w-full max-w-[420px]">
+        <div className="rounded-lg border border-border bg-card px-6 py-8 shadow-lg sm:px-8 sm:py-10">
+          <div className="flex flex-col items-center text-center">
+            <Image
+              src="/interconnect-logo-header.png"
+              alt="INTER CONNECT"
+              width={723}
+              height={139}
+              priority
+              className="h-7 w-auto"
+            />
+            <p className="mt-6 text-[11px] font-semibold uppercase tracking-[0.14em] text-accent">
+              Welcome back
+            </p>
+            <h1 className="mt-1 text-[28px] font-bold leading-[1.25] tracking-tight text-foreground">
+              おかえりなさい
+            </h1>
+            <p className="mt-1.5 text-sm text-muted-foreground">
+              経営層の出会いを、もっと確かなものに。
+            </p>
           </div>
-        )}
 
-        {params.confirmed === "true" && (
-          <div className="rounded-md bg-primary/10 p-3 text-sm text-primary">
-            確認メールを送信しました。メール内のリンクをクリックしてからログインしてください。
+          {params.password_reset === "true" && (
+            <div
+              role="status"
+              className="mt-6 flex items-start gap-2.5 rounded-lg border border-[color:color-mix(in_oklab,var(--success)_30%,var(--border))] bg-[color:color-mix(in_oklab,var(--success)_10%,var(--card))] px-3.5 py-3 text-sm text-[color:color-mix(in_oklab,var(--success)_85%,var(--foreground))]"
+            >
+              <CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0" aria-hidden="true" />
+              <span>パスワードを変更しました。新しいパスワードでログインしてください。</span>
+            </div>
+          )}
+
+          {params.confirmed === "true" && (
+            <div
+              role="status"
+              className="mt-6 flex items-start gap-2.5 rounded-lg border border-[color:color-mix(in_oklab,var(--accent)_30%,var(--border))] bg-[color:color-mix(in_oklab,var(--accent)_10%,var(--card))] px-3.5 py-3 text-sm text-[color:color-mix(in_oklab,var(--accent)_85%,var(--foreground))]"
+            >
+              <Mail className="mt-0.5 h-4 w-4 shrink-0" aria-hidden="true" />
+              <span>確認メールを送信しました。メール内のリンクをクリックしてからログインしてください。</span>
+            </div>
+          )}
+
+          {params.error === "auth" && (
+            <div
+              role="alert"
+              className="mt-6 flex items-start gap-2.5 rounded-lg border border-destructive/30 bg-destructive/10 px-3.5 py-3 text-sm text-destructive"
+            >
+              <AlertCircle className="mt-0.5 h-4 w-4 shrink-0" aria-hidden="true" />
+              <span>認証に失敗しました。もう一度お試しいただくか、メールアドレスでログインしてください。</span>
+            </div>
+          )}
+
+          {/* Social first — B2B LinkedIn 優先 */}
+          <div className="mt-6 space-y-2.5">
+            <LinkedInLoginButton />
+            <FacebookLoginButton />
           </div>
-        )}
 
-        {params.error === "auth" && (
-          <div className="rounded-md bg-destructive/10 p-3 text-sm text-destructive">
-            認証に失敗しました。もう一度お試しいただくか、メールアドレスでログインしてください。
-          </div>
-        )}
-
-        <LoginForm />
-
-        <div className="relative py-2">
-          <div className="absolute inset-0 flex items-center">
-            <span className="w-full border-t" />
-          </div>
-          <div className="relative flex justify-center text-xs uppercase">
-            <span className="bg-background px-2 text-muted-foreground">
+          <div className="my-6 flex items-center gap-3">
+            <span className="h-px flex-1 bg-border" aria-hidden="true" />
+            <span className="text-xs font-medium uppercase tracking-[0.12em] text-muted-foreground">
               または
             </span>
+            <span className="h-px flex-1 bg-border" aria-hidden="true" />
           </div>
+
+          <LoginForm />
         </div>
 
-        <LinkedInLoginButton />
-        <FacebookLoginButton />
+        <p className="mt-6 text-center text-sm text-muted-foreground">
+          アカウントをお持ちでない方は{" "}
+          <a
+            href="/register"
+            className="font-medium text-accent underline-offset-4 hover:underline"
+          >
+            新規登録
+          </a>
+        </p>
       </div>
     </div>
   );

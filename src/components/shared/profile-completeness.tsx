@@ -50,34 +50,65 @@ export function ProfileCompleteness({ profile, hideLink }: ProfileCompletenessPr
 
   return (
     <Card>
-      <CardContent className="p-4">
-        <div className="flex items-center justify-between">
+      <CardContent className="space-y-3">
+        <div className="flex items-start justify-between gap-3">
           <div>
-            <p className="text-sm font-medium">プロフィール完成度: {score}%</p>
-            <p className="mt-0.5 text-xs text-muted-foreground">
+            <div className="flex items-center gap-2">
+              <span className="inline-flex h-7 w-7 items-center justify-center rounded-full bg-primary/10 text-primary">
+                <UserCircle className="h-4 w-4" aria-hidden="true" />
+              </span>
+              <p className="text-sm font-semibold text-foreground">
+                プロフィール完成度
+              </p>
+            </div>
+            <p className="mt-1 text-xs text-muted-foreground">
               プロフィールを充実させるとマッチング精度が向上します
             </p>
           </div>
-          <UserCircle className="h-5 w-5 text-primary" />
+          <span className="ds-kpi-number text-2xl font-bold text-foreground">
+            {score}%
+          </span>
         </div>
 
-        {/* Progress bar */}
-        <div className="mt-3 h-2 rounded-full bg-muted">
+        <div
+          role="progressbar"
+          aria-label="プロフィール完成度"
+          aria-valuenow={score}
+          aria-valuemin={0}
+          aria-valuemax={100}
+          className="h-1.5 w-full overflow-hidden rounded-full bg-muted"
+        >
           <div
-            className="h-full rounded-full bg-primary transition-all"
+            className="h-full rounded-full bg-gradient-brand transition-[width] duration-500"
             style={{ width: `${score}%` }}
           />
         </div>
 
-        {/* Missing fields */}
         {missing.length > 0 && (
-          <ul className="mt-3 space-y-1">
-            {missing.map((f) => (
-              <li key={f.key} className="text-xs text-muted-foreground">
-                <span className="mr-1">&#x2022;</span>
-                {f.hint}
+          <ul className="space-y-1.5 pt-1">
+            {missing.slice(0, 3).map((f) => (
+              <li
+                key={f.key}
+                className="flex items-start justify-between gap-2 text-xs text-muted-foreground"
+              >
+                <div className="flex min-w-0 items-start gap-1.5">
+                  <span
+                    className="mt-1 inline-block h-1 w-1 shrink-0 rounded-full bg-accent"
+                    aria-hidden="true"
+                  />
+                  <span className="min-w-0">{f.hint}</span>
+                </div>
+                <span className="shrink-0 font-medium text-accent">+{f.points}%</span>
               </li>
             ))}
+            {missing.length > 3 && (
+              <li className="flex items-start justify-between gap-2 pl-2.5 text-xs text-muted-foreground/80">
+                <span>他 {missing.length - 3} 項目</span>
+                <span className="shrink-0 font-medium text-accent">
+                  +{missing.slice(3).reduce((sum, f) => sum + f.points, 0)}%
+                </span>
+              </li>
+            )}
           </ul>
         )}
 
@@ -85,7 +116,7 @@ export function ProfileCompleteness({ profile, hideLink }: ProfileCompletenessPr
           <Button
             variant="outline"
             size="sm"
-            className="mt-3"
+            className="w-fit"
             render={<Link href="/profile" />}
           >
             プロフィールを編集

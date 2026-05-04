@@ -2,13 +2,15 @@
 
 import { useState } from "react";
 import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
+import { AlertCircle, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { createClient } from "@/lib/supabase/client";
-import type { LoginInput } from "@/validations/auth";
+import { loginSchema, type LoginInput } from "@/validations/auth";
 
 export function LoginForm() {
   const router = useRouter();
@@ -19,7 +21,7 @@ export function LoginForm() {
     register,
     handleSubmit,
     formState: { errors },
-  } = useForm<LoginInput>();
+  } = useForm<LoginInput>({ resolver: zodResolver(loginSchema) });
 
   async function onSubmit(data: LoginInput) {
     setLoading(true);
@@ -42,54 +44,93 @@ export function LoginForm() {
   }
 
   return (
-    <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+    <form onSubmit={handleSubmit(onSubmit)} className="space-y-4" noValidate>
       {error && (
-        <div className="rounded-md bg-destructive/10 p-3 text-sm text-destructive">
-          {error}
+        <div
+          role="alert"
+          className="flex items-start gap-2.5 rounded-lg border border-destructive/30 bg-destructive/10 px-3.5 py-3 text-sm text-destructive"
+        >
+          <AlertCircle className="mt-0.5 h-4 w-4 shrink-0" aria-hidden="true" />
+          <div className="space-y-1">
+            <span>{error}</span>
+            <p className="text-xs">
+              <Link
+                href="/forgot-password"
+                className="font-medium text-destructive underline underline-offset-2 hover:opacity-80"
+              >
+                パスワードを再設定
+              </Link>
+              {" / "}
+              <Link
+                href="/register"
+                className="font-medium text-destructive underline underline-offset-2 hover:opacity-80"
+              >
+                新規登録
+              </Link>
+            </p>
+          </div>
         </div>
       )}
 
-      <div className="space-y-2">
-        <Label htmlFor="email">メールアドレス</Label>
+      <div className="space-y-1.5">
+        <Label htmlFor="email" className="text-[13px] font-medium text-foreground">
+          メールアドレス
+        </Label>
         <Input
           id="email"
           type="email"
           autoComplete="email"
           placeholder="you@example.com"
           enterKeyHint="next"
-          {...register("email", { required: "メールアドレスを入力してください" })}
+          aria-invalid={Boolean(errors.email) || undefined}
+          aria-describedby={errors.email ? "email-error" : undefined}
+          {...register("email")}
         />
         {errors.email && (
-          <p className="text-sm text-destructive">{errors.email.message}</p>
+          <p id="email-error" className="text-xs text-destructive">
+            {errors.email.message}
+          </p>
         )}
       </div>
 
-      <div className="space-y-2">
-        <Label htmlFor="password">パスワード</Label>
+      <div className="space-y-1.5">
+        <div className="flex items-center justify-between">
+          <Label htmlFor="password" className="text-[13px] font-medium text-foreground">
+            パスワード
+          </Label>
+          <Link
+            href="/forgot-password"
+            className="-my-2 inline-flex min-h-[44px] items-center text-xs font-medium text-accent underline-offset-4 hover:underline"
+          >
+            お忘れですか？
+          </Link>
+        </div>
         <Input
           id="password"
           type="password"
           autoComplete="current-password"
           enterKeyHint="go"
-          {...register("password", { required: "パスワードを入力してください" })}
+          aria-invalid={Boolean(errors.password) || undefined}
+          aria-describedby={errors.password ? "password-error" : undefined}
+          {...register("password")}
         />
         {errors.password && (
-          <p className="text-sm text-destructive">{errors.password.message}</p>
+          <p id="password-error" className="text-xs text-destructive">
+            {errors.password.message}
+          </p>
         )}
       </div>
 
-      <Button type="submit" className="relative z-10 w-full py-3" disabled={loading}>
-        {loading ? "ログイン中..." : "ログイン"}
+      <Button type="submit" size="lg" className="w-full" disabled={loading}>
+        {loading ? (
+          <>
+            <Loader2 className="h-4 w-4 animate-spin" aria-hidden="true" />
+            ログイン中...
+          </>
+        ) : (
+          "ログイン"
+        )}
       </Button>
-
-      <div className="relative z-10 text-center text-sm py-2">
-        <Link
-          href="/forgot-password"
-          className="inline-block px-4 py-2 text-primary underline-offset-4 hover:underline"
-        >
-          パスワードをお忘れですか？
-        </Link>
-      </div>
     </form>
   );
 }
