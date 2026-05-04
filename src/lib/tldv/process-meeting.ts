@@ -1,11 +1,20 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
 import type { TldvClient } from "./client";
 import { linkSpeakerToUser } from "./link-speaker";
+import {
+  classifyMeeting,
+  readInternalDomainsFromEnv,
+  type MeetingKind,
+  type MeetingClassificationResult,
+} from "./classify-meeting";
 
 interface ProcessResult {
   transcriptId: string;
   participantIds: string[];
   skipped: boolean;
+  classification: MeetingClassificationResult;
+  /** internal と判定されて prospect 招待をスキップする場合 true */
+  skipInvite: boolean;
 }
 
 /**
@@ -22,17 +31,35 @@ export async function processTldvMeeting(
   meetingId: string,
   supabase: SupabaseClient,
   tldv: TldvClient,
-  options: { holdForConsent?: boolean } = {},
+  options: { holdForConsent?: boolean; internalDomains?: string[] } = {},
 ): Promise<ProcessResult> {
   // 冪等性チェック: 既に処理済みなら skip
   const { data: existing } = await supabase
     .from("meeting_transcripts")
-    .select("id, status")
+    .select("id, status, meeting_kind, classification_reason")
     .eq("tldv_meeting_id", meetingId)
     .maybeSingle();
 
   if (existing && existing.status !== "error") {
-    return { transcriptId: existing.id, participantIds: [], skipped: true };
+    const rawKind = (existing as { meeting_kind?: string }).meeting_kind;
+    // 文字列リテラル検証で MeetingKind narrowing (DB に未知値が来た場合 unknown フォールバック)
+    const existingKind: MeetingKind =
+      rawKind === "sales" || rawKind === "internal" ? rawKind : "unknown";
+    return {
+      transcriptId: (existing as { id: string }).id,
+      participantIds: [],
+      skipped: true,
+      classification: {
+        kind: existingKind,
+        confidence: 1, // already classified
+        reason:
+          (existing as { classification_reason?: string }).classification_reason ??
+          "previously classified",
+        externalDomains: [],
+        internalDomainsMatched: [],
+      },
+      skipInvite: existingKind === "internal",
+    };
   }
 
   // tl;dv API からミーティング詳細 + 書き起こし取得
@@ -60,16 +87,38 @@ export async function processTldvMeeting(
     totalDuration += dur;
   }
 
+  // 商談 vs 社内分類 (招待ループ前にDBに記録、admin が後で override 可能)
+  const inviteeEmails = (meeting.invitees ?? []).map((i) => i.email);
+  const speakerNames = [...new Set(segments.map((s) => s.speaker))];
+  const internalDomains = options.internalDomains ?? readInternalDomainsFromEnv();
+  const classification = classifyMeeting(
+    {
+      title: meeting.name,
+      organizerEmail: meeting.organizer?.email,
+      participantEmails: inviteeEmails,
+      speakerNames,
+      fullText,
+    },
+    { internalDomains },
+  );
+
+  // 内部会議は招待を skip (transcript は保存するが status='internal' で AI 解析も止める)
+  const skipInvite = classification.kind === "internal";
+  const computedStatus: "ready" | "pending_consent" | "internal" = skipInvite
+    ? "internal"
+    : options.holdForConsent
+    ? "pending_consent"
+    : "ready";
+
   // meeting_transcripts に UPSERT
-  // holdForConsent=true → pending_consent (同意ゲート通過後にreadyへ昇格)
   const transcriptRow = {
     tldv_meeting_id: meetingId,
     title: meeting.name,
     meeting_date: meeting.happenedAt,
     full_text: fullText,
-    status: (options.holdForConsent ? "pending_consent" : "ready") as
-      | "ready"
-      | "pending_consent",
+    status: computedStatus,
+    meeting_kind: classification.kind,
+    classification_reason: classification.reason,
     fetched_at: new Date().toISOString(),
   };
 
@@ -139,14 +188,15 @@ export async function processTldvMeeting(
     if (error) throw error;
     participantIds.push(participant.id);
 
-    // 紐付け成功 + 同意保留中でない場合のみ analyze ジョブ投入。
+    // 紐付け成功 + 同意保留中でない + 内部会議でない場合のみ analyze ジョブ投入。
     // holdForConsent モードでは promote_pending_consent_for_user が同意完了時に enqueue する。
-    if (link.isLinked && !options.holdForConsent) {
+    // skipInvite (=internal) の場合はそもそも AI 解析対象外なので enqueue しない。
+    if (link.isLinked && !options.holdForConsent && !skipInvite) {
       await enqueueAnalyzeJob(supabase, transcriptId, participant.id);
     }
   }
 
-  return { transcriptId, participantIds, skipped: false };
+  return { transcriptId, participantIds, skipped: false, classification, skipInvite };
 }
 
 async function enqueueAnalyzeJob(

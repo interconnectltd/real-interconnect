@@ -28,6 +28,11 @@ export interface ProspectCandidate {
   meetingIds: string[];
   /** 紐付ける meeting_participants.id 一覧(招待後にuser_id back-fill対象) */
   participantIds: string[];
+  /** 招待メール本文の差し込み用 (Supabase email template の {{ .Data.* }}) */
+  hostName?: string | null;
+  hostCompany?: string | null;
+  meetingTitle?: string | null;
+  meetingDate?: string | null;
 }
 
 export type InviteStatus =
@@ -84,12 +89,20 @@ export async function inviteProspect(
   }
 
   // Supabase Auth Admin: invite
+  // 招待メール本文 (Supabase Email Template) で
+  // {{ .Data.host_name }} 様との {{ .Data.meeting_title }}
+  // ({{ .Data.meeting_date }}) を踏まえ…
+  // のように差し込み可能。「初対面サービスからの突然のメール」感を緩和する。
   const { data: invited, error: inviteError } =
     await supabase.auth.admin.inviteUserByEmail(candidate.email, {
       data: {
         name: candidate.name,
         prospect_invite: true,
         source_meeting_count: candidate.meetingIds.length,
+        host_name: candidate.hostName ?? null,
+        host_company: candidate.hostCompany ?? null,
+        meeting_title: candidate.meetingTitle ?? null,
+        meeting_date: candidate.meetingDate ?? null,
       },
     });
 
@@ -166,11 +179,38 @@ export async function inviteProspect(
 /**
  * transcript_id に紐づく未紐付 participants から prospect candidate を抽出。
  * webhook フローで「このミーティングだけのprospects」を auto-invite するために使う。
+ *
+ * GUARD: 親 meeting_transcripts.meeting_kind='internal' の場合は空配列を返す。
+ *        誤って社内ミーティングの participants を招待しないための二重防御。
  */
 export async function extractProspectsForTranscript(
   supabase: SupabaseClient,
   transcriptId: string,
 ): Promise<ProspectCandidate[]> {
+  // Guard: 親 transcript が internal なら抽出しない (fail-closed: meta 不在時も skip)
+  const { data: meta, error: metaErr } = await supabase
+    .from("meeting_transcripts")
+    .select("meeting_kind, status")
+    .eq("id", transcriptId)
+    .maybeSingle();
+  if (metaErr || !meta) {
+    // transcript が消えている / RLS で読めない → 招待を発射しない方が安全
+    return [];
+  }
+  const kind = (meta as { meeting_kind?: string }).meeting_kind;
+  const status = (meta as { status?: string }).status;
+  if (kind === "internal" || status === "internal") return [];
+
+  // 招待メール差し込み用の meeting context を取得
+  const { data: ctx } = await supabase
+    .from("meeting_transcripts")
+    .select("title, meeting_date")
+    .eq("id", transcriptId)
+    .maybeSingle();
+  const meetingTitle = (ctx as { title?: string | null } | null)?.title ?? null;
+  const meetingDate =
+    (ctx as { meeting_date?: string | null } | null)?.meeting_date ?? null;
+
   const { data, error } = await supabase
     .from("meeting_participants")
     .select("id, transcript_id, email, speaker_name, is_linked")
@@ -192,6 +232,8 @@ export async function extractProspectsForTranscript(
         name: (p.speaker_name as string) ?? email,
         meetingIds: [transcriptId],
         participantIds: [],
+        meetingTitle,
+        meetingDate,
       });
     }
     map.get(email)!.participantIds.push(p.id as string);

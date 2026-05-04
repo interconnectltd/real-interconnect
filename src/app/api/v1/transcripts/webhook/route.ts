@@ -67,7 +67,22 @@ export async function POST(request: Request) {
         processed: false,
         skipped: true,
         transcriptId: result.transcriptId,
+        meetingKind: result.classification.kind,
         message: "transcript already processed",
+      });
+    }
+
+    // Step 2.5: 社内会議 (定例 / 1on1 / 朝会等) は prospect 招待を実行しない。
+    // transcript は保存するが status='internal' なので AI 解析・招待ループとも skip。
+    if (result.skipInvite) {
+      return json({
+        processed: true,
+        skippedInvite: true,
+        transcriptId: result.transcriptId,
+        meetingKind: result.classification.kind,
+        classificationReason: result.classification.reason,
+        externalDomains: result.classification.externalDomains,
+        message: "internal meeting — invite skipped",
       });
     }
 

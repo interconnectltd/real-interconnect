@@ -406,6 +406,8 @@
 
   /* KPI tone utilities — ロゴ4階層を soft bg + strong text で展開
    * 濃度を 10/14/18/22% に段階差し、左→右で深まるロゴ序列を再現
+   * (現在は KPI カード再設計で navy stripe 主体のデザインに変更したため
+   *  これらは将来の chart/badge/icon-box 拡張のために維持)
    */
   .kpi-tone-teal {
     background-color: color-mix(in oklab, var(--brand-teal) 10%, var(--card));
@@ -499,11 +501,30 @@
     width: 100%;
   }
 
-  /* KPI number (tabular-nums for alignment) */
+  /* KPI number — 任意値タイポを撲滅するため font-size/weight 内包 */
   .ds-kpi-number {
+    font-size: 36px;
+    font-weight: 700;
+    line-height: 1;
     font-feature-settings: "tnum";
     font-variant-numeric: tabular-nums;
     letter-spacing: -0.01em;
+  }
+  .ds-kpi-number-md {
+    font-size: 28px;
+    font-weight: 700;
+    line-height: 1;
+    font-feature-settings: "tnum";
+    font-variant-numeric: tabular-nums;
+    letter-spacing: -0.01em;
+  }
+
+  /* Caption-xs (10px label/legend) — Lvステップ tick 等の極小ラベル用 */
+  .ds-caption-xs {
+    font-size: 10px;
+    font-weight: 500;
+    line-height: 1.5;
+    color: var(--muted-foreground);
   }
 
   /* Card lift on hover (default interaction pattern) */
