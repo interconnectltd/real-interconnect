@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { Bell, Menu, Settings, User, LogOut } from "lucide-react";
@@ -45,8 +46,14 @@ export function Header() {
           <SheetContent side="left" className="w-64 p-0">
             <p className="sr-only">ナビゲーションメニュー</p>
             <div className="p-4">
-              <Link href="/dashboard" className="text-lg font-bold text-primary">
-                INTERCONNECT
+              <Link href="/dashboard" aria-label="INTER CONNECT" className="flex items-center">
+                <Image
+                  src="/interconnect-logo-header.png"
+                  alt="INTER CONNECT"
+                  width={723}
+                  height={139}
+                  className="h-6 w-auto"
+                />
               </Link>
             </div>
             <Sidebar onNavigate={() => setSidebarOpen(false)} />
@@ -55,9 +62,17 @@ export function Header() {
 
         <Link
           href="/dashboard"
-          className="hidden text-lg font-bold text-primary lg:block"
+          aria-label="INTER CONNECT"
+          className="hidden items-center lg:flex"
         >
-          INTERCONNECT
+          <Image
+            src="/interconnect-logo-header.png"
+            alt="INTER CONNECT"
+            width={723}
+            height={139}
+            priority
+            className="h-7 w-auto"
+          />
         </Link>
 
         <div className="flex-1" />

@@ -1,3 +1,4 @@
+import Image from "next/image";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 
@@ -10,8 +11,15 @@ export default function PublicLayout({
     <div className="flex min-h-dvh flex-col">
       <header className="border-b border-border/50">
         <div className="mx-auto flex h-16 max-w-5xl items-center justify-between px-4">
-          <Link href="/" className="text-xl font-bold text-primary">
-            INTER CONNECT
+          <Link href="/" aria-label="INTER CONNECT" className="flex items-center">
+            <Image
+              src="/interconnect-logo-header.png"
+              alt="INTER CONNECT"
+              width={723}
+              height={139}
+              priority
+              className="h-7 w-auto sm:h-8"
+            />
           </Link>
           <div className="flex items-center gap-3">
             <Button
