@@ -32,7 +32,7 @@ import { useMyProfile } from "@/hooks/queries/use-profile";
 import type { LucideIcon } from "lucide-react";
 import type { MutualMatch, Profile } from "@/types";
 
-type StatTone = "primary" | "accent" | "neutral";
+type StatTone = "teal" | "cyan" | "blue" | "navy";
 
 interface Stat {
   label: string;
@@ -43,10 +43,13 @@ interface Stat {
   hint: string;
 }
 
+// ロゴ4階層 (teal-green → cyan → mid-blue → navy) を KPI に展開。
+// utility は globals.css の .kpi-tone-* に集約 (任意値の重複排除 + 4色SSOT)
 const toneClass: Record<StatTone, string> = {
-  primary: "bg-primary/10 text-primary",
-  accent: "bg-accent/15 text-accent",
-  neutral: "bg-muted text-muted-foreground",
+  teal: "kpi-tone-teal",
+  cyan: "kpi-tone-cyan",
+  blue: "kpi-tone-blue",
+  navy: "kpi-tone-navy",
 };
 
 export default function DashboardPage() {
@@ -95,10 +98,10 @@ export default function DashboardPage() {
   const maturityProgress = maturityLevel === 3 ? 100 : nextLevelAt ? (analysisCount / nextLevelAt) * 100 : 0;
 
   const stats: Stat[] = [
-    { label: "コネクション", value: acceptedCount, icon: UserCheck, tone: "primary", href: "/connections", hint: "受諾済の数" },
-    { label: "未読通知", value: unreadCount ?? 0, icon: Bell, tone: "accent", href: "/notifications", hint: "確認待ち" },
-    { label: "おすすめ", value: matchCount, icon: Heart, tone: "primary", href: "/matching", hint: "今週の候補" },
-    { label: "メンバー", value: memberCount, icon: Users, tone: "neutral", href: "/members", hint: "全体登録数" },
+    { label: "コネクション", value: acceptedCount, icon: UserCheck, tone: "teal", href: "/connections", hint: "受諾済の数" },
+    { label: "未読通知", value: unreadCount ?? 0, icon: Bell, tone: "cyan", href: "/notifications", hint: "確認待ち" },
+    { label: "おすすめ", value: matchCount, icon: Heart, tone: "blue", href: "/matching", hint: "今週の候補" },
+    { label: "メンバー", value: memberCount, icon: Users, tone: "navy", href: "/members", hint: "全体登録数" },
   ];
 
   const isLoading = isLoadingConnections || isLoadingUnread || isLoadingScores;
@@ -137,7 +140,7 @@ export default function DashboardPage() {
           <Link
             key={stat.label}
             href={stat.href}
-            className="group rounded-lg outline-none focus-visible:ring-[3px] focus-visible:ring-ring/30"
+            className="group rounded-lg outline-none focus-visible:ring-[3px] focus-visible:ring-ring/70"
           >
             <Card className="ds-card-interactive h-full">
               <CardContent className="flex items-start justify-between gap-3">
@@ -174,7 +177,7 @@ export default function DashboardPage() {
             <div className="flex items-start justify-between gap-3">
               <div>
                 <div className="flex items-center gap-2">
-                  <span className="inline-flex h-7 w-7 items-center justify-center rounded-full bg-accent/15 text-accent">
+                  <span className="inline-flex h-7 w-7 items-center justify-center rounded-full bg-accent/15 text-accent-strong">
                     <Sparkles className="h-3.5 w-3.5" aria-hidden="true" />
                   </span>
                   <p className="text-sm font-semibold text-foreground">
@@ -192,7 +195,7 @@ export default function DashboardPage() {
                 className={
                   maturityLevel === 3
                     ? "border-primary/40 bg-primary/10 px-2.5 text-[11px] font-semibold text-primary"
-                    : "border-accent/30 bg-accent/10 px-2.5 text-[11px] font-semibold text-accent"
+                    : "border-accent/30 bg-accent/10 px-2.5 text-[11px] font-semibold text-accent-strong"
                 }
               >
                 {maturityLevel === 3 ? "Lv 3 / 3 達成" : `Lv ${maturityLevel} / 3`}
@@ -354,7 +357,7 @@ function MemberCard({
       type="button"
       onClick={onOpen}
       aria-label={`${name} のプロフィールを開く`}
-      className="group block w-full text-left outline-none focus-visible:ring-[3px] focus-visible:ring-ring/40 rounded-lg"
+      className="group block w-full text-left outline-none focus-visible:ring-[3px] focus-visible:ring-ring/70 rounded-lg"
     >
       <Card
         className={`ds-card-interactive h-full ${accent ? "border-accent/25 bg-[color:color-mix(in_oklab,var(--accent)_4%,var(--card))]" : ""}`}
@@ -373,7 +376,7 @@ function MemberCard({
               )}
             </div>
             <ArrowUpRight
-              className="h-4 w-4 shrink-0 text-muted-foreground/60 transition-colors group-hover:text-accent"
+              className="h-4 w-4 shrink-0 text-muted-foreground/60 transition-colors group-hover:text-accent-strong"
               aria-hidden="true"
             />
           </div>
@@ -464,7 +467,7 @@ function NewMembersSection({ onViewProfile }: { onViewProfile: (id: string) => v
             type="button"
             onClick={() => onViewProfile(member.id)}
             aria-label={`${member.name} のプロフィールを開く`}
-            className="group block w-full text-left outline-none focus-visible:ring-[3px] focus-visible:ring-ring/40 rounded-lg"
+            className="group block w-full text-left outline-none focus-visible:ring-[3px] focus-visible:ring-ring/70 rounded-lg"
           >
             <Card className="ds-card-interactive h-full">
               <CardContent className="space-y-2">
@@ -479,7 +482,7 @@ function NewMembersSection({ onViewProfile }: { onViewProfile: (id: string) => v
                     </p>
                   </div>
                   <UserPlus
-                    className="h-4 w-4 shrink-0 text-muted-foreground/60 transition-colors group-hover:text-accent"
+                    className="h-4 w-4 shrink-0 text-muted-foreground/60 transition-colors group-hover:text-accent-strong"
                     aria-hidden="true"
                   />
                 </div>

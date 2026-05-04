@@ -19,9 +19,9 @@ import { LEGAL_VERSIONS } from "@/lib/legal/versions";
 const labelClass = "text-[13px] font-medium text-foreground";
 const fieldHelpClass = "text-xs text-destructive";
 const selectClass =
-  "h-10 w-full rounded-lg border border-input bg-card pl-3 pr-10 py-2 text-sm transition-[box-shadow,border-color] outline-none focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/30 aria-invalid:border-destructive aria-invalid:ring-[3px] aria-invalid:ring-destructive/20 appearance-none";
+  "h-10 w-full rounded-lg border border-input bg-card pl-3 pr-10 py-2 text-sm transition-[box-shadow,border-color] outline-none focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/70 aria-invalid:border-destructive aria-invalid:ring-[3px] aria-invalid:ring-destructive/20 appearance-none";
 const textareaClass =
-  "w-full rounded-lg border border-input bg-card px-3 py-2 text-sm transition-[box-shadow,border-color] outline-none placeholder:text-muted-foreground focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/30";
+  "w-full rounded-lg border border-input bg-card px-3 py-2 text-sm transition-[box-shadow,border-color] outline-none placeholder:text-muted-foreground focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/70";
 
 // dev のみ console 出力 (本番ビルドで PII 漏出を防ぐ)
 const isDev = typeof process !== "undefined" && process.env.NODE_ENV !== "production";
@@ -528,14 +528,14 @@ function StepProgress({ activeStep }: { activeStep: 1 | 2 | 3 | 4 }) {
               isActive
                 ? "text-foreground"
                 : isDone
-                ? "text-[color:var(--accent-strong)]"
+                ? "text-accent-strong"
                 : ""
             }`}
           >
             <span
               aria-hidden="true"
               className={`inline-block h-1.5 w-1.5 rounded-full ${
-                isActive ? "bg-accent" : isDone ? "bg-[color:var(--accent-strong)]" : "bg-border"
+                isActive ? "bg-accent" : isDone ? "bg-accent-strong" : "bg-border"
               }`}
             />
             {s.label}
@@ -571,7 +571,7 @@ function Step({
         />
       )}
       <header className="relative z-[1] flex items-start gap-3">
-        <span className="inline-flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-accent/10 text-xs font-semibold text-[color:var(--accent-strong)] ring-1 ring-accent/30">
+        <span className="inline-flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-accent/10 text-xs font-semibold text-accent-strong ring-1 ring-accent/30">
           {accentIcon ?? number}
         </span>
         <div className="min-w-0 flex-1">

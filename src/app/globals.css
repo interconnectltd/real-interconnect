@@ -89,9 +89,26 @@
   --shadow-lg: 0 12px 28px -8px rgb(15 23 42 / 0.10), 0 6px 12px -6px rgb(15 23 42 / 0.06);
   --shadow-xl: 0 24px 56px -12px rgb(15 23 42 / 0.16), 0 10px 20px -10px rgb(15 23 42 / 0.08);
 
-  /* Brand gradient (logo C: teal → cyan → navy) */
-  --gradient-brand: linear-gradient(135deg, oklch(0.74 0.13 175) 0%, oklch(0.66 0.14 220) 60%, oklch(0.30 0.06 255) 100%);
-  --gradient-brand-soft: linear-gradient(135deg, oklch(0.96 0.04 175) 0%, oklch(0.96 0.04 220) 100%);
+  /* Brand gradient (logo C 4階層: teal-green → cyan → mid-blue → navy) */
+  --gradient-brand: linear-gradient(
+    135deg,
+    var(--brand-teal) 0%,
+    var(--brand-cyan) 45%,
+    var(--brand-blue) 75%,
+    var(--brand-navy) 100%
+  );
+  --gradient-brand-soft: linear-gradient(
+    135deg,
+    oklch(0.965 0.04 168) 0%,
+    oklch(0.96 0.04 215) 50%,
+    oklch(0.96 0.04 250) 100%
+  );
+  --gradient-brand-radial: radial-gradient(
+    circle at 30% 30%,
+    oklch(0.97 0.04 168) 0%,
+    oklch(0.96 0.03 215) 40%,
+    oklch(0.99 0.005 215) 100%
+  );
 }
 
 /*
@@ -104,78 +121,90 @@
  */
 
 :root {
-  /* ── Core semantic ── */
-  --background: oklch(0.985 0.005 240);          /* #FAFCFE */
-  --foreground: oklch(0.22 0.04 255);            /* navy text */
+  /* ── Core semantic ──
+   * Cロゴから抽出した4階層パレット:
+   *   teal-green 165° (左上) → cyan 215° (上中央) → mid-blue 250° (右側) → navy 265° (右下/INTER CONNECT文字)
+   * すべて oklch でロゴ調の色相連続性を保つ。
+   */
+  --background: oklch(0.987 0.006 215);          /* cyan tint の極薄白 (ロゴ中央色相) */
+  --foreground: oklch(0.22 0.045 265);            /* navy ロゴ文字色相と一致 */
   --card: oklch(1 0 0);
-  --card-foreground: oklch(0.22 0.04 255);
+  --card-foreground: oklch(0.22 0.045 265);
   --popover: oklch(1 0 0);
-  --popover-foreground: oklch(0.22 0.04 255);
+  --popover-foreground: oklch(0.22 0.045 265);
 
-  /* Primary = Navy #142033 */
-  --primary: oklch(0.26 0.06 255);
+  /* Primary = Navy (Cロゴ右下 + INTER CONNECT 文字色) */
+  --primary: oklch(0.26 0.07 265);
   --primary-foreground: oklch(0.99 0 0);
 
-  /* Secondary = surface-2 (極薄blue gray) */
-  --secondary: oklch(0.965 0.008 240);
-  --secondary-foreground: oklch(0.22 0.04 255);
+  /* Secondary = surface-2 (極薄 cyan-blue tint) */
+  --secondary: oklch(0.965 0.01 215);
+  --secondary-foreground: oklch(0.22 0.045 265);
 
   /* Muted */
-  --muted: oklch(0.965 0.008 240);
-  --muted-foreground: oklch(0.50 0.02 250);      /* #6B7280-ish */
+  --muted: oklch(0.965 0.01 215);
+  --muted-foreground: oklch(0.50 0.025 245);     /* slight blue tint */
 
-  /* Accent = Brand Teal (Cロゴ) #23B8A4 */
-  --accent: oklch(0.72 0.12 180);
+  /* ── Brand 4-step palette (Cロゴ調 SSOT) ── */
+  --brand-teal: oklch(0.74 0.13 168);             /* 左上: 明るい teal-green */
+  --brand-teal-strong: oklch(0.48 0.13 168);      /* AA 4.5:1 確保 */
+  --brand-cyan: oklch(0.62 0.14 215);             /* 中央: 鮮やかな cyan */
+  --brand-cyan-strong: oklch(0.45 0.13 215);      /* AA 4.5:1 確保 */
+  --brand-blue: oklch(0.50 0.14 250);             /* 右側: mid-blue */
+  --brand-blue-strong: oklch(0.40 0.13 250);
+  --brand-navy: oklch(0.26 0.07 265);             /* 右下/文字: navy */
+  --brand-navy-strong: oklch(0.16 0.07 265);
+
+  /* Accent = Brand Teal-Green (Cロゴ左上、緑寄りシアン) — SSOT 経由 */
+  --accent: var(--brand-teal);
   --accent-foreground: oklch(0.99 0 0);
+  --accent-strong: var(--brand-teal-strong);
 
-  --destructive: oklch(0.54 0.225 27);            /* darker for AA contrast on /10 bg */
-  --border: oklch(0.93 0.008 240);               /* #E5EAF1 */
-  --input: oklch(0.93 0.008 240);
-  --ring: oklch(0.72 0.12 180);                  /* focus = teal */
+  --destructive: oklch(0.54 0.225 27);
+  --border: oklch(0.93 0.01 215);                /* cyan tint border */
+  --input: oklch(0.93 0.01 215);
+  --ring: var(--brand-cyan-strong);              /* focus AA: 4.5:1 確保 */
 
-  /* Accent strong (AA 4.5:1 on white) — eyebrow / small text 用途 */
-  --accent-strong: oklch(0.50 0.12 180);
-
-  /* Charts (brand-derived) */
-  --chart-1: oklch(0.26 0.06 255);
-  --chart-2: oklch(0.72 0.12 180);
-  --chart-3: oklch(0.62 0.14 220);
-  --chart-4: oklch(0.78 0.10 60);
-  --chart-5: oklch(0.55 0.10 320);
+  /* Charts — ロゴ4階層の hue (168/215/250/265) と整合 */
+  --chart-1: var(--brand-teal);
+  --chart-2: var(--brand-cyan);
+  --chart-3: var(--brand-blue);
+  --chart-4: var(--brand-navy);
+  --chart-5: oklch(0.78 0.13 85);                 /* warm accent (warning/highlight) */
 
   --radius: 0.875rem;                             /* 14 */
 
-  /* Sidebar */
-  --sidebar: oklch(0.99 0.003 240);
-  --sidebar-foreground: oklch(0.22 0.04 255);
-  --sidebar-primary: oklch(0.26 0.06 255);
+  /* Sidebar — ロゴ hue (215/265) に統一 */
+  --sidebar: oklch(0.99 0.005 215);
+  --sidebar-foreground: oklch(0.22 0.045 265);
+  --sidebar-primary: var(--brand-navy);
   --sidebar-primary-foreground: oklch(0.99 0 0);
-  --sidebar-accent: oklch(0.96 0.02 180);
-  --sidebar-accent-foreground: oklch(0.26 0.06 255);
-  --sidebar-border: oklch(0.93 0.008 240);
-  --sidebar-ring: oklch(0.72 0.12 180);
+  --sidebar-accent: oklch(0.96 0.02 168);
+  --sidebar-accent-foreground: var(--brand-navy);
+  --sidebar-border: oklch(0.93 0.01 215);
+  --sidebar-ring: var(--ring);
 
-  /* ── Brand Teal scale (= Cロゴ accent scale) ── */
-  --brand-50: oklch(0.965 0.025 180);
-  --brand-100: oklch(0.92 0.05 180);
-  --brand-200: oklch(0.86 0.08 180);
-  --brand-300: oklch(0.80 0.10 180);
-  --brand-400: oklch(0.76 0.11 180);
-  --brand-500: oklch(0.72 0.12 180);
-  --brand-600: oklch(0.62 0.11 180);
-  --brand-700: oklch(0.52 0.09 180);
-  --brand-800: oklch(0.42 0.07 180);
-  --brand-900: oklch(0.32 0.05 180);
+  /* ── Brand scale (= Cロゴ中央 cyan軸 215° で 50→900) ── */
+  --brand-50: oklch(0.965 0.025 215);
+  --brand-100: oklch(0.92 0.05 215);
+  --brand-200: oklch(0.86 0.08 215);
+  --brand-300: oklch(0.78 0.11 215);
+  --brand-400: oklch(0.70 0.13 215);
+  --brand-500: oklch(0.62 0.14 215);
+  --brand-600: oklch(0.54 0.13 215);
+  --brand-700: oklch(0.45 0.13 215);
+  --brand-800: oklch(0.36 0.10 215);
+  --brand-900: oklch(0.26 0.07 215);
 
-  /* ── Navy scale ── */
-  --warm-50: oklch(0.97 0.005 255);
-  --warm-100: oklch(0.93 0.01 255);
-  --warm-200: oklch(0.85 0.02 255);
-  --warm-300: oklch(0.72 0.04 255);
-  --warm-400: oklch(0.55 0.05 255);
-  --warm-500: oklch(0.42 0.06 255);
-  --warm-600: oklch(0.34 0.06 255);
-  --warm-700: oklch(0.26 0.06 255);
+  /* ── Navy scale (ロゴ navy 265°) ── */
+  --warm-50: oklch(0.97 0.005 265);
+  --warm-100: oklch(0.93 0.01 265);
+  --warm-200: oklch(0.85 0.02 265);
+  --warm-300: oklch(0.72 0.04 265);
+  --warm-400: oklch(0.55 0.05 265);
+  --warm-500: oklch(0.42 0.06 265);
+  --warm-600: oklch(0.34 0.06 265);
+  --warm-700: oklch(0.26 0.07 265);
 
   /* ── Semantic ── */
   --success: oklch(0.70 0.16 165);
@@ -184,30 +213,39 @@
 }
 
 .dark {
-  --background: oklch(0.16 0.02 255);            /* #0B1220 */
-  --foreground: oklch(0.95 0.01 240);
-  --card: oklch(0.21 0.025 255);                 /* #152033 */
-  --card-foreground: oklch(0.95 0.01 240);
-  --popover: oklch(0.21 0.025 255);
-  --popover-foreground: oklch(0.95 0.01 240);
+  --background: oklch(0.16 0.025 265);
+  --foreground: oklch(0.95 0.01 215);
+  --card: oklch(0.21 0.03 265);
+  --card-foreground: oklch(0.95 0.01 215);
+  --popover: oklch(0.21 0.03 265);
+  --popover-foreground: oklch(0.95 0.01 215);
 
-  --primary: oklch(0.78 0.10 180);               /* dark→teal-bright */
-  --primary-foreground: oklch(0.16 0.02 255);
+  --primary: oklch(0.78 0.11 168);               /* bright teal-green for dark */
+  --primary-foreground: oklch(0.16 0.025 265);
 
-  --secondary: oklch(0.26 0.02 255);
-  --secondary-foreground: oklch(0.95 0.01 240);
+  --secondary: oklch(0.26 0.025 265);
+  --secondary-foreground: oklch(0.95 0.01 215);
 
-  --muted: oklch(0.26 0.02 255);
-  --muted-foreground: oklch(0.68 0.02 240);
+  --muted: oklch(0.26 0.025 265);
+  --muted-foreground: oklch(0.68 0.02 215);
 
-  --accent: oklch(0.72 0.12 180);
-  --accent-foreground: oklch(0.16 0.02 255);
-  --accent-strong: oklch(0.78 0.11 180);
+  --accent: oklch(0.74 0.13 168);
+  --accent-foreground: oklch(0.16 0.025 265);
+  --accent-strong: oklch(0.86 0.10 168);          /* dark: --accent より明るく階層保持 */
+
+  --brand-teal: oklch(0.74 0.13 168);
+  --brand-teal-strong: oklch(0.86 0.10 168);
+  --brand-cyan: oklch(0.70 0.13 215);
+  --brand-cyan-strong: oklch(0.85 0.10 215);
+  --brand-blue: oklch(0.62 0.14 250);
+  --brand-blue-strong: oklch(0.82 0.11 250);
+  --brand-navy: oklch(0.42 0.08 265);
+  --brand-navy-strong: oklch(0.78 0.10 265);
 
   --destructive: oklch(0.704 0.191 22.216);
   --border: oklch(1 0 0 / 10%);
   --input: oklch(1 0 0 / 15%);
-  --ring: oklch(0.72 0.12 180);
+  --ring: oklch(0.70 0.13 215);
 
   --chart-1: oklch(0.78 0.10 180);
   --chart-2: oklch(0.62 0.14 220);
@@ -342,6 +380,66 @@
   .border-accent-strong {
     border-color: var(--accent-strong);
   }
+  .bg-accent-strong {
+    background-color: var(--accent-strong);
+  }
+
+  /* Brand 4-step palette utilities (Cロゴ階層).
+   * IMPORTANT: text-* は AA 4.5:1 に達する `*-strong` のみ提供。
+   * base 版 (text-brand-teal 等) は意図せず本文に使うと AA 違反になるため
+   * utility 化しない (footgun 防止)。背景・solid 装飾は base、本文は strong。
+   */
+  .text-brand-teal-strong { color: var(--brand-teal-strong); }
+  .text-brand-cyan-strong { color: var(--brand-cyan-strong); }
+  .text-brand-blue-strong { color: var(--brand-blue-strong); }
+  .text-brand-navy { color: var(--brand-navy); }              /* L=0.26 で AA 9.9:1 確保済 */
+  .text-brand-navy-strong { color: var(--brand-navy-strong); }
+
+  .bg-brand-teal { background-color: var(--brand-teal); }
+  .bg-brand-cyan { background-color: var(--brand-cyan); }
+  .bg-brand-blue { background-color: var(--brand-blue); }
+  .bg-brand-navy { background-color: var(--brand-navy); }
+  .border-brand-teal { border-color: var(--brand-teal); }
+  .border-brand-cyan { border-color: var(--brand-cyan); }
+  .border-brand-blue { border-color: var(--brand-blue); }
+  .border-brand-navy { border-color: var(--brand-navy); }
+
+  /* KPI tone utilities — ロゴ4階層を soft bg + strong text で展開
+   * 濃度を 10/14/18/22% に段階差し、左→右で深まるロゴ序列を再現
+   */
+  .kpi-tone-teal {
+    background-color: color-mix(in oklab, var(--brand-teal) 10%, var(--card));
+    color: var(--brand-teal-strong);
+  }
+  .kpi-tone-cyan {
+    background-color: color-mix(in oklab, var(--brand-cyan) 14%, var(--card));
+    color: var(--brand-cyan-strong);
+  }
+  .kpi-tone-blue {
+    background-color: color-mix(in oklab, var(--brand-blue) 18%, var(--card));
+    color: var(--brand-blue-strong);
+  }
+  .kpi-tone-navy {
+    background-color: color-mix(in oklab, var(--brand-navy) 12%, var(--card));
+    color: var(--brand-navy);
+  }
+
+  /* Brand 4-dot indicator (ロゴパレット階層を視覚化) */
+  .ds-brand-dots {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+  }
+  .ds-brand-dots > span {
+    display: inline-block;
+    width: 6px;
+    height: 6px;
+    border-radius: 9999px;
+  }
+  .ds-brand-dots > span:nth-child(1) { background-color: var(--brand-teal); }
+  .ds-brand-dots > span:nth-child(2) { background-color: var(--brand-cyan); }
+  .ds-brand-dots > span:nth-child(3) { background-color: var(--brand-blue); }
+  .ds-brand-dots > span:nth-child(4) { background-color: var(--brand-navy); }
 
   /* Semantic text utilities */
   .text-warning {

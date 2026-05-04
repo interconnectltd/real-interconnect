@@ -37,9 +37,16 @@ export function UserAvatar({ name, avatarUrl, size = "md", className = "" }: Use
     );
   }
 
+  // sm/md は flat (リスト内多数並ぶ場面でノイズ抑制)
+  // lg/xl のみ gradient で「ブランド identity 強調」
+  const isLarge = size === "lg" || size === "xl";
+  const fallbackBg = isLarge
+    ? "bg-gradient-brand-soft ring-1 ring-border"
+    : "bg-secondary";
+
   return (
     <div
-      className={`${sizeClass} flex shrink-0 items-center justify-center rounded-full bg-primary/10 font-medium text-primary ${className}`}
+      className={`${sizeClass} flex shrink-0 items-center justify-center rounded-full font-medium text-brand-navy ${fallbackBg} ${className}`}
     >
       {initial}
     </div>

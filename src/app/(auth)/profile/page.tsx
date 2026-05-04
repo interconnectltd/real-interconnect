@@ -28,9 +28,9 @@ import { UserAvatar } from "@/components/shared/user-avatar";
 
 const labelClass = "text-sm font-medium text-foreground";
 const selectClass =
-  "h-10 w-full rounded-lg border border-input bg-card pl-3 pr-10 py-2 text-sm transition-[box-shadow,border-color] outline-none focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/30 appearance-none";
+  "h-10 w-full rounded-lg border border-input bg-card pl-3 pr-10 py-2 text-sm transition-[box-shadow,border-color] outline-none focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/70 appearance-none";
 const textareaClass =
-  "w-full rounded-lg border border-input bg-card px-3 py-2 text-sm transition-[box-shadow,border-color] outline-none placeholder:text-muted-foreground focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/30";
+  "w-full rounded-lg border border-input bg-card px-3 py-2 text-sm transition-[box-shadow,border-color] outline-none placeholder:text-muted-foreground focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/70";
 
 const BIO_MAX = 1000;
 const BIO_WARN = 900;
@@ -164,7 +164,7 @@ export default function ProfilePage() {
           <div className="flex items-start gap-4">
             <button
               type="button"
-              className="group relative shrink-0 outline-none focus-visible:ring-[3px] focus-visible:ring-ring/30 rounded-full"
+              className="group relative shrink-0 outline-none focus-visible:ring-[3px] focus-visible:ring-ring/70 rounded-full"
               onClick={() => fileInputRef.current?.click()}
               disabled={uploadAvatar.isPending}
               aria-label="プロフィール画像を変更"
@@ -427,7 +427,7 @@ function ProfileViewMode({
       )}
       <ViewField icon={Mail} label="メールアドレス" value={profile.email} />
       {profile.contact_info && (
-        <div className="rounded-lg border border-l-stripe border-accent/25 border-l-accent bg-accent/5 p-3">
+        <div className="rounded-lg border border-accent/25 border-l-stripe border-l-accent bg-accent/5 p-3">
           <dt className="flex items-center gap-1.5 text-xs font-medium text-accent-strong">
             <Lock className="h-3 w-3" aria-hidden="true" />
             連絡先（コネクション成立後に公開）

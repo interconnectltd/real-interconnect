@@ -50,7 +50,7 @@ const PHASE_META: Record<
 
 const phaseToneClass: Record<"neutral" | "accent" | "primary", string> = {
   neutral: "border-border bg-muted text-muted-foreground",
-  accent: "border-accent/30 bg-accent/10 text-[color:var(--accent-strong)]",
+  accent: "border-accent/30 bg-accent/10 text-accent-strong",
   primary: "border-primary/30 bg-primary/10 text-primary",
 };
 
@@ -245,7 +245,7 @@ function SortRadio({
       role="radio"
       aria-checked={selected}
       onClick={onClick}
-      className={`min-h-[32px] rounded-md px-3.5 text-xs font-medium transition-colors outline-none focus-visible:ring-[3px] focus-visible:ring-ring/30 ${
+      className={`min-h-[32px] rounded-md px-3.5 text-xs font-medium transition-colors outline-none focus-visible:ring-[3px] focus-visible:ring-ring/70 ${
         selected
           ? "bg-card text-foreground shadow-sm"
           : "text-muted-foreground hover:text-foreground"
@@ -298,7 +298,7 @@ function MutualCard({
           }
         }}
         aria-label={`${name} のプロフィールを開く${stateLabel}`}
-        className="block w-full rounded-lg outline-none focus-visible:ring-[3px] focus-visible:ring-ring/40"
+        className="block w-full rounded-lg outline-none focus-visible:ring-[3px] focus-visible:ring-ring/70"
       >
         <Card className="ds-card-interactive relative h-full overflow-hidden border-accent/25 bg-[color:color-mix(in_oklab,var(--accent)_4%,var(--card))]">
           {/* Mutual stripe */}
@@ -325,7 +325,7 @@ function MutualCard({
             <div className="flex items-center justify-between gap-2">
               <Badge
                 variant="outline"
-                className="border-accent/30 bg-accent/10 px-2.5 text-[11px] font-semibold text-[color:var(--accent-strong)]"
+                className="border-accent/30 bg-accent/10 px-2.5 text-[11px] font-semibold text-accent-strong"
               >
                 <Sparkles className="h-3 w-3" aria-hidden="true" />
                 相互おすすめ
@@ -392,7 +392,7 @@ function ScoreCard({
           }
         }}
         aria-label={`${name} のプロフィールを開く${stateLabel}`}
-        className="block w-full rounded-lg outline-none focus-visible:ring-[3px] focus-visible:ring-ring/40"
+        className="block w-full rounded-lg outline-none focus-visible:ring-[3px] focus-visible:ring-ring/70"
       >
         <Card className="ds-card-interactive">
           <CardContent className="space-y-4">
@@ -404,7 +404,7 @@ function ScoreCard({
                   {p?.industry && (
                     <Badge
                       variant="outline"
-                      className="h-5 border-accent/25 bg-accent/5 px-2 text-[11px] font-medium text-[color:var(--accent-strong)]"
+                      className="h-5 border-accent/25 bg-accent/5 px-2 text-[11px] font-medium text-accent-strong"
                     >
                       {p.industry}
                     </Badge>
@@ -491,7 +491,7 @@ function ConnectControl({
     return (
       <Badge
         variant="outline"
-        className="shrink-0 border-accent/30 bg-accent/10 px-2 text-[11px] font-medium text-[color:var(--accent-strong)]"
+        className="shrink-0 border-accent/30 bg-accent/10 px-2 text-[11px] font-medium text-accent-strong"
       >
         <Clock className="h-3 w-3" aria-hidden="true" />
         申請中
@@ -525,7 +525,7 @@ function DismissButton({ onClick }: { onClick: () => void }) {
         onClick();
       }}
       aria-label="この推薦を非表示にする"
-      className="absolute right-2 top-2 inline-flex h-9 w-9 items-center justify-center rounded-full text-muted-foreground/60 transition-colors hover:bg-muted hover:text-foreground focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/30"
+      className="absolute right-2 top-2 inline-flex h-9 w-9 items-center justify-center rounded-full text-muted-foreground/60 transition-colors hover:bg-muted hover:text-foreground focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/70"
     >
       <X className="h-3.5 w-3.5" aria-hidden="true" />
     </button>
