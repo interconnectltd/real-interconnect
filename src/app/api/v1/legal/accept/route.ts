@@ -32,8 +32,16 @@ export async function POST() {
       null;
     const userAgent = headersList.get("user-agent") ?? null;
 
+    type AcceptanceRow = {
+      user_id: string;
+      kind: LegalDocKind;
+      version: string;
+      ip_address: string | null;
+      user_agent: string | null;
+    };
+
     const service = await createServiceClient();
-    const rows = KINDS.map((kind) => ({
+    const rows: AcceptanceRow[] = KINDS.map((kind) => ({
       user_id: user.id,
       kind,
       version: LEGAL_VERSIONS[kind],
@@ -41,12 +49,21 @@ export async function POST() {
       user_agent: userAgent,
     }));
 
-    const { error: insertError } = await service
-      .from("user_terms_acceptances")
-      .upsert(rows, {
-        onConflict: "user_id,kind,version",
-        ignoreDuplicates: true,
-      });
+    // user_terms_acceptances was added in migration 00006 after Database types
+    // were generated. Bypass the narrowed `never` typing until types are
+    // regenerated (`supabase gen types typescript`).
+    type UpsertResult = { error: unknown };
+    type LooseTable = {
+      upsert: (
+        rows: AcceptanceRow[],
+        options: { onConflict: string; ignoreDuplicates: boolean },
+      ) => Promise<UpsertResult>;
+    };
+    const table = service.from("user_terms_acceptances") as unknown as LooseTable;
+    const { error: insertError } = await table.upsert(rows, {
+      onConflict: "user_id,kind,version",
+      ignoreDuplicates: true,
+    });
 
     if (insertError) {
       console.error("legal/accept insert failed", insertError);
