@@ -10,12 +10,15 @@ export async function linkSpeakerToUser(
   speakerName: string,
   email: string | null,
   supabase: SupabaseClient,
+  options: { strict?: boolean } = {},
 ): Promise<LinkResult> {
   const notLinked: LinkResult = {
     userId: null,
     isLinked: false,
     linkedMethod: null,
   };
+  // strict mode: bulk-invite フローで name_partial 誤マッチを抑制 (email or name_exact のみ受理)
+  const strict = options.strict ?? false;
 
   // 1. Email exact match
   if (email) {
@@ -51,6 +54,9 @@ export async function linkSpeakerToUser(
   }
 
   // 3. Name partial match (speaker name contains user name or vice versa)
+  // strict mode (bulk-invite) では誤マッチ防止のため partial を完全に skip
+  if (strict) return notLinked;
+
   const { data: allUsers } = await supabase
     .from("user_profiles")
     .select("id, name")

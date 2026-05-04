@@ -15,11 +15,13 @@
 export const TERMS_VERSION = "2026-05-04b";
 export const PRIVACY_VERSION = "2026-05-04b";
 export const TOKUSHOHO_VERSION = "2026-05-04b";
+export const AI_CROSS_BORDER_VERSION = "2026-05-04";
 
 export const LEGAL_VERSIONS = {
   terms: TERMS_VERSION,
   privacy: PRIVACY_VERSION,
   tokushoho: TOKUSHOHO_VERSION,
+  ai_cross_border: AI_CROSS_BORDER_VERSION,
 } as const;
 
 export type LegalDocKind = keyof typeof LEGAL_VERSIONS;

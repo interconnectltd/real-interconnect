@@ -8,10 +8,21 @@ interface ProcessResult {
   skipped: boolean;
 }
 
+/**
+ * tl;dvミーティングを取り込み、参加者ごとに meeting_participants を作成する。
+ *
+ * @param meetingId    tl;dv meeting ID
+ * @param supabase     service-role client
+ * @param tldv         TldvClient
+ * @param options.holdForConsent  trueの場合、参加者を analyze enqueue せず
+ *                                meeting_transcripts.status='pending_consent' で保留する。
+ *                                bulk-invite フローで「招待 → 同意 → 分析」順序を保証するため。
+ */
 export async function processTldvMeeting(
   meetingId: string,
   supabase: SupabaseClient,
   tldv: TldvClient,
+  options: { holdForConsent?: boolean } = {},
 ): Promise<ProcessResult> {
   // 冪等性チェック: 既に処理済みなら skip
   const { data: existing } = await supabase
@@ -50,12 +61,15 @@ export async function processTldvMeeting(
   }
 
   // meeting_transcripts に UPSERT
+  // holdForConsent=true → pending_consent (同意ゲート通過後にreadyへ昇格)
   const transcriptRow = {
     tldv_meeting_id: meetingId,
     title: meeting.name,
     meeting_date: meeting.happenedAt,
     full_text: fullText,
-    status: "ready" as const,
+    status: (options.holdForConsent ? "pending_consent" : "ready") as
+      | "ready"
+      | "pending_consent",
     fetched_at: new Date().toISOString(),
   };
 
@@ -103,8 +117,10 @@ export async function processTldvMeeting(
     // invitees から email を推定
     const email = emailMap.get(speaker.toLowerCase()) ?? null;
 
-    // ユーザー紐付け
-    const link = await linkSpeakerToUser(speaker, email, supabase);
+    // ユーザー紐付け (holdForConsent=true なら strict mode で name_partial 抑制)
+    const link = await linkSpeakerToUser(speaker, email, supabase, {
+      strict: options.holdForConsent === true,
+    });
 
     const { data: participant, error } = await supabase
       .from("meeting_participants")
@@ -123,8 +139,9 @@ export async function processTldvMeeting(
     if (error) throw error;
     participantIds.push(participant.id);
 
-    // 紐付け成功した参加者に analyze ジョブを投入
-    if (link.isLinked) {
+    // 紐付け成功 + 同意保留中でない場合のみ analyze ジョブ投入。
+    // holdForConsent モードでは promote_pending_consent_for_user が同意完了時に enqueue する。
+    if (link.isLinked && !options.holdForConsent) {
       await enqueueAnalyzeJob(supabase, transcriptId, participant.id);
     }
   }

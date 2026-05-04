@@ -3,7 +3,7 @@ import { createClient, createServiceClient } from "@/lib/supabase/server";
 import { headers } from "next/headers";
 import { LEGAL_VERSIONS, type LegalDocKind } from "@/lib/legal/versions";
 
-const KINDS: LegalDocKind[] = ["terms", "privacy", "tokushoho"];
+const KINDS: LegalDocKind[] = ["terms", "privacy", "tokushoho", "ai_cross_border"];
 
 /**
  * POST /api/v1/legal/accept
@@ -12,8 +12,13 @@ const KINDS: LegalDocKind[] = ["terms", "privacy", "tokushoho"];
  *
  * 認証済みユーザーが自分自身の同意を記録するエンドポイント。
  * IPとUAはサーバー側headersから取得し、クライアントの自己申告ではない値を保存する。
+ *
+ * Body: { terms: boolean, privacy: boolean, tokushoho: boolean, ai_cross_border: boolean }
+ *   - 4つ全てが true でなければ 400 を返す
+ *   - 通常signUpフロー(register-form)では body 省略可 (互換性維持)
+ *     ただし prospect招待ユーザーは consent-gate-form 経由で必ず4チェック付きで呼ぶ
  */
-export async function POST() {
+export async function POST(request: Request) {
   try {
     const supabase = await createClient();
     const {
@@ -23,6 +28,28 @@ export async function POST() {
 
     if (authError || !user) {
       return jsonError(401, "UNAUTHORIZED", "認証が必要です");
+    }
+
+    // Body 検証 (省略時はregister-form経由のフロー、4チェック前提でメタデータ側で取得済)
+    let bodyConsents: Partial<Record<LegalDocKind, boolean>> = {};
+    if (request.headers.get("content-length") && request.headers.get("content-length") !== "0") {
+      const parsed = (await request.json().catch(() => null)) as Record<string, unknown> | null;
+      if (parsed && typeof parsed === "object") {
+        bodyConsents = parsed as Partial<Record<LegalDocKind, boolean>>;
+      }
+    }
+
+    // body指定がある場合 (consent gateフロー) は全kindがtrueでなければ拒否
+    const hasBodyHint = Object.keys(bodyConsents).length > 0;
+    if (hasBodyHint) {
+      const missing = KINDS.filter((k) => bodyConsents[k] !== true);
+      if (missing.length > 0) {
+        return jsonError(
+          400,
+          "INSUFFICIENT_CONSENT",
+          `以下の同意が必要です: ${missing.join(", ")}`,
+        );
+      }
     }
 
     const headersList = await headers();
@@ -38,6 +65,7 @@ export async function POST() {
       version: string;
       ip_address: string | null;
       user_agent: string | null;
+      email_at_acceptance: string | null;
     };
 
     const service = await createServiceClient();
@@ -47,6 +75,7 @@ export async function POST() {
       version: LEGAL_VERSIONS[kind],
       ip_address: ip,
       user_agent: userAgent,
+      email_at_acceptance: user.email ?? null,
     }));
 
     // user_terms_acceptances was added in migration 00006 after Database types
@@ -70,7 +99,29 @@ export async function POST() {
       return jsonError(500, "INSERT_FAILED", "同意の記録に失敗しました");
     }
 
-    return json({ accepted: KINDS.length, versions: LEGAL_VERSIONS });
+    // 同意完了で pending_consent transcripts を ready 昇格 + analyze ジョブ投入
+    // 通常signUpユーザーには no-op (該当transcriptがないため)。
+    // prospect招待ユーザーで同意完了したケースにだけ effect が出る。
+    type RpcLoose = {
+      rpc: (
+        fn: string,
+        args: Record<string, unknown>,
+      ) => Promise<{ data: unknown; error: unknown }>;
+    };
+    const promote = await (service as unknown as RpcLoose).rpc(
+      "promote_pending_consent_for_user",
+      { p_user_id: user.id },
+    );
+    if (promote.error) {
+      console.warn("[legal/accept] promote_pending_consent_for_user failed", promote.error);
+      // 致命ではないため fall through (招待データなし or 既処理の通常ユーザー)
+    }
+
+    return json({
+      accepted: KINDS.length,
+      versions: LEGAL_VERSIONS,
+      promoted: typeof promote.data === "number" ? promote.data : 0,
+    });
   } catch (error) {
     return handleApiError(error);
   }
