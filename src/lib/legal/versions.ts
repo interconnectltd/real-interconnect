@@ -12,9 +12,9 @@
  *      can later detect "user has not accepted the latest version" by joining
  *      user_terms_acceptances with the latest from terms_versions.
  */
-export const TERMS_VERSION = "2026-05-03c";
-export const PRIVACY_VERSION = "2026-05-03c";
-export const TOKUSHOHO_VERSION = "2026-05-03c";
+export const TERMS_VERSION = "2026-05-04";
+export const PRIVACY_VERSION = "2026-05-04";
+export const TOKUSHOHO_VERSION = "2026-05-04";
 
 export const LEGAL_VERSIONS = {
   terms: TERMS_VERSION,

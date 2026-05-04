@@ -23,15 +23,14 @@ export function PrivacyContent() {
 
       <h2 className="mt-6 text-lg font-semibold text-foreground">0. 事業者情報</h2>
       <ul className="list-disc pl-5">
-        <li>事業者の名称: INTERCONNECT</li>
-        <li>運営形態: 個人事業主</li>
-        <li>所在地: 個人事業主のため、消費者庁ガイドラインに準じて請求があった場合に遅滞なく開示いたします。</li>
-        <li>代表者氏名: 個人事業主のため、請求があった場合に遅滞なく開示いたします。</li>
-        <li>個人情報保護管理者: INTERCONNECT 個人情報保護管理者</li>
+        <li>事業者の名称: INTER CONNECT株式会社</li>
+        <li>代表者氏名: 吉井 和樹</li>
+        <li>所在地: 請求があった場合、遅滞なく開示いたします。</li>
+        <li>個人情報保護管理者: INTER CONNECT株式会社 個人情報保護管理者</li>
         <li>連絡先: <a href="mailto:interconnectltd3568@gmail.com" className="text-primary underline-offset-4 hover:underline">interconnectltd3568@gmail.com</a> ／ <a href="/contact" className="text-primary underline-offset-4 hover:underline">/contact</a></li>
       </ul>
       <p>
-        所在地・代表者氏名の開示請求は、上記連絡先に「特定商取引法又は個人情報保護法に基づく開示請求」と
+        所在地の開示請求は、上記連絡先に「特定商取引法又は個人情報保護法に基づく開示請求」と
         明記してご連絡ください。請求受領後、原則5営業日以内に書面又は電子メールで開示します。
       </p>
 

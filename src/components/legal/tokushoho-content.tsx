@@ -19,17 +19,16 @@ export function TokushohoContent() {
           <tbody>
             <tr className="border-b border-border align-top">
               <th className="whitespace-nowrap py-3 pr-4 text-left font-semibold text-foreground">事業者の名称</th>
-              <td className="py-3">INTERCONNECT</td>
+              <td className="py-3">INTER CONNECT株式会社</td>
             </tr>
             <tr className="border-b border-border align-top">
-              <th className="whitespace-nowrap py-3 pr-4 text-left font-semibold text-foreground">運営形態</th>
-              <td className="py-3">個人事業主</td>
+              <th className="whitespace-nowrap py-3 pr-4 text-left font-semibold text-foreground">代表者氏名</th>
+              <td className="py-3">吉井 和樹</td>
             </tr>
             <tr className="border-b border-border align-top">
-              <th className="whitespace-nowrap py-3 pr-4 text-left font-semibold text-foreground">代表者氏名・所在地</th>
+              <th className="whitespace-nowrap py-3 pr-4 text-left font-semibold text-foreground">所在地</th>
               <td className="py-3">
-                個人事業主のため、消費者庁ガイドラインに基づき、代表者の氏名及び所在地は請求があった場合、
-                遅滞なく開示いたします。
+                請求があった場合、遅滞なく開示いたします。
                 <br />
                 <strong>請求方法</strong>: 下記の連絡先メールアドレス宛に「特定商取引法に基づく開示請求」と
                 明記のうえご連絡ください。

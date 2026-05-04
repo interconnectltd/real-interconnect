@@ -46,7 +46,7 @@ export default function PublicLayout({
             <Link href="/contact" className="py-2 hover:text-foreground">お問い合わせ</Link>
           </nav>
           <p className="mt-3 text-center text-xs text-muted-foreground/60">
-            &copy; {new Date().getFullYear()} INTER CONNECT
+            &copy; {new Date().getFullYear()} INTER CONNECT株式会社
           </p>
         </div>
       </footer>
