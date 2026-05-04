@@ -188,6 +188,25 @@ export default function MembersPage() {
         </div>
       ) : members && members.length > 0 ? (
         <>
+          {/* 同義語展開で検索が広がっていることを明示 (動的生成のため SR にも通知) */}
+          {meta?.searchExpanded && memberSearch.trim() && meta.searchTerms && meta.searchTerms.length > 1 && (
+            <p
+              role="status"
+              aria-live="polite"
+              className="text-xs text-muted-foreground"
+            >
+              <span className="font-medium text-accent-strong">「{memberSearch.trim()}」</span>
+              に関連する{" "}
+              {meta.searchTerms.slice(1, 5).map((t, i) => (
+                <span key={t} className="text-foreground">
+                  {i > 0 && "・"}
+                  {t}
+                </span>
+              ))}
+              {meta.searchTerms.length > 5 && " ほか"}
+              {" "}も含めて検索しています
+            </p>
+          )}
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
             {members.map((member) => (
               <MemberCard
@@ -219,7 +238,12 @@ export default function MembersPage() {
           )}
         </>
       ) : (
-        <EmptyState search={memberSearch.trim()} hasFilter={hasFilter} onClear={clearFilters} />
+        <EmptyState
+          search={memberSearch.trim()}
+          hasFilter={hasFilter}
+          onClear={clearFilters}
+          synonymsTried={meta?.searchTerms ?? []}
+        />
       )}
     </div>
   );
@@ -364,7 +388,7 @@ function MemberCard({
         aria-label={`${member.name} のプロフィールを開く${stateLabel}`}
         className="block w-full rounded-lg outline-none focus-visible:ring-[3px] focus-visible:ring-ring/70"
       >
-        <Card className="ds-card-interactive h-full border-l-stripe border-l-transparent transition-[border-color] hover:border-l-accent">
+        <Card className="ds-card-interactive h-full">
           <CardContent className="space-y-3 pr-9">
             <div className="flex items-start gap-3">
               <UserAvatar name={member.name} avatarUrl={member.avatar_url} size="md" />
@@ -538,13 +562,20 @@ function EmptyState({
   search,
   hasFilter,
   onClear,
+  synonymsTried,
 }: {
   search: string;
   hasFilter: boolean;
   onClear: () => void;
+  /** API が試した検索キーワード (元語 + 同義語展開) — 「補助金で見つかりません」の下に出す */
+  synonymsTried?: string[];
 }) {
+  // 元語 (= synonymsTried[0]) を除いた同義語候補
+  const synonymHints =
+    synonymsTried && synonymsTried.length > 1 ? synonymsTried.slice(1, 6) : [];
+
   return (
-    <div className="ds-empty-state">
+    <div role="status" aria-live="polite" className="ds-empty-state">
       <Users className="mx-auto h-8 w-8 text-muted-foreground/40" aria-hidden="true" />
       <p className="mt-3 text-sm font-medium text-foreground">
         {search ? "検索結果が見つかりません" : "メンバーがまだいません"}
@@ -552,7 +583,14 @@ function EmptyState({
       {hasFilter && (
         <>
           <p className="mx-auto mt-1 max-w-sm text-xs leading-relaxed text-muted-foreground">
-            条件を絞りすぎている可能性があります。
+            「{search || "条件"}」に関連するメンバーが見つかりませんでした。
+            {synonymHints.length > 0 && (
+              <>
+                <br />
+                <span className="text-foreground">{synonymHints.join("・")}</span>
+                {" "}も含めて検索済みです。
+              </>
+            )}
           </p>
           <Button variant="outline" size="sm" className="mt-4" onClick={onClear}>
             条件をクリア

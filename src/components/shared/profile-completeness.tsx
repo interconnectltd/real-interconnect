@@ -49,11 +49,10 @@ export function ProfileCompleteness({ profile, hideLink }: ProfileCompletenessPr
   if (score >= 100) return null;
 
   return (
-    <Card className="ds-card-interactive relative overflow-hidden">
-      <span aria-hidden="true" className="ds-card-stripe opacity-60" />
-      <CardContent className="space-y-3 pl-5">
+    <Card>
+      <CardContent className="space-y-3">
         <div className="flex items-center justify-between gap-2">
-          <p className="text-xs font-medium tracking-wide text-muted-foreground">
+          <p className="ds-kpi-label">
             プロフィール完成度
           </p>
           <UserCircle

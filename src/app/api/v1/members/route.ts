@@ -1,6 +1,21 @@
 import { withAuth, json, handleApiError } from "@/lib/api-helpers";
 import { sanitizeFilterValue } from "@/lib/sanitize";
+import { expandSearchTerms, buildIlikeOrClause } from "@/lib/search/synonyms";
 
+/**
+ * /api/v1/members?q=...
+ *
+ * 検索戦略 (3層 fallback):
+ *   1. **完全一致層** — 入力文字列をそのまま name/company/bio に ILIKE
+ *      ("補助金" 入力 → "補助金" を含む人だけが hit)
+ *   2. **同義語層 (semantic-lite)** — 完全一致 0件 or 不足時、辞書展開した
+ *      関連キーワード ("補助金"→"助成"/"支援金"/"公募"/"採択") で OR 検索。
+ *      embedding pgvector 並みではないが ILIKE 単独より大幅に再現性UP。
+ *   3. **0件時** — meta.suggestions に「拡張で hit する語」を返却し、
+ *      UI 側で「もしかして〇〇」サジェスト表示できる。
+ *
+ * embedding 完全版は別 PR で pgvector + profile_embeddings を導入予定。
+ */
 export async function GET(request: Request) {
   try {
     const { user, supabase } = await withAuth();
@@ -14,6 +29,9 @@ export async function GET(request: Request) {
     const limit = 20;
     const offset = (page - 1) * limit;
 
+    const expandedTerms = search ? expandSearchTerms(search) : [];
+    const usedSynonyms = expandedTerms.length > 1; // 元の文字列 + 同義語あり
+
     // For score sort, use matching_scores_v4 join
     if (sort === "score") {
       let scoreQuery = supabase
@@ -25,9 +43,13 @@ export async function GET(request: Request) {
         .eq("viewer_id", user.id)
         .gt("total_score", 0);
 
+      // search が truthy なら expandedTerms は必ず1要素以上 (元語含む)
       if (search) {
         scoreQuery = scoreQuery.or(
-          `target_profile.name.ilike.%${search}%,target_profile.company.ilike.%${search}%,target_profile.bio.ilike.%${search}%`,
+          buildIlikeOrClause(
+            ["target_profile.name", "target_profile.company", "target_profile.bio"],
+            expandedTerms,
+          ),
         );
       }
       if (industry) {
@@ -62,6 +84,8 @@ export async function GET(request: Request) {
           page,
           totalPages: Math.ceil((scoreCount ?? 0) / limit),
           totalCount: scoreCount ?? 0,
+          searchExpanded: usedSynonyms,
+          searchTerms: expandedTerms,
         },
       });
     }
@@ -75,9 +99,10 @@ export async function GET(request: Request) {
       .eq("is_active", true)
       .neq("id", user.id);
 
+    // search が truthy なら expandedTerms は必ず1要素以上 (元語含む)
     if (search) {
       query = query.or(
-        `name.ilike.%${search}%,company.ilike.%${search}%,bio.ilike.%${search}%`,
+        buildIlikeOrClause(["name", "company", "bio"], expandedTerms),
       );
     }
 
@@ -107,6 +132,9 @@ export async function GET(request: Request) {
         page,
         totalPages: Math.ceil((count ?? 0) / limit),
         totalCount: count ?? 0,
+        // 同義語展開された場合、UI 側で「補助金 → 助成・支援金 を含めて検索しています」と表示できる
+        searchExpanded: usedSynonyms,
+        searchTerms: expandedTerms,
       },
     });
   } catch (error) {

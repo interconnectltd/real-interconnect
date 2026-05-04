@@ -523,6 +523,17 @@
     width: 100%;
   }
 
+  /* KPI label (uppercase eyebrow) — Linear/Stripe 系の罫線grid label
+   * ds-eyebrow (0.14em) より tracking 控えめで KPI 数値とのバランス重視 */
+  .ds-kpi-label {
+    font-size: 11px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--muted-foreground);
+    line-height: 1.4;
+  }
+
   /* KPI number — 任意値タイポを撲滅するため font-size/weight 内包 */
   .ds-kpi-number {
     font-size: 36px;
@@ -549,13 +560,14 @@
     color: var(--muted-foreground);
   }
 
-  /* Card lift on hover (default interaction pattern) */
+  /* Card lift on hover — Linear/Stripe 系の subtle interaction
+   * shadow→翔上ではなく、border だけが accent 寄りになる minimal pattern */
   .ds-card-interactive {
-    transition: box-shadow 0.18s ease, transform 0.18s ease, border-color 0.18s ease;
+    transition: border-color 0.16s ease, box-shadow 0.16s ease;
+    cursor: pointer;
   }
   .ds-card-interactive:hover {
-    box-shadow: var(--shadow-md);
-    transform: translateY(-1px);
-    border-color: color-mix(in oklab, var(--accent) 30%, var(--border));
+    border-color: color-mix(in oklab, var(--accent) 40%, var(--border));
+    box-shadow: var(--shadow-sm);
   }
 }

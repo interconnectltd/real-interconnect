@@ -125,70 +125,56 @@ export default function DashboardPage() {
       {/* Lv1: 最重要CTAを最上段に */}
       {isLv1 && <TldvConnectCta />}
 
-      {/* KPI grid (B2B 質実版: アイコン box廃止 + 左 stripe + 大数値主体)
-       *  - 装飾的な4色アイコンbox は外し、Card 全体を navy トーンで統一
-       *  - 左に薄い4pxの brand stripe (gradient-brand) で「ブランド identity」を控えめに
-       *  - 数値は ds-kpi-number = 36px tabular-nums で即読み可能 (CFO/役員向け)
-       *  - アイコンは右上 muted small で副次的扱い
-       *  - ChevronRight でリンクであることを示唆 (内部遷移、ArrowUpRight は外部慣習)
-       *  - zeroHint は accent-strong italic で「次のアクション」を示唆
+      {/* KPI Overview — Linear/Stripe Dashboard 系の "罫線区切り inline grid"
+       *
+       * Card 廃止理由:
+       *   各 KPI を個別 Card で囲うと shadow + radius + border + stripe の
+       *   繰り返しで「AI 生成 SaaS テンプレ」感が出る。
+       *   Linear / Stripe / Mercury のダッシュボードは KPI を一枚の
+       *   オーバービュー行にまとめ、内部を罫線で区切る。
        */}
-      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-        {stats.map((stat) => {
-          const isZero = stat.value === 0;
-          const display = isZero && stat.zeroHint ? stat.zeroHint : stat.hint;
-          const Icon = stat.icon;
-          return (
-            <Link
-              key={stat.label}
-              href={stat.href}
-              className="group rounded-lg outline-none focus-visible:ring-[3px] focus-visible:ring-ring/70"
-              aria-label={`${stat.label} ${stat.value.toLocaleString()}件、詳細を開く`}
-            >
-              <Card className="ds-card-interactive relative h-full overflow-hidden">
-                <span aria-hidden="true" className="ds-card-stripe opacity-60 transition-opacity group-hover:opacity-100" />
-                <CardContent className="space-y-1 pl-5">
-                  <div className="flex items-center justify-between gap-2">
-                    <p className="text-xs font-medium tracking-wide text-muted-foreground">
-                      {stat.label}
-                    </p>
-                    <Icon
-                      className="h-3.5 w-3.5 shrink-0 text-muted-foreground/50 transition-colors group-hover:text-accent-strong"
-                      aria-hidden="true"
-                    />
-                  </div>
-                  <p className="ds-kpi-number text-foreground">
-                    {stat.value.toLocaleString()}
-                  </p>
-                  <div className="flex items-center justify-between gap-2 pt-1">
-                    <p
-                      className={
-                        isZero && stat.zeroHint
-                          ? "text-xs italic text-accent-strong"
-                          : "text-xs text-muted-foreground/80"
-                      }
-                    >
-                      {display}
-                    </p>
-                    <ChevronRight
-                      className="h-3.5 w-3.5 shrink-0 text-muted-foreground/40 transition-all group-hover:translate-x-0.5 group-hover:text-accent-strong"
-                      aria-hidden="true"
-                    />
-                  </div>
-                </CardContent>
-              </Card>
-            </Link>
-          );
-        })}
-      </div>
+      <section
+        aria-label="ネットワーク指標"
+        className="overflow-hidden rounded-lg border border-border bg-card"
+      >
+        <div className="grid divide-y divide-border sm:grid-cols-2 sm:divide-y-0 sm:divide-x lg:grid-cols-4">
+          {stats.map((stat) => {
+            const isZero = stat.value === 0;
+            const display = isZero && stat.zeroHint ? stat.zeroHint : stat.hint;
+            return (
+              <Link
+                key={stat.label}
+                href={stat.href}
+                aria-label={`${stat.label} ${stat.value.toLocaleString()}件、詳細を開く`}
+                className="group block px-6 py-5 outline-none transition-colors hover:bg-muted/40 focus-visible:relative focus-visible:z-10 focus-visible:bg-muted/60 focus-visible:ring-[3px] focus-visible:ring-inset focus-visible:ring-ring/70"
+              >
+                <p className="ds-kpi-label">
+                  {stat.label}
+                </p>
+                <p className="ds-kpi-number mt-2 text-foreground">
+                  {stat.value.toLocaleString()}
+                </p>
+                <p
+                  className={
+                    isZero && stat.zeroHint
+                      ? "mt-1.5 text-xs text-accent-strong"
+                      : "mt-1.5 text-xs text-muted-foreground"
+                  }
+                >
+                  {display}
+                </p>
+              </Link>
+            );
+          })}
+        </div>
+      </section>
 
-      {/* 成熟度 + プロフィール完成度 (KPI Card と同じ stripe + 大数値主体に統一) */}
+      {/* 成熟度 + プロフィール完成度 — shadow / stripe を抑え border-only に */}
       <div className="grid gap-4 lg:grid-cols-2">
-        <Card className="ds-card-interactive relative overflow-hidden">
-          <span aria-hidden="true" className="ds-card-stripe opacity-60" />
-          <CardContent className="space-y-3 pl-5">
+        <Card>
+          <CardContent className="space-y-3">
             <div className="flex items-center justify-between gap-2">
-              <p className="text-xs font-medium tracking-wide text-muted-foreground">
+              <p className="ds-kpi-label">
                 おすすめ精度
               </p>
               <Sparkles

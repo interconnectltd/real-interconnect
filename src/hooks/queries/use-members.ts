@@ -7,7 +7,15 @@ import type { Profile } from "@/types";
 
 interface MembersResponse {
   members: Profile[];
-  meta: { page: number; totalPages: number; totalCount: number };
+  meta: {
+    page: number;
+    totalPages: number;
+    totalCount: number;
+    /** 同義語辞書展開で検索を広げたかどうか (UIに「〇〇も含めて検索」表示用) */
+    searchExpanded?: boolean;
+    /** 実際に検索に使われたキーワード一覧 (元語 + 同義語) */
+    searchTerms?: string[];
+  };
 }
 
 export function useMembers(
