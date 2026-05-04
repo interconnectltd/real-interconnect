@@ -335,6 +335,49 @@
     border-radius: 0.5rem;
   }
 
+  /* Color shorthand for AA-safe accent text */
+  .text-accent-strong {
+    color: var(--accent-strong);
+  }
+  .border-accent-strong {
+    border-color: var(--accent-strong);
+  }
+
+  /* Semantic text utilities */
+  .text-warning {
+    color: var(--warning);
+  }
+  .text-success {
+    color: var(--success);
+  }
+  .text-info {
+    color: var(--info);
+  }
+
+  /* Success badge surface (AA on white via color-mix) */
+  .badge-success-soft {
+    border-color: color-mix(in oklab, var(--success) 30%, var(--border));
+    background-color: color-mix(in oklab, var(--success) 10%, var(--card));
+    color: color-mix(in oklab, var(--success) 70%, var(--foreground));
+  }
+
+  /* Brand accent stripe (left border for cards) */
+  .border-l-stripe {
+    border-left-width: 3px;
+  }
+
+  /* Hero card left gradient stripe (Cロゴ調) */
+  .ds-card-stripe {
+    position: absolute;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    width: 4px;
+    background-image: var(--gradient-brand);
+    border-top-left-radius: var(--radius-lg);
+    border-bottom-left-radius: var(--radius-lg);
+  }
+
   /* Brand gradient text (Cロゴ調) */
   .text-gradient-brand {
     background: var(--gradient-brand);
