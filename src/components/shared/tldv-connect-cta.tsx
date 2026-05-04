@@ -30,30 +30,35 @@ export function TldvConnectCta() {
   }
 
   return (
-    <div className="rounded-lg border border-accent/25 bg-gradient-brand-soft px-6 py-7 text-center">
-      <span className="mx-auto inline-flex h-10 w-10 items-center justify-center rounded-full bg-card text-accent shadow-sm">
-        <Video className="h-5 w-5" aria-hidden="true" />
-      </span>
-      <h3 className="mt-3 text-sm font-semibold text-foreground">
-        ミーティング分析を接続しませんか？
-      </h3>
-      <p className="mx-auto mt-2 max-w-sm text-xs leading-relaxed text-muted-foreground">
-        tl;dvのミーティング記録を接続すると、あなたの関心や専門領域を理解し、
-        本当に会うべき人をご紹介できます。
-      </p>
-      <p className="mt-1.5 text-[11px] text-muted-foreground/70">所要時間：約2分</p>
-      <div className="mt-4 flex justify-center gap-2">
-        <Button size="sm" variant="accent" render={<Link href="/settings#tldv-connect" />}>
-          接続する
-        </Button>
-        <Button
-          size="sm"
-          variant="ghost"
-          onClick={handleDismiss}
-          aria-label="ミーティング分析CTAを7日間非表示にする"
-        >
-          あとで
-        </Button>
+    <div className="relative overflow-hidden rounded-lg border border-accent/25 bg-gradient-brand-soft">
+      <span aria-hidden="true" className="ds-card-stripe" />
+      <div className="flex flex-col gap-4 px-5 py-5 sm:flex-row sm:items-center sm:gap-5">
+        <Video
+          className="h-5 w-5 shrink-0 text-accent-strong"
+          aria-hidden="true"
+        />
+        <div className="min-w-0 flex-1">
+          <h3 className="text-sm font-semibold text-foreground">
+            ミーティング分析を接続しませんか？
+          </h3>
+          <p className="mt-1 text-xs leading-relaxed text-muted-foreground">
+            tl;dv の記録を接続すると、あなたの関心や専門領域を理解し、本当に会うべき人をご紹介できます。
+            <span className="ml-1 text-muted-foreground/70">所要時間：約2分</span>
+          </p>
+        </div>
+        <div className="flex shrink-0 gap-2 sm:flex-col-reverse sm:items-stretch sm:gap-1.5">
+          <Button
+            size="sm"
+            variant="ghost"
+            onClick={handleDismiss}
+            aria-label="ミーティング分析CTAを7日間非表示にする"
+          >
+            あとで
+          </Button>
+          <Button size="sm" variant="accent" render={<Link href="/settings#tldv-connect" />}>
+            接続する
+          </Button>
+        </div>
       </div>
     </div>
   );

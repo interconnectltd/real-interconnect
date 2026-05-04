@@ -182,37 +182,37 @@ export default function DashboardPage() {
         })}
       </div>
 
-      {/* 成熟度 + プロフィール完成度 */}
+      {/* 成熟度 + プロフィール完成度 (KPI Card と同じ stripe + 大数値主体に統一) */}
       <div className="grid gap-4 lg:grid-cols-2">
-        <Card>
-          <CardContent className="space-y-3">
-            <div className="flex items-start justify-between gap-3">
-              <div>
-                <div className="flex items-center gap-2">
-                  <span className="inline-flex h-7 w-7 items-center justify-center rounded-full bg-accent/15 text-accent-strong">
-                    <Sparkles className="h-3.5 w-3.5" aria-hidden="true" />
-                  </span>
-                  <p className="text-sm font-semibold text-foreground">
-                    おすすめ精度
-                  </p>
-                </div>
-                <p className="mt-1 text-xs text-muted-foreground">
-                  {maturityLevel === 3
-                    ? "最高精度のAI分析に基づくおすすめです"
-                    : `あと ${remaining} 回のミーティング分析で精度がアップします`}
-                </p>
-              </div>
-              <Badge
-                variant="outline"
-                className={
-                  maturityLevel === 3
-                    ? "border-primary/40 bg-primary/10 px-2.5 text-xs font-semibold text-primary"
-                    : "border-accent/30 bg-accent/10 px-2.5 text-xs font-semibold text-accent-strong"
-                }
-              >
-                {maturityLevel === 3 ? "Lv 3 / 3 達成" : `Lv ${maturityLevel} / 3`}
-              </Badge>
+        <Card className="ds-card-interactive relative overflow-hidden">
+          <span aria-hidden="true" className="ds-card-stripe opacity-60" />
+          <CardContent className="space-y-3 pl-5">
+            <div className="flex items-center justify-between gap-2">
+              <p className="text-xs font-medium tracking-wide text-muted-foreground">
+                おすすめ精度
+              </p>
+              <Sparkles
+                className="h-3.5 w-3.5 shrink-0 text-muted-foreground/50"
+                aria-hidden="true"
+              />
             </div>
+            <div className="flex items-baseline gap-2">
+              <span className="ds-kpi-number-md text-foreground">Lv {maturityLevel}</span>
+              <span className="text-sm text-muted-foreground">/ 3</span>
+              {maturityLevel === 3 && (
+                <Badge
+                  variant="outline"
+                  className="ml-1 border-primary/40 bg-primary/10 px-2 text-xs font-semibold text-primary"
+                >
+                  達成
+                </Badge>
+              )}
+            </div>
+            <p className="text-xs text-muted-foreground">
+              {maturityLevel === 3
+                ? "最高精度のAI分析に基づくおすすめです"
+                : `あと ${remaining} 回のミーティング分析で精度がアップします`}
+            </p>
             <div className="space-y-1.5">
               <ProgressBar value={maturityProgress} ariaLabel="AI分析成熟度" />
               <div className="ds-caption-xs flex justify-between text-muted-foreground/70">
@@ -415,7 +415,7 @@ function EmptyState({
   ctaLabel?: string;
 }) {
   return (
-    <div className="rounded-lg border border-dashed border-border bg-muted/40 px-6 py-10 text-center">
+    <div className="ds-empty-state">
       <Icon className="mx-auto h-8 w-8 text-muted-foreground/40" aria-hidden="true" />
       <p className="mt-3 text-sm text-muted-foreground">{text}</p>
       {ctaHref && ctaLabel && (

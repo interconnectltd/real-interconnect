@@ -160,7 +160,7 @@ export default function ProfilePage() {
       {/* Hero card with brand stripe */}
       <Card className="relative overflow-hidden">
         <span aria-hidden="true" className="ds-card-stripe" />
-        <CardContent className="space-y-5 pl-6">
+        <CardContent className="space-y-5 pl-5">
           <div className="flex items-start gap-4">
             <button
               type="button"
@@ -427,7 +427,7 @@ function ProfileViewMode({
       )}
       <ViewField icon={Mail} label="メールアドレス" value={profile.email} />
       {profile.contact_info && (
-        <div className="rounded-lg border border-accent/25 border-l-stripe border-l-accent bg-accent/5 p-3">
+        <div className="rounded-lg border border-accent/25 bg-accent/5 p-3">
           <dt className="flex items-center gap-1.5 text-xs font-medium text-accent-strong">
             <Lock className="h-3 w-3" aria-hidden="true" />
             連絡先（コネクション成立後に公開）

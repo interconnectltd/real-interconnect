@@ -301,12 +301,8 @@ function MutualCard({
         className="block w-full rounded-lg outline-none focus-visible:ring-[3px] focus-visible:ring-ring/70"
       >
         <Card className="ds-card-interactive relative h-full overflow-hidden border-accent/25 bg-[color:color-mix(in_oklab,var(--accent)_4%,var(--card))]">
-          {/* Mutual stripe */}
-          <span
-            aria-hidden="true"
-            className="absolute inset-y-0 left-0 w-[3px] bg-gradient-brand"
-          />
-          <CardContent className="space-y-3 pl-4 pr-9">
+          <span aria-hidden="true" className="ds-card-stripe" />
+          <CardContent className="space-y-3 pl-5 pr-9">
             <div className="flex items-start gap-3">
               <UserAvatar name={p?.name} avatarUrl={p?.avatar_url} size="md" />
               <div className="min-w-0 flex-1">
@@ -534,7 +530,7 @@ function DismissButton({ onClick }: { onClick: () => void }) {
 
 function EmptyState() {
   return (
-    <div className="rounded-lg border border-dashed border-muted-foreground/40 bg-muted/40 px-6 py-10 text-center">
+    <div className="ds-empty-state">
       <Heart className="mx-auto h-8 w-8 text-muted-foreground/40" aria-hidden="true" />
       <p className="mt-3 text-sm font-medium text-foreground">おすすめを準備しています</p>
       <p className="mx-auto mt-1 max-w-sm text-xs leading-relaxed text-muted-foreground">

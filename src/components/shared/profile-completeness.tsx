@@ -49,26 +49,25 @@ export function ProfileCompleteness({ profile, hideLink }: ProfileCompletenessPr
   if (score >= 100) return null;
 
   return (
-    <Card>
-      <CardContent className="space-y-3">
-        <div className="flex items-start justify-between gap-3">
-          <div>
-            <div className="flex items-center gap-2">
-              <span className="inline-flex h-7 w-7 items-center justify-center rounded-full bg-primary/10 text-primary">
-                <UserCircle className="h-4 w-4" aria-hidden="true" />
-              </span>
-              <p className="text-sm font-semibold text-foreground">
-                プロフィール完成度
-              </p>
-            </div>
-            <p className="mt-1 text-xs text-muted-foreground">
-              プロフィールを充実させるとマッチング精度が向上します
-            </p>
-          </div>
-          <span className="ds-kpi-number text-2xl font-bold text-foreground">
-            {score}%
-          </span>
+    <Card className="ds-card-interactive relative overflow-hidden">
+      <span aria-hidden="true" className="ds-card-stripe opacity-60" />
+      <CardContent className="space-y-3 pl-5">
+        <div className="flex items-center justify-between gap-2">
+          <p className="text-xs font-medium tracking-wide text-muted-foreground">
+            プロフィール完成度
+          </p>
+          <UserCircle
+            className="h-3.5 w-3.5 shrink-0 text-muted-foreground/50"
+            aria-hidden="true"
+          />
         </div>
+        <div className="flex items-baseline gap-1">
+          <span className="ds-kpi-number-md text-foreground">{score}</span>
+          <span className="text-base text-muted-foreground">%</span>
+        </div>
+        <p className="text-xs text-muted-foreground">
+          プロフィールを充実させるとマッチング精度が向上します
+        </p>
 
         <div
           role="progressbar"

@@ -478,6 +478,28 @@
     border-bottom-left-radius: var(--radius-lg);
   }
 
+  /* Empty state container — dashed border の "AI生成風" を排除し、
+   * 上端に薄い brand stripe を引いて identity を控えめに保つ */
+  .ds-empty-state {
+    position: relative;
+    overflow: hidden;
+    border-radius: var(--radius-lg);
+    border: 1px solid var(--border);
+    background-color: color-mix(in oklab, var(--muted) 70%, var(--card));
+    padding: 2.5rem 1.5rem;
+    text-align: center;
+  }
+  .ds-empty-state::before {
+    content: "";
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: 0;
+    height: 2px;
+    background-image: var(--gradient-brand);
+    opacity: 0.6;
+  }
+
   /* Brand gradient text (Cロゴ調) */
   .text-gradient-brand {
     background: var(--gradient-brand);

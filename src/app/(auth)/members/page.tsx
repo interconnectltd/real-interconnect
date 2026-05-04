@@ -544,7 +544,7 @@ function EmptyState({
   onClear: () => void;
 }) {
   return (
-    <div className="rounded-lg border border-dashed border-muted-foreground/40 bg-muted/40 px-6 py-12 text-center">
+    <div className="ds-empty-state">
       <Users className="mx-auto h-8 w-8 text-muted-foreground/40" aria-hidden="true" />
       <p className="mt-3 text-sm font-medium text-foreground">
         {search ? "検索結果が見つかりません" : "メンバーがまだいません"}
