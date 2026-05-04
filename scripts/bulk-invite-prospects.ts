@@ -27,6 +27,7 @@
 import { createClient, SupabaseClient } from "@supabase/supabase-js";
 import { TldvClient } from "../src/lib/tldv/client";
 import { processTldvMeeting } from "../src/lib/tldv/process-meeting";
+import { inviteProspect, type InviteResult, type ProspectCandidate } from "../src/lib/prospect/invite-prospect";
 
 interface CliArgs {
   dryRun: boolean;
@@ -35,19 +36,7 @@ interface CliArgs {
   invitedBy: string | null;
 }
 
-interface ProspectCandidate {
-  email: string;
-  name: string;
-  meetingIds: string[];
-  participantIds: string[];
-}
-
-interface InviteResult {
-  email: string;
-  status: "invited" | "skipped_existing" | "skipped_dry_run" | "failed";
-  userId?: string;
-  error?: string;
-}
+// ProspectCandidate / InviteResult は src/lib/prospect/invite-prospect.ts から import
 
 function parseArgs(): CliArgs {
   const args = process.argv.slice(2);
@@ -154,104 +143,18 @@ async function extractProspects(
   return [...map.values()];
 }
 
+// inviteOne は src/lib/prospect/invite-prospect.ts の inviteProspect() に統合済み
 async function inviteOne(
   supabase: SupabaseClient,
   candidate: ProspectCandidate,
   invitedBy: string | null,
   dryRun: boolean,
 ): Promise<InviteResult> {
-  if (dryRun) {
-    return { email: candidate.email, status: "skipped_dry_run" };
-  }
-
-  // 既存ユーザーチェック
-  const { data: existing } = await supabase
-    .from("user_profiles")
-    .select("id")
-    .ilike("email", candidate.email)
-    .maybeSingle();
-  if (existing) {
-    return {
-      email: candidate.email,
-      status: "skipped_existing",
-      userId: (existing as { id: string }).id,
-    };
-  }
-
-  // Supabase Auth Admin: invite
-  const { data: invited, error: inviteError } =
-    await supabase.auth.admin.inviteUserByEmail(candidate.email, {
-      data: {
-        name: candidate.name,
-        prospect_invite: true,
-        source_meeting_count: candidate.meetingIds.length,
-      },
-    });
-
-  if (inviteError || !invited?.user) {
-    return {
-      email: candidate.email,
-      status: "failed",
-      error: inviteError?.message ?? "no user returned",
-    };
-  }
-
-  const userId = invited.user.id;
-
-  const inviteSentAt = new Date();
-  const expiresAt = new Date(inviteSentAt.getTime() + 14 * 24 * 60 * 60 * 1000); // 14日後
-
-  // partial failure rollback: いずれかのDB操作失敗で auth.admin.deleteUser でロールバック
-  try {
-    const { error: profileErr } = await supabase.from("user_profiles").upsert(
-      {
-        id: userId,
-        email: candidate.email,
-        name: candidate.name,
-        prospect_invite_at: inviteSentAt.toISOString(),
-        prospect_invite_expires_at: expiresAt.toISOString(),
-      },
-      { onConflict: "id" },
-    );
-    if (profileErr) throw new Error(`profiles upsert: ${profileErr.message}`);
-
-    const { error: pErr } = await supabase
-      .from("meeting_participants")
-      .update({
-        user_id: userId,
-        is_linked: true,
-        linked_method: "email",
-      })
-      .in("id", candidate.participantIds);
-    if (pErr) throw new Error(`participants update: ${pErr.message}`);
-
-    const { error: logErr } = await supabase.from("bulk_invite_log").insert({
-      invited_by: invitedBy,
-      email: candidate.email,
-      user_id: userId,
-      source_meeting_ids: candidate.meetingIds,
-      status: "invited",
-      metadata: {
-        invite_sent_at: inviteSentAt.toISOString(),
-        invite_expires_at: expiresAt.toISOString(),
-        participant_count: candidate.participantIds.length,
-        meeting_count: candidate.meetingIds.length,
-      },
-    });
-    if (logErr) throw new Error(`bulk_invite_log insert: ${logErr.message}`);
-  } catch (err) {
-    const msg = err instanceof Error ? err.message : String(err);
-    console.error(`[invite] DB write failed for ${candidate.email}, rolling back auth user`, msg);
-    // rollback: auth.users 削除 (CASCADE で user_profiles等もクリア)
-    try {
-      await supabase.auth.admin.deleteUser(userId);
-    } catch (rollbackErr) {
-      console.error(`[invite] rollback failed for user ${userId}`, rollbackErr);
-    }
-    return { email: candidate.email, status: "failed", error: msg };
-  }
-
-  return { email: candidate.email, status: "invited", userId };
+  return inviteProspect(supabase, candidate, {
+    invitedBy,
+    dryRun,
+    metadata: { source: "bulk_invite_cli" },
+  });
 }
 
 async function main() {

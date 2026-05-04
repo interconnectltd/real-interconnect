@@ -22,7 +22,11 @@ export async function POST(request: Request) {
     const meetings = list.results.slice(0, maxMeetings);
     for (const meeting of meetings) {
       try {
-        const result = await processTldvMeeting(meeting.id, supabase, tldv);
+        // holdForConsent=true: 同意未取得のprospect発話が混入する transcript を
+        // Claude送信前に一時保留にする (越境移転同意の時系列保証)
+        const result = await processTldvMeeting(meeting.id, supabase, tldv, {
+          holdForConsent: true,
+        });
         if (result.skipped) {
           skipped++;
         } else {
