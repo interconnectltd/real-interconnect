@@ -30,8 +30,7 @@ export function TldvConnectCta() {
   }
 
   return (
-    <div className="relative overflow-hidden rounded-lg border border-accent/25 bg-gradient-brand-soft">
-      <span aria-hidden="true" className="ds-card-stripe" />
+    <div className="rounded-lg border border-accent/25 bg-gradient-brand-soft">
       <div className="flex flex-col gap-4 px-5 py-5 sm:flex-row sm:items-center sm:gap-5">
         <Video
           className="h-5 w-5 shrink-0 text-accent-strong"

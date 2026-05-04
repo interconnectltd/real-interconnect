@@ -157,10 +157,9 @@ export default function ProfilePage() {
       {/* Completeness */}
       <ProfileCompleteness profile={profile} hideLink />
 
-      {/* Hero card with brand stripe */}
-      <Card className="relative overflow-hidden">
-        <span aria-hidden="true" className="ds-card-stripe" />
-        <CardContent className="space-y-5 pl-5">
+      {/* Hero card */}
+      <Card>
+        <CardContent className="space-y-5">
           <div className="flex items-start gap-4">
             <button
               type="button"

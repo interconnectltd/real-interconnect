@@ -461,43 +461,15 @@
     color: color-mix(in oklab, var(--success) 70%, var(--foreground));
   }
 
-  /* Brand accent stripe (left border for cards) */
-  .border-l-stripe {
-    border-left-width: 3px;
-  }
 
-  /* Hero card left gradient stripe (Cロゴ調) */
-  .ds-card-stripe {
-    position: absolute;
-    left: 0;
-    top: 0;
-    bottom: 0;
-    width: 4px;
-    background-image: var(--gradient-brand);
-    border-top-left-radius: var(--radius-lg);
-    border-bottom-left-radius: var(--radius-lg);
-  }
-
-  /* Empty state container — dashed border の "AI生成風" を排除し、
-   * 上端に薄い brand stripe を引いて identity を控えめに保つ */
+  /* Empty state container — dashed border の "AI生成風" を排除、
+   * 装飾は border + 軽い tint のみで Linear/Stripe 系の質実感に */
   .ds-empty-state {
-    position: relative;
-    overflow: hidden;
     border-radius: var(--radius-lg);
     border: 1px solid var(--border);
     background-color: color-mix(in oklab, var(--muted) 70%, var(--card));
     padding: 2.5rem 1.5rem;
     text-align: center;
-  }
-  .ds-empty-state::before {
-    content: "";
-    position: absolute;
-    left: 0;
-    right: 0;
-    top: 0;
-    height: 2px;
-    background-image: var(--gradient-brand);
-    opacity: 0.6;
   }
 
   /* Brand gradient text (Cロゴ調) */

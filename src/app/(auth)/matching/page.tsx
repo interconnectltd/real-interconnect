@@ -300,9 +300,8 @@ function MutualCard({
         aria-label={`${name} のプロフィールを開く${stateLabel}`}
         className="block w-full rounded-lg outline-none focus-visible:ring-[3px] focus-visible:ring-ring/70"
       >
-        <Card className="ds-card-interactive relative h-full overflow-hidden border-accent/25 bg-[color:color-mix(in_oklab,var(--accent)_4%,var(--card))]">
-          <span aria-hidden="true" className="ds-card-stripe" />
-          <CardContent className="space-y-3 pl-5 pr-9">
+        <Card className="ds-card-interactive h-full border-accent/25 bg-[color:color-mix(in_oklab,var(--accent)_4%,var(--card))]">
+          <CardContent className="space-y-3 pr-9">
             <div className="flex items-start gap-3">
               <UserAvatar name={p?.name} avatarUrl={p?.avatar_url} size="md" />
               <div className="min-w-0 flex-1">
