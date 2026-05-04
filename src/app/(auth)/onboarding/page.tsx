@@ -124,12 +124,47 @@ export default function OnboardingPage() {
   }, [step]);
 
   // Step 1: 基本情報
+  // user_profiles を source of truth として読む。 signUp時の user_metadata は
+  // frozen snapshot のため、 /settings 等で変更されても反映されない問題を解消。
+  // フォールバック: profile 取得失敗時は user_metadata、それも無ければ email username。
   const [profile, setProfile] = useState({
     name: user?.user_metadata?.name ?? "",
     company: user?.user_metadata?.company ?? "",
     position: user?.user_metadata?.position ?? "",
     contact_info: "",
   });
+  const [profileLoaded, setProfileLoaded] = useState(false);
+
+  useEffect(() => {
+    if (!user?.id || profileLoaded) return;
+    let cancelled = false;
+    (async () => {
+      const { data } = await supabase
+        .from("user_profiles")
+        .select("name, company, position, contact_info")
+        .eq("id", user.id)
+        .maybeSingle();
+      if (cancelled) return;
+      if (data) {
+        setProfile({
+          name: (data as { name?: string }).name ?? user?.user_metadata?.name ?? "",
+          company:
+            (data as { company?: string | null }).company ??
+            user?.user_metadata?.company ??
+            "",
+          position:
+            (data as { position?: string | null }).position ??
+            user?.user_metadata?.position ??
+            "",
+          contact_info: (data as { contact_info?: string | null }).contact_info ?? "",
+        });
+      }
+      setProfileLoaded(true);
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, [user?.id, profileLoaded, supabase, user?.user_metadata]);
 
   // Step 2: Goals & Offerings
   const [selectedGoals, setSelectedGoals] = useState<Set<string>>(new Set());
