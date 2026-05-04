@@ -65,6 +65,20 @@ export function useDismissedUsers(userId: string | undefined) {
     [userId],
   );
 
+  const restore = useCallback(
+    (targetId: string) => {
+      if (!userId) return;
+      const current = getDismissedIds(userId);
+      if (current.includes(targetId)) {
+        setDismissedIds(
+          userId,
+          current.filter((id) => id !== targetId),
+        );
+      }
+    },
+    [userId],
+  );
+
   const resetAll = useCallback(() => {
     if (!userId) return;
     setDismissedIds(userId, []);
@@ -72,5 +86,5 @@ export function useDismissedUsers(userId: string | undefined) {
 
   const dismissedSet = new Set(dismissedIds);
 
-  return { dismissedSet, dismiss, resetAll };
+  return { dismissedSet, dismiss, restore, resetAll };
 }

@@ -133,6 +133,9 @@
   --input: oklch(0.93 0.008 240);
   --ring: oklch(0.72 0.12 180);                  /* focus = teal */
 
+  /* Accent strong (AA 4.5:1 on white) — eyebrow / small text 用途 */
+  --accent-strong: oklch(0.50 0.12 180);
+
   /* Charts (brand-derived) */
   --chart-1: oklch(0.26 0.06 255);
   --chart-2: oklch(0.72 0.12 180);
@@ -199,6 +202,7 @@
 
   --accent: oklch(0.72 0.12 180);
   --accent-foreground: oklch(0.16 0.02 255);
+  --accent-strong: oklch(0.78 0.11 180);
 
   --destructive: oklch(0.704 0.191 22.216);
   --border: oklch(1 0 0 / 10%);
@@ -282,6 +286,55 @@
 
 /* ── Design-system utilities ── */
 @layer components {
+  /* Typography utilities (集約: 任意値タイポを消去) */
+  .ds-eyebrow {
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--accent-strong);
+    line-height: 1.4;
+  }
+  .ds-eyebrow-rule {
+    display: block;
+    height: 1px;
+    width: 24px;
+    background-color: var(--accent);
+    margin-top: 6px;
+  }
+  .ds-h1 {
+    font-size: 28px;
+    font-weight: 700;
+    line-height: 1.25;
+    letter-spacing: -0.01em;
+  }
+  .ds-h2 {
+    font-size: 22px;
+    font-weight: 600;
+    line-height: 1.3;
+    letter-spacing: -0.005em;
+  }
+  .ds-h3 {
+    font-size: 16px;
+    font-weight: 600;
+    line-height: 1.35;
+  }
+  .ds-caption {
+    font-size: 11px;
+    font-weight: 500;
+    line-height: 1.5;
+    color: var(--muted-foreground);
+  }
+
+  /* Focus ring */
+  .ds-focus-ring {
+    outline: none;
+  }
+  .ds-focus-ring:focus-visible {
+    box-shadow: 0 0 0 3px color-mix(in oklab, var(--ring) 30%, transparent);
+    border-radius: 0.5rem;
+  }
+
   /* Brand gradient text (Cロゴ調) */
   .text-gradient-brand {
     background: var(--gradient-brand);

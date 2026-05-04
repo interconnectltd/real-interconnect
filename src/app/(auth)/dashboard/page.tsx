@@ -112,12 +112,8 @@ export default function DashboardPage() {
     <div className="mx-auto max-w-6xl space-y-8">
       <div className="flex items-start justify-between gap-3">
         <div>
-          <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-accent">
-            Dashboard
-          </p>
-          <h1 className="mt-1 text-[28px] font-bold leading-[1.25] tracking-tight text-foreground">
-            {greeting}
-          </h1>
+          <p className="ds-eyebrow">Dashboard</p>
+          <h1 className="ds-h1 mt-1 tracking-tight text-foreground">{greeting}</h1>
           <p className="mt-1 text-sm text-muted-foreground">
             あなたのネットワーク状況の概要
           </p>
@@ -323,13 +319,9 @@ function SectionHeader({
   return (
     <div className="flex items-end justify-between gap-3">
       <div>
-        <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-accent">
-          {eyebrow}
-        </p>
-        <span className="mt-1.5 block h-px w-6 bg-accent" aria-hidden="true" />
-        <h2 className="mt-2 text-[22px] font-semibold leading-[1.3] tracking-tight text-foreground">
-          {title}
-        </h2>
+        <p className="ds-eyebrow">{eyebrow}</p>
+        <span className="ds-eyebrow-rule" aria-hidden="true" />
+        <h2 className="ds-h2 mt-2 tracking-tight text-foreground">{title}</h2>
         <p className="mt-1 text-xs text-muted-foreground">{caption}</p>
       </div>
       {actionHref && actionLabel && (

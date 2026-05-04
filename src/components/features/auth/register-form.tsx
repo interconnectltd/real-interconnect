@@ -1,10 +1,11 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
+import { AlertCircle, ChevronDown, Loader2, ShieldCheck } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -15,10 +16,37 @@ import { INDUSTRIES } from "@/lib/constants";
 import { LegalDialog } from "@/components/legal/legal-dialog";
 import { LEGAL_VERSIONS } from "@/lib/legal/versions";
 
+const labelClass = "text-[13px] font-medium text-foreground";
+const fieldHelpClass = "text-xs text-destructive";
+const selectClass =
+  "h-10 w-full rounded-lg border border-input bg-card pl-3 pr-10 py-2 text-sm transition-[box-shadow,border-color] outline-none focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/30 aria-invalid:border-destructive aria-invalid:ring-[3px] aria-invalid:ring-destructive/20 appearance-none";
+const textareaClass =
+  "w-full rounded-lg border border-input bg-card px-3 py-2 text-sm transition-[box-shadow,border-color] outline-none placeholder:text-muted-foreground focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/30";
+
+// dev のみ console 出力 (本番ビルドで PII 漏出を防ぐ)
+const isDev = typeof process !== "undefined" && process.env.NODE_ENV !== "production";
+const log = {
+  group: (label: string) => isDev && console.group(label),
+  groupEnd: () => isDev && console.groupEnd(),
+  info: (...a: unknown[]) => isDev && console.log(...a),
+  warn: (...a: unknown[]) => isDev && console.warn(...a),
+  error: (...a: unknown[]) => isDev && console.error(...a),
+};
+
 export function RegisterForm() {
   const router = useRouter();
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
+  const [activeStep, setActiveStep] = useState<1 | 2 | 3 | 4>(1);
+  const errorRef = useRef<HTMLDivElement | null>(null);
+
+  // form内 focus イベントから現在 active Step を割り出す
+  function handleFocus(e: React.FocusEvent<HTMLFormElement>) {
+    const stepEl = (e.target as HTMLElement).closest("[data-step]") as HTMLElement | null;
+    if (!stepEl) return;
+    const n = Number(stepEl.dataset.step);
+    if (n === 1 || n === 2 || n === 3 || n === 4) setActiveStep(n);
+  }
 
   const {
     register,
@@ -35,6 +63,14 @@ export function RegisterForm() {
     },
   });
 
+  // エラー表示時にスクロールしてフォーカス (長いフォーム対策)
+  useEffect(() => {
+    if (error && errorRef.current) {
+      errorRef.current.scrollIntoView({ behavior: "smooth", block: "center" });
+      errorRef.current.focus();
+    }
+  }, [error]);
+
   const agreeToTerms = watch("agreeToTerms");
   const agreeToPrivacy = watch("agreeToPrivacy");
   const agreeToTokushoho = watch("agreeToTokushoho");
@@ -43,8 +79,8 @@ export function RegisterForm() {
     setLoading(true);
     setError(null);
 
-    console.group("[register] submit");
-    console.log("[register] form data", {
+    log.group("[register] submit");
+    log.info("[register] form data", {
       invitationCode: data.invitationCode,
       invitationCodeLen: data.invitationCode?.length,
       email: data.email,
@@ -54,40 +90,39 @@ export function RegisterForm() {
       agreeToTokushoho: data.agreeToTokushoho,
     });
 
-    // 招待コード検証
     let invitationId: string | null = null;
     try {
-      console.log("[register] POST /api/v1/invitation", { code: data.invitationCode });
+      log.info("[register] POST /api/v1/invitation", { code: data.invitationCode });
       const res = await fetch("/api/v1/invitation", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ code: data.invitationCode }),
       });
-      console.log("[register] invitation response", { status: res.status, ok: res.ok });
+      log.info("[register] invitation response", { status: res.status, ok: res.ok });
       const bodyText = await res.text();
-      console.log("[register] invitation body", bodyText);
+      log.info("[register] invitation body", bodyText);
       const parsed = bodyText ? JSON.parse(bodyText) : null;
       if (!res.ok) {
         const errMsg = parsed?.error?.message ?? "招待コードが無効です";
-        console.error("[register] invitation failed", parsed);
+        log.error("[register] invitation failed", parsed);
         setError(errMsg);
         setLoading(false);
-        console.groupEnd();
+        log.groupEnd();
         return;
       }
       invitationId = parsed?.data?.invitation_id ?? null;
-      console.log("[register] invitation OK", { invitationId });
+      log.info("[register] invitation OK", { invitationId });
     } catch (e) {
-      console.error("[register] invitation fetch threw", e);
+      log.error("[register] invitation fetch threw", e);
       setError("招待コードの検証に失敗しました");
       setLoading(false);
-      console.groupEnd();
+      log.groupEnd();
       return;
     }
 
     const supabase = createClient();
     const consentTimestamp = new Date().toISOString();
-    console.log("[register] supabase.auth.signUp", { email: data.email });
+    log.info("[register] supabase.auth.signUp", { email: data.email });
     const { data: signUpData, error: authError } = await supabase.auth.signUp({
       email: data.email,
       password: data.password,
@@ -108,254 +143,475 @@ export function RegisterForm() {
         },
       },
     });
-    console.log("[register] signUp result", { user: signUpData?.user?.id ?? null, session: signUpData?.session ? "present" : "null", authError });
+    log.info("[register] signUp result", {
+      user: signUpData?.user?.id ?? null,
+      session: signUpData?.session ? "present" : "null",
+      authError,
+    });
 
     if (authError) {
-      console.error("[register] signUp error", authError);
+      log.error("[register] signUp error", authError);
       setError(authError.message);
       setLoading(false);
-      console.groupEnd();
+      log.groupEnd();
       return;
     }
 
-    // Increment invitation use_count after successful signup
     if (invitationId) {
-      console.log("[register] PATCH /api/v1/invitation", { invitationId });
+      log.info("[register] PATCH /api/v1/invitation", { invitationId });
       await fetch("/api/v1/invitation", {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ invitation_id: invitationId }),
       }).catch((e) => {
-        console.warn("[register] invitation PATCH failed (non-critical)", e);
+        log.warn("[register] invitation PATCH failed (non-critical)", e);
       });
     }
 
-    // Record consent for terms / privacy / tokushoho with IP+UA evidence.
-    // Best-effort: don't block registration completion if logging fails.
-    console.log("[register] POST /api/v1/legal/accept");
+    log.info("[register] POST /api/v1/legal/accept");
     await fetch("/api/v1/legal/accept", { method: "POST" }).catch((e) => {
-      console.warn("[register] legal/accept failed (non-critical)", e);
+      log.warn("[register] legal/accept failed (non-critical)", e);
     });
 
-    console.log("[register] redirect to /login?confirmed=true");
-    console.groupEnd();
+    log.info("[register] redirect to /login?confirmed=true");
+    log.groupEnd();
     router.push("/login?confirmed=true");
   }
 
   return (
     <form
       onSubmit={handleSubmit(onSubmit, (validationErrors) => {
-        console.warn("[register] zod validation blocked submit", validationErrors);
+        log.warn("[register] zod validation blocked submit", validationErrors);
       })}
-      className="space-y-4"
+      onFocusCapture={handleFocus}
+      className="space-y-5"
+      noValidate
     >
       {error && (
-        <div className="rounded-md bg-destructive/10 p-3 text-sm text-destructive">
-          {error}
+        <div
+          ref={errorRef}
+          tabIndex={-1}
+          role="alert"
+          aria-live="assertive"
+          className="flex items-start gap-2.5 rounded-lg border border-destructive/30 bg-destructive/10 px-3.5 py-3 text-sm text-destructive outline-none focus-visible:ring-[3px] focus-visible:ring-destructive/30"
+        >
+          <AlertCircle className="mt-0.5 h-4 w-4 shrink-0" aria-hidden="true" />
+          <span>{error}</span>
         </div>
       )}
 
-      <div className="space-y-2">
-        <Label htmlFor="invitation-code">招待コード *</Label>
-        <Input
-          id="invitation-code"
-          placeholder="招待コードを入力 (例: TEST2026)"
-          autoComplete="off"
-          enterKeyHint="next"
-          {...register("invitationCode")}
-          className="tracking-wider"
-        />
-        {errors.invitationCode && (
-          <p className="text-sm text-destructive">{errors.invitationCode.message}</p>
-        )}
-      </div>
+      {/* Step progress overview (UX P0: 全体感 + 動的active) */}
+      <StepProgress activeStep={activeStep} />
 
-      <div className="space-y-2">
-        <Label htmlFor="name">お名前 *</Label>
-        <Input
-          id="name"
-          autoComplete="name"
-          placeholder="山田 太郎"
-          enterKeyHint="next"
-          {...register("name")}
-        />
-        {errors.name && (
-          <p className="text-sm text-destructive">{errors.name.message}</p>
-        )}
-      </div>
-
-      <div className="space-y-2">
-        <Label htmlFor="reg-email">メールアドレス *</Label>
-        <Input
-          id="reg-email"
-          type="email"
-          autoComplete="email"
-          placeholder="you@example.com"
-          enterKeyHint="next"
-          {...register("email")}
-        />
-        {errors.email && (
-          <p className="text-sm text-destructive">{errors.email.message}</p>
-        )}
-      </div>
-
-      <div className="space-y-2">
-        <Label htmlFor="reg-password">パスワード *</Label>
-        <Input
-          id="reg-password"
-          type="password"
-          autoComplete="new-password"
-          placeholder="8文字以上"
-          enterKeyHint="next"
-          {...register("password")}
-        />
-        {errors.password && (
-          <p className="text-sm text-destructive">{errors.password.message}</p>
-        )}
-      </div>
-
-      <div className="grid gap-4 sm:grid-cols-2">
-        <div className="space-y-2">
-          <Label htmlFor="company">会社名</Label>
-          <Input id="company" autoComplete="organization" placeholder="株式会社○○" enterKeyHint="next" {...register("company")} />
+      <Step
+        number={1}
+        title="招待コード"
+        caption="ご紹介者から受け取ったコードを入力してください"
+        isLast={false}
+      >
+        <div className="space-y-1.5">
+          <Label htmlFor="invitation-code" className={labelClass}>
+            招待コード <RequiredMark />
+          </Label>
+          <Input
+            id="invitation-code"
+            placeholder="例: TEST2026"
+            autoComplete="off"
+            enterKeyHint="next"
+            aria-invalid={Boolean(errors.invitationCode) || undefined}
+            aria-describedby={errors.invitationCode ? "invitation-code-error" : "invitation-code-hint"}
+            {...register("invitationCode")}
+            className="tracking-wider"
+          />
+          {errors.invitationCode ? (
+            <p id="invitation-code-error" className={fieldHelpClass}>
+              {errors.invitationCode.message}
+            </p>
+          ) : (
+            <p id="invitation-code-hint" className="text-xs text-muted-foreground">
+              招待コードをお持ちでない方は{" "}
+              <Link
+                href="/contact"
+                className="font-medium text-accent underline-offset-4 hover:underline"
+              >
+                お問い合わせ
+              </Link>
+              からご連絡ください。
+            </p>
+          )}
         </div>
-        <div className="space-y-2">
-          <Label htmlFor="position">役職</Label>
-          <Input id="position" autoComplete="organization-title" placeholder="エンジニア" enterKeyHint="go" {...register("position")} />
+      </Step>
+
+      <Step number={2} title="アカウント情報" isLast={false}>
+        <div className="space-y-4">
+          <div className="space-y-1.5">
+            <Label htmlFor="name" className={labelClass}>
+              お名前 <RequiredMark />
+            </Label>
+            <Input
+              id="name"
+              autoComplete="name"
+              placeholder="山田 太郎"
+              enterKeyHint="next"
+              aria-invalid={Boolean(errors.name) || undefined}
+              aria-describedby={errors.name ? "name-error" : undefined}
+              {...register("name")}
+            />
+            {errors.name && (
+              <p id="name-error" className={fieldHelpClass}>
+                {errors.name.message}
+              </p>
+            )}
+          </div>
+
+          <div className="space-y-1.5">
+            <Label htmlFor="reg-email" className={labelClass}>
+              メールアドレス <RequiredMark />
+            </Label>
+            <Input
+              id="reg-email"
+              type="email"
+              autoComplete="email"
+              placeholder="you@example.com"
+              enterKeyHint="next"
+              aria-invalid={Boolean(errors.email) || undefined}
+              aria-describedby={errors.email ? "reg-email-error" : undefined}
+              {...register("email")}
+            />
+            {errors.email && (
+              <p id="reg-email-error" className={fieldHelpClass}>
+                {errors.email.message}
+              </p>
+            )}
+          </div>
+
+          <div className="space-y-1.5">
+            <Label htmlFor="reg-password" className={labelClass}>
+              パスワード <RequiredMark />
+            </Label>
+            <Input
+              id="reg-password"
+              type="password"
+              autoComplete="new-password"
+              placeholder="8文字以上"
+              enterKeyHint="next"
+              aria-invalid={Boolean(errors.password) || undefined}
+              aria-describedby={errors.password ? "reg-password-error" : undefined}
+              {...register("password")}
+            />
+            {errors.password && (
+              <p id="reg-password-error" className={fieldHelpClass}>
+                {errors.password.message}
+              </p>
+            )}
+          </div>
         </div>
-      </div>
+      </Step>
 
-      <div className="space-y-2">
-        <Label htmlFor="industry">業種 *</Label>
-        <select
-          id="industry"
-          {...register("industry")}
-          className="w-full rounded-md border bg-background px-3 py-2 text-base md:text-sm"
-        >
-          <option value="">選択してください</option>
-          {INDUSTRIES.map((ind) => (
-            <option key={ind} value={ind}>{ind}</option>
-          ))}
-        </select>
-        {errors.industry && (
-          <p className="text-sm text-destructive">{errors.industry.message}</p>
-        )}
-      </div>
+      <Step number={3} title="プロフィール" caption="マッチング精度の向上にお使いします" isLast={false}>
+        <div className="space-y-4">
+          <div className="grid gap-4 sm:grid-cols-2">
+            <div className="space-y-1.5">
+              <Label htmlFor="company" className={labelClass}>
+                会社名 <OptionalMark />
+              </Label>
+              <Input
+                id="company"
+                autoComplete="organization"
+                placeholder="株式会社○○"
+                enterKeyHint="next"
+                {...register("company")}
+              />
+            </div>
+            <div className="space-y-1.5">
+              <Label htmlFor="position" className={labelClass}>
+                役職 <OptionalMark />
+              </Label>
+              <Input
+                id="position"
+                autoComplete="organization-title"
+                placeholder="代表取締役"
+                enterKeyHint="next"
+                {...register("position")}
+              />
+            </div>
+          </div>
 
-      <div className="space-y-2">
-        <Label htmlFor="bio">自己紹介</Label>
-        <textarea
-          id="bio"
-          {...register("bio")}
-          className="w-full rounded-md border bg-background px-3 py-2 text-base md:text-sm"
-          rows={3}
-          placeholder="あなたの専門領域や関心事を教えてください（マッチング精度が向上します）"
-        />
-      </div>
+          <div className="space-y-1.5">
+            <Label htmlFor="industry" className={labelClass}>
+              業種 <RequiredMark />
+            </Label>
+            <div className="relative">
+              <select
+                id="industry"
+                {...register("industry")}
+                aria-invalid={Boolean(errors.industry) || undefined}
+                aria-describedby={errors.industry ? "industry-error" : undefined}
+                className={selectClass}
+              >
+                <option value="">選択してください</option>
+                {INDUSTRIES.map((ind) => (
+                  <option key={ind} value={ind}>
+                    {ind}
+                  </option>
+                ))}
+              </select>
+              <ChevronDown
+                className="pointer-events-none absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground"
+                aria-hidden="true"
+              />
+            </div>
+            {errors.industry && (
+              <p id="industry-error" className={fieldHelpClass}>
+                {errors.industry.message}
+              </p>
+            )}
+          </div>
 
-      <fieldset className="space-y-3 rounded-md border border-border/60 p-3 pt-2">
-        <legend className="px-1 text-sm font-medium">法務文書への同意（3点すべて必須）</legend>
-        <p className="text-xs text-muted-foreground">
-          下記リンクは全てモーダルで開きます。入力中のフォーム内容は失われません。
-          内容を確認のうえ、それぞれにチェックを入れてください。
-        </p>
-        <LegalDialog
-          trigger={
-            <button
-              type="button"
-              className="text-xs text-primary underline-offset-4 hover:underline"
-            >
-              3文書をまとめて読む（モーダルで開く）
-            </button>
-          }
-        />
+          <div className="space-y-1.5">
+            <Label htmlFor="bio" className={labelClass}>
+              自己紹介 <OptionalMark />
+            </Label>
+            <textarea
+              id="bio"
+              {...register("bio")}
+              className={textareaClass}
+              rows={3}
+              placeholder="あなたの専門領域や関心事を教えてください（マッチング精度が向上します）"
+            />
+          </div>
+        </div>
+      </Step>
 
-        <div className="flex items-start gap-2 pt-1">
-          <Checkbox
+      <Step
+        number={4}
+        title="法務文書への同意"
+        caption="3点すべてのご確認・ご同意が必要です"
+        accentIcon={<ShieldCheck className="h-3.5 w-3.5" aria-hidden="true" />}
+        isLast
+      >
+        <fieldset className="space-y-3 rounded-lg border border-border bg-muted/40 p-4">
+          <legend className="sr-only">法務文書への同意</legend>
+          <p className="text-xs leading-relaxed text-muted-foreground">
+            下記リンクは全てモーダルで開きます。入力中のフォーム内容は失われません。
+          </p>
+          <LegalDialog
+            trigger={
+              <button
+                type="button"
+                className="inline-flex min-h-[28px] items-center text-xs font-medium text-accent underline-offset-4 hover:underline"
+              >
+                3文書をまとめて読む（モーダル）
+              </button>
+            }
+          />
+
+          <ConsentRow
             id="agree-terms"
             checked={agreeToTerms}
-            onCheckedChange={(checked) => setValue("agreeToTerms", checked === true)}
-          />
-          <div className="text-sm leading-relaxed">
+            onChange={(v) => setValue("agreeToTerms", v, { shouldValidate: true })}
+            error={errors.agreeToTerms?.message}
+          >
             <LegalDialog
               defaultTab="terms"
               trigger={
-                <button type="button" className="text-primary underline-offset-4 hover:underline">
+                <button type="button" className="font-medium text-accent underline-offset-4 hover:underline">
                   利用規約
                 </button>
               }
             />
             （AI分析・米国への越境移転を含む）に
-            <Label htmlFor="agree-terms" className="cursor-pointer">
+            <Label htmlFor="agree-terms" className="cursor-pointer font-medium">
               同意します
             </Label>
-          </div>
-        </div>
-        {errors.agreeToTerms && (
-          <p className="text-sm text-destructive">{errors.agreeToTerms.message}</p>
-        )}
+          </ConsentRow>
 
-        <div className="flex items-start gap-2">
-          <Checkbox
+          <ConsentRow
             id="agree-privacy"
             checked={agreeToPrivacy}
-            onCheckedChange={(checked) => setValue("agreeToPrivacy", checked === true)}
-          />
-          <div className="text-sm leading-relaxed">
+            onChange={(v) => setValue("agreeToPrivacy", v, { shouldValidate: true })}
+            error={errors.agreeToPrivacy?.message}
+          >
             <LegalDialog
               defaultTab="privacy"
               trigger={
-                <button type="button" className="text-primary underline-offset-4 hover:underline">
+                <button type="button" className="font-medium text-accent underline-offset-4 hover:underline">
                   プライバシーポリシー
                 </button>
               }
             />
             （越境移転・委託先への提供を含む）に
-            <Label htmlFor="agree-privacy" className="cursor-pointer">
+            <Label htmlFor="agree-privacy" className="cursor-pointer font-medium">
               同意します
             </Label>
-          </div>
-        </div>
-        {errors.agreeToPrivacy && (
-          <p className="text-sm text-destructive">{errors.agreeToPrivacy.message}</p>
-        )}
+          </ConsentRow>
 
-        <div className="flex items-start gap-2">
-          <Checkbox
+          <ConsentRow
             id="agree-tokushoho"
             checked={agreeToTokushoho}
-            onCheckedChange={(checked) => setValue("agreeToTokushoho", checked === true)}
-          />
-          <div className="text-sm leading-relaxed">
+            onChange={(v) => setValue("agreeToTokushoho", v, { shouldValidate: true })}
+            error={errors.agreeToTokushoho?.message}
+          >
             <LegalDialog
               defaultTab="tokushoho"
               trigger={
-                <button type="button" className="text-primary underline-offset-4 hover:underline">
+                <button type="button" className="font-medium text-accent underline-offset-4 hover:underline">
                   特定商取引法に基づく表記
                 </button>
               }
             />
             の内容を
-            <Label htmlFor="agree-tokushoho" className="cursor-pointer">
+            <Label htmlFor="agree-tokushoho" className="cursor-pointer font-medium">
               確認しました
             </Label>
-          </div>
-        </div>
-        {errors.agreeToTokushoho && (
-          <p className="text-sm text-destructive">{errors.agreeToTokushoho.message}</p>
-        )}
-      </fieldset>
+          </ConsentRow>
+        </fieldset>
+      </Step>
 
-      <Button type="submit" className="w-full" disabled={loading}>
-        {loading ? "登録中..." : "アカウント作成"}
+      <Button type="submit" size="lg" className="w-full" disabled={loading}>
+        {loading ? (
+          <>
+            <Loader2 className="h-4 w-4 animate-spin" aria-hidden="true" />
+            登録中...
+          </>
+        ) : (
+          "アカウント作成"
+        )}
       </Button>
 
       <p className="text-center text-sm text-muted-foreground">
         すでにアカウントをお持ちですか？{" "}
-        <Link href="/login" className="text-primary underline-offset-4 hover:underline">
+        <Link href="/login" className="font-medium text-accent underline-offset-4 hover:underline">
           ログイン
         </Link>
       </p>
     </form>
+  );
+}
+
+/* ───────── Subcomponents ───────── */
+
+function RequiredMark() {
+  return (
+    <span className="ml-0.5 text-destructive" aria-label="必須">
+      *
+    </span>
+  );
+}
+
+function OptionalMark() {
+  return (
+    <span className="ml-1 text-xs font-normal text-muted-foreground">（任意）</span>
+  );
+}
+
+function StepProgress({ activeStep }: { activeStep: 1 | 2 | 3 | 4 }) {
+  const steps: Array<{ n: 1 | 2 | 3 | 4; label: string }> = [
+    { n: 1, label: "招待コード" },
+    { n: 2, label: "アカウント" },
+    { n: 3, label: "プロフィール" },
+    { n: 4, label: "同意" },
+  ];
+  return (
+    <ol
+      aria-label="登録ステップ"
+      className="flex flex-wrap items-center gap-x-2 gap-y-1 text-xs font-medium text-muted-foreground"
+    >
+      {steps.map((s) => {
+        const isActive = activeStep === s.n;
+        const isDone = activeStep > s.n;
+        return (
+          <li
+            key={s.n}
+            aria-current={isActive ? "step" : undefined}
+            className={`flex items-center gap-1.5 [&:not(:last-child)]:after:ml-2 [&:not(:last-child)]:after:inline-block [&:not(:last-child)]:after:h-px [&:not(:last-child)]:after:w-3 [&:not(:last-child)]:after:bg-border [&:not(:last-child)]:after:content-[''] ${
+              isActive
+                ? "text-foreground"
+                : isDone
+                ? "text-[color:var(--accent-strong)]"
+                : ""
+            }`}
+          >
+            <span
+              aria-hidden="true"
+              className={`inline-block h-1.5 w-1.5 rounded-full ${
+                isActive ? "bg-accent" : isDone ? "bg-[color:var(--accent-strong)]" : "bg-border"
+              }`}
+            />
+            {s.label}
+          </li>
+        );
+      })}
+    </ol>
+  );
+}
+
+function Step({
+  number,
+  title,
+  caption,
+  children,
+  accentIcon,
+  isLast,
+}: {
+  number: number;
+  title: string;
+  caption?: string;
+  children: React.ReactNode;
+  accentIcon?: React.ReactNode;
+  isLast?: boolean;
+}) {
+  return (
+    <section className="relative" data-step={number}>
+      {/* 縦connector線 (最後のStep以外) */}
+      {!isLast && (
+        <span
+          aria-hidden="true"
+          className="absolute left-[13px] top-7 -bottom-3 w-px bg-border"
+        />
+      )}
+      <header className="relative z-[1] flex items-start gap-3">
+        <span className="inline-flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-accent/10 text-xs font-semibold text-[color:var(--accent-strong)] ring-1 ring-accent/30">
+          {accentIcon ?? number}
+        </span>
+        <div className="min-w-0 flex-1">
+          <h2 className="text-base font-semibold leading-tight text-foreground">{title}</h2>
+          {caption && (
+            <p className="mt-0.5 text-[11px] leading-snug text-muted-foreground">{caption}</p>
+          )}
+        </div>
+      </header>
+      <div className="ml-10 mt-3">{children}</div>
+    </section>
+  );
+}
+
+function ConsentRow({
+  id,
+  checked,
+  onChange,
+  error,
+  children,
+}: {
+  id: string;
+  checked: boolean;
+  onChange: (v: boolean) => void;
+  error?: string;
+  children: React.ReactNode;
+}) {
+  return (
+    <div className="space-y-1">
+      <div className="flex items-start gap-2.5">
+        <Checkbox
+          id={id}
+          checked={checked}
+          onCheckedChange={(v) => onChange(v === true)}
+          className="mt-0.5"
+          aria-invalid={Boolean(error) || undefined}
+        />
+        <div className="text-sm leading-relaxed text-foreground">{children}</div>
+      </div>
+      {error && <p className={`pl-[26px] ${fieldHelpClass}`}>{error}</p>}
+    </div>
   );
 }

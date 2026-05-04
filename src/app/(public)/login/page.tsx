@@ -34,10 +34,8 @@ export default async function LoginPage({
               priority
               className="h-7 w-auto"
             />
-            <p className="mt-6 text-[11px] font-semibold uppercase tracking-[0.14em] text-accent">
-              Welcome back
-            </p>
-            <h1 className="mt-1 text-[28px] font-bold leading-[1.25] tracking-tight text-foreground">
+            <p className="ds-eyebrow mt-6">Welcome back</p>
+            <h1 className="ds-h1 mt-1 tracking-tight text-foreground">
               おかえりなさい
             </h1>
             <p className="mt-1.5 text-sm text-muted-foreground">
