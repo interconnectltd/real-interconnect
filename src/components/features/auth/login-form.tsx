@@ -39,8 +39,10 @@ export function LoginForm() {
       return;
     }
 
-    router.push("/dashboard");
+    // 順序: refresh で middleware が新しい session cookie を読む → push で navigation
+    // setLoading(false) しないことで「ログイン中…」表示を遷移完了まで維持 (ボタン誤押下防止)
     router.refresh();
+    router.push("/dashboard");
   }
 
   return (

@@ -287,9 +287,17 @@
   --info: oklch(0.65 0.15 240);
 }
 
-/* Mobile touch feedback */
+/* Mobile touch feedback: 300ms tap-delay 解消 + ハイライト除去 */
 * {
   -webkit-tap-highlight-color: transparent;
+}
+html {
+  /* ダブルタップズームをアプリ全体で無効化 → click が即時 fire (~300ms 短縮) */
+  touch-action: manipulation;
+}
+button, [role="button"], a {
+  /* インタラクション要素のタッチ遅延を完全排除 */
+  touch-action: manipulation;
 }
 
 /* Safe area padding for notch/home bar */
@@ -535,7 +543,7 @@
   /* Card lift on hover — Linear/Stripe 系の subtle interaction
    * shadow→翔上ではなく、border だけが accent 寄りになる minimal pattern */
   .ds-card-interactive {
-    transition: border-color 0.16s ease, box-shadow 0.16s ease;
+    transition: border-color 0.08s ease, box-shadow 0.08s ease;
     cursor: pointer;
   }
   .ds-card-interactive:hover {
