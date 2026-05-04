@@ -27,14 +27,11 @@ export function TokushohoContent() {
             </tr>
             <tr className="border-b border-border align-top">
               <th className="whitespace-nowrap py-3 pr-4 text-left font-semibold text-foreground">所在地</th>
-              <td className="py-3">
-                請求があった場合、遅滞なく開示いたします。
-                <br />
-                <strong>請求方法</strong>: 下記の連絡先メールアドレス宛に「特定商取引法に基づく開示請求」と
-                明記のうえご連絡ください。
-                <br />
-                <strong>開示期限</strong>: 請求受領後、原則5営業日以内に書面又は電子メールで開示いたします。
-              </td>
+              <td className="py-3">〒160-0023 東京都新宿区西新宿7丁目5-14 203号</td>
+            </tr>
+            <tr className="border-b border-border align-top">
+              <th className="whitespace-nowrap py-3 pr-4 text-left font-semibold text-foreground">設立年月日</th>
+              <td className="py-3">2026年5月15日</td>
             </tr>
             <tr className="border-b border-border align-top">
               <th className="whitespace-nowrap py-3 pr-4 text-left font-semibold text-foreground">連絡先</th>

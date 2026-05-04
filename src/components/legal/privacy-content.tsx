@@ -25,14 +25,11 @@ export function PrivacyContent() {
       <ul className="list-disc pl-5">
         <li>事業者の名称: INTER CONNECT株式会社</li>
         <li>代表者氏名: 吉井 和樹</li>
-        <li>所在地: 請求があった場合、遅滞なく開示いたします。</li>
+        <li>所在地: 〒160-0023 東京都新宿区西新宿7丁目5-14 203号</li>
+        <li>設立年月日: 2026年5月15日</li>
         <li>個人情報保護管理者: INTER CONNECT株式会社 個人情報保護管理者</li>
         <li>連絡先: <a href="mailto:interconnectltd3568@gmail.com" className="text-primary underline-offset-4 hover:underline">interconnectltd3568@gmail.com</a> ／ <a href="/contact" className="text-primary underline-offset-4 hover:underline">/contact</a></li>
       </ul>
-      <p>
-        所在地の開示請求は、上記連絡先に「特定商取引法又は個人情報保護法に基づく開示請求」と
-        明記してご連絡ください。請求受領後、原則5営業日以内に書面又は電子メールで開示します。
-      </p>
 
       <h2 className="mt-6 text-lg font-semibold text-foreground">適用範囲</h2>
       <p>
@@ -288,7 +285,7 @@ export function PrivacyContent() {
         個情法第32条第1項各号に基づき、本項を独立した公表事項として整理します。
       </p>
       <ul className="list-disc pl-5">
-        <li><strong>第1号 個人情報取扱事業者の氏名又は名称・住所・代表者氏名</strong>: 第0項「事業者情報」に記載のとおり(事業者名: INTER CONNECT株式会社、代表者氏名: 吉井 和樹)。所在地は請求があった場合、5営業日以内に開示します。</li>
+        <li><strong>第1号 個人情報取扱事業者の氏名又は名称・住所・代表者氏名</strong>: 第0項「事業者情報」に記載のとおり(事業者名: INTER CONNECT株式会社、代表者氏名: 吉井 和樹、所在地: 〒160-0023 東京都新宿区西新宿7丁目5-14 203号)。</li>
         <li><strong>第2号 全ての保有個人データの利用目的</strong>: 第2項「利用目的」に記載の8項目。</li>
         <li><strong>第3号 保有個人データの項目</strong>: 第1項「取得する情報」に列挙したとおり（登録情報・認証情報・連携サービスから取得する情報・AI分析により生成される情報・利用履歴・決済関連情報・お問い合わせ情報）。</li>
         <li><strong>第4号 開示等の請求に応じる手続・苦情申出先</strong>: 第13項「開示・訂正・利用停止等の請求」及び第15項「問合せ窓口・苦情処理」に記載のとおり。</li>
