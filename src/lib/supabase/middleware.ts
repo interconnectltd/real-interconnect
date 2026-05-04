@@ -50,11 +50,13 @@ export async function updateSession(request: NextRequest) {
 
   // publicPaths は exact match のみ + 限定的な startsWith。
   // /api/v1/legal/ 全部 startsWith は危険なため exact match に制限。
+  // tl;dv からの webhook は ?secret= 検証のため未認証で叩く必要があり public 扱い。
   const isPublicPath =
     publicPaths.includes(pathname) ||
     pathname.startsWith("/api/v1/health") ||
     pathname === "/api/v1/invitation" ||
     pathname === "/api/v1/legal/accept" ||
+    pathname === "/api/v1/transcripts/webhook" ||
     pathname.startsWith("/lp") ||
     pathname.startsWith("/api/v1/webhooks");
 
