@@ -5,7 +5,7 @@
 
 import { calcAttributeScore } from "./attribute-score";
 import { calcPurposeScore } from "./purpose-score";
-import { applyHaikuJudgment, type JudgeCacheRow } from "./judge-haiku";
+import { applyHaikuJudgmentOneDirection, type JudgeCacheRow } from "./judge-haiku";
 import type { EmbeddingScores } from "./embedding";
 
 // 意味空間スコアを score スケール [0,1] に持ち上げる
@@ -151,8 +151,10 @@ export interface ScoreV2Input {
   };
   sharedMeetingCount: number;
   config: ScoringConfig;
-  /** Haiku 4-text crossmatch のキャッシュ行 (00020_haiku_judgment.sql)。空配列なら無視。 */
-  judgeCacheRows?: JudgeCacheRow[];
+  /** Haiku 4-text crossmatch の forward 方向 cache (direction='fwd', viewer.need × target.offer)。 */
+  judgeCacheFwd?: JudgeCacheRow[];
+  /** Haiku 4-text crossmatch の reverse 方向 cache (direction='rev', target.need × viewer.offer)。 */
+  judgeCacheRev?: JudgeCacheRow[];
   /** pgvector cosine から取得した意味空間スコア (00021_pgvector.sql)。未指定なら無視。 */
   embeddingScores?: EmbeddingScores;
 }
@@ -316,7 +318,7 @@ function calcHistoryScore(sharedMeetings: number): number {
 // メイン: computeScoreV2
 // =====================================================================
 export function computeScoreV2(input: ScoreV2Input): ScoreV2Result {
-  const { viewer, target, sharedMeetingCount, config, judgeCacheRows, embeddingScores } = input;
+  const { viewer, target, sharedMeetingCount, config, judgeCacheFwd, judgeCacheRev, embeddingScores } = input;
 
   // --- 5次元計算（カテゴリベース、ベースライン）---
   let needOfferScore = calcNeedOfferScore(viewer.needVectors, target.offerVectors);
@@ -335,18 +337,18 @@ export function computeScoreV2(input: ScoreV2Input): ScoreV2Result {
   let haikuReasons: string[] = [];
 
   if (minAnalysis > 0 || partialAnalysis) {
-    // Haiku LLM 判定の上書き (§3「+10 score core」)
-    if (judgeCacheRows && judgeCacheRows.length > 0) {
-      const haiku = applyHaikuJudgment(
-        viewer.needVectors,
-        viewer.offerVectors,
-        target.needVectors,
-        target.offerVectors,
-        judgeCacheRows,
-      );
-      if (haiku.needOfferScore !== null) needOfferScore = haiku.needOfferScore;
-      if (haiku.reverseMatch !== null) reverseMatch = haiku.reverseMatch;
-      haikuReasons = haiku.reasons;
+    // Haiku LLM 判定の上書き (§3「+10 score core」、片方向 API)
+    const hasFwd = judgeCacheFwd && judgeCacheFwd.length > 0;
+    const hasRev = judgeCacheRev && judgeCacheRev.length > 0;
+    if (hasFwd) {
+      const fwd = applyHaikuJudgmentOneDirection(viewer.needVectors, judgeCacheFwd!, "h_no");
+      if (fwd.score !== null) needOfferScore = fwd.score;
+      haikuReasons.push(...fwd.reasons);
+    }
+    if (hasRev) {
+      const rev = applyHaikuJudgmentOneDirection(target.needVectors, judgeCacheRev!, "h_no");
+      if (rev.score !== null) reverseMatch = rev.score;
+      haikuReasons.push(...rev.reasons);
     }
 
     // 意味空間 (pgvector) によるフォールバック / 補正
@@ -356,8 +358,10 @@ export function computeScoreV2(input: ScoreV2Input): ScoreV2Result {
       const sNo = semanticToScore(embeddingScores.semanticNo);
       const sRv = semanticToScore(embeddingScores.semanticRv);
       const sTopic = semanticToScore(embeddingScores.semanticTopic);
-      if (!judgeCacheRows || judgeCacheRows.length === 0) {
+      if (!hasFwd) {
         needOfferScore = needOfferScore <= 0.05 ? sNo : 0.7 * needOfferScore + 0.3 * sNo;
+      }
+      if (!hasRev) {
         reverseMatch = reverseMatch <= 0.05 ? sRv : 0.7 * reverseMatch + 0.3 * sRv;
       }
       topicAlignment = topicAlignment <= 0.05 ? sTopic : 0.7 * topicAlignment + 0.3 * sTopic;

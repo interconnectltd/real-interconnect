@@ -119,33 +119,35 @@ export async function POST() {
       offeringsMap.get(o.user_id)!.push({ type: o.type });
     }
 
-    // --- judge_pair_cache 一括取得 (viewer × target_ids 双方向) ---
-    // Haiku 4-text crossmatch の結果を applyHaikuJudgment が読む。
-    // 双方向 row を一度に集めるため (viewer_id, target_id) 双方向クエリ。
-    type JudgeRowDb = JudgeCacheRow & { viewer_id: string; target_id: string };
+    // --- judge_pair_cache 一括取得 (viewer=user.id 視点で direction='fwd'/'rev' を別マップに格納) ---
+    // worker は viewer=user.id, target=X について direction='fwd' で
+    // (viewer.need × target.offer) を、direction='rev' で (target.need × viewer.offer) を書く。
+    // applyHaikuJudgmentOneDirection は片方向専用なので、direction で分けて Map に詰める。
+    type JudgeRowDb = JudgeCacheRow & { target_id: string; direction: string };
     const { data: judgeCacheRaw } = await (
       supabase.from("judge_pair_cache" as never) as unknown as {
         select: (s: string) => {
-          or: (cond: string) => Promise<{ data: JudgeRowDb[] | null }>;
+          eq: (col: string, val: string) => Promise<{ data: JudgeRowDb[] | null }>;
         };
       }
     )
-      .select("viewer_id, target_id, need_idx, offer_idx, h_no, h_rv, reason_no, reason_rv")
-      .or(
-        `and(viewer_id.eq.${user.id}),and(target_id.eq.${user.id})`,
-      );
-    const judgeCacheByPair = new Map<string, JudgeCacheRow[]>();
+      .select("target_id, direction, need_idx, offer_idx, h_no, h_rv, reason_no, reason_rv")
+      .eq("viewer_id", user.id);
+
+    const judgeCacheFwdByTarget = new Map<string, JudgeCacheRow[]>();
+    const judgeCacheRevByTarget = new Map<string, JudgeCacheRow[]>();
     for (const row of judgeCacheRaw ?? []) {
-      const key = `${row.viewer_id}::${row.target_id}`;
-      if (!judgeCacheByPair.has(key)) judgeCacheByPair.set(key, []);
-      judgeCacheByPair.get(key)!.push({
+      const r: JudgeCacheRow = {
         need_idx: row.need_idx,
         offer_idx: row.offer_idx,
         h_no: row.h_no,
         h_rv: row.h_rv,
         reason_no: row.reason_no,
         reason_rv: row.reason_rv,
-      });
+      };
+      const map = row.direction === "rev" ? judgeCacheRevByTarget : judgeCacheFwdByTarget;
+      if (!map.has(row.target_id)) map.set(row.target_id, []);
+      map.get(row.target_id)!.push(r);
     }
 
     // --- 意味空間スコアを 1 RTT バッチ取得 (P4 指摘 #1 N-RTT 暴発の修正) ---
@@ -180,8 +182,8 @@ export async function POST() {
 
     for (const target of targets) {
       const tv = vectorMap.get(target.id);
-      const fwdJudge = judgeCacheByPair.get(`${user.id}::${target.id}`) ?? [];
-      const revJudge = judgeCacheByPair.get(`${target.id}::${user.id}`) ?? [];
+      const fwdJudge = judgeCacheFwdByTarget.get(target.id) ?? [];
+      const revJudge = judgeCacheRevByTarget.get(target.id) ?? [];
       const fwdEmb = embeddingByTarget.get(target.id) ?? { semanticNo: 0, semanticRv: 0, semanticTopic: 0 };
       // 逆方向は viewer/target 入替なので semanticNo/Rv が flip
       const revEmb = { semanticNo: fwdEmb.semanticRv, semanticRv: fwdEmb.semanticNo, semanticTopic: fwdEmb.semanticTopic };
@@ -218,7 +220,8 @@ export async function POST() {
         },
         sharedMeetingCount: sharedMeetingMap.get(target.id) ?? 0,
         config,
-        judgeCacheRows: fwdJudge,
+        judgeCacheFwd: fwdJudge,
+        judgeCacheRev: revJudge,
         embeddingScores: fwdEmb,
       });
 
@@ -288,7 +291,9 @@ export async function POST() {
         },
         sharedMeetingCount: sharedCount,
         config,
-        judgeCacheRows: revJudge,
+        // 逆視点では fwd/rev が flip
+        judgeCacheFwd: revJudge,
+        judgeCacheRev: fwdJudge,
         embeddingScores: revEmb,
       });
 

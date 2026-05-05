@@ -1,0 +1,35 @@
+name: Judge Manual
+
+on:
+  workflow_dispatch:
+    inputs:
+      viewer_id:
+        description: '判定する viewer の user_id (空なら最 active user を auto 選択)'
+        required: false
+        default: ''
+
+jobs:
+  judge:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 9
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'pnpm'
+
+      - run: pnpm install --frozen-lockfile
+
+      - name: Run Haiku judge
+        env:
+          NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+          VIEWER_ID: ${{ inputs.viewer_id }}
+        run: pnpm exec tsx scripts/run-judge-local.ts

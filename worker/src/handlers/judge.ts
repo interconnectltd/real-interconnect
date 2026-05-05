@@ -238,14 +238,15 @@ export async function handleJudgePairBatch(payload: JudgePairBatchPayload): Prom
       return new Map<string, { score: number; reason: string }>();
     });
 
-    // judge_pair_cache に詰めるため (need_idx, offer_idx) で行をマージ。
-    // need_idx/offer_idx の意味はそれぞれ:
-    //   forward 行: (viewer.need_idx, target.offer_idx) → h_no/reason_no
-    //   reverse 行: (target.need_idx, viewer.offer_idx) → h_rv/reason_rv
-    // forward と reverse は (need_idx, offer_idx) 軸が異なるため、別レコードとして書き込む。
-    // h_no が無いレコードは 0、h_rv が無いレコードも 0 として書く。
+    // judge_pair_cache に詰める。direction='fwd' / 'rev' で別行に分離。
+    //   direction='fwd': need_idx=viewer.need_idx, offer_idx=target.offer_idx, h_no=score
+    //   direction='rev': need_idx=target.need_idx, offer_idx=viewer.offer_idx, h_no=score
+    //                    (reverse 視点の forward = h_no、h_rv は deprecated 扱いで 0)
+    // P8 HIGH 指摘: 旧版は 1 行に forward と reverse を merge しようとしたが
+    // (need_idx, offer_idx) の意味軸が異なるため意味混在のリスクがあった。
     type CacheUpsert = {
       viewer_id: string; target_id: string;
+      direction: "fwd" | "rev";
       need_idx: number; offer_idx: number;
       h_no: number; h_rv: number;
       reason_no: string | null; reason_rv: string | null;
@@ -256,10 +257,10 @@ export async function handleJudgePairBatch(payload: JudgePairBatchPayload): Prom
     const now = new Date().toISOString();
 
     for (const p of fwdSubset) {
-      const k = `${p.need_idx}|${p.offer_idx}`;
-      const v = fwdScores.get(k);
+      const v = fwdScores.get(`${p.need_idx}|${p.offer_idx}`);
       out.push({
         viewer_id, target_id: tid,
+        direction: "fwd",
         need_idx: p.need_idx, offer_idx: p.offer_idx,
         h_no: v?.score ?? 0,
         h_rv: 0,
@@ -270,36 +271,26 @@ export async function handleJudgePairBatch(payload: JudgePairBatchPayload): Prom
       });
     }
 
-    // reverse は別 (need_idx, offer_idx) 空間 → 別レコード。
-    // ただし forward 側の (need_idx, offer_idx) と衝突する可能性があるので、
-    // 重複時は h_rv を既存行にマージしたい。シンプルに out 配列内で再検索してマージ。
     for (const p of revSubset) {
       const v = revScores.get(`${p.need_idx}|${p.offer_idx}`);
-      const existing = out.find(
-        (x) => x.need_idx === p.need_idx && x.offer_idx === p.offer_idx,
-      );
-      if (existing) {
-        existing.h_rv = v?.score ?? 0;
-        existing.reason_rv = v?.reason ? truncate15(v.reason) : null;
-      } else {
-        out.push({
-          viewer_id, target_id: tid,
-          need_idx: p.need_idx, offer_idx: p.offer_idx,
-          h_no: 0,
-          h_rv: v?.score ?? 0,
-          reason_no: null,
-          reason_rv: v?.reason ? truncate15(v.reason) : null,
-          prompt_version: PROMPT_VERSION,
-          judged_at: now,
-        });
-      }
+      out.push({
+        viewer_id, target_id: tid,
+        direction: "rev",
+        need_idx: p.need_idx, offer_idx: p.offer_idx,
+        h_no: v?.score ?? 0,
+        h_rv: 0,
+        reason_no: v?.reason ? truncate15(v.reason) : null,
+        reason_rv: null,
+        prompt_version: PROMPT_VERSION,
+        judged_at: now,
+      });
     }
 
     if (out.length === 0) continue;
 
     const { error: upErr } = await supabase
       .from("judge_pair_cache")
-      .upsert(out, { onConflict: "viewer_id,target_id,need_idx,offer_idx" });
+      .upsert(out, { onConflict: "viewer_id,target_id,direction,need_idx,offer_idx" });
 
     if (upErr) {
       console.error(`[judge] cache upsert failed viewer=${viewer_id} target=${tid}:`, upErr.message);
