@@ -30,7 +30,10 @@ async function main(): Promise<void> {
   const openai = (process.env.OPENAI_API_KEY ?? "").trim();
   if (!url || !key) throw new Error("Missing Supabase env");
   if (!openai) throw new Error("Missing OPENAI_API_KEY");
-  // 後段 handleEmbed が queue.ts の supabase client を使うので env を上書きしておく
+  // PGRST125 デバッグ: URL prefix / length / 末尾を出す (Secret なので部分露出のみ)
+  console.log("[debug] URL prefix:", url.slice(0, 16), "len:", url.length, "tail:", JSON.stringify(url.slice(-6)));
+  console.log("[debug] key starts with:", key.slice(0, 4), "len:", key.length);
+  console.log("[debug] openai starts with:", openai.slice(0, 7), "len:", openai.length);
   process.env.NEXT_PUBLIC_SUPABASE_URL = url;
   process.env.SUPABASE_SERVICE_ROLE_KEY = key;
   process.env.OPENAI_API_KEY = openai;
