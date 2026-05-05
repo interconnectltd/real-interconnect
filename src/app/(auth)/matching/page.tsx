@@ -523,7 +523,7 @@ function DismissButton({ onClick }: { onClick: () => void }) {
         onClick();
       }}
       aria-label="この推薦を非表示にする"
-      className="absolute right-2 top-2 inline-flex h-9 w-9 items-center justify-center rounded-full text-muted-foreground/60 transition-colors hover:bg-muted hover:text-foreground focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/70"
+      className="absolute right-1.5 top-1.5 inline-flex h-11 w-11 items-center justify-center rounded-full text-muted-foreground/60 transition-colors hover:bg-muted hover:text-foreground focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/70"
     >
       <X className="h-3.5 w-3.5" aria-hidden="true" />
     </button>

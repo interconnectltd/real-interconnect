@@ -33,7 +33,9 @@ export function Sidebar({ onNavigate }: { onNavigate?: () => void }) {
   return (
     <nav className="flex flex-col gap-1 p-2">
       {navItems.map((item) => {
-        const isActive = pathname.startsWith(item.href);
+        // /me が /members にマッチしないよう exact または prefix+/ で判定
+        const isActive =
+          pathname === item.href || pathname.startsWith(item.href + "/");
         return (
           <Link
             key={item.href}

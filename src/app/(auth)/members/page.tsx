@@ -462,7 +462,7 @@ function MemberCard({
         disabled={bookmarkPending}
         aria-pressed={bookmarked}
         aria-label={bookmarked ? "ブックマークを解除" : "ブックマークに追加"}
-        className={`absolute right-2 top-2 z-10 inline-flex h-9 w-9 items-center justify-center rounded-full transition-colors focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/70 ${
+        className={`absolute right-1.5 top-1.5 z-10 inline-flex h-11 w-11 items-center justify-center rounded-full transition-colors focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/70 ${
           bookmarked
             ? "text-accent-strong hover:bg-accent/10"
             : "text-muted-foreground/60 hover:bg-muted hover:text-accent-strong"

@@ -294,6 +294,12 @@
 html {
   /* ダブルタップズームをアプリ全体で無効化 → click が即時 fire (~300ms 短縮) */
   touch-action: manipulation;
+  /* iOS Safari の pull-to-refresh / overscroll bounce 抑止 */
+  overscroll-behavior-y: contain;
+}
+body {
+  /* 親要素に overscroll-behavior が継承されるよう明示 */
+  overscroll-behavior-y: contain;
 }
 button, [role="button"], a {
   /* インタラクション要素のタッチ遅延を完全排除 */

@@ -1,13 +1,16 @@
 "use client";
 
-import { useQuery } from "@tanstack/react-query";
-import { api } from "@/lib/api-client";
-import { queryKeys } from "./keys";
+import { useMyProfile } from "./use-profile";
 
+/**
+ * /profiles/me の analysis_count を派生させる hook。
+ * useMyProfile と queryKey を共有 (= 重複 fetch ゼロ)。
+ */
 export function useAnalysisCount() {
-  return useQuery({
-    queryKey: queryKeys.profile.me(),
-    queryFn: () => api.get<{ analysis_count: number }>("/profiles/me"),
-    select: (data) => data.analysis_count ?? 0,
-  });
+  const { data, isLoading } = useMyProfile();
+  return {
+    data:
+      ((data as unknown as { analysis_count?: number } | undefined)?.analysis_count) ?? 0,
+    isLoading,
+  };
 }

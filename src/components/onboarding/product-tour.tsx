@@ -137,9 +137,17 @@ export function ProductTour({ steps, storageKey, open, onClose }: ProductTourPro
     const onResize = () => scheduleMeasure();
     window.addEventListener("resize", onResize);
     window.addEventListener("scroll", onResize, true);
-    // DOM 変更で対象が後から現れる場合に対応 (debounce 必須)
+    // DOM 変更で対象が後から現れる場合に対応するが、対象が見つかれば
+    // body 全体監視は止めて parent ancestor のみ監視に縮小 (重い reflow 抑制)
+    const target = document.querySelector(`[data-tour="${step?.target}"]`);
+    const obsTarget = target?.parentElement ?? document.body;
     const obs = new MutationObserver(() => scheduleMeasure());
-    obs.observe(document.body, { subtree: true, childList: true });
+    obs.observe(obsTarget, {
+      subtree: target ? false : true,
+      childList: true,
+      attributes: false,
+      characterData: false,
+    });
     return () => {
       window.removeEventListener("resize", onResize);
       window.removeEventListener("scroll", onResize, true);
@@ -149,7 +157,7 @@ export function ProductTour({ steps, storageKey, open, onClose }: ProductTourPro
         measureRafRef.current = null;
       }
     };
-  }, [open, current, measure]);
+  }, [open, current, measure, step?.target]);
 
   // tooltip 位置を計算 (上下左右で空きが多い方を選ぶ)
   useLayoutEffect(() => {
@@ -249,13 +257,24 @@ export function ProductTour({ steps, storageKey, open, onClose }: ProductTourPro
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [open, current, isLast, isFirst]);
 
-  // tour 中は body スクロール固定
+  // tour 中は body スクロール固定 (iOS Safari の touch scroll も止める)
   useEffect(() => {
     if (!open) return;
-    const prev = document.body.style.overflow;
+    const scrollY = window.scrollY;
+    const prevOverflow = document.body.style.overflow;
+    const prevPosition = document.body.style.position;
+    const prevTop = document.body.style.top;
+    const prevWidth = document.body.style.width;
     document.body.style.overflow = "hidden";
+    document.body.style.position = "fixed";
+    document.body.style.top = `-${scrollY}px`;
+    document.body.style.width = "100%";
     return () => {
-      document.body.style.overflow = prev;
+      document.body.style.overflow = prevOverflow;
+      document.body.style.position = prevPosition;
+      document.body.style.top = prevTop;
+      document.body.style.width = prevWidth;
+      window.scrollTo(0, scrollY);
     };
   }, [open]);
 
@@ -290,13 +309,13 @@ export function ProductTour({ steps, storageKey, open, onClose }: ProductTourPro
   const overlays = rect
     ? [
         // top
-        { top: 0, left: 0, width: "100vw", height: Math.max(0, rect.top - PAD) },
+        { top: 0, left: 0, width: "min(100vw, 100dvw)", height: Math.max(0, rect.top - PAD) },
         // bottom
-        { top: rect.top + rect.height + PAD, left: 0, width: "100vw", height: `calc(100vh - ${rect.top + rect.height + PAD}px)` },
+        { top: rect.top + rect.height + PAD, left: 0, width: "min(100vw, 100dvw)", height: `calc(min(100vh, 100dvh) - ${rect.top + rect.height + PAD}px)` },
         // left
         { top: Math.max(0, rect.top - PAD), left: 0, width: Math.max(0, rect.left - PAD), height: rect.height + PAD * 2 },
         // right
-        { top: Math.max(0, rect.top - PAD), left: rect.left + rect.width + PAD, width: `calc(100vw - ${rect.left + rect.width + PAD}px)`, height: rect.height + PAD * 2 },
+        { top: Math.max(0, rect.top - PAD), left: rect.left + rect.width + PAD, width: `calc(min(100vw, 100dvw) - ${rect.left + rect.width + PAD}px)`, height: rect.height + PAD * 2 },
       ]
     : [];
 
@@ -363,7 +382,7 @@ export function ProductTour({ steps, storageKey, open, onClose }: ProductTourPro
             type="button"
             onClick={handleDismiss}
             aria-label="案内を閉じる"
-            className="-mr-1 inline-flex h-8 w-8 items-center justify-center rounded-md text-muted-foreground/70 hover:bg-muted hover:text-foreground focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/70"
+            className="-mr-1 inline-flex h-11 w-11 items-center justify-center rounded-md text-muted-foreground/70 hover:bg-muted hover:text-foreground focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/70"
           >
             <X className="h-4 w-4" aria-hidden="true" />
           </button>

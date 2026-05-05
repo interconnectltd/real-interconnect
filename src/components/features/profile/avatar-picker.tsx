@@ -125,7 +125,7 @@ export function AvatarPicker({
       >
         {(["preset", "upload", "initial"] as const).map((k) => {
           const label =
-            k === "preset" ? "プリセット" : k === "upload" ? "画像アップロード" : "頭文字";
+            k === "preset" ? "プリセット" : k === "upload" ? "アップロード" : "頭文字";
           return (
             <TabBtn
               key={k}
@@ -146,7 +146,7 @@ export function AvatarPicker({
           <p className="mb-3 text-xs text-muted-foreground">
             お好きなアイコンを選んでください。背景色とパターンが選べます。
           </p>
-          <div className="grid grid-cols-3 gap-3 sm:grid-cols-4 md:grid-cols-6">
+          <div className="grid grid-cols-3 gap-3 sm:grid-cols-4 lg:grid-cols-6">
             {AVATAR_PRESETS.map((p) => {
               const url = `${AVATAR_PRESET_PREFIX}${p.id}`;
               const isCurrent = current === url;

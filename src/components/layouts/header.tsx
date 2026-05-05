@@ -29,17 +29,17 @@ export function Header() {
 
   async function handleSignOut() {
     await supabase.auth.signOut();
+    // signOut → cookie 削除 → middleware が /login で許可、refresh は不要
     router.push("/login");
-    router.refresh();
   }
 
   return (
     <header className="sticky top-0 z-40 border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 pt-safe">
-      <div className="flex h-14 items-center gap-4 px-4 lg:px-6">
+      <div className="flex h-14 items-center gap-4 px-4 landscape:h-12 md:px-6">
         {/* Mobile menu — render prop merges SheetTrigger onto Button */}
         <Sheet open={sidebarOpen} onOpenChange={setSidebarOpen}>
           <SheetTrigger
-            render={<Button variant="ghost" size="icon-lg" className="lg:hidden" aria-label="メニューを開く" />}
+            render={<Button variant="ghost" size="icon-lg" className="md:hidden" aria-label="メニューを開く" />}
           >
             <Menu className="h-5 w-5" />
           </SheetTrigger>
@@ -52,6 +52,7 @@ export function Header() {
                   alt="INTER CONNECT"
                   width={723}
                   height={139}
+                  sizes="160px"
                   className="h-6 w-auto"
                 />
               </Link>
@@ -63,7 +64,7 @@ export function Header() {
         <Link
           href="/dashboard"
           aria-label="INTER CONNECT"
-          className="hidden items-center lg:flex"
+          className="hidden items-center md:flex"
         >
           <Image
             src="/interconnect-logo-header.png"
@@ -71,6 +72,7 @@ export function Header() {
             width={723}
             height={139}
             priority
+            sizes="180px"
             className="h-7 w-auto"
           />
         </Link>
@@ -87,7 +89,7 @@ export function Header() {
         >
           <Bell className="h-5 w-5" />
           {unreadCount && unreadCount > 0 ? (
-            <span className="absolute -right-0.5 -top-0.5 flex h-4 min-w-4 items-center justify-center rounded-full bg-accent px-1 text-[10px] font-medium text-accent-foreground">
+            <span className="absolute right-0 top-0 flex h-4 min-w-4 items-center justify-center rounded-full bg-accent px-1 text-[10px] font-medium text-accent-foreground">
               {unreadCount > 99 ? "99+" : unreadCount}
             </span>
           ) : null}

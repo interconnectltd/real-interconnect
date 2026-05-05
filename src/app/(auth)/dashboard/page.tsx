@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef } from "react";
+import { useEffect, useMemo, useRef } from "react";
 import {
   Heart,
   Users,
@@ -89,12 +89,17 @@ export default function DashboardPage() {
   const remaining = nextLevelAt ? Math.max(0, nextLevelAt - analysisCount) : 0;
   const maturityProgress = maturityLevel === 3 ? 100 : nextLevelAt ? (analysisCount / nextLevelAt) * 100 : 0;
 
-  const stats: Stat[] = [
-    { label: "コネクション", value: acceptedCount, icon: UserCheck, href: "/connections", hint: "受諾済の数", zeroHint: "出会いを増やそう" },
-    { label: "未読通知", value: unreadCount ?? 0, icon: Bell, href: "/notifications", hint: "確認待ち" },
-    { label: "おすすめ", value: matchCount, icon: Heart, href: "/matching", hint: "今週の候補", zeroHint: "もうすぐ準備完了" },
-    { label: "メンバー", value: memberCount, icon: Users, href: "/members", hint: "全体登録数" },
-  ];
+  // useMemo で stats 配列を安定化 → KPI Link の参照同一性を保ち
+  // refetch 時の不必要な再 render を抑止
+  const stats = useMemo<Stat[]>(
+    () => [
+      { label: "コネクション", value: acceptedCount, icon: UserCheck, href: "/connections", hint: "受諾済の数", zeroHint: "出会いを増やそう" },
+      { label: "未読通知", value: unreadCount ?? 0, icon: Bell, href: "/notifications", hint: "確認待ち" },
+      { label: "おすすめ", value: matchCount, icon: Heart, href: "/matching", hint: "今週の候補", zeroHint: "もうすぐ準備完了" },
+      { label: "メンバー", value: memberCount, icon: Users, href: "/members", hint: "全体登録数" },
+    ],
+    [acceptedCount, unreadCount, matchCount, memberCount],
+  );
 
   const isLoading = isLoadingConnections || isLoadingUnread || isLoadingScores;
 
@@ -143,7 +148,7 @@ export default function DashboardPage() {
         aria-label="ネットワーク指標"
         className="overflow-hidden rounded-lg border border-border bg-card"
       >
-        <div className="grid divide-y divide-border sm:grid-cols-2 sm:divide-y-0 sm:divide-x lg:grid-cols-4">
+        <div className="grid divide-y divide-border sm:grid-cols-2 sm:divide-y-0 sm:divide-x md:grid-cols-4">
           {stats.map((stat) => {
             const isZero = stat.value === 0;
             const display = isZero && stat.zeroHint ? stat.zeroHint : stat.hint;
@@ -176,7 +181,7 @@ export default function DashboardPage() {
       </section>
 
       {/* 成熟度 + プロフィール完成度 — shadow / stripe を抑え border-only に */}
-      <div className="grid gap-4 lg:grid-cols-2">
+      <div className="grid gap-4 md:grid-cols-2">
         <Card data-tour="maturity-card">
           <CardContent className="space-y-3">
             <div className="flex items-center justify-between gap-2">
@@ -286,7 +291,12 @@ export default function DashboardPage() {
         </>
       )}
 
-      <NewMembersSection onViewProfile={openProfileModal} />
+      <NewMembersSection
+        members={
+          (membersData as { members?: Profile[] } | undefined)?.members
+        }
+        onViewProfile={openProfileModal}
+      />
 
       {/* 初回ログインの案内 + 右下 ? ヘルプ FAB (auth全画面に表示するため別途 layout で出すこともできるが、Dashboard 専用 tour なのでこの位置で配置) */}
       <DashboardTour isLv1={isLv1} />
@@ -449,14 +459,19 @@ function DashboardSkeleton() {
   );
 }
 
-function NewMembersSection({ onViewProfile }: { onViewProfile: (id: string) => void }) {
-  const { data } = useMembers("", { page: 1 });
-  const members = (data as { members: Profile[]; meta: unknown } | undefined)?.members;
-
-  const sevenDaysAgo = Date.now() - 7 * 24 * 60 * 60 * 1000;
-  const newMembers = members?.filter(
-    (m) => new Date(m.created_at).getTime() > sevenDaysAgo,
-  );
+// 親で取得済みの members 配列を props で受け取る (重複 useMembers 削除)
+function NewMembersSection({
+  members,
+  onViewProfile,
+}: {
+  members: Profile[] | undefined;
+  onViewProfile: (id: string) => void;
+}) {
+  const newMembers = useMemo(() => {
+    if (!members?.length) return null;
+    const sevenDaysAgo = Date.now() - 7 * 24 * 60 * 60 * 1000;
+    return members.filter((m) => new Date(m.created_at).getTime() > sevenDaysAgo);
+  }, [members]);
 
   if (!newMembers?.length) return null;
 

@@ -15,7 +15,17 @@ import {
   Image as ImageIcon,
 } from "lucide-react";
 import { toast } from "sonner";
-import { AvatarPicker } from "@/components/features/profile/avatar-picker";
+import dynamic from "next/dynamic";
+
+// AvatarPicker (12 SVG プリセット + Canvas resize lib) を遅延 import。
+// pickerOpen=true 初回のみロード → 編集していないユーザーには bundle 載せない
+const AvatarPicker = dynamic(
+  () =>
+    import("@/components/features/profile/avatar-picker").then((m) => ({
+      default: m.AvatarPicker,
+    })),
+  { ssr: false },
+);
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -214,9 +224,13 @@ export default function ProfilePage() {
               aria-busy={uploadAvatar.isPending || updateProfile.isPending}
             >
               {avatarPreview ? (
+                // eslint-disable-next-line @next/next/no-img-element
                 <img
                   src={avatarPreview}
                   alt="プレビュー"
+                  width={64}
+                  height={64}
+                  decoding="async"
                   className="h-16 w-16 rounded-full object-cover"
                 />
               ) : (
@@ -226,7 +240,9 @@ export default function ProfilePage() {
                   size="lg"
                 />
               )}
-              <span className="absolute inset-0 flex items-center justify-center rounded-full bg-foreground/60 opacity-100 transition-opacity md:opacity-0 md:group-hover:opacity-100">
+              {/* hover が効くデバイス (mouse) のみ初期透明 → hover で表示
+                  タブレット・スマホ (pointer:coarse) は常時表示で操作可能 */}
+              <span className="absolute inset-0 flex items-center justify-center rounded-full bg-foreground/60 opacity-100 transition-opacity [@media(hover:hover)]:opacity-0 [@media(hover:hover)]:group-hover:opacity-100">
                 {uploadAvatar.isPending ? (
                   <Loader2 className="h-5 w-5 animate-spin text-white" aria-hidden="true" />
                 ) : (
