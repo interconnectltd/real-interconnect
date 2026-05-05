@@ -80,7 +80,11 @@ async function main() {
   let failed = 0;
   for (const meeting of meetings) {
     try {
-      const r = await processTldvMeeting(meeting.id, sb, tldv, { holdForConsent: true });
+      // skipIfInternal=true: 「定例 / 1on1 / standup / weekly」等を取り込みから完全除外
+      const r = await processTldvMeeting(meeting.id, sb, tldv, {
+        holdForConsent: true,
+        skipIfInternal: true,
+      });
       if (r.skipped) skipped++;
       else processed++;
     } catch (err) {

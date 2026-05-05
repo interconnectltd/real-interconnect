@@ -31,4 +31,6 @@ jobs:
           SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
           TLDV_API_KEY: ${{ secrets.TLDV_API_KEY }}
           TLDV_MAX_MEETINGS: ${{ inputs.max_meetings || '10' }}
+          # 自社定例 (default の「定例 / 1on1 / standup / weekly」に加えて) — 必要に応じて追加
+          TLDV_EXTRA_INTERNAL_PATTERNS: 'meet\s*(?:インターコネクト|interconnect),チーム\s*sync,フィードバック\s*MT'
         run: pnpm exec tsx scripts/run-tldv-sync.ts
