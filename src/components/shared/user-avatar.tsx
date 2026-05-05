@@ -2,12 +2,15 @@
 
 import { useEffect, useState } from "react";
 import { findPreset, isPresetAvatarUrl, presetSvgViewBox } from "@/lib/avatar-presets";
+import { variantAvatarUrl, type AvatarVariantKey } from "@/lib/avatar-resize";
 
 interface UserAvatarProps {
   name: string | null | undefined;
   avatarUrl: string | null | undefined;
   size?: "sm" | "md" | "lg" | "xl";
   className?: string;
+  /** ATF (above-the-fold) 表示なら eager + high priority に */
+  priority?: boolean;
 }
 
 const sizeClasses = {
@@ -18,12 +21,39 @@ const sizeClasses = {
 };
 
 /**
+ * size → 必要な variant key の mapping。
+ *
+ * Display rendering size:
+ *   sm = 32px  → thumb (96px = 3x DPR で十分)
+ *   md = 40px  → thumb
+ *   lg = 64px  → sm    (256px = 4x DPR で高精細)
+ *   xl = 96px  → md    (512px = 5x DPR まで対応)
+ *
+ * これにより:
+ *   - リスト 20名表示 (sm/md ばかり) は thumb 5KB × 20 = 100KB
+ *     旧 main 150KB × 20 = 3MB から 30倍速
+ *   - 詳細 modal (xl) でも 80KB で十分鮮明
+ */
+const sizeToVariant: Record<NonNullable<UserAvatarProps["size"]>, AvatarVariantKey> = {
+  sm: "thumb",
+  md: "thumb",
+  lg: "sm",
+  xl: "md",
+};
+
+/**
  * Avatar 表示の優先順:
  *   1. avatarUrl が `preset:<id>` → AVATAR_PRESETS から SVG 描画 (network なし)
- *   2. http(s)://...     → <img> で表示、エラー時に initial fallback
+ *   2. http(s)://...     → size に応じた variant URL を <img> で表示
  *   3. 不在 / エラー    → 名前頭文字 + ロゴ調 background
  */
-export function UserAvatar({ name, avatarUrl, size = "md", className = "" }: UserAvatarProps) {
+export function UserAvatar({
+  name,
+  avatarUrl,
+  size = "md",
+  className = "",
+  priority = false,
+}: UserAvatarProps) {
   const [imgError, setImgError] = useState(false);
 
   useEffect(() => {
@@ -56,14 +86,32 @@ export function UserAvatar({ name, avatarUrl, size = "md", className = "" }: Use
     }
   }
 
-  // 2. uploaded image
+  // 2. uploaded image — size に応じた variant を選択
   if (avatarUrl && !imgError) {
+    const variantKey = sizeToVariant[size];
+    const src = variantAvatarUrl(avatarUrl, variantKey) ?? avatarUrl;
     return (
       <img
-        src={avatarUrl}
+        src={src}
         alt={name ?? "avatar"}
+        // ATF=eager, それ以外は lazy で初期表示を高速化
+        loading={priority ? "eager" : "lazy"}
+        // decoding=async でメインスレッドブロックを避ける
+        decoding="async"
+        // Chrome の fetchPriority hint (TS 型は string で受ける)
+        // @ts-expect-error fetchpriority is a valid HTML attribute (React 19)
+        fetchpriority={priority ? "high" : "auto"}
         className={`${sizeClass} shrink-0 rounded-full object-cover ${className}`}
-        onError={() => setImgError(true)}
+        onError={(e) => {
+          // variant URL で失敗した場合、main URL に fallback してリトライ
+          const target = e.currentTarget;
+          if (target.src !== avatarUrl && target.dataset.retried !== "1") {
+            target.dataset.retried = "1";
+            target.src = avatarUrl;
+            return;
+          }
+          setImgError(true);
+        }}
       />
     );
   }

@@ -9,15 +9,15 @@ const ALLOWED_TYPES = ["image/jpeg", "image/png", "image/webp", "image/gif"];
 const MAX_SIZE = 50 * 1024 * 1024; // 50MB (Supabase Storage 上限と揃える)
 
 /**
- * POST /api/v1/profiles/avatar
- * 画像をアップロードして profile.avatar_url を更新。
+ * POST /api/v1/profiles/avatar (legacy fallback)
+ *
+ * 主経路は use-upload-avatar.ts のクライアント直送 + 4-variant WebP 生成。
+ * このエンドポイントは古いクライアントや Canvas 不可環境のフォールバック用。
+ * Netlify Functions の body 制限 (sync 6MB) を超える場合は 413 が返る。
  *
  * 重要な実装注意:
  *   - storage.objects RLS は (storage.foldername(name))[1] = auth.uid()
  *     つまり `<user.id>/<filename>` のフォルダパスでないと upload 拒否される。
- *     旧実装は flat path `<user.id>.jpg` で 500 を引いていた。
- *   - 同じユーザーが別 ext で再アップロードすると orphan が残るため
- *     upload 前に同フォルダ内の他ファイルを削除する。
  */
 export async function POST(request: Request) {
   try {
