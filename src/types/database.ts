@@ -64,6 +64,7 @@ export interface Database {
           timezone: string;
           is_admin: boolean;
           is_active: boolean;
+          linkedin_id: string | null;
           created_at: string;
           updated_at: string;
         };
@@ -534,6 +535,8 @@ export interface Database {
           user_id: string;
           type: string;
           context: string | null;
+          /** 00013_goals_offerings_taxonomy_v2 で追加。Z4 detail 文字数評価で参照。 */
+          detail: string | null;
           confidence: number;
           source: string;
           created_at: string;
@@ -542,11 +545,13 @@ export interface Database {
           user_id: string;
           type: string;
           context?: string | null;
+          detail?: string | null;
           confidence?: number;
           source?: string;
         };
         Update: {
           context?: string | null;
+          detail?: string | null;
           confidence?: number;
         };
         Relationships: [];
@@ -557,6 +562,8 @@ export interface Database {
           user_id: string;
           type: string;
           context: string | null;
+          /** 00013_goals_offerings_taxonomy_v2 で追加。Z4 detail 文字数評価で参照。 */
+          detail: string | null;
           confidence: number;
           source: string;
           created_at: string;
@@ -565,11 +572,13 @@ export interface Database {
           user_id: string;
           type: string;
           context?: string | null;
+          detail?: string | null;
           confidence?: number;
           source?: string;
         };
         Update: {
           context?: string | null;
+          detail?: string | null;
           confidence?: number;
         };
         Relationships: [];

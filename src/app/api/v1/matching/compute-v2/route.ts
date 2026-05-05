@@ -13,6 +13,11 @@ import { computeScoreV2 } from "@/lib/matching/score-compute-v2";
 import { generateReasonsV2 } from "@/lib/matching/reason-templates-v2";
 import { checkMatchingRateLimit } from "@/lib/rate-limit";
 import { applyEmbeddingScoreBatch } from "@/lib/matching/embedding";
+import {
+  findDuplicatePersons,
+  collectAlternateIds,
+  type DuplicateCandidateProfile,
+} from "@/lib/matching/duplicate-detection";
 import type { ScoringConfig } from "@/lib/matching/score-compute-v2";
 import type { JudgeCacheRow } from "@/lib/matching/judge-haiku";
 import type { Database } from "@/types/database";
@@ -69,9 +74,10 @@ export async function POST() {
     const myVectors = myVectorsRaw as { user_id: string; need_vectors: unknown[]; offer_vectors: unknown[]; topic_vectors: unknown[]; engagement_signature: Record<string, number>; analysis_count: number } | null;
 
     // --- 自分のプロフィール + goals/offerings ---
+    // duplicate-detection 用に email / linkedin_id / is_active / updated_at も取得
     const { data: myProfile } = await supabase
       .from("user_profiles")
-      .select("id, name, company, position, industry, bio")
+      .select("id, name, email, company, position, industry, bio, linkedin_id, is_active, updated_at")
       .eq("id", user.id)
       .single();
 
@@ -81,26 +87,87 @@ export async function POST() {
       .from("user_offerings").select("type").eq("user_id", user.id);
 
     // --- 全ターゲット取得 ---
-    const { data: targets } = await supabase
+    // duplicate-detection 用に email / linkedin_id / updated_at / is_active も取得
+    const { data: targetsRaw } = await supabase
       .from("user_profiles")
-      .select("id, name, company, position, industry, bio")
+      .select("id, name, email, company, position, industry, bio, linkedin_id, is_active, updated_at")
       .eq("is_active", true)
       .neq("id", user.id);
 
-    if (!targets?.length) return json({ computed: 0 });
+    if (!targetsRaw?.length) return json({ computed: 0 });
 
-    const targetIds = targets.map((t) => t.id);
-
-    // ターゲットの会話ベクトル一括取得
+    // ターゲット + viewer 自身の会話ベクトル一括取得 (analysis_count を duplicate detection に使う)
+    const initialTargetIds = (targetsRaw as { id: string }[]).map((t) => t.id);
     const { data: targetVectorsRaw } = await supabase
       .from("user_conversation_vectors")
       .select("*")
-      .in("user_id", targetIds);
+      .in("user_id", initialTargetIds);
 
     type VectorRow = { user_id: string; need_vectors: unknown[]; offer_vectors: unknown[]; topic_vectors: unknown[]; engagement_signature: Record<string, number>; analysis_count: number };
     const vectorMap = new Map<string, VectorRow>(
       ((targetVectorsRaw ?? []) as VectorRow[]).map((v) => [v.user_id, v]),
     );
+
+    // --- 重複アカウント検出: 同一実在人物の別 user_profile を 1 つに集約 ---
+    // viewer 自身も candidate に含めて、viewer の重複を target に出さないようにする。
+    type ProfileRowExt = {
+      id: string; name: string; email: string;
+      company: string | null; position: string | null;
+      industry: string | null; bio: string | null;
+      linkedin_id: string | null; is_active: boolean; updated_at: string;
+    };
+    const targetsExt = targetsRaw as ProfileRowExt[];
+    const dedupCandidates: DuplicateCandidateProfile[] = targetsExt.map((p) => ({
+      id: p.id,
+      name: p.name,
+      email: p.email,
+      company: p.company,
+      linkedin_id: p.linkedin_id,
+      is_active: p.is_active,
+      updated_at: p.updated_at,
+      analysis_count: vectorMap.get(p.id)?.analysis_count ?? 0,
+    }));
+
+    // viewer 本人の row も含めて検出 (viewer の "もう 1 つの自分" を target から除外)
+    if (myProfile) {
+      const me = myProfile as Pick<ProfileRowExt, "id" | "name" | "email" | "company" | "linkedin_id" | "is_active" | "updated_at">;
+      dedupCandidates.push({
+        id: me.id,
+        name: me.name,
+        email: me.email,
+        company: me.company,
+        linkedin_id: me.linkedin_id,
+        is_active: me.is_active,
+        updated_at: me.updated_at,
+        analysis_count: myVectors?.analysis_count ?? 0,
+      });
+    }
+
+    const dupGroups = findDuplicatePersons(dedupCandidates);
+    const dupAlternateIds = collectAlternateIds(dupGroups);
+
+    // viewer 自身が属するグループの全メンバー (representative 含む) を target から除外。
+    // 例: viewer=A, B が同一人物 → A は元々 .neq で除外済みだが、B も "viewer の別アカウント"
+    // なので推薦相手として出すのは UX 的におかしい。
+    const viewerGroupMemberIds = new Set<string>();
+    for (const g of dupGroups) {
+      const all = [g.representative, ...g.alternates];
+      if (all.some((m) => m.id === user.id)) {
+        for (const m of all) viewerGroupMemberIds.add(m.id);
+      }
+    }
+
+    if (dupAlternateIds.size > 0 || viewerGroupMemberIds.size > 0) {
+      console.info(
+        `[compute-v2] duplicate-detection: ${dupGroups.length} groups, ${dupAlternateIds.size} alternates excluded, ${viewerGroupMemberIds.size} viewer-self-duplicates excluded`,
+      );
+    }
+
+    const targets = targetsExt.filter(
+      (t) => !dupAlternateIds.has(t.id) && !viewerGroupMemberIds.has(t.id),
+    );
+    if (!targets.length) return json({ computed: 0 });
+    const targetIds = targets.map((t) => t.id);
 
     // ターゲットの goals/offerings 一括取得
     const { data: allGoals } = await supabase

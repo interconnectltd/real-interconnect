@@ -64,14 +64,72 @@ export default function MatchingPage() {
   const { data: myProfile } = useMyProfile();
   const { dismissedSet, dismiss, restore, resetAll } = useDismissedUsers(myProfile?.id);
 
-  const filteredScores = useMemo(
-    () => scores?.filter((s: MatchScore) => !dismissedSet.has(s.target_id)),
-    [scores, dismissedSet],
-  );
-  const filteredMutual = useMemo(
-    () => mutualMatches?.filter((m: MutualMatch) => !dismissedSet.has(m.user_id)),
-    [mutualMatches, dismissedSet],
-  );
+  // ── 二重防御フィルタ (Persona W3) ──
+  // Backend の除外漏れに備え、UI 側でも以下を防ぐ:
+  //  1. self (自分自身) の混入
+  //  2. 同一人物 (name + email 完全一致) の重複表示
+  // ※ name のみ一致 / email 違いは「同姓同名の別人」として両方残す (Sub-B 安全策)
+  const myId = myProfile?.id;
+  const myEmail = myProfile?.email?.trim().toLowerCase();
+
+  const filteredScores = useMemo(() => {
+    if (!scores) return scores;
+    // dedupe key: 正規化 name + 正規化 email
+    const seen = new Map<string, { idx: number; dupCount: number }>();
+    const result: Array<MatchScore & { __dupCount?: number }> = [];
+    for (const s of scores) {
+      if (dismissedSet.has(s.target_id)) continue;
+      // self exclude (id 一致 OR email 完全一致でも自分とみなす)
+      if (myId && s.target_id === myId) continue;
+      const targetEmail = s.target_profile?.email?.trim().toLowerCase();
+      if (myEmail && targetEmail && targetEmail === myEmail) continue;
+
+      const rawName = s.target_profile?.name ?? "";
+      const normName = rawName.trim().toLowerCase().replace(/\s+/g, "");
+      // name + email 両方で一意化 (email 違いの同姓同名は別人扱い)
+      const key = normName && targetEmail ? `${normName}__${targetEmail}` : null;
+      if (key) {
+        const prev = seen.get(key);
+        if (prev) {
+          prev.dupCount += 1;
+          const head = result[prev.idx] as MatchScore & { __dupCount?: number };
+          head.__dupCount = prev.dupCount;
+          continue;
+        }
+        seen.set(key, { idx: result.length, dupCount: 0 });
+      }
+      result.push({ ...s });
+    }
+    return result;
+  }, [scores, dismissedSet, myId, myEmail]);
+
+  const filteredMutual = useMemo(() => {
+    if (!mutualMatches) return mutualMatches;
+    const seen = new Map<string, { idx: number; dupCount: number }>();
+    const result: Array<MutualMatch & { __dupCount?: number }> = [];
+    for (const m of mutualMatches) {
+      if (dismissedSet.has(m.user_id)) continue;
+      if (myId && m.user_id === myId) continue;
+      const targetEmail = m.profile?.email?.trim().toLowerCase();
+      if (myEmail && targetEmail && targetEmail === myEmail) continue;
+
+      const rawName = m.profile?.name ?? "";
+      const normName = rawName.trim().toLowerCase().replace(/\s+/g, "");
+      const key = normName && targetEmail ? `${normName}__${targetEmail}` : null;
+      if (key) {
+        const prev = seen.get(key);
+        if (prev) {
+          prev.dupCount += 1;
+          const head = result[prev.idx] as MutualMatch & { __dupCount?: number };
+          head.__dupCount = prev.dupCount;
+          continue;
+        }
+        seen.set(key, { idx: result.length, dupCount: 0 });
+      }
+      result.push({ ...m });
+    }
+    return result;
+  }, [mutualMatches, dismissedSet, myId, myEmail]);
 
   const { connectedIds, pendingIds } = useMemo(() => {
     const conns = connections as Connection[] | undefined;
@@ -129,18 +187,30 @@ export default function MatchingPage() {
             </p>
           </header>
           <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-            {filteredMutual.map((m: MutualMatch) => (
-              <MutualCard
-                key={m.user_id}
-                match={m}
-                connected={connectedIds.has(m.user_id)}
-                pending={pendingIds.has(m.user_id)}
-                connectPending={requestConnection.isPending}
-                onOpen={() => openProfileModal(m.user_id)}
-                onConnect={() => requestConnection.mutate(m.user_id)}
-                onDismiss={() => handleDismiss(m.user_id)}
-              />
-            ))}
+            {filteredMutual.map((m: MutualMatch & { __dupCount?: number }) => {
+              const isSelf =
+                (!!myId && m.user_id === myId) ||
+                (!!myEmail &&
+                  !!m.profile?.email &&
+                  m.profile.email.trim().toLowerCase() === myEmail);
+              return (
+                <MutualCard
+                  key={m.user_id}
+                  match={m}
+                  connected={connectedIds.has(m.user_id)}
+                  pending={pendingIds.has(m.user_id)}
+                  connectPending={requestConnection.isPending}
+                  isSelf={isSelf}
+                  dupCount={m.__dupCount ?? 0}
+                  onOpen={() => {
+                    if (isSelf) return;
+                    openProfileModal(m.user_id);
+                  }}
+                  onConnect={() => requestConnection.mutate(m.user_id)}
+                  onDismiss={() => handleDismiss(m.user_id)}
+                />
+              );
+            })}
           </div>
         </section>
       )}
@@ -162,24 +232,36 @@ export default function MatchingPage() {
         </div>
       ) : filteredScores && filteredScores.length > 0 ? (
         <div className="space-y-4">
-          {filteredScores.map((score: MatchScore, i: number) => (
-            <div key={score.target_id} data-tour={i === 0 ? "matching-card-first" : undefined}>
-            <ScoreCard
-              score={score}
-              connected={connectedIds.has(score.target_id)}
-              pending={pendingIds.has(score.target_id)}
-              connectPending={requestConnection.isPending}
-              onOpen={() => openProfileModal(score.target_id)}
-              onConnect={() => requestConnection.mutate(score.target_id)}
-              onDismiss={() => handleDismiss(score.target_id)}
-            />
-            </div>
-          ))}
+          {filteredScores.map((score: MatchScore & { __dupCount?: number }, i: number) => {
+            const isSelf =
+              (!!myId && score.target_id === myId) ||
+              (!!myEmail &&
+                !!score.target_profile?.email &&
+                score.target_profile.email.trim().toLowerCase() === myEmail);
+            return (
+              <div key={score.target_id} data-tour={i === 0 ? "matching-card-first" : undefined}>
+                <ScoreCard
+                  score={score}
+                  connected={connectedIds.has(score.target_id)}
+                  pending={pendingIds.has(score.target_id)}
+                  connectPending={requestConnection.isPending}
+                  isSelf={isSelf}
+                  dupCount={score.__dupCount ?? 0}
+                  onOpen={() => {
+                    if (isSelf) return;
+                    openProfileModal(score.target_id);
+                  }}
+                  onConnect={() => requestConnection.mutate(score.target_id)}
+                  onDismiss={() => handleDismiss(score.target_id)}
+                />
+              </div>
+            );
+          })}
           <TldvConnectCta />
         </div>
       ) : (
         <div className="space-y-4">
-          <EmptyState />
+          <EmptyState hasMyProfile={!!myProfile} />
           <TldvConnectCta />
         </div>
       )}
@@ -264,6 +346,8 @@ function MutualCard({
   connected,
   pending,
   connectPending,
+  isSelf = false,
+  dupCount = 0,
   onOpen,
   onConnect,
   onDismiss,
@@ -272,21 +356,31 @@ function MutualCard({
   connected: boolean;
   pending: boolean;
   connectPending: boolean;
+  isSelf?: boolean;
+  dupCount?: number;
   onOpen: () => void;
   onConnect: () => void;
   onDismiss: () => void;
 }) {
   const p = match.profile;
   const name = p?.name ?? "ユーザー";
-  const stateLabel = connected ? "（接続済み）" : pending ? "（申請中）" : "";
+  const stateLabel = isSelf
+    ? "（本人）"
+    : connected
+      ? "（接続済み）"
+      : pending
+        ? "（申請中）"
+        : "";
 
   return (
     <div className="relative">
       <div
         role="button"
-        tabIndex={0}
-        onClick={onOpen}
+        tabIndex={isSelf ? -1 : 0}
+        aria-disabled={isSelf || undefined}
+        onClick={isSelf ? undefined : onOpen}
         onKeyDown={(e) => {
+          if (isSelf) return;
           if (e.key === "Enter") {
             e.preventDefault();
             onOpen();
@@ -295,20 +389,38 @@ function MutualCard({
           }
         }}
         onKeyUp={(e) => {
+          if (isSelf) return;
           if (e.key === " ") {
             e.preventDefault();
             onOpen();
           }
         }}
         aria-label={`${name} のプロフィールを開く${stateLabel}`}
-        className="block w-full rounded-lg outline-none focus-visible:ring-[3px] focus-visible:ring-ring/70"
+        className={`block w-full rounded-lg outline-none focus-visible:ring-[3px] focus-visible:ring-ring/70 ${
+          isSelf ? "pointer-events-none opacity-60" : ""
+        }`}
       >
         <Card className="ds-card-interactive h-full border-accent/25 bg-[color:color-mix(in_oklab,var(--accent)_4%,var(--card))]">
           <CardContent className="space-y-3 pr-9">
             <div className="flex items-start gap-3">
               <UserAvatar name={p?.name} avatarUrl={p?.avatar_url} size="md" />
               <div className="min-w-0 flex-1">
-                <p className="truncate text-base font-medium text-foreground">{name}</p>
+                <div className="flex flex-wrap items-center gap-x-2 gap-y-1">
+                  <p className="truncate text-base font-medium text-foreground">{name}</p>
+                  {isSelf && (
+                    <Badge
+                      variant="outline"
+                      className="h-5 border-destructive/30 bg-destructive/10 px-2 text-[11px] font-medium text-destructive"
+                    >
+                      本人
+                    </Badge>
+                  )}
+                  {dupCount > 0 && (
+                    <span className="text-[11px] text-muted-foreground">
+                      （他 {dupCount} 件のアカウント）
+                    </span>
+                  )}
+                </div>
                 <p className="mt-0.5 truncate text-xs text-muted-foreground">
                   {p?.company}
                   {p?.position ? ` / ${p.position}` : ""}
@@ -349,6 +461,8 @@ function ScoreCard({
   connected,
   pending,
   connectPending,
+  isSelf = false,
+  dupCount = 0,
   onOpen,
   onConnect,
   onDismiss,
@@ -357,6 +471,8 @@ function ScoreCard({
   connected: boolean;
   pending: boolean;
   connectPending: boolean;
+  isSelf?: boolean;
+  dupCount?: number;
   onOpen: () => void;
   onConnect: () => void;
   onDismiss: () => void;
@@ -367,15 +483,23 @@ function ScoreCard({
   const preliminary = score.confidence < 0.5;
   const matchPct = Math.round(score.total_score * 100);
   const name = p?.name ?? "ユーザー";
-  const stateLabel = connected ? "（接続済み）" : pending ? "（申請中）" : "";
+  const stateLabel = isSelf
+    ? "（本人）"
+    : connected
+      ? "（接続済み）"
+      : pending
+        ? "（申請中）"
+        : "";
 
   return (
     <div className="relative">
       <div
         role="button"
-        tabIndex={0}
-        onClick={onOpen}
+        tabIndex={isSelf ? -1 : 0}
+        aria-disabled={isSelf || undefined}
+        onClick={isSelf ? undefined : onOpen}
         onKeyDown={(e) => {
+          if (isSelf) return;
           if (e.key === "Enter") {
             e.preventDefault();
             onOpen();
@@ -384,13 +508,16 @@ function ScoreCard({
           }
         }}
         onKeyUp={(e) => {
+          if (isSelf) return;
           if (e.key === " ") {
             e.preventDefault();
             onOpen();
           }
         }}
         aria-label={`${name} のプロフィールを開く${stateLabel}`}
-        className="block w-full rounded-lg outline-none focus-visible:ring-[3px] focus-visible:ring-ring/70"
+        className={`block w-full rounded-lg outline-none focus-visible:ring-[3px] focus-visible:ring-ring/70 ${
+          isSelf ? "pointer-events-none opacity-60" : ""
+        }`}
       >
         <Card className="ds-card-interactive">
           <CardContent className="space-y-4">
@@ -399,6 +526,14 @@ function ScoreCard({
               <div className="min-w-0 flex-1">
                 <div className="flex flex-wrap items-center gap-x-2 gap-y-1">
                   <p className="truncate text-base font-medium text-foreground">{name}</p>
+                  {isSelf && (
+                    <Badge
+                      variant="outline"
+                      className="h-5 border-destructive/30 bg-destructive/10 px-2 text-[11px] font-medium text-destructive"
+                    >
+                      本人
+                    </Badge>
+                  )}
                   {p?.industry && (
                     <Badge
                       variant="outline"
@@ -407,19 +542,26 @@ function ScoreCard({
                       {p.industry}
                     </Badge>
                   )}
+                  {dupCount > 0 && (
+                    <span className="text-[11px] text-muted-foreground">
+                      （他 {dupCount} 件のアカウント）
+                    </span>
+                  )}
                 </div>
                 <p className="mt-0.5 truncate text-xs text-muted-foreground">
                   {p?.company}
                   {p?.position ? ` / ${p.position}` : ""}
                 </p>
               </div>
-              <ConnectControl
-                connected={connected}
-                pending={pending}
-                disabled={connectPending}
-                onConnect={onConnect}
-                size="sm"
-              />
+              {!isSelf && (
+                <ConnectControl
+                  connected={connected}
+                  pending={pending}
+                  disabled={connectPending}
+                  onConnect={onConnect}
+                  size="sm"
+                />
+              )}
             </div>
 
             <ReasonList reasons={score.reasons ?? []} />
@@ -530,17 +672,24 @@ function DismissButton({ onClick }: { onClick: () => void }) {
   );
 }
 
-function EmptyState() {
+function EmptyState({ hasMyProfile = true }: { hasMyProfile?: boolean }) {
   return (
     <div className="ds-empty-state">
       <Heart className="mx-auto h-8 w-8 text-muted-foreground/40" aria-hidden="true" />
-      <p className="mt-3 text-sm font-medium text-foreground">おすすめを準備しています</p>
-      <p className="mx-auto mt-1 max-w-sm text-xs leading-relaxed text-muted-foreground">
-        プロフィールを充実させると、より的確なおすすめが表示されます。
+      <p className="mt-3 text-sm font-medium text-foreground">
+        {hasMyProfile ? "おすすめを準備しています" : "おすすめはまだありません"}
       </p>
-      <Button variant="outline" size="sm" className="mt-4" render={<a href="/members" />}>
-        メンバー一覧を見る
-      </Button>
+      <p className="mx-auto mt-1 max-w-sm text-xs leading-relaxed text-muted-foreground">
+        会話分析を増やすと、より的確なおすすめが表示されます。プロフィールの充実もおすすめ精度を高めます。
+      </p>
+      <div className="mt-4 flex flex-wrap items-center justify-center gap-2">
+        <Button variant="accent" size="sm" render={<a href="/meetings" />}>
+          会話分析を増やす
+        </Button>
+        <Button variant="outline" size="sm" render={<a href="/members" />}>
+          メンバー一覧を見る
+        </Button>
+      </div>
     </div>
   );
 }

@@ -6,10 +6,12 @@ export async function GET() {
     const { user, supabase } = await withAuth();
 
     // Get scores where I score them >= threshold
+    // Defense-in-depth: target_id != viewer_id で self pair を弾く
     const { data: myScores, error: err1 } = await supabase
       .from("matching_scores_v4")
       .select("target_id, total_score, score_reasons")
       .eq("viewer_id", user.id)
+      .neq("target_id", user.id)
       .gte("total_score", MATCHING_MUTUAL_THRESHOLD) as { data: { target_id: string; total_score: number; score_reasons: string[] }[] | null; error: Error | null };
 
     if (err1) throw err1;
@@ -18,10 +20,12 @@ export async function GET() {
     const targetIds = myScores.map((s) => s.target_id);
 
     // Get reverse scores where they also score me >= threshold
+    // Defense-in-depth: viewer_id != target_id (=user.id) で self pair を弾く
     const { data: theirScores, error: err2 } = await supabase
       .from("matching_scores_v4")
-      .select("viewer_id, total_score, target_profile:user_profiles!viewer_id(id, name, company, position, industry, bio, avatar_url)")
+      .select("viewer_id, total_score, target_profile:user_profiles!viewer_id(id, name, email, company, position, industry, bio, avatar_url)")
       .eq("target_id", user.id)
+      .neq("viewer_id", user.id)
       .in("viewer_id", targetIds)
       .gte("total_score", MATCHING_MUTUAL_THRESHOLD)
       .order("total_score", { ascending: false }) as { data: { viewer_id: string; total_score: number; target_profile: unknown }[] | null; error: Error | null };

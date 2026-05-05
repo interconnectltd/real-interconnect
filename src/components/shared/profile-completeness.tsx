@@ -37,7 +37,7 @@ export function ProfileCompleteness({ profile, hideLink }: ProfileCompletenessPr
             <span className="text-base text-muted-foreground">%</span>
           </div>
           <p className="text-xs text-success">
-            プロフィールが完成しました。マッチング精度が最大化されます。
+            プロフィール登録項目をすべて満たしました。会議分析を重ねるごとに、マッチング精度はさらに磨かれます。
           </p>
         </CardContent>
       </Card>
@@ -48,6 +48,7 @@ export function ProfileCompleteness({ profile, hideLink }: ProfileCompletenessPr
   const sortedMissing = [...missing].sort((a, b) => b.points - a.points);
   const top3 = sortedMissing.slice(0, 3);
   const restPoints = sortedMissing.slice(3).reduce((s, f) => s + f.points, 0);
+  const topMissingLabel = sortedMissing[0]?.label;
 
   return (
     <Card data-tour="completeness-card">
@@ -65,12 +66,14 @@ export function ProfileCompleteness({ profile, hideLink }: ProfileCompletenessPr
           {score === 0
             ? "これから1つずつ埋めていきましょう。まずは下の項目から。"
             : score < 30
-            ? "良いスタートです。基本情報の次は自己紹介を充実させましょう。"
+            ? "これから1つずつ埋めていきましょう。最初は『お名前』『会社名』からどうぞ。"
             : score < 60
-            ? "順調に進んでいます。目標と提供できることを登録すると精度が大幅UP。"
+            ? "基本情報の次は、自己紹介と『提供できること』を充実させましょう。"
             : score < 90
-            ? "あと少しで完成です。tl;dv 連携で AI 推薦が解禁されます。"
-            : "ほぼ完成。最後の数%で最高精度のマッチングが提供されます。"}
+            ? topMissingLabel
+              ? `順調に進んでいます。次は「${topMissingLabel}」を埋めると、AI 推薦の効きが大きく変わります。`
+              : "順調に進んでいます。残りの項目を埋めると、AI 推薦の効きが大きく変わります。"
+            : "ほぼ完成。最後の数項目を埋めると、AI 推薦に必要な前提条件がすべて揃います。"}
         </p>
 
         <div
@@ -127,22 +130,36 @@ export function ProfileCompleteness({ profile, hideLink }: ProfileCompletenessPr
             <ChevronDown className="h-3.5 w-3.5 transition-transform group-open/detail:rotate-180" aria-hidden="true" />
           </summary>
           <ul className="space-y-2 px-3 pb-3 pt-1">
-            {groups.map((g) => (
-              <li key={g.id} className="space-y-1">
-                <div className="flex items-center justify-between text-[11px]">
-                  <span className="text-foreground">{g.label}</span>
-                  <span className="tabular-nums text-muted-foreground">
-                    {g.earned} / {g.total}
-                  </span>
-                </div>
-                <div className="h-1 overflow-hidden rounded-full bg-muted">
-                  <div
-                    className="h-full rounded-full bg-accent/70"
-                    style={{ width: `${(g.earned / g.total) * 100}%` }}
-                  />
-                </div>
-              </li>
-            ))}
+            {groups.map((g) => {
+              const isLever = g.id === "tldv";
+              return (
+                <li key={g.id} className="space-y-1">
+                  <div className="flex items-center justify-between gap-2 text-[11px]">
+                    <span className="flex items-center gap-1 text-foreground">
+                      <span>{g.label}</span>
+                      {isLever && (
+                        <span
+                          className="rounded-sm bg-accent/15 px-1 py-0.5 text-[10px] font-medium text-accent"
+                          aria-label="推薦精度を引き上げる主要レバー"
+                          title="会議分析の蓄積回数が AI 推薦の精度を最も引き上げます"
+                        >
+                          ★ 推薦精度 lever
+                        </span>
+                      )}
+                    </span>
+                    <span className="tabular-nums text-muted-foreground">
+                      {g.earned} / {g.total}
+                    </span>
+                  </div>
+                  <div className="h-1 overflow-hidden rounded-full bg-muted">
+                    <div
+                      className="h-full rounded-full bg-accent/70"
+                      style={{ width: `${(g.earned / g.total) * 100}%` }}
+                    />
+                  </div>
+                </li>
+              );
+            })}
           </ul>
         </details>
 
@@ -157,12 +174,21 @@ export function ProfileCompleteness({ profile, hideLink }: ProfileCompletenessPr
 }
 
 function MissingItem({ item }: { item: CompletenessFieldCheck }) {
+  const isLever = item.key.startsWith("tldv");
   return (
     <li className="flex items-start justify-between gap-2 text-xs text-muted-foreground">
       <div className="flex min-w-0 items-start gap-1.5">
         <span className="mt-1 inline-block h-1 w-1 shrink-0 rounded-full bg-accent" aria-hidden="true" />
         <div className="min-w-0">
           <span className="text-foreground">{item.label}</span>
+          {isLever && (
+            <span
+              className="ml-1 text-[10px] font-medium text-accent"
+              aria-label="マッチング精度の核となる項目"
+            >
+              (マッチング精度の核)
+            </span>
+          )}
           {item.hint && <span className="ml-1 text-muted-foreground/80">— {item.hint}</span>}
         </div>
       </div>

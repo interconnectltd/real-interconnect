@@ -12,8 +12,11 @@ export async function GET(request: Request) {
 
     let query = supabase
       .from("matching_scores_v4")
-      .select("*, target_profile:user_profiles!target_id(id, name, company, position, industry, bio, avatar_url)", { count: "exact" })
+      .select("*, target_profile:user_profiles!target_id(id, name, email, company, position, industry, bio, avatar_url)", { count: "exact" })
       .eq("viewer_id", user.id)
+      // Defense-in-depth: 自分自身のペアを絶対にレスポンスに含めない
+      // (compute-v2 で既に除外しているが、過去 row や手動 insert への保険)
+      .neq("target_id", user.id)
       .gte("total_score", minScore);
 
     if (sortBy === "score") {

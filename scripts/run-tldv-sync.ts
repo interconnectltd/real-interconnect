@@ -78,15 +78,19 @@ async function main() {
   let processed = 0;
   let skipped = 0;
   let failed = 0;
+  // skipIfInternal=false (default): DB に保存、AI 解析だけ classify 結果に応じて skip。
+  // 旧 skipIfInternal=true は「organizer 1 人だけの商談 (招待 link 参加)」も
+  // external=0 で internal 誤判定 → 全件 skip するリスクがあった。
+  // TLDV_EXTRA_INTERNAL_PATTERNS env で明示パターンに該当するものだけが
+  // classification.kind='internal' になるが、それでも DB には保存される。
   for (const meeting of meetings) {
     try {
-      // skipIfInternal=true: 「定例 / 1on1 / standup / weekly」等を取り込みから完全除外
       const r = await processTldvMeeting(meeting.id, sb, tldv, {
         holdForConsent: true,
-        skipIfInternal: true,
       });
       if (r.skipped) skipped++;
       else processed++;
+      console.log(`[run-tldv-sync] meeting ${meeting.id.slice(0, 8)} skipped=${r.skipped} kind=${r.classification.kind} title="${meeting.name?.slice(0, 30) ?? ''}"`);
     } catch (err) {
       failed++;
       console.error(`[run-tldv-sync] meeting ${meeting.id} failed:`, err instanceof Error ? err.message : String(err));
