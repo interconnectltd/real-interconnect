@@ -1,0 +1,34 @@
+name: tl;dv Sync
+
+on:
+  schedule:
+    # 毎日 16:00 UTC = 翌 01:00 JST に新規 transcript を取り込み
+    - cron: '0 16 * * *'
+  workflow_dispatch:
+    inputs:
+      max_meetings:
+        description: '取り込み件数 (default 10, max 50)'
+        required: false
+        default: '10'
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 10
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'pnpm'
+      - run: pnpm install --frozen-lockfile
+      - name: Run tl;dv sync
+        env:
+          NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+          TLDV_API_KEY: ${{ secrets.TLDV_API_KEY }}
+          TLDV_MAX_MEETINGS: ${{ inputs.max_meetings || '10' }}
+        run: pnpm exec tsx scripts/run-tldv-sync.ts
