@@ -8,8 +8,8 @@ export default function PublicLayout({
   children: React.ReactNode;
 }) {
   return (
-    <div className="flex min-h-dvh flex-col">
-      <header className="border-b border-border/50">
+    <div className="flex min-h-dvh flex-col pb-safe">
+      <header className="border-b border-border/50 pt-safe pl-safe pr-safe">
         <div className="mx-auto flex h-16 max-w-5xl items-center justify-between px-4">
           <Link href="/" aria-label="INTER CONNECT" className="flex items-center">
             <Image

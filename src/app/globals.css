@@ -306,12 +306,67 @@ button, [role="button"], a {
   touch-action: manipulation;
 }
 
-/* Safe area padding for notch/home bar */
+/* Safe area padding for notch / Dynamic Island / home indicator.
+ * iPhone 14 Pro Max: top=59pt (Dynamic Island), bottom=34pt (Home Indicator),
+ * landscape では left/right にも notch が回る。
+ * env() は viewportFit=cover (root layout.tsx) と併用して初めて値を返す。
+ */
 .pb-safe {
   padding-bottom: env(safe-area-inset-bottom);
 }
 .pt-safe {
   padding-top: env(safe-area-inset-top);
+}
+.pl-safe {
+  padding-left: env(safe-area-inset-left);
+}
+.pr-safe {
+  padding-right: env(safe-area-inset-right);
+}
+.px-safe {
+  padding-left: env(safe-area-inset-left);
+  padding-right: env(safe-area-inset-right);
+}
+/* `*-or-4` 系: safe-area が 0 の端末でも 1rem の最低 padding を保証
+ * (Tailwind v4 の env() max() ヘルパ相当を CSS で明示)。
+ * 旧 iPhone / Android 横画面で Home indicator 16px に満たない端末でも余白が崩れない。 */
+.pb-safe-or-4 {
+  padding-bottom: max(env(safe-area-inset-bottom), 1rem);
+}
+.pt-safe-or-4 {
+  padding-top: max(env(safe-area-inset-top), 1rem);
+}
+.pl-safe-or-4 {
+  padding-left: max(env(safe-area-inset-left), 1rem);
+}
+.pr-safe-or-4 {
+  padding-right: max(env(safe-area-inset-right), 1rem);
+}
+
+/* Landscape (短い高さ + 左右ノッチ) — モーダルの max-height を 92dvh に制約。
+ * iPhone SE 横向き (667×375) では 90dvh モーダル ≒ 337px しかなく、
+ * Dialog に max-h-[90dvh] が無いケースで内容がはみ出す保険。 */
+@media (orientation: landscape) and (max-height: 500px) {
+  [data-slot="dialog-content"],
+  [data-slot="sheet-content"][data-side="left"],
+  [data-slot="sheet-content"][data-side="right"] {
+    max-height: 92dvh;
+    overflow-y: auto;
+  }
+  [data-slot="sheet-content"][data-side="bottom"] {
+    max-height: 80dvh;
+    overflow-y: auto;
+  }
+}
+
+/* Foldable / 極狭端末 (Galaxy Z Fold 折りたたみ時 280px) で
+ * デフォルト main padding (16px) と中身の min-w が衝突して横スクロールを生むため
+ * 極狭時のみ padding を縮める。Tailwind ユーティリティ上書きが必要なので !important。 */
+@media (max-width: 320px) {
+  main {
+    padding-left: 0.75rem;
+    padding-right: 0.75rem;
+  }
 }
 
 @layer base {

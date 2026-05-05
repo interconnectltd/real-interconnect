@@ -120,7 +120,7 @@ export default function DashboardPage() {
         </div>
         <Button
           variant="outline"
-          size="icon-sm"
+          size="icon-lg"
           onClick={() => queryClient.invalidateQueries()}
           aria-label="データを更新"
         >
@@ -148,7 +148,7 @@ export default function DashboardPage() {
         aria-label="ネットワーク指標"
         className="overflow-hidden rounded-lg border border-border bg-card"
       >
-        <div className="grid divide-y divide-border sm:grid-cols-2 sm:divide-y-0 sm:divide-x md:grid-cols-4">
+        <div className="grid divide-y divide-border sm:grid-cols-2 sm:divide-y-0 sm:divide-x lg:grid-cols-4">
           {stats.map((stat) => {
             const isZero = stat.value === 0;
             const display = isZero && stat.zeroHint ? stat.zeroHint : stat.hint;

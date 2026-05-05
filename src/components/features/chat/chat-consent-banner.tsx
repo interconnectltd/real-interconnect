@@ -36,14 +36,14 @@ export function ChatConsentBanner() {
         <Button
           size="sm"
           variant="outline"
-          className="h-7 border-blue-200 dark:border-blue-800 bg-white dark:bg-blue-900 text-blue-700 dark:text-blue-200 hover:bg-blue-100 dark:hover:bg-blue-800"
+          className="border-blue-200 dark:border-blue-800 bg-white dark:bg-blue-900 text-blue-700 dark:text-blue-200 hover:bg-blue-100 dark:hover:bg-blue-800"
           onClick={handleAccept}
         >
           了承する
         </Button>
         <button
           type="button"
-          className="text-blue-400 dark:text-blue-500 hover:text-blue-600 dark:hover:text-blue-300"
+          className="inline-flex h-11 w-11 items-center justify-center rounded-md text-blue-400 dark:text-blue-500 hover:text-blue-600 dark:hover:text-blue-300 focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/70"
           onClick={handleAccept}
           aria-label="閉じる"
         >

@@ -122,7 +122,7 @@ export function HelpDock({
                 fabRef.current?.focus();
               }}
               aria-label="メニューを閉じる"
-              className="-mr-1 inline-flex h-7 w-7 items-center justify-center rounded-md text-muted-foreground/70 hover:bg-muted hover:text-foreground focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/70"
+              className="-mr-1 inline-flex h-11 w-11 items-center justify-center rounded-md text-muted-foreground/70 hover:bg-muted hover:text-foreground focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/70"
             >
               <X className="h-3.5 w-3.5" aria-hidden="true" />
             </button>

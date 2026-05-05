@@ -280,7 +280,7 @@ function SortToggle({
             role="radio"
             aria-checked={value === opt.value}
             onClick={() => onChange(opt.value)}
-            className={`min-h-8 rounded-md px-3.5 text-xs font-medium transition-colors outline-none focus-visible:ring-[3px] focus-visible:ring-ring/70 ${
+            className={`inline-flex min-h-11 items-center rounded-md px-3.5 text-xs font-medium transition-colors outline-none focus-visible:ring-[3px] focus-visible:ring-ring/70 ${
               value === opt.value
                 ? "bg-card text-foreground shadow-sm"
                 : "text-muted-foreground hover:text-foreground"
@@ -328,7 +328,7 @@ function FilterRow({
               role="radio"
               aria-checked={isSelected}
               onClick={() => onSelect(item.value || undefined)}
-              className={`inline-flex min-h-8 shrink-0 items-center rounded-full border px-3 text-xs font-medium transition-colors outline-none focus-visible:ring-[3px] focus-visible:ring-ring/70 ${
+              className={`inline-flex min-h-11 shrink-0 items-center rounded-full border px-3 text-xs font-medium transition-colors outline-none focus-visible:ring-[3px] focus-visible:ring-ring/70 ${
                 isSelected
                   ? "border-accent/40 bg-accent/10 text-accent-strong"
                   : "border-border bg-card text-muted-foreground hover:border-accent/30 hover:text-foreground"
@@ -502,7 +502,7 @@ function Pagination({
     >
       <Button
         variant="outline"
-        size="icon-sm"
+        size="icon-lg"
         disabled={page <= 1}
         onClick={() => onChange(page - 1)}
         aria-label="前のページ"
@@ -517,7 +517,7 @@ function Pagination({
             onClick={() => onChange(n)}
             aria-current={n === page ? "page" : undefined}
             aria-label={`${n}ページ目`}
-            className={`inline-flex h-8 min-w-8 items-center justify-center rounded-md px-2 text-xs font-medium tabular-nums transition-colors outline-none focus-visible:ring-[3px] focus-visible:ring-ring/70 ${
+            className={`inline-flex h-11 min-w-11 items-center justify-center rounded-md px-2 text-xs font-medium tabular-nums transition-colors outline-none focus-visible:ring-[3px] focus-visible:ring-ring/70 ${
               n === page
                 ? "bg-primary text-primary-foreground shadow-sm"
                 : "text-muted-foreground hover:bg-muted hover:text-foreground"
@@ -533,7 +533,7 @@ function Pagination({
       )}
       <Button
         variant="outline"
-        size="icon-sm"
+        size="icon-lg"
         disabled={page >= totalPages}
         onClick={() => onChange(page + 1)}
         aria-label="次のページ"

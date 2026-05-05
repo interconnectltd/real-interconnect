@@ -87,12 +87,13 @@ export function FeedbackModal({
         </DialogHeader>
 
         {step === 1 ? (
-          <div className="flex justify-center gap-1 py-4">
+          <div className="flex justify-center gap-2 py-4">
             {[1, 2, 3, 4, 5].map((star) => (
               <button
                 key={star}
                 type="button"
-                className="rounded-md p-1 transition-transform hover:scale-110 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                aria-label={`${star}星評価`}
+                className="inline-flex h-11 w-11 items-center justify-center rounded-md p-1 transition-transform hover:scale-110 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
                 onMouseEnter={() => setHoveredStar(star)}
                 onMouseLeave={() => setHoveredStar(0)}
                 onClick={() => setRating(star)}

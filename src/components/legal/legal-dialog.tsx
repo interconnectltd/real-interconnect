@@ -54,7 +54,7 @@ export function LegalDialog({ trigger, defaultTab = "terms" }: LegalDialogProps)
         }
       />
       <DialogContent
-        className="flex h-[85vh] w-full max-w-3xl flex-col gap-3 overflow-hidden p-4 sm:max-w-3xl"
+        className="flex h-[85dvh] max-h-[85dvh] w-full max-w-3xl flex-col gap-3 overflow-hidden p-4 sm:max-w-3xl"
       >
         <DialogTitle className="text-base font-semibold">
           法務文書

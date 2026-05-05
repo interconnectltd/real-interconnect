@@ -88,7 +88,7 @@ export default function ConnectionsPage() {
         </p>
       </div>
 
-      <div className="flex gap-2">
+      <div className="flex flex-wrap gap-2">
         {tabs.map((tab) => (
           <Button
             key={tab.key}

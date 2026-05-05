@@ -29,7 +29,7 @@ export default function AuthLayout({
               <Sidebar />
             </div>
           </aside>
-          <main className="flex-1 overflow-x-hidden p-4 pb-24 md:p-6">{children}</main>
+          <main className="flex-1 overflow-x-hidden p-4 pb-24 landscape:pb-16 md:p-6">{children}</main>
         </div>
       </div>
       <ProfileModal />

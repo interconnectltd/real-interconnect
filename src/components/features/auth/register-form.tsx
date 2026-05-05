@@ -19,7 +19,7 @@ import { LEGAL_VERSIONS } from "@/lib/legal/versions";
 const labelClass = "text-[13px] font-medium text-foreground";
 const fieldHelpClass = "text-xs text-destructive";
 const selectClass =
-  "h-10 w-full rounded-lg border border-input bg-card pl-3 pr-10 py-2 text-sm transition-[box-shadow,border-color] outline-none focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/70 aria-invalid:border-destructive aria-invalid:ring-[3px] aria-invalid:ring-destructive/20 appearance-none";
+  "h-11 w-full rounded-lg border border-input bg-card pl-3 pr-10 py-2 text-base sm:text-sm transition-[box-shadow,border-color] outline-none focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/70 aria-invalid:border-destructive aria-invalid:ring-[3px] aria-invalid:ring-destructive/20 appearance-none";
 const textareaClass =
   "w-full rounded-lg border border-input bg-card px-3 py-2 text-sm transition-[box-shadow,border-color] outline-none placeholder:text-muted-foreground focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/70";
 

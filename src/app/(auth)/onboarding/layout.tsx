@@ -7,8 +7,8 @@ export default function OnboardingLayout({
   children: React.ReactNode;
 }) {
   return (
-    <div className="flex min-h-dvh flex-col">
-      <header className="border-b border-border/50">
+    <div className="flex min-h-dvh flex-col pb-safe">
+      <header className="border-b border-border/50 pt-safe pl-safe pr-safe">
         <div className="mx-auto flex h-14 max-w-2xl items-center px-4">
           <Image
             src="/interconnect-logo-header.png"

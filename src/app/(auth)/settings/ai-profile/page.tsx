@@ -72,9 +72,11 @@ function VectorItemRow({
         isHidden ? "border-dashed border-muted bg-muted/30" : "border-border"
       }`}
     >
-      <div className="flex min-w-0 flex-1 items-center gap-2">
+      {/* iPhone SE (375px) で text + 3 badges を横並びにすると overflow するため
+       * flex-wrap で複数行に折り返す。`break-words` で長いキーワードも截断 */}
+      <div className="flex min-w-0 flex-1 flex-wrap items-center gap-1.5">
         <span
-          className={`text-sm ${
+          className={`text-sm break-words ${
             isHidden
               ? "text-muted-foreground line-through"
               : "text-foreground"
@@ -83,20 +85,20 @@ function VectorItemRow({
           {item.text}
         </span>
         {item.category && (
-          <Badge variant="outline" className="shrink-0 text-[10px]">
+          <Badge variant="outline" className="shrink-0 text-[11px]">
             {item.category}
           </Badge>
         )}
         <Badge
           variant={confidenceVariant(item.confidence)}
-          className="shrink-0 text-[10px]"
+          className="shrink-0 text-[11px]"
         >
           確度: {confidenceLabel(item.confidence)}
         </Badge>
         {showUrgency && urgency && (
           <Badge
             variant={urgencyVariant(item.urgency)}
-            className="shrink-0 text-[10px]"
+            className="shrink-0 text-[11px]"
           >
             {urgency}
           </Badge>
@@ -104,17 +106,17 @@ function VectorItemRow({
       </div>
       <Button
         variant="ghost"
-        size="icon-sm"
+        size="icon-lg"
         disabled={isToggling}
         onClick={onToggle}
         aria-label={isHidden ? "再表示" : "非表示にする"}
       >
         {isToggling ? (
-          <Loader2 className="size-3.5 animate-spin" />
+          <Loader2 className="size-4 animate-spin" />
         ) : isHidden ? (
-          <EyeOff className="size-3.5 text-muted-foreground" />
+          <EyeOff className="size-4 text-muted-foreground" />
         ) : (
-          <Eye className="size-3.5" />
+          <Eye className="size-4" />
         )}
       </Button>
     </div>

@@ -39,10 +39,12 @@ import { ProfileCompleteness } from "@/components/shared/profile-completeness";
 import { UserAvatar } from "@/components/shared/user-avatar";
 
 const labelClass = "text-sm font-medium text-foreground";
+// iOS Safari は font-size <16px の input/select/textarea で focus 時に zoom-in する。
+// モバイルでは text-base (16px)、sm 以上で text-sm に下げる (Input.tsx と同じ規約)
 const selectClass =
-  "h-10 w-full rounded-lg border border-input bg-card pl-3 pr-10 py-2 text-sm transition-[box-shadow,border-color] outline-none focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/70 appearance-none";
+  "h-11 w-full rounded-lg border border-input bg-card pl-3 pr-10 py-2 text-base sm:text-sm transition-[box-shadow,border-color] outline-none focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/70 appearance-none";
 const textareaClass =
-  "w-full rounded-lg border border-input bg-card px-3 py-2 text-sm transition-[box-shadow,border-color] outline-none placeholder:text-muted-foreground focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/70";
+  "w-full rounded-lg border border-input bg-card px-3 py-2 text-base sm:text-sm transition-[box-shadow,border-color] outline-none placeholder:text-muted-foreground focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/70";
 
 const BIO_MAX = 1000;
 const BIO_WARN = 900;

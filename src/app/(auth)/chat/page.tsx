@@ -92,7 +92,7 @@ function ChatPageInner() {
         <div id="chat-container" className="flex h-[calc(100dvh-220px)] min-h-[200px]">
           {/* Left panel: Room list */}
           <div
-            className={`w-full flex-col border-r md:flex md:w-80 md:shrink-0 ${
+            className={`w-full flex-col border-r lg:flex lg:w-80 lg:shrink-0 ${
               selectedRoom ? "hidden" : "flex"
             }`}
           >
@@ -122,7 +122,7 @@ function ChatPageInner() {
           {/* Right panel: Messages */}
           <div
             className={`flex-1 flex-col ${
-              selectedRoom ? "flex" : "hidden md:flex"
+              selectedRoom ? "flex" : "hidden lg:flex"
             }`}
           >
             {selectedRoom && user ? (
@@ -131,9 +131,10 @@ function ChatPageInner() {
                 <div className="flex items-center gap-3 border-b px-4 py-3">
                   <Button
                     variant="ghost"
-                    size="sm"
-                    className="md:hidden"
+                    size="icon"
+                    className="lg:hidden"
                     onClick={handleBack}
+                    aria-label="チャット一覧に戻る"
                   >
                     <ArrowLeft className="h-4 w-4" />
                   </Button>

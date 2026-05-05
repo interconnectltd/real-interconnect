@@ -934,13 +934,13 @@ export default function SettingsPage() {
                     <p className="text-xs leading-relaxed text-muted-foreground">
                       Google Calendar、Apple Calendar、Outlook等からICS URLを取得して貼り付けてください
                     </p>
-                    <div className="flex gap-2">
+                    <div className="flex flex-col gap-2 sm:flex-row">
                       <Input
                         type="url"
                         placeholder="https://calendar.google.com/calendar/ical/..."
                         value={icsUrl}
                         onChange={(e) => setIcsUrl(e.target.value)}
-                        className="h-8 flex-1 text-base md:text-xs"
+                        className="h-11 flex-1 text-base md:text-xs"
                       />
                       <Button
                         size="sm"
@@ -985,7 +985,7 @@ export default function SettingsPage() {
                 <Input
                   readOnly
                   value={feedUrl}
-                  className="h-8 flex-1 text-base md:text-xs font-mono"
+                  className="h-11 flex-1 text-base md:text-xs font-mono"
                   onClick={(e) => (e.target as HTMLInputElement).select()}
                 />
                 <Button
@@ -1051,7 +1051,7 @@ export default function SettingsPage() {
                           <select
                             value={weeklyTemplate[day].start}
                             onChange={(e) => updateDayRule(day, "start", e.target.value)}
-                            className="h-8 rounded-md border border-input bg-background px-2 text-base md:text-xs"
+                            className="h-11 rounded-md border border-input bg-background px-2 text-base md:text-xs"
                           >
                             {TIME_OPTIONS.map((t) => (
                               <option key={t} value={t}>{t}</option>
@@ -1061,7 +1061,7 @@ export default function SettingsPage() {
                           <select
                             value={weeklyTemplate[day].end}
                             onChange={(e) => updateDayRule(day, "end", e.target.value)}
-                            className="h-8 rounded-md border border-input bg-background px-2 text-base md:text-xs"
+                            className="h-11 rounded-md border border-input bg-background px-2 text-base md:text-xs"
                           >
                             {TIME_OPTIONS.map((t) => (
                               <option key={t} value={t}>{t}</option>
@@ -1129,7 +1129,7 @@ export default function SettingsPage() {
                             type="date"
                             value={newOverrideDate}
                             onChange={(e) => setNewOverrideDate(e.target.value)}
-                            className="h-8 w-auto text-base md:text-xs"
+                            className="h-11 w-auto text-base md:text-xs"
                           />
                         </div>
                         <div className="space-y-1">
@@ -1137,7 +1137,7 @@ export default function SettingsPage() {
                           <select
                             value={newOverrideType}
                             onChange={(e) => setNewOverrideType(e.target.value as "block" | "custom")}
-                            className="h-8 rounded-md border border-input bg-background px-2 text-base md:text-xs"
+                            className="h-11 rounded-md border border-input bg-background px-2 text-base md:text-xs"
                           >
                             <option value="block">終日ブロック</option>
                             <option value="custom">カスタム時間</option>
@@ -1150,7 +1150,7 @@ export default function SettingsPage() {
                               <select
                                 value={newOverrideStart}
                                 onChange={(e) => setNewOverrideStart(e.target.value)}
-                                className="h-8 rounded-md border border-input bg-background px-2 text-base md:text-xs"
+                                className="h-11 rounded-md border border-input bg-background px-2 text-base md:text-xs"
                               >
                                 {TIME_OPTIONS.map((t) => (
                                   <option key={t} value={t}>{t}</option>
@@ -1162,7 +1162,7 @@ export default function SettingsPage() {
                               <select
                                 value={newOverrideEnd}
                                 onChange={(e) => setNewOverrideEnd(e.target.value)}
-                                className="h-8 rounded-md border border-input bg-background px-2 text-base md:text-xs"
+                                className="h-11 rounded-md border border-input bg-background px-2 text-base md:text-xs"
                               >
                                 {TIME_OPTIONS.map((t) => (
                                   <option key={t} value={t}>{t}</option>

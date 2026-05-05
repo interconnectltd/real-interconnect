@@ -29,6 +29,10 @@ export const viewport: Viewport = {
   maximumScale: 5,
   viewportFit: "cover",
   themeColor: "#0a1633",
+  // Chrome/Edge: ソフトキーボード出現時に layout viewport をリサイズせず overlay にする
+  // → fixed bottom 要素 (HelpDock FAB / chat-input) が keyboard で押し上げられない問題を回避。
+  //   chat ページは visualViewport API で別途 height 補正する設計と整合。
+  interactiveWidget: "resizes-content",
 };
 
 export const metadata: Metadata = {

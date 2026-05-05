@@ -430,15 +430,17 @@ export default function MeetingsPage() {
               {meeting.status === "confirmed" && (
                 <>
                   {meeting.meeting_url && (
-                    <a
-                      href={meeting.meeting_url}
-                      target="_blank"
-                      rel="noreferrer"
-                      className="inline-flex h-7 shrink-0 items-center justify-center gap-1 rounded-[min(var(--radius-md),12px)] border border-transparent bg-primary px-2.5 text-[0.8rem] font-medium text-primary-foreground transition-all hover:bg-primary/80"
+                    // 44px tap target を満たすため Button 経由で h-9 (sm) を確保
+                    <Button
+                      size="sm"
+                      nativeButton={false}
+                      render={
+                        <a href={meeting.meeting_url} target="_blank" rel="noreferrer" />
+                      }
                     >
                       <Video className="h-3.5 w-3.5" />
                       参加する
-                    </a>
+                    </Button>
                   )}
                   <Button
                     size="sm"
