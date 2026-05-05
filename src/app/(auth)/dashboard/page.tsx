@@ -28,6 +28,7 @@ import { useUIStore } from "@/stores/ui-store";
 import { useAnalysisCount } from "@/hooks/queries/use-ai-profile";
 import { TldvConnectCta } from "@/components/shared/tldv-connect-cta";
 import { ProfileCompleteness } from "@/components/shared/profile-completeness";
+import { DashboardTour } from "@/components/onboarding/dashboard-tour";
 import { api } from "@/lib/api-client";
 import { useMyProfile } from "@/hooks/queries/use-profile";
 import type { LucideIcon } from "lucide-react";
@@ -123,7 +124,11 @@ export default function DashboardPage() {
       </div>
 
       {/* Lv1: 最重要CTAを最上段に */}
-      {isLv1 && <TldvConnectCta />}
+      {isLv1 && (
+        <div data-tour="tldv-cta">
+          <TldvConnectCta />
+        </div>
+      )}
 
       {/* KPI Overview — Linear/Stripe Dashboard 系の "罫線区切り inline grid"
        *
@@ -134,6 +139,7 @@ export default function DashboardPage() {
        *   オーバービュー行にまとめ、内部を罫線で区切る。
        */}
       <section
+        data-tour="kpi-overview"
         aria-label="ネットワーク指標"
         className="overflow-hidden rounded-lg border border-border bg-card"
       >
@@ -171,7 +177,7 @@ export default function DashboardPage() {
 
       {/* 成熟度 + プロフィール完成度 — shadow / stripe を抑え border-only に */}
       <div className="grid gap-4 lg:grid-cols-2">
-        <Card>
+        <Card data-tour="maturity-card">
           <CardContent className="space-y-3">
             <div className="flex items-center justify-between gap-2">
               <p className="ds-kpi-label">
@@ -214,6 +220,7 @@ export default function DashboardPage() {
       </div>
 
       {/* おすすめマッチング */}
+      <div data-tour="recommendation-section" className="space-y-4">
       <SectionHeader
         eyebrow="Recommendation"
         title="おすすめの方"
@@ -253,6 +260,7 @@ export default function DashboardPage() {
           ctaLabel="プロフィールを充実させる"
         />
       )}
+      </div>
 
       {/* 相互おすすめ */}
       {mutualMatches && mutualMatches.length > 0 && (
@@ -279,6 +287,9 @@ export default function DashboardPage() {
       )}
 
       <NewMembersSection onViewProfile={openProfileModal} />
+
+      {/* 初回ログインの案内 + 右下 ? ヘルプ FAB (auth全画面に表示するため別途 layout で出すこともできるが、Dashboard 専用 tour なのでこの位置で配置) */}
+      <DashboardTour />
     </div>
   );
 }

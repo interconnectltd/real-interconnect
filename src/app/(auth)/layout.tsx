@@ -3,6 +3,7 @@ import { QueryProvider } from "@/providers/query-provider";
 import { Header } from "@/components/layouts/header";
 import { Sidebar } from "@/components/layouts/sidebar";
 import { ProfileModal } from "@/components/features/profile/profile-modal";
+import { GlobalHelpDock } from "@/components/onboarding/global-help-dock";
 
 export default function AuthLayout({
   children,
@@ -24,6 +25,7 @@ export default function AuthLayout({
           </div>
         </div>
         <ProfileModal />
+        <GlobalHelpDock />
       </QueryProvider>
     </SupabaseProvider>
   );

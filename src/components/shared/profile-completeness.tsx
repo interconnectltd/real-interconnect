@@ -49,7 +49,7 @@ export function ProfileCompleteness({ profile, hideLink }: ProfileCompletenessPr
   if (score >= 100) return null;
 
   return (
-    <Card>
+    <Card data-tour="completeness-card">
       <CardContent className="space-y-3">
         <div className="flex items-center justify-between gap-2">
           <p className="ds-kpi-label">
