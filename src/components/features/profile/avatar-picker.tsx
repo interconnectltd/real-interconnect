@@ -30,7 +30,7 @@ interface AvatarPickerProps {
   pending: boolean;
 }
 
-const AVATAR_MAX_BYTES = 5 * 1024 * 1024;
+const AVATAR_MAX_BYTES = 50 * 1024 * 1024; // 50MB (Supabase Storage 上限)
 const ACCEPTED = "image/jpeg,image/png,image/webp,image/gif";
 
 /**
@@ -63,7 +63,7 @@ export function AvatarPicker({
     e.target.value = "";
     if (!file) return;
     if (file.size > AVATAR_MAX_BYTES) {
-      toast.error("画像サイズは5MB以下にしてください");
+      toast.error("画像サイズは50MB以下にしてください");
       return;
     }
     if (!ACCEPTED.split(",").includes(file.type)) {
@@ -211,7 +211,7 @@ export function AvatarPicker({
             ) : (
               <>
                 <Upload className="h-4 w-4" aria-hidden="true" />
-                画像を選択 (JPEG / PNG / WebP / GIF, 最大5MB)
+                画像を選択 (JPEG / PNG / WebP / GIF, 最大50MB)
               </>
             )}
           </button>

@@ -1,7 +1,12 @@
 import { withAuth, json, jsonError, handleApiError } from "@/lib/api-helpers";
 
+// Route Handler を Node.js runtime で実行 (Edge は body 4.5MB 上限)
+// + maxDuration を 60s に拡張 (50MB アップロードのタイムアウト回避)
+export const runtime = "nodejs";
+export const maxDuration = 60;
+
 const ALLOWED_TYPES = ["image/jpeg", "image/png", "image/webp", "image/gif"];
-const MAX_SIZE = 5 * 1024 * 1024; // 5MB
+const MAX_SIZE = 50 * 1024 * 1024; // 50MB (Supabase Storage 上限と揃える)
 
 /**
  * POST /api/v1/profiles/avatar
@@ -30,7 +35,7 @@ export async function POST(request: Request) {
     }
 
     if (file.size > MAX_SIZE) {
-      return jsonError(400, "BAD_REQUEST", "ファイルサイズは5MB以下にしてください");
+      return jsonError(400, "BAD_REQUEST", "ファイルサイズは50MB以下にしてください");
     }
 
     const ext = (file.name.split(".").pop() ?? "jpg").toLowerCase();
