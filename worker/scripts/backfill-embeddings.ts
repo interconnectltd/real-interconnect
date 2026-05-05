@@ -24,13 +24,17 @@ import { createClient } from "@supabase/supabase-js";
 import { handleEmbed } from "../src/handlers/embed";
 
 async function main(): Promise<void> {
-  const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
-  const key = process.env.SUPABASE_SERVICE_ROLE_KEY;
-  const openai = process.env.OPENAI_API_KEY;
+  // Secret 値末尾改行/空白/trailing slash 除去 (PGRST125 防御)
+  const url = (process.env.NEXT_PUBLIC_SUPABASE_URL ?? "").trim().replace(/\/+$/, "");
+  const key = (process.env.SUPABASE_SERVICE_ROLE_KEY ?? "").trim();
+  const openai = (process.env.OPENAI_API_KEY ?? "").trim();
   if (!url || !key) throw new Error("Missing Supabase env");
   if (!openai) throw new Error("Missing OPENAI_API_KEY");
+  // 後段 handleEmbed が queue.ts の supabase client を使うので env を上書きしておく
+  process.env.NEXT_PUBLIC_SUPABASE_URL = url;
+  process.env.SUPABASE_SERVICE_ROLE_KEY = key;
+  process.env.OPENAI_API_KEY = openai;
 
-  // Use service-role client to enumerate users.
   const sb = createClient(url, key);
 
   const { data: rows, error } = await sb

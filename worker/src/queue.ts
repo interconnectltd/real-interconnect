@@ -5,10 +5,12 @@
 
 import { createClient } from "@supabase/supabase-js";
 
-const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.SUPABASE_SERVICE_ROLE_KEY!,
-);
+// Secret 値の末尾改行 / 空白 / trailing slash を防御的に除去
+// (CI から渡された値で `https://...co\n` 等になると PGRST125 が出る)
+const SUPABASE_URL = (process.env.NEXT_PUBLIC_SUPABASE_URL ?? "").trim().replace(/\/+$/, "");
+const SUPABASE_KEY = (process.env.SUPABASE_SERVICE_ROLE_KEY ?? "").trim();
+
+const supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
 
 /**
  * ジョブタイプ定義 (single source of truth)
