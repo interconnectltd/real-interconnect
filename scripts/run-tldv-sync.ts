@@ -62,8 +62,9 @@ async function main() {
     }
   }
 
-  const argMax = Number(process.argv[2] ?? process.env.TLDV_MAX_MEETINGS ?? 10);
-  const maxMeetings = Math.max(1, Math.min(argMax, 50));
+  // pagination 対応: tl;dv は 1 page=50 件、複数ページ巡回で max 200 件まで取り込み可能
+  const argMax = Number(process.argv[2] ?? process.env.TLDV_MAX_MEETINGS ?? 50);
+  const maxMeetings = Math.max(1, Math.min(argMax, 200));
 
   const { createClient } = await import("@supabase/supabase-js");
   const sb = createClient(url, srk);
@@ -71,9 +72,22 @@ async function main() {
   const { createTldvClient, processTldvMeeting } = await import("../src/lib/tldv");
   const tldv = createTldvClient();
 
-  const list = await tldv.listMeetings(1);
-  const meetings = list.results.slice(0, maxMeetings);
-  console.log(`[run-tldv-sync] tl;dv total=${list.total}, processing=${meetings.length}`);
+  // 全 page を巡回して maxMeetings に達するまで取得
+  const meetings: Array<{ id: string; name: string }> = [];
+  let total = 0;
+  let totalPages = 1;
+  for (let page = 1; page <= totalPages && meetings.length < maxMeetings; page++) {
+    const list = await tldv.listMeetings(page);
+    if (page === 1) {
+      total = list.total;
+      totalPages = list.pages ?? 1;
+    }
+    for (const m of list.results) {
+      if (meetings.length >= maxMeetings) break;
+      meetings.push({ id: m.id, name: m.name });
+    }
+  }
+  console.log(`[run-tldv-sync] tl;dv total=${total}, pages=${totalPages}, fetched=${meetings.length}, cap=${maxMeetings}`);
 
   let processed = 0;
   let skipped = 0;
