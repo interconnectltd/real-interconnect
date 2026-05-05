@@ -64,71 +64,83 @@ export default function MatchingPage() {
   const { data: myProfile } = useMyProfile();
   const { dismissedSet, dismiss, restore, resetAll } = useDismissedUsers(myProfile?.id);
 
-  // ── 二重防御フィルタ (Persona W3) ──
+  // ── 二重防御フィルタ (Persona W3 / R3 audit) ──
   // Backend の除外漏れに備え、UI 側でも以下を防ぐ:
-  //  1. self (自分自身) の混入
-  //  2. 同一人物 (name + email 完全一致) の重複表示
-  // ※ name のみ一致 / email 違いは「同姓同名の別人」として両方残す (Sub-B 安全策)
+  //  1. self (自分自身) の混入 — id 一致 or email 完全一致
+  //  2. 同一行 (target_id 完全一致) の重複表示 — JOIN 由来の二重列挙を吸収
+  //
+  // R3 修正: 旧版は name+email 一致を dedup key にしていたため、target_id が
+  // 異なる「実在する別個ユーザー」(双子で同名同 email を共用するなど DB 上
+  // 起こり得るデータ) を黙ってマージしていた → false positive。
+  // dedup key を target_id のみに変更し、name+email の偶発一致は保持する。
+  // それでも「同名同 email の複数アカウント」が両方表示される際の混乱を避け
+  // られるよう、name+email 完全一致ペアには注意ラベルを別経路で付与する。
   const myId = myProfile?.id;
   const myEmail = myProfile?.email?.trim().toLowerCase();
 
   const filteredScores = useMemo(() => {
     if (!scores) return scores;
-    // dedupe key: 正規化 name + 正規化 email
-    const seen = new Map<string, { idx: number; dupCount: number }>();
+    const seenIds = new Set<string>();
+    // 同名同 email カウンタ (告知用 / 実体は消さない)
+    const nameEmailCount = new Map<string, number>();
     const result: Array<MatchScore & { __dupCount?: number }> = [];
     for (const s of scores) {
       if (dismissedSet.has(s.target_id)) continue;
-      // self exclude (id 一致 OR email 完全一致でも自分とみなす)
       if (myId && s.target_id === myId) continue;
       const targetEmail = s.target_profile?.email?.trim().toLowerCase();
       if (myEmail && targetEmail && targetEmail === myEmail) continue;
+      // 同一 target_id (= 同一 user) の重複だけを排除
+      if (seenIds.has(s.target_id)) continue;
+      seenIds.add(s.target_id);
 
       const rawName = s.target_profile?.name ?? "";
       const normName = rawName.trim().toLowerCase().replace(/\s+/g, "");
-      // name + email 両方で一意化 (email 違いの同姓同名は別人扱い)
-      const key = normName && targetEmail ? `${normName}__${targetEmail}` : null;
-      if (key) {
-        const prev = seen.get(key);
-        if (prev) {
-          prev.dupCount += 1;
-          const head = result[prev.idx] as MatchScore & { __dupCount?: number };
-          head.__dupCount = prev.dupCount;
-          continue;
-        }
-        seen.set(key, { idx: result.length, dupCount: 0 });
+      if (normName && targetEmail) {
+        const key = `${normName}__${targetEmail}`;
+        nameEmailCount.set(key, (nameEmailCount.get(key) ?? 0) + 1);
       }
       result.push({ ...s });
     }
-    return result;
+    // 同名同 email が 2 件以上ある場合、各カードに __dupCount を付与
+    return result.map((s) => {
+      const rawName = s.target_profile?.name ?? "";
+      const normName = rawName.trim().toLowerCase().replace(/\s+/g, "");
+      const targetEmail = s.target_profile?.email?.trim().toLowerCase();
+      const key = normName && targetEmail ? `${normName}__${targetEmail}` : null;
+      const count = key ? (nameEmailCount.get(key) ?? 0) : 0;
+      return count > 1 ? { ...s, __dupCount: count - 1 } : s;
+    });
   }, [scores, dismissedSet, myId, myEmail]);
 
   const filteredMutual = useMemo(() => {
     if (!mutualMatches) return mutualMatches;
-    const seen = new Map<string, { idx: number; dupCount: number }>();
+    const seenIds = new Set<string>();
+    const nameEmailCount = new Map<string, number>();
     const result: Array<MutualMatch & { __dupCount?: number }> = [];
     for (const m of mutualMatches) {
       if (dismissedSet.has(m.user_id)) continue;
       if (myId && m.user_id === myId) continue;
       const targetEmail = m.profile?.email?.trim().toLowerCase();
       if (myEmail && targetEmail && targetEmail === myEmail) continue;
+      if (seenIds.has(m.user_id)) continue;
+      seenIds.add(m.user_id);
 
       const rawName = m.profile?.name ?? "";
       const normName = rawName.trim().toLowerCase().replace(/\s+/g, "");
-      const key = normName && targetEmail ? `${normName}__${targetEmail}` : null;
-      if (key) {
-        const prev = seen.get(key);
-        if (prev) {
-          prev.dupCount += 1;
-          const head = result[prev.idx] as MutualMatch & { __dupCount?: number };
-          head.__dupCount = prev.dupCount;
-          continue;
-        }
-        seen.set(key, { idx: result.length, dupCount: 0 });
+      if (normName && targetEmail) {
+        const key = `${normName}__${targetEmail}`;
+        nameEmailCount.set(key, (nameEmailCount.get(key) ?? 0) + 1);
       }
       result.push({ ...m });
     }
-    return result;
+    return result.map((m) => {
+      const rawName = m.profile?.name ?? "";
+      const normName = rawName.trim().toLowerCase().replace(/\s+/g, "");
+      const targetEmail = m.profile?.email?.trim().toLowerCase();
+      const key = normName && targetEmail ? `${normName}__${targetEmail}` : null;
+      const count = key ? (nameEmailCount.get(key) ?? 0) : 0;
+      return count > 1 ? { ...m, __dupCount: count - 1 } : m;
+    });
   }, [mutualMatches, dismissedSet, myId, myEmail]);
 
   const { connectedIds, pendingIds } = useMemo(() => {
@@ -416,8 +428,11 @@ function MutualCard({
                     </Badge>
                   )}
                   {dupCount > 0 && (
-                    <span className="text-[11px] text-muted-foreground">
-                      （他 {dupCount} 件のアカウント）
+                    <span
+                      className="text-[11px] text-muted-foreground"
+                      title="同じ氏名・連絡先のアカウントが他にも見つかりました。別人の可能性もありますのでご注意ください。"
+                    >
+                      （同名同連絡先 他{dupCount}件）
                     </span>
                   )}
                 </div>
@@ -543,8 +558,11 @@ function ScoreCard({
                     </Badge>
                   )}
                   {dupCount > 0 && (
-                    <span className="text-[11px] text-muted-foreground">
-                      （他 {dupCount} 件のアカウント）
+                    <span
+                      className="text-[11px] text-muted-foreground"
+                      title="同じ氏名・連絡先のアカウントが他にも見つかりました。別人の可能性もありますのでご注意ください。"
+                    >
+                      （同名同連絡先 他{dupCount}件）
                     </span>
                   )}
                 </div>

@@ -262,6 +262,26 @@ export function classifyMeeting(
     };
   }
 
+  // 6.5. 招待 link 経由参加 (R4 audit 由来):
+  //   tl;dv は招待リンク経由の外部参加者の email を取得できず invitees=organizer のみ。
+  //   external=0 だが speakers>=2 なら「外部ゲストが email 不明状態で参加した商談」
+  //   と推定して sales 寄り 0.6 に判定する (false negative=internal 誤判定で AI 解析漏れ防止)。
+  //   holdForConsent=true で同意フローに乗るため誤って sales 判定しても招待スパム直撃にならない。
+  if (
+    externalDomains.length === 0 &&
+    internalDomainsMatched.length <= 1 &&
+    (input.speakerNames?.length ?? 0) >= 2 &&
+    !matchedExclude
+  ) {
+    return {
+      kind: "sales",
+      confidence: 0.6,
+      reason: "multi-speaker meeting with no resolvable external email (invite-link guest)",
+      externalDomains,
+      internalDomainsMatched,
+    };
+  }
+
   // 7. 参加者が1人だけ (=自分だけのメモ録) → internal
   if ((input.speakerNames?.length ?? 0) <= 1) {
     return {
