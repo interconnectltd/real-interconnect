@@ -12,7 +12,10 @@ import {
   ArrowUpDown,
   ChevronLeft,
   ChevronRight,
+  ChevronDown,
+  Sparkles,
 } from "lucide-react";
+import { PairAnalysis } from "@/components/features/matching/pair-analysis";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -361,97 +364,100 @@ function MemberCard({
   onToggleBookmark: () => void;
   onConnect: () => void;
 }) {
+  const [analysisOpen, setAnalysisOpen] = useState(false);
   const stateLabel = connected ? "（接続済み）" : pending ? "（申請中）" : "";
+  const analysisPanelId = `pair-analysis-${member.id}`;
 
   return (
     <div className="relative">
-      <div
-        role="button"
-        tabIndex={0}
-        onClick={(e) => {
-          if (e.target !== e.currentTarget && (e.target as HTMLElement).closest("button")) return;
-          onOpen();
-        }}
-        onKeyDown={(e) => {
-          if (e.target !== e.currentTarget) return;
-          if (e.key === "Enter") {
-            e.preventDefault();
-            onOpen();
-          } else if (e.key === " ") {
-            e.preventDefault();
-          }
-        }}
-        onKeyUp={(e) => {
-          if (e.target !== e.currentTarget) return;
-          if (e.key === " ") {
-            e.preventDefault();
-            onOpen();
-          }
-        }}
-        aria-label={`${member.name} のプロフィールを開く${stateLabel}`}
-        className="block w-full rounded-lg outline-none focus-visible:ring-[3px] focus-visible:ring-ring/70"
-      >
-        <Card className="ds-card-interactive h-full">
-          <CardContent className="space-y-3 pr-9">
-            <div className="flex items-start gap-3">
-              <UserAvatar name={member.name} avatarUrl={member.avatar_url} size="md" />
-              <div className="min-w-0 flex-1">
-                <p className="truncate text-base font-medium text-foreground">
-                  {member.name}
-                </p>
-                <p className="mt-0.5 truncate text-xs text-muted-foreground">
-                  {member.company}
-                  {member.position ? ` / ${member.position}` : ""}
-                </p>
-              </div>
-            </div>
+      <Card className="ds-card-interactive h-full">
+        <CardContent className="space-y-3 pr-9">
+          <div className="flex items-start gap-3">
+            <UserAvatar name={member.name} avatarUrl={member.avatar_url} size="md" />
+            <button
+              type="button"
+              onClick={onOpen}
+              aria-label={`${member.name} のプロフィール詳細を開く${stateLabel}`}
+              className="min-w-0 flex-1 text-left outline-none focus-visible:ring-[3px] focus-visible:ring-ring/70 rounded"
+            >
+              <p className="truncate text-base font-medium text-foreground">
+                {member.name}
+              </p>
+              <p className="mt-0.5 truncate text-xs text-muted-foreground">
+                {member.company}
+                {member.position ? ` / ${member.position}` : ""}
+              </p>
+            </button>
+          </div>
 
-            {member.industry && (
+          {member.industry && (
+            <Badge
+              variant="outline"
+              className="h-6 border-accent/25 bg-accent/5 px-2.5 text-xs font-medium text-accent-strong"
+            >
+              {member.industry}
+            </Badge>
+          )}
+          {member.bio && (
+            <p className="line-clamp-2 text-xs leading-relaxed text-muted-foreground">
+              {member.bio}
+            </p>
+          )}
+
+          {/* AI 双方向分析の Accordion トリガー (44px tap target) */}
+          <button
+            type="button"
+            onClick={() => setAnalysisOpen((v) => !v)}
+            aria-expanded={analysisOpen}
+            aria-controls={analysisPanelId}
+            className="flex min-h-11 w-full items-center justify-between gap-2 rounded-md bg-muted/40 px-3 py-2.5 text-xs font-medium text-foreground transition-colors duration-100 hover:bg-muted focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/70"
+          >
+            <span className="flex items-center gap-1.5">
+              <Sparkles className="h-3.5 w-3.5 text-accent-strong" aria-hidden="true" />
+              この人と自分のAI双方向分析
+            </span>
+            <ChevronDown
+              className={`h-3.5 w-3.5 text-muted-foreground transition-transform duration-200 ease-out ${analysisOpen ? "rotate-180" : ""}`}
+              aria-hidden="true"
+            />
+          </button>
+          {analysisOpen && (
+            <div id={analysisPanelId} role="region" aria-label="AI双方向マッチング分析">
+              <PairAnalysis targetId={member.id} open={analysisOpen} />
+            </div>
+          )}
+
+          <div className="flex items-center justify-end pt-1">
+            {connected ? (
+              <Badge variant="outline" className="badge-success-soft px-2 text-xs font-medium">
+                <CheckCircle2 className="h-3 w-3" aria-hidden="true" />
+                接続済み
+              </Badge>
+            ) : pending ? (
               <Badge
                 variant="outline"
-                className="h-6 border-accent/25 bg-accent/5 px-2.5 text-xs font-medium text-accent-strong"
+                className="border-accent/30 bg-accent/10 px-2 text-xs font-medium text-accent-strong"
               >
-                {member.industry}
+                <Clock className="h-3 w-3" aria-hidden="true" />
+                申請中
               </Badge>
+            ) : (
+              <Button
+                size="sm"
+                variant="accent"
+                disabled={connectPending}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onConnect();
+                }}
+              >
+                <UserPlus className="h-3.5 w-3.5" aria-hidden="true" />
+                つながる
+              </Button>
             )}
-            {member.bio && (
-              <p className="line-clamp-2 text-xs leading-relaxed text-muted-foreground">
-                {member.bio}
-              </p>
-            )}
-
-            <div className="flex items-center justify-end pt-1">
-              {connected ? (
-                <Badge variant="outline" className="badge-success-soft px-2 text-xs font-medium">
-                  <CheckCircle2 className="h-3 w-3" aria-hidden="true" />
-                  接続済み
-                </Badge>
-              ) : pending ? (
-                <Badge
-                  variant="outline"
-                  className="border-accent/30 bg-accent/10 px-2 text-xs font-medium text-accent-strong"
-                >
-                  <Clock className="h-3 w-3" aria-hidden="true" />
-                  申請中
-                </Badge>
-              ) : (
-                <Button
-                  size="sm"
-                  variant="accent"
-                  disabled={connectPending}
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    onConnect();
-                  }}
-                >
-                  <UserPlus className="h-3.5 w-3.5" aria-hidden="true" />
-                  つながる
-                </Button>
-              )}
-            </div>
-          </CardContent>
-        </Card>
-      </div>
+          </div>
+        </CardContent>
+      </Card>
 
       <button
         type="button"
