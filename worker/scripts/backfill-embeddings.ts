@@ -24,8 +24,11 @@ import { createClient } from "@supabase/supabase-js";
 import { handleEmbed } from "../src/handlers/embed";
 
 async function main(): Promise<void> {
-  // Secret 値末尾改行/空白/trailing slash 除去 (PGRST125 防御)
-  const url = (process.env.NEXT_PUBLIC_SUPABASE_URL ?? "").trim().replace(/\/+$/, "");
+  // Secret 値末尾改行/空白/trailing slash/"/rest/v1" 除去 (PGRST125 防御)
+  const url = (process.env.NEXT_PUBLIC_SUPABASE_URL ?? "")
+    .trim()
+    .replace(/\/rest\/v1\/?$/, "")
+    .replace(/\/+$/, "");
   const key = (process.env.SUPABASE_SERVICE_ROLE_KEY ?? "").trim();
   const openai = (process.env.OPENAI_API_KEY ?? "").trim();
   if (!url || !key) throw new Error("Missing Supabase env");

@@ -32,8 +32,11 @@ async function main() {
     process.env.ANTHROPIC_API_KEY = process.env.AI_API_KEY;
   }
   const { createClient } = await import("@supabase/supabase-js");
-  // Secret 末尾改行/trailing slash 除去
-  const url = (process.env.NEXT_PUBLIC_SUPABASE_URL ?? "").trim().replace(/\/+$/, "");
+  // Secret 末尾改行/trailing slash/"/rest/v1" 除去
+  const url = (process.env.NEXT_PUBLIC_SUPABASE_URL ?? "")
+    .trim()
+    .replace(/\/rest\/v1\/?$/, "")
+    .replace(/\/+$/, "");
   const srk = (process.env.SUPABASE_SERVICE_ROLE_KEY ?? "").trim();
   const ak = (process.env.ANTHROPIC_API_KEY ?? "").trim();
   if (!url || !srk) throw new Error("Missing NEXT_PUBLIC_SUPABASE_URL / SUPABASE_SERVICE_ROLE_KEY");
