@@ -6,7 +6,7 @@ import { ProductTour, useProductTour, type TourStep } from "./product-tour";
 // Step 順序は Lv1 ユーザーの物理動線 (画面 top→down) に合わせる:
 //   Lv1 で表示される TldvConnectCta が最上段 → 次に KPI 罫線 → 成熟度/完成度 → おすすめ
 //   tldv-cta は Lv1 のみ存在 (skipIfMissing) で Lv2+ は自動的に2番目から開始される。
-const STEPS: TourStep[] = [
+const STEPS_ALL: TourStep[] = [
   {
     target: "tldv-cta",
     title: "まずは tl;dv を接続しましょう",
@@ -74,9 +74,13 @@ export function restartDashboardTour() {
  * 全画面共通の HelpDock は (auth)/layout.tsx で mount され、
  * tour 再開要求は window event で送信する。
  */
-export function DashboardTour() {
+export function DashboardTour({ isLv1 = true }: { isLv1?: boolean }) {
   const tour = useProductTour(STORAGE_KEY);
   const [manualOpen, setManualOpen] = useState(false);
+
+  // Lv1 でない時は tldv-cta step を事前除外 (skipIfMissing の retry を回避し、
+  // body.overflow=hidden の 250ms ラグを起こさない)
+  const steps = isLv1 ? STEPS_ALL : STEPS_ALL.filter((s) => s.target !== "tldv-cta");
 
   const open = tour.open || manualOpen;
 
@@ -97,7 +101,7 @@ export function DashboardTour() {
 
   return (
     <ProductTour
-      steps={STEPS}
+      steps={steps}
       storageKey={STORAGE_KEY}
       open={open}
       onClose={handleClose}

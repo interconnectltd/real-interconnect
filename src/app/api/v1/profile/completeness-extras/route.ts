@@ -17,7 +17,7 @@ export async function GET() {
       { count: goalsCount },
       { count: offeringsCount },
       { data: profile },
-      { count: analyzedCount },
+      { data: analyzedRows },
     ] = await Promise.all([
       supabase
         .from("user_goals")
@@ -32,22 +32,32 @@ export async function GET() {
         .select("contact_sharing_consent_at")
         .eq("id", user.id)
         .maybeSingle(),
+      // distinct な transcript_id をカウント (同一 transcript に複数 speaker で
+      // 紐付いた場合の二重カウント回避)。onboarding/internal は除外。
       supabase
         .from("meeting_participants")
         .select(
-          "id, transcript:meeting_transcripts!inner(status)",
-          { count: "exact", head: true },
+          "transcript_id, transcript:meeting_transcripts!inner(status, meeting_kind)",
         )
         .eq("user_id", user.id)
-        .eq("transcript.status", "analyzed"),
+        .in("transcript.status", ["analyzed", "ready"])
+        .neq("transcript.meeting_kind", "onboarding")
+        .neq("transcript.meeting_kind", "internal"),
     ]);
+
+    // distinct transcript_id 数を JS 側で計算
+    const distinctTranscripts = new Set(
+      ((analyzedRows ?? []) as { transcript_id: string }[]).map(
+        (r) => r.transcript_id,
+      ),
+    );
 
     return json({
       goals: goalsCount ?? 0,
       offerings: offeringsCount ?? 0,
       consent_at: (profile as { contact_sharing_consent_at?: string | null } | null)
         ?.contact_sharing_consent_at ?? null,
-      analyzed_count: analyzedCount ?? 0,
+      analyzed_count: distinctTranscripts.size,
     });
   } catch (error) {
     return handleApiError(error);

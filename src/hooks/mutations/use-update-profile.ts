@@ -14,6 +14,8 @@ export function useUpdateProfile() {
     mutationFn: (data: ProfileUpdateInput) => api.patch("/profiles/me", data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: queryKeys.profile.all });
+      // 完成度 extras も即時再計算 (avatar / consent / bio 変更が反映)
+      queryClient.invalidateQueries({ queryKey: ["profile-completeness-extras"] });
       toast.success("プロフィールを更新しました");
     },
     onError: showErrorToast,

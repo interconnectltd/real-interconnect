@@ -305,7 +305,7 @@ export function ProductTour({ steps, storageKey, open, onClose }: ProductTourPro
       role="dialog"
       aria-modal="true"
       aria-labelledby="tour-title"
-      aria-describedby="tour-description"
+      aria-describedby="tour-description tour-rationale tour-next"
       className="fixed inset-0 z-[100] motion-safe:transition-opacity"
     >
       {rect ? (
@@ -377,7 +377,10 @@ export function ProductTour({ steps, storageKey, open, onClose }: ProductTourPro
         </p>
 
         {step.rationale && (
-          <p className="mt-3 rounded-md bg-muted/60 px-3 py-2 text-xs leading-relaxed text-muted-foreground">
+          <p
+            id="tour-rationale"
+            className="mt-3 rounded-md bg-muted/60 px-3 py-2 text-xs leading-relaxed text-muted-foreground"
+          >
             <span className="font-semibold text-foreground">なぜ重要？</span>
             <br />
             {step.rationale}
@@ -385,7 +388,10 @@ export function ProductTour({ steps, storageKey, open, onClose }: ProductTourPro
         )}
 
         {step.next && (
-          <p className="mt-2 text-xs leading-relaxed text-accent-strong">
+          <p
+            id="tour-next"
+            className="mt-2 text-xs leading-relaxed text-accent-strong"
+          >
             <span className="font-semibold">次のアクション:</span> {step.next}
           </p>
         )}

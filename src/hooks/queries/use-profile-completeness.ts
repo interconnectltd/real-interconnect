@@ -183,7 +183,8 @@ export function useProfileCompleteness(
   const { data: extras } = useQuery({
     queryKey: ["profile-completeness-extras"],
     queryFn: () => api.get<RawExtras>("/profile/completeness-extras"),
-    staleTime: 60_000,
+    // profile 更新で goals/offerings/consent が即変わるため stale 0 + 短 cache
+    staleTime: 5_000,
     enabled: Boolean(profile?.id),
   });
 

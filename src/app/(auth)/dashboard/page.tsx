@@ -289,7 +289,7 @@ export default function DashboardPage() {
       <NewMembersSection onViewProfile={openProfileModal} />
 
       {/* 初回ログインの案内 + 右下 ? ヘルプ FAB (auth全画面に表示するため別途 layout で出すこともできるが、Dashboard 専用 tour なのでこの位置で配置) */}
-      <DashboardTour />
+      <DashboardTour isLv1={isLv1} />
     </div>
   );
 }

@@ -103,11 +103,12 @@ export function AvatarPicker({
         )}
       </div>
 
-      {/* タブ — ARIA APG tabs pattern: 矢印キーで移動、tabIndex roving */}
+      {/* タブ — ARIA APG tabs pattern: 矢印キーで移動、tabIndex roving。
+          393px 端末でも 3タブが折返さず収まるよう grid + flex-nowrap */}
       <div
         role="tablist"
         aria-label="アイコン選択方法"
-        className="inline-flex rounded-lg border border-border bg-muted p-1"
+        className="grid grid-cols-3 rounded-lg border border-border bg-muted p-1"
         onKeyDown={(e) => {
           if (e.key === "ArrowRight" || e.key === "ArrowLeft") {
             e.preventDefault();
@@ -145,7 +146,7 @@ export function AvatarPicker({
           <p className="mb-3 text-xs text-muted-foreground">
             お好きなアイコンを選んでください。背景色とパターンが選べます。
           </p>
-          <div className="grid grid-cols-4 gap-2 sm:grid-cols-6">
+          <div className="grid grid-cols-3 gap-3 sm:grid-cols-4 md:grid-cols-6">
             {AVATAR_PRESETS.map((p) => {
               const url = `${AVATAR_PRESET_PREFIX}${p.id}`;
               const isCurrent = current === url;
@@ -272,7 +273,7 @@ function TabBtn({
       aria-selected={selected}
       tabIndex={selected ? 0 : -1}
       onClick={onClick}
-      className={`min-h-8 rounded-md px-3.5 text-xs font-medium transition-colors duration-75 outline-none focus-visible:ring-[3px] focus-visible:ring-ring/70 ${
+      className={`min-h-11 rounded-md px-3 text-xs font-medium transition-colors duration-75 outline-none focus-visible:ring-[3px] focus-visible:ring-ring/70 ${
         selected
           ? "bg-card text-foreground shadow-sm"
           : "text-muted-foreground hover:text-foreground"

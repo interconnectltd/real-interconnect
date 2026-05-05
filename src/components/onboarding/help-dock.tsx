@@ -100,8 +100,9 @@ export function HelpDock({
       aria-label="ヘルプメニュー"
       className="fixed bottom-4 right-4 z-40 sm:bottom-6 sm:right-6"
       style={{
-        bottom: "max(1rem, env(safe-area-inset-bottom))",
-        right: "max(1rem, env(safe-area-inset-right))",
+        // iOS Home indicator (34px) + 余白 16px ≧ 50px を保証
+        bottom: "calc(env(safe-area-inset-bottom) + 1rem)",
+        right: "calc(env(safe-area-inset-right) + 1rem)",
       }}
     >
       {open && (
@@ -211,7 +212,7 @@ export function HelpDock({
         aria-haspopup="menu"
         aria-expanded={open}
         aria-label="ヘルプメニューを開く"
-        className="inline-flex h-12 w-12 cursor-pointer items-center justify-center rounded-full bg-primary text-primary-foreground shadow-lg transition-[transform,brightness] duration-75 hover:brightness-110 active:scale-95 focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/70"
+        className="inline-flex h-14 w-14 cursor-pointer items-center justify-center rounded-full bg-primary text-primary-foreground shadow-lg transition-[transform,brightness] duration-75 hover:brightness-110 active:scale-95 focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/70"
       >
         <HelpCircle className="h-5 w-5" aria-hidden="true" />
       </button>

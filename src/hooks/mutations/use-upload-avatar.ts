@@ -34,6 +34,7 @@ export function useUploadAvatar() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: queryKeys.profile.all });
+      queryClient.invalidateQueries({ queryKey: ["profile-completeness-extras"] });
       toast.success("アバターを更新しました");
     },
     onError: showErrorToast,

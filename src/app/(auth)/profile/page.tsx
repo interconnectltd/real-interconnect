@@ -132,7 +132,18 @@ export default function ProfilePage() {
     });
   }
 
+  async function purgeAvatarStorage() {
+    // ベストエフォート: storage の orphan 削除 (失敗しても profile 更新は続行)
+    try {
+      await fetch("/api/v1/profiles/avatar", { method: "DELETE" });
+    } catch {
+      // network error 時は即時 invalidate せず、次回 upload で cleanup されるため無視
+    }
+  }
+
   async function selectPreset(presetUrl: string) {
+    // preset に切替時、過去のアップロード画像は不要 → storage を purge
+    await purgeAvatarStorage();
     return new Promise<void>((resolve) => {
       updateProfile.mutate(
         { avatar_url: presetUrl },
@@ -148,6 +159,7 @@ export default function ProfilePage() {
   }
 
   async function clearAvatar() {
+    await purgeAvatarStorage();
     return new Promise<void>((resolve) => {
       updateProfile.mutate(
         { avatar_url: null },
