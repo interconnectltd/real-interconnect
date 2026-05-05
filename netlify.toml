@@ -1,6 +1,10 @@
 [build]
   command = "pnpm build"
   publish = ".next"
+  # build minutes 節約: 本番 Next.js に影響しないファイルのみ変更時は deploy skip
+  # 対象除外: .github/workflows (GitHub Actions only) / scripts/ (CI スクリプト)
+  #          / worker/ (将来 Render 用、Netlify では使われない) / *.md (ドキュメント)
+  ignore = "git diff --quiet HEAD^ HEAD ':!.github/' ':!scripts/' ':!worker/' ':!*.md' ':!docs/'"
 
 [build.environment]
   NODE_VERSION = "22"
