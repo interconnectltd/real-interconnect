@@ -42,6 +42,8 @@ import {
 } from "@/components/ui/dialog";
 import { useSupabase } from "@/providers/supabase-provider";
 import { useAnalysisCount } from "@/hooks/queries/use-ai-profile";
+import { useQuery } from "@tanstack/react-query";
+import { api } from "@/lib/api-client";
 import { toast } from "sonner";
 
 interface CalendarConnection {
@@ -150,6 +152,17 @@ export default function SettingsPage() {
   const { supabase, user } = useSupabase();
   const router = useRouter();
   const { data: analysisCount } = useAnalysisCount();
+
+  // tl;dv 連携メタ情報 (last_analyzed_at) — 設定画面で「次回会議で再分析」期待値に使う
+  const { data: aiProfileMeta } = useQuery({
+    queryKey: ["ai-profile-meta"],
+    queryFn: () =>
+      api.get<{ analysis_count: number; last_analyzed_at: string | null }>(
+        "/ai-profile",
+      ),
+    staleTime: 30_000,
+  });
+  const [tldvSyncing, setTldvSyncing] = useState(false);
 
   // Password change
   const [passwordDialogOpen, setPasswordDialogOpen] = useState(false);
@@ -738,10 +751,16 @@ export default function SettingsPage() {
         </CardContent>
       </Card>
 
-      {/* tl;dv connection */}
+      {/* tl;dv connection
+        * 注: tl;dv API は 単一テナント (TLDV_API_KEY env) で動作する。
+        * ユーザー個別の API key 入力 UI は出さない。
+        * 接続判定は user_conversation_vectors.analysis_count > 0 を proxy にする。
+        * webhook (TranscriptReady) は tl;dv 側で設定済みなので、
+        * 「次の会議が tl;dv で記録されると自動で再分析」が期待値になる。
+        */}
       <Card id="tldv-connect">
         <CardHeader>
-          <CardTitle className="text-base">ミーティング分析</CardTitle>
+          <CardTitle className="text-base">ミーティング分析 (tl;dv 連携)</CardTitle>
         </CardHeader>
         <CardContent>
           <div className="space-y-3">
@@ -749,37 +768,97 @@ export default function SettingsPage() {
               <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10">
                 <Video className="h-5 w-5 text-primary" />
               </div>
-              <div>
-                <div className="flex items-center gap-2">
+              <div className="min-w-0 flex-1">
+                <div className="flex flex-wrap items-center gap-2">
                   <p className="text-sm font-medium">tl;dv 連携</p>
                   {hasAnalyses ? (
                     <Badge variant="secondary">接続済み</Badge>
                   ) : (
-                    <span className="text-xs text-muted-foreground">
+                    <Badge variant="outline" className="text-muted-foreground">
                       未接続
-                    </span>
+                    </Badge>
                   )}
                 </div>
-                {hasAnalyses && (
-                  <p className="text-xs text-muted-foreground">
-                    {analysisCount}件のミーティングを分析済み
-                  </p>
-                )}
+                {hasAnalyses ? (
+                  <>
+                    <p className="text-xs text-muted-foreground">
+                      {analysisCount}件のミーティングを分析済み
+                    </p>
+                    {aiProfileMeta?.last_analyzed_at && (
+                      <p className="text-xs text-muted-foreground">
+                        最終分析:{" "}
+                        {new Date(
+                          aiProfileMeta.last_analyzed_at,
+                        ).toLocaleString("ja-JP")}
+                      </p>
+                    )}
+                  </>
+                ) : null}
               </div>
             </div>
-            {!hasAnalyses && (
+
+            <div className="rounded-md border border-dashed border-border bg-muted/30 px-3 py-2.5">
               <p className="text-xs leading-relaxed text-muted-foreground">
-                tl;dvのミーティング記録を接続すると、あなたの関心や専門領域をAIが分析し、
-                本当に会うべき人をご紹介できます。
+                {hasAnalyses
+                  ? "次のミーティングが tl;dv に記録されると自動で再分析され、AI推薦の精度が上がります。"
+                  : "tl;dvのミーティング記録を接続すると、あなたの関心や専門領域をAIが分析し、本当に会うべき人をご紹介できます。次回以降の tl;dv 録画が自動で取り込まれます。"}
               </p>
-            )}
-            <Button
-              size="sm"
-              variant={hasAnalyses ? "outline" : "default"}
-              render={<a href="#tldv-connect" />}
-            >
-              {hasAnalyses ? "設定を管理" : "接続する"}
-            </Button>
+            </div>
+
+            <div className="flex flex-wrap gap-2">
+              <Button
+                size="sm"
+                variant="outline"
+                onClick={async () => {
+                  setTldvSyncing(true);
+                  try {
+                    const result = await api.post<{
+                      processed: number;
+                      skipped: number;
+                      errors: number;
+                      total: number;
+                    }>("/transcripts/sync");
+                    if (result.processed > 0) {
+                      toast.success(
+                        `${result.processed}件のミーティングを取り込みました`,
+                      );
+                    } else if (result.skipped > 0) {
+                      toast.info(
+                        `${result.skipped}件は処理済みでした`,
+                      );
+                    } else {
+                      toast.info("新しいミーティングはありませんでした");
+                    }
+                  } catch (err: unknown) {
+                    const message =
+                      err instanceof Error
+                        ? err.message
+                        : "同期に失敗しました";
+                    toast.error(message);
+                  } finally {
+                    setTldvSyncing(false);
+                  }
+                }}
+                disabled={tldvSyncing}
+              >
+                {tldvSyncing ? (
+                  <Loader2 className="mr-1.5 h-3.5 w-3.5 animate-spin" />
+                ) : (
+                  <RefreshCw className="mr-1.5 h-3.5 w-3.5" />
+                )}
+                {tldvSyncing ? "同期中..." : "今すぐ同期"}
+              </Button>
+              {hasAnalyses && (
+                <Button
+                  size="sm"
+                  variant="ghost"
+                  render={<Link href="/settings/ai-profile" />}
+                >
+                  分析結果を見る
+                  <ChevronRight className="ml-1 h-3.5 w-3.5" />
+                </Button>
+              )}
+            </div>
           </div>
         </CardContent>
       </Card>

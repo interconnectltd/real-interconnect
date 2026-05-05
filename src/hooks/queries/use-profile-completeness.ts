@@ -224,10 +224,10 @@ export function calcDetailedCompleteness(
       total: 15,
       earned: 0,
       fields: [
-        { key: "name", label: "お名前", hint: "本名を入力", points: 4, done: nonEmpty(profile.name) },
-        { key: "company", label: "会社名", hint: "所属企業を追加", points: 4, done: nonEmpty(profile.company) },
-        { key: "position", label: "役職", hint: "役職を追加", points: 4, done: nonEmpty(profile.position) },
-        { key: "industry", label: "業種", hint: "業種を選択", points: 3, done: nonEmpty(profile.industry) },
+        { key: "name", label: "お名前", hint: "本名を入力", points: 4, hash: "/profile#profile-name", done: nonEmpty(profile.name) },
+        { key: "company", label: "会社名", hint: "所属企業を追加", points: 4, hash: "/profile#profile-company", done: nonEmpty(profile.company) },
+        { key: "position", label: "役職", hint: "役職を追加", points: 4, hash: "/profile#profile-position", done: nonEmpty(profile.position) },
+        { key: "industry", label: "業種", hint: "業種を選択", points: 3, hash: "/profile#profile-industry", done: nonEmpty(profile.industry) },
       ],
     },
     {
@@ -236,10 +236,16 @@ export function calcDetailedCompleteness(
       total: 2,
       earned: 0,
       fields: [
-        { key: "avatar_url", label: "アイコン", hint: "プリセット/写真を選択", points: 2, done: nonEmpty(profile.avatar_url) },
+        { key: "avatar_url", label: "アイコン", hint: "プリセット/写真を選択", points: 2, hash: "/profile#profile-avatar", done: nonEmpty(profile.avatar_url) },
       ],
     },
-    bioGroup(bioLen),
+    (() => {
+      const g = bioGroup(bioLen);
+      // 各 tier に /profile#profile-bio anchor を仕込み、完成度カードの
+      // missing item クリック → /profile の textarea にスクロール+focus する。
+      g.fields = g.fields.map((f) => ({ ...f, hash: "/profile#profile-bio" }));
+      return g;
+    })(),
     (() => {
       // Z4: tier 判定は「実効件数」(detail >= 30字 = 1.0、未満 = 0.5) で行う。
       // API が新フィールドを返さない過去レスポンスでも安全に降格できるよう、
@@ -271,7 +277,7 @@ export function calcDetailedCompleteness(
       total: 5,
       earned: 0,
       fields: [
-        { key: "contact_info", label: "連絡先入力", hint: "コネクション成立後に共有", points: 3, done: nonEmpty(profile.contact_info) },
+        { key: "contact_info", label: "連絡先入力", hint: "コネクション成立後に共有", points: 3, hash: "/profile#profile-contact", done: nonEmpty(profile.contact_info) },
         { key: "consent", label: "第三者提供同意", hint: "オンボーディング完了で取得", points: 2, done: Boolean(extras.consentAt) },
       ],
     },

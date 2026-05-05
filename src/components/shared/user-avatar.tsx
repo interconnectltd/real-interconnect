@@ -125,9 +125,11 @@ export function UserAvatar({
 
   return (
     <div
+      role="img"
+      aria-label={name ? `${name} のアイコン` : "ユーザーアイコン"}
       className={`${sizeClass} flex shrink-0 items-center justify-center rounded-full font-medium text-brand-navy ${fallbackBg} ${className}`}
     >
-      {initial}
+      <span aria-hidden="true">{initial}</span>
     </div>
   );
 }

@@ -13,7 +13,13 @@ import {
   AtSign,
   Lock,
   Image as ImageIcon,
+  Target,
+  Gift,
+  ShieldCheck,
+  Link2,
+  ChevronRight,
 } from "lucide-react";
+import Link from "next/link";
 import { toast } from "sonner";
 import dynamic from "next/dynamic";
 
@@ -49,6 +55,11 @@ const textareaClass =
 const BIO_MAX = 1000;
 const BIO_WARN = 900;
 const BIO_DANGER = 990;
+/**
+ * use-profile-completeness.ts の BIO_TIERS と整合させた 5 段階マーカー。
+ * 各 tier 通過時に +4% (合計 20%) 加点される。
+ */
+const BIO_TIER_THRESHOLDS = [50, 100, 150, 250, 400] as const;
 
 interface ProfileForm {
   name: string;
@@ -81,6 +92,79 @@ export default function ProfilePage() {
   useEffect(() => {
     if (!editing) originalSnapshotRef.current = null;
   }, [editing]);
+
+  /**
+   * 完成度カード (profile-completeness.tsx) の missing item をクリック → /profile#profile-name 等に
+   * 着地した時、編集モードに切替えて該当 input にスクロール+focus する。
+   * profile-avatar の場合のみ pickerOpen を開く。
+   * tab query ?tab=basic も同等に受け付ける (basic = name にフォーカス)。
+   */
+  useEffect(() => {
+    if (!profile) return;
+    if (typeof window === "undefined") return;
+    const hash = window.location.hash.replace(/^#/, "");
+    const params = new URLSearchParams(window.location.search);
+    const tab = params.get("tab");
+    // profile-completeness.tsx の resolveHref が ?focus=<field> 形式で
+    // basic/avatar/bio/contact/sns 等を渡してくる。`name`/`company`/`position`/
+    // `industry`/`avatar_url`/`contact_info` の完成度 field key も直接 input id に変換。
+    const focus = params.get("focus");
+    const focusToId = (f: string | null): string | null => {
+      if (!f) return null;
+      switch (f) {
+        case "basic":
+        case "name":
+          return "profile-name";
+        case "company":
+          return "profile-company";
+        case "position":
+          return "profile-position";
+        case "industry":
+          return "profile-industry";
+        case "avatar":
+        case "avatar_url":
+          return "profile-avatar";
+        case "bio":
+          return "profile-bio";
+        case "contact":
+        case "contact_info":
+          return "profile-contact";
+        default:
+          return null;
+      }
+    };
+    const targetId = (() => {
+      if (hash) return hash;
+      const fromFocus = focusToId(focus);
+      if (fromFocus) return fromFocus;
+      const fromTab = focusToId(tab);
+      if (fromTab) return fromTab;
+      return null;
+    })();
+    if (!targetId) return;
+    if (targetId === "profile-avatar") {
+      setPickerOpen(true);
+    } else if (!editing) {
+      // 編集 UI に input が描画されていないと focus できないため editing=true にする
+      const snap = snapshotFromProfile();
+      originalSnapshotRef.current = snap;
+      setForm(snap);
+      setEditing(true);
+    }
+    // 次のフレームで描画完了を待ってから focus + scroll
+    requestAnimationFrame(() => {
+      const el = document.getElementById(targetId);
+      if (el) {
+        el.scrollIntoView({ behavior: "smooth", block: "center" });
+        if (typeof (el as HTMLElement & { focus?: () => void }).focus === "function") {
+          (el as HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement).focus();
+        }
+      }
+    });
+    // この effect は profile 取得時 (= 初回着地) のみ動かす。
+    // editing 状態の変化で再実行されないように依存は profile.id のみに限定。
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [profile?.id]);
 
   function snapshotFromProfile(): ProfileForm {
     return {
@@ -323,6 +407,86 @@ export default function ProfilePage() {
           )}
         </CardContent>
       </Card>
+
+      {/* ゴール/提供/同意の編集導線 (各 ProfileCompleteness の missing から到達)
+          /onboarding にジャンプして既存 goals/offerings を再選択・detail 編集できる。
+          再同意は /onboarding/consent (prospect 経由ユーザー向け、通常ユーザーは
+          onboarding 完了時に取得済 → 再表示用)。 */}
+      <Card>
+        <CardContent className="space-y-3">
+          <div className="flex items-center justify-between gap-2">
+            <p className="ds-kpi-label">マッチング項目を編集</p>
+            <span className="text-xs text-muted-foreground">
+              プロフィール完成度の主要項目
+            </span>
+          </div>
+          <ul className="divide-y divide-border rounded-lg border border-border">
+            <li>
+              <Link
+                href="/onboarding"
+                className="flex items-center justify-between gap-3 px-4 py-3 text-sm hover:bg-muted/40 focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/70"
+                aria-label="ゴール (求めていること) を編集"
+              >
+                <span className="flex items-center gap-2">
+                  <Target className="h-4 w-4 text-primary" aria-hidden="true" />
+                  <span className="text-foreground">ゴール (求めていること)</span>
+                  <span className="text-xs text-muted-foreground">
+                    1件 +10% / 3件 +3% / 5件 +2%
+                  </span>
+                </span>
+                <ChevronRight
+                  className="h-4 w-4 text-muted-foreground"
+                  aria-hidden="true"
+                />
+              </Link>
+            </li>
+            <li>
+              <Link
+                href="/onboarding"
+                className="flex items-center justify-between gap-3 px-4 py-3 text-sm hover:bg-muted/40 focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/70"
+                aria-label="提供できることを編集"
+              >
+                <span className="flex items-center gap-2">
+                  <Gift className="h-4 w-4 text-primary" aria-hidden="true" />
+                  <span className="text-foreground">提供できること</span>
+                  <span className="text-xs text-muted-foreground">
+                    1件 +10% / 3件 +3% / 5件 +2%
+                  </span>
+                </span>
+                <ChevronRight
+                  className="h-4 w-4 text-muted-foreground"
+                  aria-hidden="true"
+                />
+              </Link>
+            </li>
+            <li>
+              <Link
+                href="/onboarding/consent"
+                className="flex items-center justify-between gap-3 px-4 py-3 text-sm hover:bg-muted/40 focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/70"
+                aria-label="第三者提供同意を再確認"
+              >
+                <span className="flex items-center gap-2">
+                  <ShieldCheck
+                    className="h-4 w-4 text-primary"
+                    aria-hidden="true"
+                  />
+                  <span className="text-foreground">同意を再確認</span>
+                  <span className="text-xs text-muted-foreground">
+                    第三者提供 / プライバシー
+                  </span>
+                </span>
+                <ChevronRight
+                  className="h-4 w-4 text-muted-foreground"
+                  aria-hidden="true"
+                />
+              </Link>
+            </li>
+          </ul>
+          <p className="text-xs text-muted-foreground">
+            ゴールと提供は、各カテゴリの<strong>詳細 (30字以上)</strong>を書くと「full」扱いになりマッチング精度が上がります。
+          </p>
+        </CardContent>
+      </Card>
     </div>
   );
 }
@@ -424,8 +588,9 @@ function ProfileEditForm({
           value={form.bio}
           onChange={(e) => setForm({ ...form, bio: e.target.value })}
           placeholder="あなたの専門領域や関心事を教えてください（マッチング精度が向上します）"
-          aria-describedby="profile-bio-counter"
+          aria-describedby="profile-bio-counter profile-bio-tiers"
         />
+        <BioTierProgress bioLen={bioLen} />
         <p
           id="profile-bio-counter"
           aria-live="polite"
@@ -441,14 +606,14 @@ function ProfileEditForm({
 
       <div data-tour="profile-contact" className="space-y-1.5">
         <Label htmlFor="profile-contact" className={labelClass}>
-          連絡先
+          連絡先 / SNS / Web URL
         </Label>
         <Input
           id="profile-contact"
           value={form.contact_info}
           onChange={(e) => setForm({ ...form, contact_info: e.target.value })}
-          placeholder="LINE ID、メールアドレス等"
-          aria-describedby="profile-contact-hint"
+          placeholder="LinkedIn URL / X (Twitter) handle / メールアドレス / 電話番号"
+          aria-describedby="profile-contact-hint profile-contact-sns-hint"
         />
         <p
           id="profile-contact-hint"
@@ -456,6 +621,13 @@ function ProfileEditForm({
         >
           <Lock className="mt-0.5 h-3 w-3 shrink-0" aria-hidden="true" />
           コネクションが成立した相手にのみ公開されます。
+        </p>
+        <p
+          id="profile-contact-sns-hint"
+          className="flex items-start gap-1.5 text-xs text-accent-strong"
+        >
+          <Link2 className="mt-0.5 h-3 w-3 shrink-0" aria-hidden="true" />
+          URL / SNS handle (例: https://linkedin.com/in/xxx, @yourhandle) を含めるとプロフィール完成度 +3%。
         </p>
       </div>
 
@@ -539,6 +711,73 @@ function ViewField({
         {label}
       </dt>
       <dd className="mt-1 text-sm text-foreground">{value || "—"}</dd>
+    </div>
+  );
+}
+
+/**
+ * BioTierProgress — 自己紹介の 5 段階 tier 達成度を可視化する progress bar。
+ * 完成度配点 (50/100/150/250/400 字 × 4 点 = 20 点) と 1:1 で対応する。
+ * - 100% bar の幅は最終 tier (400 字) を 100% として scale。
+ * - 各 tier 通過時にチェックマーク + 「+4%」ラベル。
+ * - 次 tier までの残り字数を hint として表示 (cliff jump 解消)。
+ */
+function BioTierProgress({ bioLen }: { bioLen: number }) {
+  const finalTier = BIO_TIER_THRESHOLDS[BIO_TIER_THRESHOLDS.length - 1] ?? 400;
+  const pct = Math.min(100, Math.round((bioLen / finalTier) * 100));
+  // 直近の未達 tier を求める (達成済 → 「最高ランク達成」、それ以外 → 残り字数)
+  const nextTier = BIO_TIER_THRESHOLDS.find((t) => bioLen < t) ?? null;
+  const remainHint = nextTier
+    ? `あと ${nextTier - bioLen} 字で +4% (現在 ${bioLen}字 / 目標 ${nextTier}字)`
+    : `最高ランク達成 (現在 ${bioLen}字)`;
+  return (
+    <div
+      id="profile-bio-tiers"
+      role="group"
+      aria-label="自己紹介の充実度 tier"
+      className="space-y-1"
+    >
+      <div className="relative h-1.5 w-full overflow-visible rounded-full bg-muted">
+        <div
+          className="h-full rounded-full bg-gradient-brand transition-[width] duration-300"
+          style={{ width: `${pct}%` }}
+          aria-hidden="true"
+        />
+        {/* tier ノッチ (50/100/150/250/400) を bar 上にドット表示 */}
+        {BIO_TIER_THRESHOLDS.map((t) => {
+          const left = Math.min(100, (t / finalTier) * 100);
+          const reached = bioLen >= t;
+          return (
+            <span
+              key={t}
+              aria-hidden="true"
+              className={`absolute top-1/2 -translate-x-1/2 -translate-y-1/2 inline-block h-2 w-2 rounded-full border ${
+                reached
+                  ? "border-accent-strong bg-accent-strong"
+                  : "border-border bg-card"
+              }`}
+              style={{ left: `${left}%` }}
+            />
+          );
+        })}
+      </div>
+      <div className="flex items-center justify-between text-[11px] text-muted-foreground">
+        <span aria-hidden="true">
+          {BIO_TIER_THRESHOLDS.map((t, i) => {
+            const reached = bioLen >= t;
+            return (
+              <span
+                key={t}
+                className={`tabular-nums ${reached ? "text-accent-strong" : "text-muted-foreground/60"}`}
+              >
+                {t}
+                {i < BIO_TIER_THRESHOLDS.length - 1 ? " · " : ""}
+              </span>
+            );
+          })}
+        </span>
+        <span className="tabular-nums">{remainHint}</span>
+      </div>
     </div>
   );
 }

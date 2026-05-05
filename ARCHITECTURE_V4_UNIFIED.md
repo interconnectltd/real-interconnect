@@ -14,7 +14,7 @@
 |---|---|---|
 | A1 | Python Worker RLSバイパス | Node.js Worker で service_role_key 使用済み |
 | A3 | Next.js 16 RouteContext型 | 全動的ルートで async params 対応済み |
-| A12 | オンボーディングフロー | 3ステップ実装済み（goals/offerings/完了） |
+| A12 | オンボーディングフロー | 3ステップ実装済み（goals/offerings/完了）。Step Indicator は `<ol>` + `aria-current="step"`、Tabs は `role="tablist"/tab/tabpanel` + `aria-selected/aria-controls`、必須 input は `aria-required` + `aria-invalid`、第三者提供同意の checkbox は重複参照を解消（label htmlFor のみで accessible name を提供）|
 | A35 | Daily.co Bot検証 | tl;dv採用のため不要。Webhook+手動同期稼働中 |
 | A2 | Monorepo Python型共有 | Node.js単体構成のため不要 |
 
@@ -102,7 +102,7 @@
 | メンバー検索 | 100% | A14完了（ソート/フィルタ/役職追加）、A18(カテゴリ絞込)未対応 |
 | tl;dv連携 | 90% | 稼働中 |
 | AI分析（Opus v3） | 100% | solver/beneficiary_profile抽出済み |
-| プロフィール | 95% | 完成度メーター v2 (alpha 整合 / detail 文字数評価)、アバター 4-variant WebP 実装済 |
+| プロフィール | 98% | 完成度メーター v2 (alpha 整合 / detail 文字数評価)、アバター 4-variant WebP 実装済、**11 項目編集 UI 完備** (name/company/position/industry/bio/contact_info/avatar/goals/offerings/goal_detail/offering_detail) — `/profile` で 7 項目 + `/onboarding` で 4 項目を網羅、各 input に label htmlFor / aria-describedby / aria-required / aria-invalid を WCAG 2.1 AA 準拠で実装 |
 | 通知 | 100% | A17(PWA/プッシュ)未対応 |
 | ブックマーク | 100% | — |
 | 招待機能 | 70% | A11: use_count未加算 |

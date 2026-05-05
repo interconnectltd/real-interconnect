@@ -49,9 +49,16 @@ function StepIndicator({
 }) {
   const steps = ["基本情報の確認", "目的と提供", "完了"];
   return (
-    <div className="mb-8 flex items-center justify-center gap-2">
+    <ol
+      className="mb-8 flex items-center justify-center gap-2"
+      aria-label="オンボーディング進行状況"
+    >
       {steps.map((label, i) => (
-        <div key={label} className="flex items-center gap-2">
+        <li
+          key={label}
+          className="flex items-center gap-2"
+          aria-current={i === current ? "step" : undefined}
+        >
           <div
             className={cn(
               "flex h-7 w-7 items-center justify-center rounded-full text-xs font-medium",
@@ -61,6 +68,7 @@ function StepIndicator({
                   ? "border-2 border-primary text-primary"
                   : "border border-muted-foreground/30 text-muted-foreground/50",
             )}
+            aria-hidden="true"
           >
             {i < current ? <Check className="h-3.5 w-3.5" /> : i + 1}
           </div>
@@ -75,11 +83,11 @@ function StepIndicator({
               : label}
           </span>
           {i < steps.length - 1 && (
-            <div className="mx-1 h-px w-6 bg-border sm:w-10" />
+            <div className="mx-1 h-px w-6 bg-border sm:w-10" aria-hidden="true" />
           )}
-        </div>
+        </li>
       ))}
-    </div>
+    </ol>
   );
 }
 
@@ -424,11 +432,16 @@ export default function OnboardingPage() {
               {editingBasic && (
                 <div className="mt-4 space-y-3 rounded-md border border-border/60 p-3">
                   <div className="space-y-1.5">
-                    <Label htmlFor="ob-name">お名前</Label>
+                    <Label htmlFor="ob-name">
+                      お名前 <span className="text-destructive" aria-hidden="true">*</span>
+                    </Label>
                     <Input
                       id="ob-name"
                       autoComplete="name"
                       enterKeyHint="next"
+                      required
+                      aria-required="true"
+                      aria-invalid={!profile.name.trim()}
                       value={profile.name}
                       onChange={(e) => setProfile({ ...profile, name: e.target.value })}
                     />
@@ -526,11 +539,13 @@ export default function OnboardingPage() {
                   checked={agreeContactSharing}
                   onChange={(e) => setAgreeContactSharing(e.target.checked)}
                   className="mt-1"
-                  aria-describedby="ob-contact-sharing-desc"
+                  aria-required="true"
+                  aria-invalid={!agreeContactSharing}
                 />
+                {/* Label は htmlFor で input の accessible name を兼ねる。
+                    aria-describedby で同じ要素を二重参照しないこと(SR が同テキストを 2 回読む) */}
                 <Label
                   htmlFor="ob-contact-sharing"
-                  id="ob-contact-sharing-desc"
                   className="cursor-pointer text-xs leading-relaxed text-amber-900 dark:text-amber-200"
                 >
                   上記連絡先(または登録メールアドレス)が、<strong>マッチング承諾された相手ユーザー</strong>に開示されることに同意します。

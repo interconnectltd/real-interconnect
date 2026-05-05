@@ -173,26 +173,52 @@ export function ProfileCompleteness({ profile, hideLink }: ProfileCompletenessPr
   );
 }
 
+/**
+ * `hash` ヒント (use-profile-completeness.ts CompletenessFieldCheck) に応じた遷移先決定。
+ *   - "/onboarding"            → goals/offerings 編集 (現状は再オンボでやり直し)
+ *   - "/settings#tldv-connect" → tl;dv 接続パネル直送
+ *   - 未設定 (basic/avatar/bio/contact/sns) → /profile に focus 付き query で遷移
+ *
+ * /profile?focus=<field> 形式で渡すことで、ProfilePage 側の useEffect が
+ * 該当 input を自動で編集モード→scrollIntoView→focus する想定 (P3 タスク)。
+ * focus 未対応キーでも /profile トップに着地するため UX は安全に劣化する。
+ */
+function resolveHref(item: CompletenessFieldCheck): string {
+  if (item.hash) return item.hash;
+  const focus =
+    item.key.startsWith("bio_") ? "bio"
+    : item.key === "sns_url" ? "contact"
+    : item.key;
+  return `/profile?focus=${encodeURIComponent(focus)}`;
+}
+
 function MissingItem({ item }: { item: CompletenessFieldCheck }) {
   const isLever = item.key.startsWith("tldv");
+  const href = resolveHref(item);
   return (
-    <li className="flex items-start justify-between gap-2 text-xs text-muted-foreground">
-      <div className="flex min-w-0 items-start gap-1.5">
-        <span className="mt-1 inline-block h-1 w-1 shrink-0 rounded-full bg-accent" aria-hidden="true" />
-        <div className="min-w-0">
-          <span className="text-foreground">{item.label}</span>
-          {isLever && (
-            <span
-              className="ml-1 text-[10px] font-medium text-accent"
-              aria-label="マッチング精度の核となる項目"
-            >
-              (マッチング精度の核)
-            </span>
-          )}
-          {item.hint && <span className="ml-1 text-muted-foreground/80">— {item.hint}</span>}
-        </div>
-      </div>
-      <span className="shrink-0 font-medium text-accent">+{item.points}%</span>
+    <li>
+      <Link
+        href={href}
+        className="flex items-start justify-between gap-2 rounded-md px-2.5 py-1 text-xs text-muted-foreground transition-colors hover:bg-muted hover:text-foreground focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/70"
+        aria-label={`${item.label} を編集 (+${item.points}%)`}
+      >
+        <span className="flex min-w-0 items-start gap-1.5">
+          <span className="mt-1 inline-block h-1 w-1 shrink-0 rounded-full bg-accent" aria-hidden="true" />
+          <span className="min-w-0">
+            <span className="text-foreground">{item.label}</span>
+            {isLever && (
+              <span
+                className="ml-1 text-[10px] font-medium text-accent"
+                aria-label="マッチング精度の核となる項目"
+              >
+                (マッチング精度の核)
+              </span>
+            )}
+            {item.hint && <span className="ml-1 text-muted-foreground/80">— {item.hint}</span>}
+          </span>
+        </span>
+        <span className="shrink-0 font-medium text-accent">+{item.points}%</span>
+      </Link>
     </li>
   );
 }
