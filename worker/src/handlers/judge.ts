@@ -41,7 +41,8 @@ const anthropic = new Anthropic({
 const HAIKU_MODEL = "claude-haiku-4-5-20251001" as const;
 const PROMPT_VERSION = "haiku-judge-1.0.0";
 const TOP_N_DEFAULT = 50;
-const PER_VIEWER_DAILY_CAP = 100;
+// env で上書き可能 (CI で全 viewer × 全 target を一気に判定する初期 backfill 用)
+const PER_VIEWER_DAILY_CAP = Number(process.env.PER_VIEWER_DAILY_CAP ?? 100);
 const PAIRS_PER_LLM_CALL = 12;          // 1 API call で扱う (need × offer) ペア数
 const MAX_TEXT_LEN = 220;               // 各テキストフィールドの安全上限
 const MAX_PROFILE_LEN = 320;            // solver/beneficiary_profile の安全上限

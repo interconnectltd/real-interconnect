@@ -46,4 +46,6 @@ jobs:
           NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
           SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
           ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+          # 4 ユーザーの初期 backfill 用に一時的に 500 まで許可。本番運用後は 100 に戻す。
+          PER_VIEWER_DAILY_CAP: '500'
         run: pnpm exec tsx scripts/run-judge-all.ts
