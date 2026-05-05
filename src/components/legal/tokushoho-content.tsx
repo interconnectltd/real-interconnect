@@ -14,7 +14,7 @@ export function TokushohoContent() {
         </p>
       </header>
 
-      <div className="overflow-x-auto">
+      <div className="overflow-x-auto overscroll-x-contain">
         <table className="w-full border-collapse text-sm">
           <tbody>
             <tr className="border-b border-border align-top">

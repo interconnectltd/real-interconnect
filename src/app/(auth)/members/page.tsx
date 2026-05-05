@@ -314,7 +314,7 @@ function FilterRow({
       <div
         role="radiogroup"
         aria-label={label}
-        className="-mx-1 flex flex-1 flex-nowrap items-center gap-1.5 overflow-x-auto px-1 pb-1 [scrollbar-width:thin]"
+        className="-mx-1 flex flex-1 flex-nowrap items-center gap-1.5 overflow-x-auto overscroll-x-contain px-1 pb-1 [scrollbar-width:thin]"
       >
         {items.map((item) => {
           const isSelected =

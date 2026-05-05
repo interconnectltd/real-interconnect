@@ -77,7 +77,7 @@ export function PrivacyContent() {
 
       <h2 className="mt-6 text-lg font-semibold text-foreground">4. 委託先</h2>
       <p>当社は、本サービスの提供のために以下の事業者に個人データの取扱を委託します。</p>
-      <div className="overflow-x-auto">
+      <div className="overflow-x-auto overscroll-x-contain">
         <table className="w-full border-collapse text-xs">
           <caption className="sr-only">委託先一覧</caption>
           <thead>
@@ -183,7 +183,7 @@ export function PrivacyContent() {
 
       <h2 className="mt-6 text-lg font-semibold text-foreground">10. データ保持期間</h2>
       <p>当社は、各データを以下の期間保持し、保持期間経過後は速やかに削除又は無効化します。</p>
-      <div className="overflow-x-auto">
+      <div className="overflow-x-auto overscroll-x-contain">
         <table className="mt-2 w-full border-collapse text-xs">
           <thead>
             <tr className="border-b border-border">

@@ -306,16 +306,18 @@ export function ProductTour({ steps, storageKey, open, onClose }: ProductTourPro
   const dimColor = "color-mix(in oklab, var(--brand-navy) 60%, transparent)";
 
   // spotlight 4辺の overlay (rect ありの時のみ)
+  // dvw / dvh は dynamic viewport (desktop scrollbar 17px 抜き / iOS URL bar 連動)。
+  // 100vw を使うと右端に 17px はみ出して横揺れするため使わない。
   const overlays = rect
     ? [
         // top
-        { top: 0, left: 0, width: "min(100vw, 100dvw)", height: Math.max(0, rect.top - PAD) },
+        { top: 0, left: 0, width: "100dvw", height: Math.max(0, rect.top - PAD) },
         // bottom
-        { top: rect.top + rect.height + PAD, left: 0, width: "min(100vw, 100dvw)", height: `calc(min(100vh, 100dvh) - ${rect.top + rect.height + PAD}px)` },
+        { top: rect.top + rect.height + PAD, left: 0, width: "100dvw", height: `calc(100dvh - ${rect.top + rect.height + PAD}px)` },
         // left
         { top: Math.max(0, rect.top - PAD), left: 0, width: Math.max(0, rect.left - PAD), height: rect.height + PAD * 2 },
         // right
-        { top: Math.max(0, rect.top - PAD), left: rect.left + rect.width + PAD, width: `calc(min(100vw, 100dvw) - ${rect.left + rect.width + PAD}px)`, height: rect.height + PAD * 2 },
+        { top: Math.max(0, rect.top - PAD), left: rect.left + rect.width + PAD, width: `calc(100dvw - ${rect.left + rect.width + PAD}px)`, height: rect.height + PAD * 2 },
       ]
     : [];
 

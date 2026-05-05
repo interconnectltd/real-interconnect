@@ -294,12 +294,28 @@
 html {
   /* ダブルタップズームをアプリ全体で無効化 → click が即時 fire (~300ms 短縮) */
   touch-action: manipulation;
-  /* iOS Safari の pull-to-refresh / overscroll bounce 抑止 */
-  overscroll-behavior-y: contain;
+  /* iOS Safari の pull-to-refresh / overscroll bounce 抑止 (y/x 共に contain).
+   *   - y: pull-to-refresh / 縦 rubber-band 抑止
+   *   - x: 横 rubber-band ("左右にちょっとぶれる") 抑止。Persona X4 audit 由来。
+   *   - `contain` は子要素の momentum (chat の縦慣性) を保持しつつ親への伝播のみ停止
+   *     するので、子 scroll container の "シャラっと感" を犠牲にしない。 */
+  overscroll-behavior: contain;
+  /* 横方向の overflow を root で完全クリップ (左右ブレ・がたつき対策).
+   *   - `clip` は scroll container を生成しないので position:sticky (Header/Sidebar) を壊さない
+   *   - 子孫の意図せぬ overflow (long URL / 横長 table / -mx-* / Header) で
+   *     html scrollbar が出現し、URL bar 開閉でレイアウト幅が脈動するのを防止 */
+  overflow-x: clip;
+  /* Android Chrome の classic scrollbar が content height で出現/消滅すると
+   * 17px 幅で content area が左右に脈動 → 常時 gutter を予約して shift を撲滅 */
+  scrollbar-gutter: stable;
 }
 body {
-  /* 親要素に overscroll-behavior が継承されるよう明示 */
-  overscroll-behavior-y: contain;
+  /* 親要素に overscroll-behavior が継承されるよう明示 (2軸 contain) */
+  overscroll-behavior: contain;
+  /* 子要素の意図せぬ overflow も body で二重にクリップ (root と同方針) */
+  overflow-x: clip;
+  /* 100vw 系子要素が body 幅を超えても本体は viewport 幅を維持 */
+  max-width: 100%;
 }
 button, [role="button"], a {
   /* インタラクション要素のタッチ遅延を完全排除 */
