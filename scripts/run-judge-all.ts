@@ -10,15 +10,15 @@ import { existsSync } from "fs";
 import { resolve } from "path";
 
 const envLocalPath = resolve(process.cwd(), ".env.local");
-if (existsSync(envLocalPath)) {
-  const { config } = await import("dotenv");
-  config({ path: envLocalPath });
-}
-if (!process.env.ANTHROPIC_API_KEY && process.env.AI_API_KEY) {
-  process.env.ANTHROPIC_API_KEY = process.env.AI_API_KEY;
-}
 
 async function main() {
+  if (existsSync(envLocalPath)) {
+    const { config } = await import("dotenv");
+    config({ path: envLocalPath });
+  }
+  if (!process.env.ANTHROPIC_API_KEY && process.env.AI_API_KEY) {
+    process.env.ANTHROPIC_API_KEY = process.env.AI_API_KEY;
+  }
   const { createClient } = await import("@supabase/supabase-js");
   const url = (process.env.NEXT_PUBLIC_SUPABASE_URL ?? "").trim().replace(/\/+$/, "");
   const srk = (process.env.SUPABASE_SERVICE_ROLE_KEY ?? "").trim();

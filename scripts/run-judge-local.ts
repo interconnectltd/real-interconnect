@@ -21,17 +21,16 @@ import { resolve } from "path";
 
 // ローカル実行時のみ .env.local を読む。CI では Secrets が直接 env に入る。
 const envLocalPath = resolve(process.cwd(), ".env.local");
-if (existsSync(envLocalPath)) {
-  const { config } = await import("dotenv");
-  config({ path: envLocalPath });
-}
-
-// AI_API_KEY → ANTHROPIC_API_KEY エイリアス (worker/judge.ts は両方サポート)
-if (!process.env.ANTHROPIC_API_KEY && process.env.AI_API_KEY) {
-  process.env.ANTHROPIC_API_KEY = process.env.AI_API_KEY;
-}
 
 async function main() {
+  if (existsSync(envLocalPath)) {
+    const { config } = await import("dotenv");
+    config({ path: envLocalPath });
+  }
+  // AI_API_KEY → ANTHROPIC_API_KEY エイリアス
+  if (!process.env.ANTHROPIC_API_KEY && process.env.AI_API_KEY) {
+    process.env.ANTHROPIC_API_KEY = process.env.AI_API_KEY;
+  }
   const { createClient } = await import("@supabase/supabase-js");
   // Secret 末尾改行/trailing slash 除去
   const url = (process.env.NEXT_PUBLIC_SUPABASE_URL ?? "").trim().replace(/\/+$/, "");
