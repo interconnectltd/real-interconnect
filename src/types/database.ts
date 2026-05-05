@@ -855,6 +855,84 @@ export interface Database {
         };
         Relationships: [];
       };
+      job_queue: {
+        Row: {
+          id: string;
+          type: string;
+          payload: Json;
+          status: string;
+          priority: number;
+          attempts: number;
+          max_attempts: number;
+          scheduled_at: string;
+          locked_at: string | null;
+          locked_by: string | null;
+          completed_at: string | null;
+          last_error: string | null;
+          created_at: string;
+        };
+        Insert: {
+          type: string;
+          payload: Json;
+          status?: string;
+          priority?: number;
+          attempts?: number;
+          max_attempts?: number;
+          scheduled_at?: string;
+          locked_at?: string | null;
+          locked_by?: string | null;
+          completed_at?: string | null;
+          last_error?: string | null;
+        };
+        Update: Partial<Database["public"]["Tables"]["job_queue"]["Insert"]>;
+        Relationships: [];
+      };
+      judge_pair_cache: {
+        Row: {
+          id: string;
+          viewer_id: string;
+          target_id: string;
+          need_idx: number;
+          offer_idx: number;
+          h_no: number;
+          h_rv: number;
+          reason_no: string | null;
+          reason_rv: string | null;
+          prompt_version: string;
+          judged_at: string;
+        };
+        Insert: {
+          viewer_id: string;
+          target_id: string;
+          need_idx: number;
+          offer_idx: number;
+          h_no?: number;
+          h_rv?: number;
+          reason_no?: string | null;
+          reason_rv?: string | null;
+          prompt_version?: string;
+          judged_at?: string;
+        };
+        Update: Partial<Database["public"]["Tables"]["judge_pair_cache"]["Insert"]>;
+        Relationships: [];
+      };
+      judge_quota_log: {
+        Row: {
+          id: string;
+          viewer_id: string;
+          quota_date: string;
+          pairs_used: number;
+          updated_at: string;
+        };
+        Insert: {
+          viewer_id: string;
+          quota_date?: string;
+          pairs_used?: number;
+          updated_at?: string;
+        };
+        Update: Partial<Database["public"]["Tables"]["judge_quota_log"]["Insert"]>;
+        Relationships: [];
+      };
     };
     Views: Record<string, never>;
     Functions: {

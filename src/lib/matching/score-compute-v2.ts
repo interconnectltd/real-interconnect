@@ -5,6 +5,19 @@
 
 import { calcAttributeScore } from "./attribute-score";
 import { calcPurposeScore } from "./purpose-score";
+import { applyHaikuJudgment, type JudgeCacheRow } from "./judge-haiku";
+import type { EmbeddingScores } from "./embedding";
+
+// 意味空間スコアを score スケール [0,1] に持ち上げる
+// text-embedding-3-small の B2B 同言語 cosine は 0.55-0.85 帯に集中するため、
+// 0.55 未満は無関係扱い、0.92 以上で 0.85 にキャップ (単独 signal で完全マッチ扱いさせない)。
+// P2 指摘 #1 への対応。
+function semanticToScore(c: number): number {
+  if (!Number.isFinite(c) || c <= 0.55) return 0;
+  if (c >= 0.92) return 0.85;
+  // 線形 0.55→0 / 0.92→0.85
+  return ((c - 0.55) / 0.37) * 0.85;
+}
 
 // --- カテゴリ正規化（日本語→英語マッピング） ---
 const VALID_CATEGORIES = new Set([
@@ -138,6 +151,10 @@ export interface ScoreV2Input {
   };
   sharedMeetingCount: number;
   config: ScoringConfig;
+  /** Haiku 4-text crossmatch のキャッシュ行 (00020_haiku_judgment.sql)。空配列なら無視。 */
+  judgeCacheRows?: JudgeCacheRow[];
+  /** pgvector cosine から取得した意味空間スコア (00021_pgvector.sql)。未指定なら無視。 */
+  embeddingScores?: EmbeddingScores;
 }
 
 export interface ScoreV2Result {
@@ -299,15 +316,53 @@ function calcHistoryScore(sharedMeetings: number): number {
 // メイン: computeScoreV2
 // =====================================================================
 export function computeScoreV2(input: ScoreV2Input): ScoreV2Result {
-  const { viewer, target, sharedMeetingCount, config } = input;
+  const { viewer, target, sharedMeetingCount, config, judgeCacheRows, embeddingScores } = input;
 
-  // --- 5次元計算 ---
-  const needOfferScore = calcNeedOfferScore(viewer.needVectors, target.offerVectors);
-  const reverseMatch = calcNeedOfferScore(target.needVectors, viewer.offerVectors);
+  // --- 5次元計算（カテゴリベース、ベースライン）---
+  let needOfferScore = calcNeedOfferScore(viewer.needVectors, target.offerVectors);
+  let reverseMatch = calcNeedOfferScore(target.needVectors, viewer.offerVectors);
   const expertiseFit = calcExpertiseFit(viewer.needVectors, target.offerVectors);
-  const topicAlignment = calcTopicAlignment(viewer.topicVectors, target.topicVectors);
+  let topicAlignment = calcTopicAlignment(viewer.topicVectors, target.topicVectors);
   const engagementValue = calcEngagementValue(target.engagementSignature);
   const historyScore = calcHistoryScore(sharedMeetingCount);
+
+  // --- Haiku / Embedding は片側でも会話分析がある場合のみ反映 (P2 指摘 #3) ---
+  // analysisCount=0 (両ユーザー) のときは Haiku/Embedding が dimension fields に
+  // 漏れないよう gate。alpha=0 で totalScore は守られるが、reason/UI が
+  // 「属性のみ」と表示しつつ Haiku 由来の値を返すと整合性が崩れる。
+  const minAnalysis = Math.min(viewer.analysisCount, target.analysisCount);
+  const partialAnalysis = viewer.analysisCount > 0 || target.analysisCount > 0;
+  let haikuReasons: string[] = [];
+
+  if (minAnalysis > 0 || partialAnalysis) {
+    // Haiku LLM 判定の上書き (§3「+10 score core」)
+    if (judgeCacheRows && judgeCacheRows.length > 0) {
+      const haiku = applyHaikuJudgment(
+        viewer.needVectors,
+        viewer.offerVectors,
+        target.needVectors,
+        target.offerVectors,
+        judgeCacheRows,
+      );
+      if (haiku.needOfferScore !== null) needOfferScore = haiku.needOfferScore;
+      if (haiku.reverseMatch !== null) reverseMatch = haiku.reverseMatch;
+      haikuReasons = haiku.reasons;
+    }
+
+    // 意味空間 (pgvector) によるフォールバック / 補正
+    // P2 指摘 #2: max() で三重カウントしないよう 0.7 cat + 0.3 sem の加重ブレンド。
+    // ただし category=0 のときに限り max を採用 (純 fallback)。
+    if (embeddingScores) {
+      const sNo = semanticToScore(embeddingScores.semanticNo);
+      const sRv = semanticToScore(embeddingScores.semanticRv);
+      const sTopic = semanticToScore(embeddingScores.semanticTopic);
+      if (!judgeCacheRows || judgeCacheRows.length === 0) {
+        needOfferScore = needOfferScore <= 0.05 ? sNo : 0.7 * needOfferScore + 0.3 * sNo;
+        reverseMatch = reverseMatch <= 0.05 ? sRv : 0.7 * reverseMatch + 0.3 * sRv;
+      }
+      topicAlignment = topicAlignment <= 0.05 ? sTopic : 0.7 * topicAlignment + 0.3 * sTopic;
+    }
+  }
 
   // --- 動的重み ---
   const thresholds = config.weights_json.thresholds;
@@ -325,10 +380,13 @@ export function computeScoreV2(input: ScoreV2Input): ScoreV2Result {
     (w.topic_alignment ?? 0.12) * topicAlignment +
     (w.engagement_value ?? 0.12) * engagementValue;
 
-  // --- ブースト ---
+  // --- ブースト (P7 HIGH BUG-1 修正: gate と bonus を分離) ---
+  // 旧: bp.threshold_85 (= 0.08) を gate にも使い、needOffer>=0.08 で常時発火していた。
+  // gate は SCORING_V2_ARCHITECTURE.md §4.3 の通りリテラル 0.85 / 0.70、
+  // bonus 量だけ config から読む。
   const bp = config.boost_params_json;
-  if (needOfferScore >= (bp.threshold_85 ?? 0.85)) convScore += bp.threshold_85 ?? 0.08;
-  else if (needOfferScore >= (bp.threshold_70 ?? 0.70)) convScore += bp.threshold_70 ?? 0.04;
+  if (needOfferScore >= 0.85) convScore += bp.threshold_85 ?? 0.08;
+  else if (needOfferScore >= 0.70) convScore += bp.threshold_70 ?? 0.04;
 
   // --- 属性スコア（V1関数を再利用） ---
   const attr = calcAttributeScore(
@@ -346,8 +404,7 @@ export function computeScoreV2(input: ScoreV2Input): ScoreV2Result {
     convScore += Math.min(bp.surprise_bonus_max ?? 0.06, (convScore - 0.45) * 0.12);
   }
 
-  // --- Alpha ---
-  const minAnalysis = Math.min(viewer.analysisCount, target.analysisCount);
+  // --- Alpha (minAnalysis は Haiku gate ですでに宣言済み) ---
   const alphaTable = config.alpha_table_json;
   let alpha: number;
   if (minAnalysis === 0) {
@@ -385,11 +442,11 @@ export function computeScoreV2(input: ScoreV2Input): ScoreV2Result {
   else if (totalScore >= 0.60 && confidence >= 0.4) notifyTier = "medium";
   else if (totalScore >= 0.50) notifyTier = "low";
 
-  // --- 理由生成は外部で ---
+  // --- 理由生成は外部で / Haiku 由来 reason は haikuReasons で別ルート ---
   return {
     needOfferScore, reverseMatch, expertiseFit, topicAlignment,
     engagementValue, historyScore, totalScore, confidence, phase,
-    reasons: [], // compute-v2/route.ts で生成
+    reasons: haikuReasons, // Haiku 由来の reason をパススルー (compute-v2 route で属性 reason と merge)
     notifyTier,
   };
 }

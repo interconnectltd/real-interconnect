@@ -6,6 +6,8 @@
 import { claimJobDirect, completeJob, failJob, releaseStaleJobs } from "./queue";
 import { handleAnalyze } from "./handlers/analyze";
 import { handleAggregate } from "./handlers/aggregate";
+import { handleJudgePairBatch, type JudgePairBatchPayload } from "./handlers/judge";
+import { handleEmbed } from "./handlers/embed";
 
 const WORKER_ID = `worker-${process.pid}-${Date.now()}`;
 const POLL_INTERVAL = 5000;
@@ -57,6 +59,12 @@ async function processJob(): Promise<boolean> {
         break;
       case "score":
         console.log(`[${WORKER_ID}] Score job for user ${(job.payload as { user_id: string }).user_id} — delegating to compute API`);
+        break;
+      case "judge_pair_batch":
+        await handleJudgePairBatch(job.payload as unknown as JudgePairBatchPayload);
+        break;
+      case "embed":
+        await handleEmbed(job.payload as { user_id: string });
         break;
       case "notify":
         console.log(`[${WORKER_ID}] Notify job — placeholder`);

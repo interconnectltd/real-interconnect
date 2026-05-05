@@ -12,8 +12,23 @@ import { createServiceClient } from "@/lib/supabase/server";
 import { computeScoreV2 } from "@/lib/matching/score-compute-v2";
 import { generateReasonsV2 } from "@/lib/matching/reason-templates-v2";
 import { checkMatchingRateLimit } from "@/lib/rate-limit";
+import { applyEmbeddingScoreBatch } from "@/lib/matching/embedding";
 import type { ScoringConfig } from "@/lib/matching/score-compute-v2";
+import type { JudgeCacheRow } from "@/lib/matching/judge-haiku";
 import type { Database } from "@/types/database";
+
+/** Haiku reasons を attribute reasons の前に追加 (重複は除去、最大 5 件) */
+function mergeUnique(haiku: string[], attr: string[]): string[] {
+  const out: string[] = [];
+  const seen = new Set<string>();
+  for (const r of [...haiku, ...attr]) {
+    if (!r || seen.has(r)) continue;
+    seen.add(r);
+    out.push(r);
+    if (out.length >= 5) break;
+  }
+  return out;
+}
 
 export async function POST() {
   try {
@@ -104,6 +119,40 @@ export async function POST() {
       offeringsMap.get(o.user_id)!.push({ type: o.type });
     }
 
+    // --- judge_pair_cache 一括取得 (viewer × target_ids 双方向) ---
+    // Haiku 4-text crossmatch の結果を applyHaikuJudgment が読む。
+    // 双方向 row を一度に集めるため (viewer_id, target_id) 双方向クエリ。
+    type JudgeRowDb = JudgeCacheRow & { viewer_id: string; target_id: string };
+    const { data: judgeCacheRaw } = await (
+      supabase.from("judge_pair_cache" as never) as unknown as {
+        select: (s: string) => {
+          or: (cond: string) => Promise<{ data: JudgeRowDb[] | null }>;
+        };
+      }
+    )
+      .select("viewer_id, target_id, need_idx, offer_idx, h_no, h_rv, reason_no, reason_rv")
+      .or(
+        `and(viewer_id.eq.${user.id}),and(target_id.eq.${user.id})`,
+      );
+    const judgeCacheByPair = new Map<string, JudgeCacheRow[]>();
+    for (const row of judgeCacheRaw ?? []) {
+      const key = `${row.viewer_id}::${row.target_id}`;
+      if (!judgeCacheByPair.has(key)) judgeCacheByPair.set(key, []);
+      judgeCacheByPair.get(key)!.push({
+        need_idx: row.need_idx,
+        offer_idx: row.offer_idx,
+        h_no: row.h_no,
+        h_rv: row.h_rv,
+        reason_no: row.reason_no,
+        reason_rv: row.reason_rv,
+      });
+    }
+
+    // --- 意味空間スコアを 1 RTT バッチ取得 (P4 指摘 #1 N-RTT 暴発の修正) ---
+    // 旧: Promise.all で N RPC = 1k ユーザーで 8-15s。
+    // 新: match_pair_embeddings_batch で全 target を 1 RPC、p95 ~250ms。
+    const embeddingByTarget = await applyEmbeddingScoreBatch(user.id, targetIds, supabase);
+
     // --- 共有ミーティング数を取得 ---
     const { data: viewerParticipations } = await supabase
       .from("meeting_participants_v2")
@@ -131,6 +180,11 @@ export async function POST() {
 
     for (const target of targets) {
       const tv = vectorMap.get(target.id);
+      const fwdJudge = judgeCacheByPair.get(`${user.id}::${target.id}`) ?? [];
+      const revJudge = judgeCacheByPair.get(`${target.id}::${user.id}`) ?? [];
+      const fwdEmb = embeddingByTarget.get(target.id) ?? { semanticNo: 0, semanticRv: 0, semanticTopic: 0 };
+      // 逆方向は viewer/target 入替なので semanticNo/Rv が flip
+      const revEmb = { semanticNo: fwdEmb.semanticRv, semanticRv: fwdEmb.semanticNo, semanticTopic: fwdEmb.semanticTopic };
 
       // Forward: viewer → target
       const fwd = computeScoreV2({
@@ -164,19 +218,23 @@ export async function POST() {
         },
         sharedMeetingCount: sharedMeetingMap.get(target.id) ?? 0,
         config,
+        judgeCacheRows: fwdJudge,
+        embeddingScores: fwdEmb,
       });
 
       // 理由生成
       const topOffer = (tv?.offer_vectors as { text?: string }[] | null)?.[0];
       const topTopic = (tv?.topic_vectors as { topic?: string }[] | null)?.[0];
       const sharedCount = sharedMeetingMap.get(target.id) ?? 0;
-      const fwdReasons = generateReasonsV2({
+      const fwdReasonsBase = generateReasonsV2({
         target: { name: target.name, industry: target.industry, position: target.position, company: target.company },
         ...fwd,
         sharedMeetingCount: sharedCount,
         topOfferText: topOffer?.text,
         topTopicText: topTopic?.topic,
       });
+      // P5 指摘 #1: Haiku 由来の reason を最優先で先頭に挿入 (重複は除去)
+      const fwdReasons = mergeUnique(fwd.reasons, fwdReasonsBase);
 
       rows.push({
         viewer_id: user.id,
@@ -230,17 +288,20 @@ export async function POST() {
         },
         sharedMeetingCount: sharedCount,
         config,
+        judgeCacheRows: revJudge,
+        embeddingScores: revEmb,
       });
 
       const myTopOffer = (myVectors?.offer_vectors as { text?: string }[] | null)?.[0];
       const myTopTopic = (myVectors?.topic_vectors as { topic?: string }[] | null)?.[0];
-      const revReasons = generateReasonsV2({
+      const revReasonsBase = generateReasonsV2({
         target: { name: myProfile?.name, industry: myProfile?.industry, position: myProfile?.position, company: myProfile?.company },
         ...rev,
         sharedMeetingCount: sharedCount,
         topOfferText: myTopOffer?.text,
         topTopicText: myTopTopic?.topic,
       });
+      const revReasons = mergeUnique(rev.reasons, revReasonsBase);
 
       rows.push({
         viewer_id: target.id,
@@ -278,7 +339,47 @@ export async function POST() {
       }
     }
 
-    return json({ computed, config_version: configRow.version_id });
+    // --- Haiku 判定バッチ enqueue (SCORING_V2_ARCHITECTURE.md §3.4 — top-50 リランキング) ---
+    // viewer 視点のスコア上位 N 件を judge_pair_batch ジョブとしてキューに投入。
+    // 結果は judge_pair_cache に書かれ、次回の compute-v2 で applyHaikuJudgment が読み込む。
+    const TOP_N_FOR_JUDGE = 50;
+    let enqueuedJudge = false;
+    try {
+      const viewerRows = rows
+        .filter((r) => r.viewer_id === user.id)
+        .sort((a, b) => (b.total_score ?? 0) - (a.total_score ?? 0))
+        .slice(0, TOP_N_FOR_JUDGE);
+      const candidateTargetIds = viewerRows.map((r) => r.target_id);
+
+      if (candidateTargetIds.length > 0) {
+        // 既存の analyze/aggregate と同じ enqueueJob 規約 (重複防止: 同じ payload は再投入しない)
+        const payload = { viewer_id: user.id, target_ids: candidateTargetIds, top_n: TOP_N_FOR_JUDGE };
+        const payloadStr = JSON.stringify(payload);
+
+        const { data: existing } = await supabase
+          .from("job_queue")
+          .select("id")
+          .eq("type", "judge_pair_batch")
+          .in("status", ["pending", "running"])
+          .eq("payload", payloadStr)
+          .limit(1);
+
+        if (!existing?.length) {
+          await supabase.from("job_queue").insert({
+            type: "judge_pair_batch",
+            payload,
+            priority: 2,
+            status: "pending",
+          });
+          enqueuedJudge = true;
+        }
+      }
+    } catch (e) {
+      // judge enqueue 失敗はスコア計算自体の成功を阻害しない
+      console.error("judge_pair_batch enqueue failed:", e instanceof Error ? e.message : String(e));
+    }
+
+    return json({ computed, config_version: configRow.version_id, enqueued_judge: enqueuedJudge });
   } catch (error) {
     return handleApiError(error);
   }

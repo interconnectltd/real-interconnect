@@ -10,9 +10,27 @@ const supabase = createClient(
   process.env.SUPABASE_SERVICE_ROLE_KEY!,
 );
 
+/**
+ * ジョブタイプ定義 (single source of truth)
+ *  - analyze:           Opus による transcript_insights 抽出 (handlers/analyze.ts)
+ *  - aggregate:         transcript_insights → user_conversation_vectors 集約 (handlers/aggregate.ts)
+ *  - score:             カテゴリベース 5 次元スコア計算 (Next.js compute-v2 route)
+ *  - judge_pair_batch:  Haiku 4-text crossmatch 判定 (handlers/judge.ts) — SCORING_V2_ARCHITECTURE.md §3
+ *  - notify:            プッシュ通知 (placeholder)
+ */
+export const JOB_TYPES = {
+  ANALYZE: "analyze",
+  AGGREGATE: "aggregate",
+  SCORE: "score",
+  JUDGE_PAIR_BATCH: "judge_pair_batch",
+  NOTIFY: "notify",
+} as const;
+
+export type JobType = typeof JOB_TYPES[keyof typeof JOB_TYPES];
+
 export interface Job {
   id: string;
-  type: string;
+  type: JobType | string;
   payload: Record<string, unknown>;
   attempts: number;
   max_attempts: number;
