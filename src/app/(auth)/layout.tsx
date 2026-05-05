@@ -1,17 +1,8 @@
-import dynamic from "next/dynamic";
 import { Header } from "@/components/layouts/header";
 import { Sidebar } from "@/components/layouts/sidebar";
 import { ProfileModal } from "@/components/features/profile/profile-modal";
-
-// HelpDock + page-tour-registry + ProductTour を初期 JS から外す。
-// FAB は遅延 mount で OK (interactive 直後に hydrate 不要)
-const GlobalHelpDock = dynamic(
-  () =>
-    import("@/components/onboarding/global-help-dock").then((m) => ({
-      default: m.GlobalHelpDock,
-    })),
-  { ssr: false },
-);
+// dynamic({ssr:false}) は Next.js 16 で Server Component 禁止 → Client wrapper 経由
+import { LazyGlobalHelpDock as GlobalHelpDock } from "@/components/onboarding/global-help-dock-client";
 
 export default function AuthLayout({
   children,
