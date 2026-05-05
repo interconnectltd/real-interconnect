@@ -43,13 +43,23 @@ async function main() {
   process.env.SUPABASE_SERVICE_ROLE_KEY = srk;
   process.env.TLDV_API_KEY = tldvKey;
 
-  // 直接 fetch で 1 度叩いて生レスポンスを確認 (client wrapper をバイパス)
-  const probe = await fetch("https://pasta.tldv.io/v1alpha1/meetings?page=1", {
-    headers: { "x-api-key": tldvKey, "Content-Type": "application/json" },
-  });
-  console.log("[debug] direct probe status:", probe.status);
-  if (!probe.ok) {
-    console.log("[debug] body:", (await probe.text()).slice(0, 200));
+  // 複数 endpoint / header で probe して 401 真因を特定
+  const probes = [
+    { url: "https://pasta.tldv.io/v1alpha1/meetings?page=1", header: "x-api-key", value: tldvKey },
+    { url: "https://pasta.tldv.io/v1alpha1/meetings?page=1", header: "Authorization", value: `Bearer ${tldvKey}` },
+    { url: "https://pasta.tldv.io/v1alpha1/meetings?page=1", header: "Authorization", value: `Api-Key ${tldvKey}` },
+    { url: "https://api.tldv.io/v1/meetings?page=1", header: "x-api-key", value: tldvKey },
+    { url: "https://api.tldv.io/v1/meetings?page=1", header: "Authorization", value: `Bearer ${tldvKey}` },
+    { url: "https://api.tldv.io/v1alpha1/meetings?page=1", header: "x-api-key", value: tldvKey },
+  ];
+  for (const p of probes) {
+    try {
+      const r = await fetch(p.url, { headers: { [p.header]: p.value, "Content-Type": "application/json" } });
+      const body = (await r.text()).slice(0, 100);
+      console.log(`[probe] ${r.status} ${p.url} ${p.header}=${p.value.slice(0, 12)}... → ${body}`);
+    } catch (e) {
+      console.log(`[probe] ERR ${p.url} ${p.header}: ${e instanceof Error ? e.message : String(e)}`);
+    }
   }
 
   const argMax = Number(process.argv[2] ?? process.env.TLDV_MAX_MEETINGS ?? 10);
