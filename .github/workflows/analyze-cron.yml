@@ -1,0 +1,64 @@
+name: Analyze Cron
+
+on:
+  schedule:
+    # tl;dv sync (16:00 UTC = 01:00 JST) の 30 分後に analyze drain
+    - cron: '30 16 * * *'
+  workflow_dispatch:
+    inputs:
+      max_jobs:
+        description: 'analyze 消化上限 (default 60、cost guard)'
+        required: false
+        default: '60'
+      usd_cap:
+        description: '予算上限 USD (default 30)'
+        required: false
+        default: '30'
+
+jobs:
+  analyze:
+    runs-on: ubuntu-latest
+    timeout-minutes: 55
+    concurrency:
+      group: analyze-drain
+      cancel-in-progress: false
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 10
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'pnpm'
+      - run: pnpm install --frozen-lockfile
+      - name: Drain analyze queue (Opus 4.6)
+        env:
+          NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+          AI_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+          ANALYZE_MAX_JOBS: ${{ inputs.max_jobs || '60' }}
+          ANALYZE_DAILY_USD_CAP: ${{ inputs.usd_cap || '30' }}
+        run: pnpm exec tsx worker/scripts/drain-analyze.ts
+
+  aggregate:
+    needs: analyze
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 10
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'pnpm'
+      - run: pnpm install --frozen-lockfile
+      - name: Drain aggregate queue
+        env:
+          NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+          AGGREGATE_MAX_JOBS: '100'
+        run: pnpm exec tsx worker/scripts/drain-aggregate.ts
