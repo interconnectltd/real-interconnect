@@ -20,7 +20,14 @@
  *     「商談確定シグナル」として強く扱う (false positive 防止)。
  */
 
-export type MeetingKind = "sales" | "internal" | "unknown";
+/**
+ * - sales: 商談 (顧客との外部 MT、AI 解析+招待 ON)
+ * - internal: 社内 (定例/1on1 等、AI 解析もスキップ)
+ * - onboarding: 運営とユーザーの初回キックオフ MT。AI 解析対象外 (= 運営側の発話で
+ *   ユーザーの嗜好が誤推定されるのを防ぐ)、prospect 招待もしない。表示上は専用バッジ。
+ * - unknown: 判定不能 (admin review)
+ */
+export type MeetingKind = "sales" | "internal" | "onboarding" | "unknown";
 
 export interface MeetingClassificationResult {
   kind: MeetingKind;
@@ -47,6 +54,11 @@ interface ClassifyOptions {
    * 例: ["interconnect.app", "ikemen.ltd"]
    */
   internalDomains?: string[];
+  /**
+   * 運営オペレーターの email (完全一致、CSV)。
+   * このメンバーが MT 参加者にいる場合 = 運営とユーザーの面談 → onboarding 確定。
+   */
+  operatorEmails?: string[];
   /** タイトル除外正規表現の追加 (CIで unit-test しやすいよう外部注入可能) */
   extraTitleExcludePatterns?: RegExp[];
   /** タイトル sales-bias 正規表現の追加 */
@@ -157,6 +169,23 @@ export function classifyMeeting(
   const matchedSales = titleIncludes.find((re) => re.test(title));
   const matchedExclude = titleExcludes.find((re) => re.test(title));
 
+  // 0. **運営オペレーターが参加 → onboarding 確定 (最優先)**
+  //    商談pattern を持っていても、運営とのキックオフ面談は AI 解析対象外。
+  const operatorSet = new Set((options.operatorEmails ?? []).map((e) => e.toLowerCase().trim()).filter(Boolean));
+  if (operatorSet.size > 0) {
+    const allEmailsLower = allEmails.map((e) => e.toLowerCase().trim());
+    const operatorHit = allEmailsLower.find((e) => operatorSet.has(e));
+    if (operatorHit) {
+      return {
+        kind: "onboarding",
+        confidence: 0.98,
+        reason: `operator email matched (${operatorHit})`,
+        externalDomains,
+        internalDomainsMatched,
+      };
+    }
+  }
+
   // 1. **外部ドメイン + sales pattern → sales 確定 (最優先)**
   //    定例商談 / 定期商談 のような両義パターンを sales と確実に判定する
   if (externalDomains.length > 0 && matchedSales) {
@@ -262,5 +291,19 @@ export function readInternalDomainsFromEnv(): string[] {
   return raw
     .split(",")
     .map((d) => d.trim().toLowerCase())
+    .filter(Boolean);
+}
+
+/**
+ * env から運営オペレーター email 一覧を取得 (CSV、完全一致)。
+ * 例: INTERCONNECT_OPERATOR_EMAILS="ops@interconnect.app,founder@interconnect.app"
+ *
+ * 運営との初回キックオフ MT (= onboarding) を AI 解析・招待ループから除外する基準。
+ */
+export function readOperatorEmailsFromEnv(): string[] {
+  const raw = process.env.INTERCONNECT_OPERATOR_EMAILS ?? "";
+  return raw
+    .split(",")
+    .map((e) => e.trim().toLowerCase())
     .filter(Boolean);
 }

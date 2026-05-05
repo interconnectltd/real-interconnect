@@ -1,41 +1,15 @@
 "use client";
 
 import Link from "next/link";
-import { UserCircle } from "lucide-react";
+import { UserCircle, ChevronDown } from "lucide-react";
+import { useState } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import {
+  useProfileCompleteness,
+  type CompletenessFieldCheck,
+} from "@/hooks/queries/use-profile-completeness";
 import type { Profile } from "@/types";
-
-interface FieldCheck {
-  key: keyof Profile;
-  label: string;
-  hint: string;
-  points: number;
-}
-
-const FIELDS: FieldCheck[] = [
-  { key: "name", label: "お名前", hint: "名前を入力しましょう", points: 15 },
-  { key: "company", label: "会社名", hint: "所属企業を追加しましょう", points: 15 },
-  { key: "position", label: "役職", hint: "役職を追加しましょう", points: 15 },
-  { key: "industry", label: "業種", hint: "業種を選択しましょう", points: 15 },
-  { key: "bio", label: "自己紹介", hint: "自己紹介を書くとマッチング精度が大幅に向上します", points: 20 },
-  { key: "contact_info", label: "連絡先", hint: "連絡先を追加しましょう", points: 10 },
-  { key: "avatar_url", label: "プロフィール画像", hint: "プロフィール画像を設定しましょう", points: 10 },
-];
-
-export function calcProfileCompleteness(profile: Profile) {
-  let score = 0;
-  const missing: FieldCheck[] = [];
-  for (const field of FIELDS) {
-    const val = profile[field.key];
-    if (val && typeof val === "string" && val.trim().length > 0) {
-      score += field.points;
-    } else {
-      missing.push(field);
-    }
-  }
-  return { score, missing };
-}
 
 interface ProfileCompletenessProps {
   profile: Profile;
@@ -44,28 +18,59 @@ interface ProfileCompletenessProps {
 }
 
 export function ProfileCompleteness({ profile, hideLink }: ProfileCompletenessProps) {
-  const { score, missing } = calcProfileCompleteness(profile);
+  const result = useProfileCompleteness(profile);
+  const [expanded, setExpanded] = useState(false);
 
-  if (score >= 100) return null;
+  if (!result) return null;
+  const { score, groups, missing } = result;
+
+  if (score >= 100) {
+    return (
+      <Card data-tour="completeness-card">
+        <CardContent className="space-y-2">
+          <div className="flex items-center justify-between gap-2">
+            <p className="ds-kpi-label">プロフィール完成度</p>
+            <UserCircle className="h-3.5 w-3.5 shrink-0 text-muted-foreground/50" aria-hidden="true" />
+          </div>
+          <div className="flex items-baseline gap-1">
+            <span className="ds-kpi-number-md text-foreground">100</span>
+            <span className="text-base text-muted-foreground">%</span>
+          </div>
+          <p className="text-xs text-success">
+            プロフィールが完成しました。マッチング精度が最大化されます。
+          </p>
+        </CardContent>
+      </Card>
+    );
+  }
+
+  // missing を「効果が大きい順 (points 降順)」で 3 件 + その他集約
+  const sortedMissing = [...missing].sort((a, b) => b.points - a.points);
+  const top3 = sortedMissing.slice(0, 3);
+  const restPoints = sortedMissing.slice(3).reduce((s, f) => s + f.points, 0);
 
   return (
     <Card data-tour="completeness-card">
       <CardContent className="space-y-3">
         <div className="flex items-center justify-between gap-2">
-          <p className="ds-kpi-label">
-            プロフィール完成度
-          </p>
-          <UserCircle
-            className="h-3.5 w-3.5 shrink-0 text-muted-foreground/50"
-            aria-hidden="true"
-          />
+          <p className="ds-kpi-label">プロフィール完成度</p>
+          <UserCircle className="h-3.5 w-3.5 shrink-0 text-muted-foreground/50" aria-hidden="true" />
         </div>
         <div className="flex items-baseline gap-1">
           <span className="ds-kpi-number-md text-foreground">{score}</span>
           <span className="text-base text-muted-foreground">%</span>
+          <span className="ml-2 text-xs text-muted-foreground">/ 100</span>
         </div>
         <p className="text-xs text-muted-foreground">
-          プロフィールを充実させるとマッチング精度が向上します
+          {score === 0
+            ? "これから1つずつ埋めていきましょう。まずは下の項目から。"
+            : score < 30
+            ? "良いスタートです。基本情報の次は自己紹介を充実させましょう。"
+            : score < 60
+            ? "順調に進んでいます。目標と提供できることを登録すると精度が大幅UP。"
+            : score < 90
+            ? "あと少しで完成です。tl;dv 連携で AI 推薦が解禁されます。"
+            : "ほぼ完成。最後の数%で最高精度のマッチングが提供されます。"}
         </p>
 
         <div
@@ -82,45 +87,86 @@ export function ProfileCompleteness({ profile, hideLink }: ProfileCompletenessPr
           />
         </div>
 
-        {missing.length > 0 && (
+        {top3.length > 0 && (
           <ul className="space-y-1.5 pt-1">
-            {missing.slice(0, 3).map((f) => (
-              <li
-                key={f.key}
-                className="flex items-start justify-between gap-2 text-xs text-muted-foreground"
-              >
-                <div className="flex min-w-0 items-start gap-1.5">
-                  <span
-                    className="mt-1 inline-block h-1 w-1 shrink-0 rounded-full bg-accent"
+            {top3.map((f) => (
+              <MissingItem key={f.key} item={f} />
+            ))}
+            {sortedMissing.length > 3 && (
+              <li>
+                <button
+                  type="button"
+                  onClick={() => setExpanded((v) => !v)}
+                  aria-expanded={expanded}
+                  className="flex w-full items-center justify-between gap-2 rounded-md px-2.5 py-1 text-xs text-muted-foreground/80 hover:bg-muted focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/70"
+                >
+                  <span>
+                    他 {sortedMissing.length - 3} 項目 (+{restPoints}%)
+                  </span>
+                  <ChevronDown
+                    className={`h-3.5 w-3.5 transition-transform ${expanded ? "rotate-180" : ""}`}
                     aria-hidden="true"
                   />
-                  <span className="min-w-0">{f.hint}</span>
-                </div>
-                <span className="shrink-0 font-medium text-accent">+{f.points}%</span>
-              </li>
-            ))}
-            {missing.length > 3 && (
-              <li className="flex items-start justify-between gap-2 pl-2.5 text-xs text-muted-foreground/80">
-                <span>他 {missing.length - 3} 項目</span>
-                <span className="shrink-0 font-medium text-accent">
-                  +{missing.slice(3).reduce((sum, f) => sum + f.points, 0)}%
-                </span>
+                </button>
+                {expanded && (
+                  <ul className="mt-1.5 space-y-1.5 pl-2.5">
+                    {sortedMissing.slice(3).map((f) => (
+                      <MissingItem key={f.key} item={f} />
+                    ))}
+                  </ul>
+                )}
               </li>
             )}
           </ul>
         )}
 
+        {/* グループ別 mini meter (groups の bar 表示) */}
+        <details className="group/detail rounded-md border border-border bg-muted/40">
+          <summary className="flex cursor-pointer items-center justify-between gap-2 px-3 py-2 text-xs font-medium text-muted-foreground hover:text-foreground focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/70">
+            <span>カテゴリ別の達成度</span>
+            <ChevronDown className="h-3.5 w-3.5 transition-transform group-open/detail:rotate-180" aria-hidden="true" />
+          </summary>
+          <ul className="space-y-2 px-3 pb-3 pt-1">
+            {groups.map((g) => (
+              <li key={g.id} className="space-y-1">
+                <div className="flex items-center justify-between text-[11px]">
+                  <span className="text-foreground">{g.label}</span>
+                  <span className="tabular-nums text-muted-foreground">
+                    {g.earned} / {g.total}
+                  </span>
+                </div>
+                <div className="h-1 overflow-hidden rounded-full bg-muted">
+                  <div
+                    className="h-full rounded-full bg-accent/70"
+                    style={{ width: `${(g.earned / g.total) * 100}%` }}
+                  />
+                </div>
+              </li>
+            ))}
+          </ul>
+        </details>
+
         {!hideLink && (
-          <Button
-            variant="outline"
-            size="sm"
-            className="w-fit"
-            render={<Link href="/profile" />}
-          >
+          <Button variant="outline" size="sm" className="w-fit" render={<Link href="/profile" />}>
             プロフィールを編集
           </Button>
         )}
       </CardContent>
     </Card>
+  );
+}
+
+function MissingItem({ item }: { item: CompletenessFieldCheck }) {
+  return (
+    <li className="flex items-start justify-between gap-2 text-xs text-muted-foreground">
+      <div className="flex min-w-0 items-start gap-1.5">
+        <span className="mt-1 inline-block h-1 w-1 shrink-0 rounded-full bg-accent" aria-hidden="true" />
+        <div className="min-w-0">
+          <span className="text-foreground">{item.label}</span>
+          {item.hint && <span className="ml-1 text-muted-foreground/80">— {item.hint}</span>}
+        </div>
+      </div>
+      <span className="shrink-0 font-medium text-accent">+{item.points}%</span>
+    </li>
   );
 }

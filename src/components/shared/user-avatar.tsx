@@ -1,6 +1,7 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useEffect, useState } from "react";
+import { findPreset, isPresetAvatarUrl, presetSvgViewBox } from "@/lib/avatar-presets";
 
 interface UserAvatarProps {
   name: string | null | undefined;
@@ -16,6 +17,12 @@ const sizeClasses = {
   xl: "h-24 w-24 text-3xl",
 };
 
+/**
+ * Avatar 表示の優先順:
+ *   1. avatarUrl が `preset:<id>` → AVATAR_PRESETS から SVG 描画 (network なし)
+ *   2. http(s)://...     → <img> で表示、エラー時に initial fallback
+ *   3. 不在 / エラー    → 名前頭文字 + ロゴ調 background
+ */
 export function UserAvatar({ name, avatarUrl, size = "md", className = "" }: UserAvatarProps) {
   const [imgError, setImgError] = useState(false);
 
@@ -23,9 +30,33 @@ export function UserAvatar({ name, avatarUrl, size = "md", className = "" }: Use
     setImgError(false);
   }, [avatarUrl]);
 
-  const initial = (name ?? "?").charAt(0).toUpperCase();
   const sizeClass = sizeClasses[size];
 
+  // 1. preset
+  if (isPresetAvatarUrl(avatarUrl)) {
+    const preset = findPreset(avatarUrl);
+    if (preset) {
+      return (
+        <span
+          role="img"
+          aria-label={name ?? preset.label}
+          className={`inline-flex shrink-0 overflow-hidden rounded-full ${sizeClass} ${className}`}
+          style={{ backgroundColor: preset.bgVar, color: preset.fgVar }}
+        >
+          <svg
+            viewBox={presetSvgViewBox()}
+            xmlns="http://www.w3.org/2000/svg"
+            className="h-full w-full"
+            aria-hidden="true"
+            // SVG paint markup is curated and trusted (lib/avatar-presets.ts)
+            dangerouslySetInnerHTML={{ __html: preset.paint }}
+          />
+        </span>
+      );
+    }
+  }
+
+  // 2. uploaded image
   if (avatarUrl && !imgError) {
     return (
       <img
@@ -37,8 +68,8 @@ export function UserAvatar({ name, avatarUrl, size = "md", className = "" }: Use
     );
   }
 
-  // sm/md は flat (リスト内多数並ぶ場面でノイズ抑制)
-  // lg/xl のみ gradient で「ブランド identity 強調」
+  // 3. initial fallback
+  const initial = (name ?? "?").charAt(0).toUpperCase();
   const isLarge = size === "lg" || size === "xl";
   const fallbackBg = isLarge
     ? "bg-gradient-brand-soft ring-1 ring-border"

@@ -123,7 +123,7 @@ export default function MembersPage() {
       {/* Filters card — Search + Sort + Industry + Position */}
       <Card>
         <CardContent className="space-y-4">
-          <div className="relative">
+          <div className="relative" data-tour="members-search">
             <Search
               className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground"
               aria-hidden="true"
@@ -139,6 +139,7 @@ export default function MembersPage() {
 
           <SortToggle value={memberSortBy} onChange={setMemberSortBy} />
 
+          <div data-tour="members-filters" className="space-y-4">
           <FilterRow
             icon={Filter}
             label="業種"
@@ -160,6 +161,7 @@ export default function MembersPage() {
             selected={memberPositionFilter}
             onSelect={(v) => setMemberPositionFilter(v ?? "")}
           />
+          </div>
 
           {hasFilter && (
             <div className="flex justify-end">
@@ -208,9 +210,9 @@ export default function MembersPage() {
             </p>
           )}
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-            {members.map((member) => (
+            {members.map((member, i) => (
+              <div key={member.id} data-tour={i === 0 ? "members-card-first" : undefined}>
               <MemberCard
-                key={member.id}
                 member={member}
                 bookmarked={bookmarkedIds.has(member.id)}
                 connected={connectedIds.has(member.id)}
@@ -226,6 +228,7 @@ export default function MembersPage() {
                 }
                 onConnect={() => requestConnection.mutate(member.id)}
               />
+              </div>
             ))}
           </div>
 

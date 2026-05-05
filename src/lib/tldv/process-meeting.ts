@@ -4,6 +4,7 @@ import { linkSpeakerToUser } from "./link-speaker";
 import {
   classifyMeeting,
   readInternalDomainsFromEnv,
+  readOperatorEmailsFromEnv,
   type MeetingKind,
   type MeetingClassificationResult,
 } from "./classify-meeting";
@@ -31,7 +32,12 @@ export async function processTldvMeeting(
   meetingId: string,
   supabase: SupabaseClient,
   tldv: TldvClient,
-  options: { holdForConsent?: boolean; internalDomains?: string[] } = {},
+  options: {
+    holdForConsent?: boolean;
+    internalDomains?: string[];
+    /** 運営オペレーター email (CSV)。指定されていれば onboarding 判定に使用 */
+    operatorEmails?: string[];
+  } = {},
 ): Promise<ProcessResult> {
   // 冪等性チェック: 既に処理済みなら skip
   const { data: existing } = await supabase
@@ -44,7 +50,9 @@ export async function processTldvMeeting(
     const rawKind = (existing as { meeting_kind?: string }).meeting_kind;
     // 文字列リテラル検証で MeetingKind narrowing (DB に未知値が来た場合 unknown フォールバック)
     const existingKind: MeetingKind =
-      rawKind === "sales" || rawKind === "internal" ? rawKind : "unknown";
+      rawKind === "sales" || rawKind === "internal" || rawKind === "onboarding"
+        ? rawKind
+        : "unknown";
     return {
       transcriptId: (existing as { id: string }).id,
       participantIds: [],
@@ -58,7 +66,8 @@ export async function processTldvMeeting(
         externalDomains: [],
         internalDomainsMatched: [],
       },
-      skipInvite: existingKind === "internal",
+      // onboarding も招待・解析を skip (運営との面談で発火しない)
+      skipInvite: existingKind === "internal" || existingKind === "onboarding",
     };
   }
 
@@ -87,10 +96,11 @@ export async function processTldvMeeting(
     totalDuration += dur;
   }
 
-  // 商談 vs 社内分類 (招待ループ前にDBに記録、admin が後で override 可能)
+  // 商談 vs 社内 vs 運営面談 の分類 (招待ループ前にDBに記録、admin が後で override 可能)
   const inviteeEmails = (meeting.invitees ?? []).map((i) => i.email);
   const speakerNames = [...new Set(segments.map((s) => s.speaker))];
   const internalDomains = options.internalDomains ?? readInternalDomainsFromEnv();
+  const operatorEmails = options.operatorEmails ?? readOperatorEmailsFromEnv();
   const classification = classifyMeeting(
     {
       title: meeting.name,
@@ -99,16 +109,21 @@ export async function processTldvMeeting(
       speakerNames,
       fullText,
     },
-    { internalDomains },
+    { internalDomains, operatorEmails },
   );
 
-  // 内部会議は招待を skip (transcript は保存するが status='internal' で AI 解析も止める)
-  const skipInvite = classification.kind === "internal";
-  const computedStatus: "ready" | "pending_consent" | "internal" = skipInvite
-    ? "internal"
-    : options.holdForConsent
-    ? "pending_consent"
-    : "ready";
+  // internal / onboarding は招待 + AI 解析を共に skip
+  // (onboarding は運営との面談、ユーザー嗜好が誤推定されないよう解析対象外)
+  const skipInvite =
+    classification.kind === "internal" || classification.kind === "onboarding";
+  const computedStatus: "ready" | "pending_consent" | "internal" | "onboarding" =
+    classification.kind === "onboarding"
+      ? "onboarding"
+      : classification.kind === "internal"
+      ? "internal"
+      : options.holdForConsent
+      ? "pending_consent"
+      : "ready";
 
   // meeting_transcripts に UPSERT
   const transcriptRow = {

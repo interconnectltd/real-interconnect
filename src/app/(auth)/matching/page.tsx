@@ -119,7 +119,7 @@ export default function MatchingPage() {
 
       {/* Mutual matches */}
       {filteredMutual && filteredMutual.length > 0 && (
-        <section className="space-y-4">
+        <section data-tour="matching-mutual" className="space-y-4">
           <header>
             <p className="ds-eyebrow">Mutual</p>
             <span className="ds-eyebrow-rule" aria-hidden="true" />
@@ -146,7 +146,9 @@ export default function MatchingPage() {
       )}
 
       {/* Sort segmented control */}
-      <SortToggle value={matchingSortBy} onChange={setMatchingSortBy} />
+      <div data-tour="matching-sort">
+        <SortToggle value={matchingSortBy} onChange={setMatchingSortBy} />
+      </div>
 
       {/* Score cards */}
       {isLoading ? (
@@ -160,9 +162,9 @@ export default function MatchingPage() {
         </div>
       ) : filteredScores && filteredScores.length > 0 ? (
         <div className="space-y-4">
-          {filteredScores.map((score: MatchScore) => (
+          {filteredScores.map((score: MatchScore, i: number) => (
+            <div key={score.target_id} data-tour={i === 0 ? "matching-card-first" : undefined}>
             <ScoreCard
-              key={score.target_id}
               score={score}
               connected={connectedIds.has(score.target_id)}
               pending={pendingIds.has(score.target_id)}
@@ -171,6 +173,7 @@ export default function MatchingPage() {
               onConnect={() => requestConnection.mutate(score.target_id)}
               onDismiss={() => handleDismiss(score.target_id)}
             />
+            </div>
           ))}
           <TldvConnectCta />
         </div>

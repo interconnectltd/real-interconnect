@@ -12,8 +12,10 @@ import {
   X,
   AtSign,
   Lock,
+  Image as ImageIcon,
 } from "lucide-react";
 import { toast } from "sonner";
+import { AvatarPicker } from "@/components/features/profile/avatar-picker";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -35,7 +37,6 @@ const textareaClass =
 const BIO_MAX = 1000;
 const BIO_WARN = 900;
 const BIO_DANGER = 990;
-const AVATAR_MAX_BYTES = 5 * 1024 * 1024;
 
 interface ProfileForm {
   name: string;
@@ -50,11 +51,11 @@ export default function ProfilePage() {
   const { data: profile, isLoading } = useMyProfile();
   const updateProfile = useUpdateProfile();
   const uploadAvatar = useUploadAvatar();
-  const fileInputRef = useRef<HTMLInputElement>(null);
   // 編集開始時の値を凍結 (refetch でズレないよう ref で保持)
   const originalSnapshotRef = useRef<ProfileForm | null>(null);
   const [editing, setEditing] = useState(false);
   const [avatarPreview, setAvatarPreview] = useState<string | null>(null);
+  const [pickerOpen, setPickerOpen] = useState(false);
   const [form, setForm] = useState<ProfileForm>({
     name: "",
     company: "",
@@ -112,23 +113,52 @@ export default function ProfilePage() {
     });
   }
 
-  function handleAvatarSelect(e: React.ChangeEvent<HTMLInputElement>) {
-    const file = e.target.files?.[0];
-    e.target.value = "";
-    if (!file) return;
+  async function uploadFromFile(file: File): Promise<void> {
+    return new Promise((resolve) => {
+      const reader = new FileReader();
+      reader.onload = (ev) => setAvatarPreview(ev.target?.result as string);
+      reader.readAsDataURL(file);
+      uploadAvatar.mutate(file, {
+        onSuccess: () => {
+          setAvatarPreview(null);
+          setPickerOpen(false);
+          resolve();
+        },
+        onError: () => {
+          setAvatarPreview(null);
+          resolve();
+        },
+      });
+    });
+  }
 
-    if (file.size > AVATAR_MAX_BYTES) {
-      toast.error("画像サイズは5MB以下にしてください");
-      return;
-    }
+  async function selectPreset(presetUrl: string) {
+    return new Promise<void>((resolve) => {
+      updateProfile.mutate(
+        { avatar_url: presetUrl },
+        {
+          onSuccess: () => {
+            setPickerOpen(false);
+            resolve();
+          },
+          onError: () => resolve(),
+        },
+      );
+    });
+  }
 
-    const reader = new FileReader();
-    reader.onload = (ev) => setAvatarPreview(ev.target?.result as string);
-    reader.readAsDataURL(file);
-
-    uploadAvatar.mutate(file, {
-      onSuccess: () => setAvatarPreview(null),
-      onError: () => setAvatarPreview(null),
+  async function clearAvatar() {
+    return new Promise<void>((resolve) => {
+      updateProfile.mutate(
+        { avatar_url: null },
+        {
+          onSuccess: () => {
+            setPickerOpen(false);
+            resolve();
+          },
+          onError: () => resolve(),
+        },
+      );
     });
   }
 
@@ -158,16 +188,18 @@ export default function ProfilePage() {
       <ProfileCompleteness profile={profile} hideLink />
 
       {/* Hero card */}
-      <Card>
+      <Card data-tour="profile-completeness">
         <CardContent className="space-y-5">
           <div className="flex items-start gap-4">
             <button
               type="button"
+              data-tour="profile-avatar"
               className="group relative shrink-0 outline-none focus-visible:ring-[3px] focus-visible:ring-ring/70 rounded-full"
-              onClick={() => fileInputRef.current?.click()}
-              disabled={uploadAvatar.isPending}
+              onClick={() => setPickerOpen((v) => !v)}
+              disabled={uploadAvatar.isPending || updateProfile.isPending}
               aria-label="プロフィール画像を変更"
-              aria-busy={uploadAvatar.isPending}
+              aria-expanded={pickerOpen}
+              aria-busy={uploadAvatar.isPending || updateProfile.isPending}
             >
               {avatarPreview ? (
                 <img
@@ -186,7 +218,7 @@ export default function ProfilePage() {
                 {uploadAvatar.isPending ? (
                   <Loader2 className="h-5 w-5 animate-spin text-white" aria-hidden="true" />
                 ) : (
-                  <Camera className="h-5 w-5 text-white" aria-hidden="true" />
+                  <ImageIcon className="h-5 w-5 text-white" aria-hidden="true" />
                 )}
               </span>
             </button>
@@ -194,13 +226,6 @@ export default function ProfilePage() {
             <p role="status" aria-live="polite" className="sr-only">
               {uploadAvatar.isPending ? "プロフィール画像をアップロード中です" : ""}
             </p>
-            <input
-              ref={fileInputRef}
-              type="file"
-              accept="image/jpeg,image/png,image/webp,image/gif"
-              className="hidden"
-              onChange={handleAvatarSelect}
-            />
             <div className="min-w-0 flex-1">
               <h2 className="ds-h2 truncate text-foreground">{profile.name}</h2>
               <p className="mt-0.5 truncate text-xs text-muted-foreground">
@@ -227,6 +252,33 @@ export default function ProfilePage() {
               </div>
             </div>
           </div>
+
+          {/* AvatarPicker 展開パネル (Camera ボタンクリックで表示) */}
+          {pickerOpen && (
+            <div className="rounded-lg border border-border bg-card p-4">
+              <div className="mb-3 flex items-center justify-between">
+                <h3 className="text-sm font-semibold text-foreground">アイコンを変更</h3>
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => setPickerOpen(false)}
+                  aria-label="アイコン変更パネルを閉じる"
+                >
+                  <X className="h-3.5 w-3.5" aria-hidden="true" />
+                  閉じる
+                </Button>
+              </div>
+              <AvatarPicker
+                name={profile.name}
+                current={profile.avatar_url}
+                onUploadFile={uploadFromFile}
+                onSelectPreset={selectPreset}
+                onClear={clearAvatar}
+                pending={uploadAvatar.isPending || updateProfile.isPending}
+              />
+            </div>
+          )}
 
           {editing ? (
             <ProfileEditForm
@@ -330,7 +382,7 @@ function ProfileEditForm({
         </div>
       </div>
 
-      <div className="space-y-1.5">
+      <div data-tour="profile-bio" className="space-y-1.5">
         <Label htmlFor="profile-bio" className={labelClass}>
           自己紹介
         </Label>
@@ -357,7 +409,7 @@ function ProfileEditForm({
         </p>
       </div>
 
-      <div className="space-y-1.5">
+      <div data-tour="profile-contact" className="space-y-1.5">
         <Label htmlFor="profile-contact" className={labelClass}>
           連絡先
         </Label>

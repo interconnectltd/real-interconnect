@@ -10,6 +10,10 @@ export const profileUpdateSchema = z.object({
   industry: z.enum(industryValues).optional(),
   bio: z.string().max(1000, "自己紹介は1000文字以内で入力してください").optional(),
   contact_info: z.string().optional(),
+  /** preset:<id> | http(s)://... | null (= 頭文字 fallback) */
+  avatar_url: z
+    .union([z.string().max(2048), z.null()])
+    .optional(),
 });
 
 export type ProfileUpdateInput = z.infer<typeof profileUpdateSchema>;

@@ -2,12 +2,19 @@
 
 import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
-import { HelpCircle, Compass, MessageSquare, BookOpen, X } from "lucide-react";
+import { HelpCircle, MapPin, Home, MessageSquare, BookOpen, X } from "lucide-react";
 
 interface HelpDockProps {
-  /** 「使い方ガイドを再生」ボタンのコールバック */
+  /** 「このページの使い方を見る」コールバック (pathname に応じた step を起動) */
+  onStartPageTour?: () => void;
+  /** 「ダッシュボードのガイドを再生」コールバック (Dashboard 全体のオンボーディング) */
+  onStartDashboardTour?: () => void;
+  /** メニュー文言: pathname のページ名 (例: "メンバー") */
+  pageTourLabel?: string;
+  /** このページの専用 tour が利用可能か */
+  pageTourAvailable?: boolean;
+  /** @deprecated レガシー互換: 過去の単一 tour 用 */
   onStartTour?: () => void;
-  /** ガイドが利用可能か (false の時は再生メニューを薄表示) */
   tourAvailable?: boolean;
 }
 
@@ -22,7 +29,18 @@ interface HelpDockProps {
  *   - メニュー項目は <a>/<Link>/<button> で操作 + aria-current 不要 (永続選択なし)
  *   - 親レイアウトに干渉しない z-index と pointer-events 設計
  */
-export function HelpDock({ onStartTour, tourAvailable = true }: HelpDockProps) {
+export function HelpDock({
+  onStartPageTour,
+  onStartDashboardTour,
+  pageTourLabel,
+  pageTourAvailable = false,
+  onStartTour,
+  tourAvailable,
+}: HelpDockProps) {
+  // レガシー互換: onStartTour が渡された場合は dashboard tour として扱う
+  const startDashboard = onStartDashboardTour ?? onStartTour;
+  const startPage = onStartPageTour;
+  const dashAvailable = onStartDashboardTour != null || (tourAvailable ?? false);
   const [open, setOpen] = useState(false);
   const fabRef = useRef<HTMLButtonElement>(null);
   const menuRef = useRef<HTMLDivElement>(null);
@@ -115,16 +133,38 @@ export function HelpDock({ onStartTour, tourAvailable = true }: HelpDockProps) {
                 role="menuitem"
                 onClick={() => {
                   setOpen(false);
-                  onStartTour?.();
+                  startPage?.();
                 }}
-                disabled={!tourAvailable}
+                disabled={!pageTourAvailable || !startPage}
                 className="flex w-full items-start gap-3 rounded-md px-3 py-2.5 text-left text-sm transition-colors hover:bg-muted focus-visible:bg-muted focus-visible:outline-none disabled:cursor-not-allowed disabled:opacity-50"
               >
-                <Compass className="mt-0.5 h-4 w-4 shrink-0 text-accent-strong" aria-hidden="true" />
+                <MapPin className="mt-0.5 h-4 w-4 shrink-0 text-accent-strong" aria-hidden="true" />
                 <span className="min-w-0 flex-1">
-                  <span className="block font-medium text-foreground">使い方ガイドを再生</span>
+                  <span className="block font-medium text-foreground">
+                    {pageTourLabel ? `${pageTourLabel}の使い方を見る` : "このページの使い方を見る"}
+                  </span>
                   <span className="mt-0.5 block text-xs text-muted-foreground">
-                    画面の各機能をステップで案内します
+                    今いるページの主要機能を順に案内
+                  </span>
+                </span>
+              </button>
+            </li>
+            <li>
+              <button
+                type="button"
+                role="menuitem"
+                onClick={() => {
+                  setOpen(false);
+                  startDashboard?.();
+                }}
+                disabled={!dashAvailable || !startDashboard}
+                className="flex w-full items-start gap-3 rounded-md px-3 py-2.5 text-left text-sm transition-colors hover:bg-muted focus-visible:bg-muted focus-visible:outline-none disabled:cursor-not-allowed disabled:opacity-50"
+              >
+                <Home className="mt-0.5 h-4 w-4 shrink-0 text-muted-foreground" aria-hidden="true" />
+                <span className="min-w-0 flex-1">
+                  <span className="block font-medium text-foreground">ダッシュボードのガイド</span>
+                  <span className="mt-0.5 block text-xs text-muted-foreground">
+                    全体像を俯瞰する初回ガイド
                   </span>
                 </span>
               </button>

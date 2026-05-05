@@ -199,7 +199,15 @@ export async function extractProspectsForTranscript(
   }
   const kind = (meta as { meeting_kind?: string }).meeting_kind;
   const status = (meta as { status?: string }).status;
-  if (kind === "internal" || status === "internal") return [];
+  // onboarding (運営との面談) も招待スキップ
+  if (
+    kind === "internal" ||
+    kind === "onboarding" ||
+    status === "internal" ||
+    status === "onboarding"
+  ) {
+    return [];
+  }
 
   // 招待メール差し込み用の meeting context を取得
   const { data: ctx } = await supabase
