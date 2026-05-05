@@ -37,9 +37,20 @@ async function main() {
   const tldvKey = (process.env.TLDV_API_KEY ?? "").trim();
   if (!url || !srk) throw new Error("Missing Supabase env");
   if (!tldvKey) throw new Error("Missing TLDV_API_KEY");
+  // 401 デバッグ: key の長さ / prefix / 末尾を出す (Secret なので部分露出のみ)
+  console.log("[debug] TLDV_API_KEY len:", tldvKey.length, "prefix:", tldvKey.slice(0, 6), "tail:", JSON.stringify(tldvKey.slice(-3)));
   process.env.NEXT_PUBLIC_SUPABASE_URL = url;
   process.env.SUPABASE_SERVICE_ROLE_KEY = srk;
   process.env.TLDV_API_KEY = tldvKey;
+
+  // 直接 fetch で 1 度叩いて生レスポンスを確認 (client wrapper をバイパス)
+  const probe = await fetch("https://pasta.tldv.io/v1alpha1/meetings?page=1", {
+    headers: { "x-api-key": tldvKey, "Content-Type": "application/json" },
+  });
+  console.log("[debug] direct probe status:", probe.status);
+  if (!probe.ok) {
+    console.log("[debug] body:", (await probe.text()).slice(0, 200));
+  }
 
   const argMax = Number(process.argv[2] ?? process.env.TLDV_MAX_MEETINGS ?? 10);
   const maxMeetings = Math.max(1, Math.min(argMax, 50));
