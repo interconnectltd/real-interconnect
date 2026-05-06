@@ -23,7 +23,8 @@ export async function GET(request: Request) {
     // Defense-in-depth: viewer_id != target_id (=user.id) で self pair を弾く
     const { data: theirScores, error: err2 } = await supabase
       .from("matching_scores_v4")
-      .select("viewer_id, total_score, target_profile:user_profiles!viewer_id(id, name, email, company, position, industry, bio, avatar_url)")
+      // PII 漏洩防止: 他人の email は payload に含めない (Sec audit Critical /matching)
+      .select("viewer_id, total_score, target_profile:user_profiles!viewer_id(id, name, company, position, industry, bio, avatar_url)")
       .eq("target_id", user.id)
       .neq("viewer_id", user.id)
       .in("viewer_id", targetIds)

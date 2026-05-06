@@ -168,6 +168,7 @@ export default function SettingsPage() {
 
   // Password change
   const [passwordDialogOpen, setPasswordDialogOpen] = useState(false);
+  const [currentPassword, setCurrentPassword] = useState("");
   const [newPassword, setNewPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [passwordLoading, setPasswordLoading] = useState(false);
@@ -558,27 +559,52 @@ export default function SettingsPage() {
   }
 
   async function handlePasswordChange() {
+    // 現パスワード必須化 (Sec Critical: セッション奪取で即書換可能だった旧仕様の解消)
+    // GitHub / Stripe / Google 等の業界標準: 現パスでの再認証 → 新パス更新
+    if (!currentPassword) {
+      toast.error("現在のパスワードを入力してください");
+      return;
+    }
     if (!newPassword) {
       toast.error("新しいパスワードを入力してください");
       return;
     }
-    if (newPassword.length < 6) {
-      toast.error("パスワードは6文字以上で入力してください");
+    if (newPassword.length < 8) {
+      toast.error("パスワードは 8 文字以上で入力してください");
+      return;
+    }
+    if (newPassword === currentPassword) {
+      toast.error("新しいパスワードは現在と異なるものを設定してください");
       return;
     }
     if (newPassword !== confirmPassword) {
       toast.error("パスワードが一致しません");
       return;
     }
+    if (!user?.email) {
+      toast.error("ユーザー情報が取得できません");
+      return;
+    }
 
     setPasswordLoading(true);
     try {
+      // 1) 現パスワードで再認証 (signInWithPassword で検証、失敗時は 401)
+      const { error: reauthErr } = await supabase.auth.signInWithPassword({
+        email: user.email,
+        password: currentPassword,
+      });
+      if (reauthErr) {
+        toast.error("現在のパスワードが正しくありません");
+        return;
+      }
+      // 2) 新パスワード更新
       const { error } = await supabase.auth.updateUser({
         password: newPassword,
       });
       if (error) throw error;
       toast.success("パスワードを変更しました");
       setPasswordDialogOpen(false);
+      setCurrentPassword("");
       setNewPassword("");
       setConfirmPassword("");
     } catch (err: unknown) {
@@ -631,25 +657,38 @@ export default function SettingsPage() {
                 <DialogHeader>
                   <DialogTitle>パスワードを変更</DialogTitle>
                   <DialogDescription>
-                    新しいパスワードを入力してください（6文字以上）
+                    安全のため、現在のパスワードでの再認証が必要です。新しいパスワードは 8 文字以上で設定してください。
                   </DialogDescription>
                 </DialogHeader>
                 <div className="space-y-3 py-2">
+                  <div className="space-y-1.5">
+                    <Label htmlFor="current-password">現在のパスワード</Label>
+                    <Input
+                      id="current-password"
+                      type="password"
+                      autoComplete="current-password"
+                      value={currentPassword}
+                      onChange={(e) => setCurrentPassword(e.target.value)}
+                      placeholder="••••••••"
+                    />
+                  </div>
                   <div className="space-y-1.5">
                     <Label htmlFor="new-password">新しいパスワード</Label>
                     <Input
                       id="new-password"
                       type="password"
+                      autoComplete="new-password"
                       value={newPassword}
                       onChange={(e) => setNewPassword(e.target.value)}
-                      placeholder="••••••••"
+                      placeholder="8 文字以上"
                     />
                   </div>
                   <div className="space-y-1.5">
-                    <Label htmlFor="confirm-password">パスワード確認</Label>
+                    <Label htmlFor="confirm-password">新しいパスワード (確認)</Label>
                     <Input
                       id="confirm-password"
                       type="password"
+                      autoComplete="new-password"
                       value={confirmPassword}
                       onChange={(e) => setConfirmPassword(e.target.value)}
                       placeholder="••••••••"
@@ -657,6 +696,18 @@ export default function SettingsPage() {
                   </div>
                 </div>
                 <DialogFooter>
+                  <Button
+                    variant="outline"
+                    onClick={() => {
+                      setPasswordDialogOpen(false);
+                      setCurrentPassword("");
+                      setNewPassword("");
+                      setConfirmPassword("");
+                    }}
+                    disabled={passwordLoading}
+                  >
+                    キャンセル
+                  </Button>
                   <Button
                     onClick={handlePasswordChange}
                     disabled={passwordLoading}

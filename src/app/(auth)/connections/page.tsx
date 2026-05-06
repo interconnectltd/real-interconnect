@@ -6,6 +6,14 @@ import { UserCheck, Clock, Send, Star, MessageCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+  DialogFooter,
+} from "@/components/ui/dialog";
 import { useConnections } from "@/hooks/queries/use-connections";
 import { useUpdateConnection } from "@/hooks/mutations/use-update-connection";
 import { useFeedbackStatus } from "@/hooks/queries/use-feedback-status";
@@ -31,6 +39,10 @@ export default function ConnectionsPage() {
   const { user } = useSupabase();
   const { connectionTab, setConnectionTab } = useFilterStore();
   const [feedbackTarget, setFeedbackTarget] = useState<{
+    id: string;
+    name: string;
+  } | null>(null);
+  const [disconnectTarget, setDisconnectTarget] = useState<{
     id: string;
     name: string;
   } | null>(null);
@@ -188,11 +200,15 @@ export default function ConnectionsPage() {
                         size="sm"
                         variant="destructive"
                         disabled={updateConnection.isPending}
-                        onClick={() => {
-                          if (window.confirm("このコネクションを解除しますか？")) {
-                            updateConnection.mutate({ id: conn.id, status: "disconnected" });
-                          }
-                        }}
+                        onClick={() =>
+                          setDisconnectTarget({
+                            id: conn.id,
+                            name:
+                              (conn as unknown as {
+                                profile?: { name?: string };
+                              }).profile?.name ?? "このコネクション",
+                          })
+                        }
                       >
                         解除
                       </Button>
@@ -224,6 +240,50 @@ export default function ConnectionsPage() {
           targetName={feedbackTarget.name}
         />
       )}
+
+      {/* コネクション解除確認 Dialog (window.confirm 撤去) */}
+      <Dialog
+        open={Boolean(disconnectTarget)}
+        onOpenChange={(o) => !o && setDisconnectTarget(null)}
+      >
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>コネクションを解除</DialogTitle>
+            <DialogDescription>
+              {disconnectTarget?.name} さんとのコネクションを解除します。
+              <br />
+              この操作は取り消せません。再度繋がるには再申請が必要です。
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <Button
+              variant="outline"
+              onClick={() => setDisconnectTarget(null)}
+            >
+              キャンセル
+            </Button>
+            <Button
+              variant="destructive"
+              disabled={updateConnection.isPending}
+              onClick={() => {
+                if (disconnectTarget) {
+                  updateConnection.mutate(
+                    { id: disconnectTarget.id, status: "disconnected" },
+                    {
+                      onSuccess: () => {
+                        toast.success("コネクションを解除しました");
+                      },
+                    },
+                  );
+                  setDisconnectTarget(null);
+                }
+              }}
+            >
+              {updateConnection.isPending ? "解除中..." : "解除する"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

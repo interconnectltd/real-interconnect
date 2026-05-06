@@ -73,7 +73,11 @@ export default function DashboardPage() {
           queryClient.invalidateQueries({ queryKey: ["matching"] });
         }
       })
-      .catch(() => {});
+      .catch((err) => {
+        // 旧実装は catch 握り潰しで障害を完全に吸収していた。observability のため
+        // 最低限 console.error に残し、Sentry 導入後は捕捉対象に。
+        console.error("[dashboard] matching/compute-v2 failed", err);
+      });
   }, [user, queryClient]);
 
   const acceptedCount = connections?.filter(
@@ -122,7 +126,23 @@ export default function DashboardPage() {
         <Button
           variant="outline"
           size="icon-lg"
-          onClick={() => queryClient.invalidateQueries()}
+          onClick={() => {
+            // 全 query 無差別 invalidate は N+1 と rate limit を誘発するため、
+            // ダッシュボード関連の代表 queryKey に絞る (refetchType: active)
+            queryClient.invalidateQueries({
+              predicate: (q) => {
+                const k = q.queryKey[0];
+                return (
+                  k === "connections" ||
+                  k === "notifications" ||
+                  k === "matching" ||
+                  k === "members" ||
+                  k === "ai-profile"
+                );
+              },
+              refetchType: "active",
+            });
+          }}
           aria-label="データを更新"
         >
           <RefreshCw className="h-4 w-4" />

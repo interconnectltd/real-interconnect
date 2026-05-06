@@ -82,72 +82,61 @@ export default function MatchingPage() {
   // それでも「同名同 email の複数アカウント」が両方表示される際の混乱を避け
   // られるよう、name+email 完全一致ペアには注意ラベルを別経路で付与する。
   const myId = myProfile?.id;
-  const myEmail = myProfile?.email?.trim().toLowerCase();
 
   const filteredScores = useMemo(() => {
     if (!scores) return scores;
+    // PII 漏洩防止のため API レスポンスから email を撤去 (Sec audit Critical /matching)。
+    // self / dup 検出は ID と name 正規化のみで実施。同名注意ラベルは name 一致で計上。
     const seenIds = new Set<string>();
-    // 同名同 email カウンタ (告知用 / 実体は消さない)
-    const nameEmailCount = new Map<string, number>();
+    const nameCount = new Map<string, number>();
     const result: Array<MatchScore & { __dupCount?: number }> = [];
     for (const s of scores) {
       if (dismissedSet.has(s.target_id)) continue;
       if (myId && s.target_id === myId) continue;
-      const targetEmail = s.target_profile?.email?.trim().toLowerCase();
-      if (myEmail && targetEmail && targetEmail === myEmail) continue;
-      // 同一 target_id (= 同一 user) の重複だけを排除
       if (seenIds.has(s.target_id)) continue;
       seenIds.add(s.target_id);
 
       const rawName = s.target_profile?.name ?? "";
       const normName = rawName.trim().toLowerCase().replace(/\s+/g, "");
-      if (normName && targetEmail) {
-        const key = `${normName}__${targetEmail}`;
-        nameEmailCount.set(key, (nameEmailCount.get(key) ?? 0) + 1);
+      if (normName) {
+        nameCount.set(normName, (nameCount.get(normName) ?? 0) + 1);
       }
       result.push({ ...s });
     }
-    // 同名同 email が 2 件以上ある場合、各カードに __dupCount を付与
+    // 同名アカウントが 2 件以上ある場合、各カードに __dupCount を付与 (注意喚起)
     return result.map((s) => {
       const rawName = s.target_profile?.name ?? "";
       const normName = rawName.trim().toLowerCase().replace(/\s+/g, "");
-      const targetEmail = s.target_profile?.email?.trim().toLowerCase();
-      const key = normName && targetEmail ? `${normName}__${targetEmail}` : null;
-      const count = key ? (nameEmailCount.get(key) ?? 0) : 0;
+      const count = normName ? (nameCount.get(normName) ?? 0) : 0;
       return count > 1 ? { ...s, __dupCount: count - 1 } : s;
     });
-  }, [scores, dismissedSet, myId, myEmail]);
+  }, [scores, dismissedSet, myId]);
 
   const filteredMutual = useMemo(() => {
     if (!mutualMatches) return mutualMatches;
     const seenIds = new Set<string>();
-    const nameEmailCount = new Map<string, number>();
+    const nameCount = new Map<string, number>();
     const result: Array<MutualMatch & { __dupCount?: number }> = [];
     for (const m of mutualMatches) {
       if (dismissedSet.has(m.user_id)) continue;
       if (myId && m.user_id === myId) continue;
-      const targetEmail = m.profile?.email?.trim().toLowerCase();
-      if (myEmail && targetEmail && targetEmail === myEmail) continue;
       if (seenIds.has(m.user_id)) continue;
       seenIds.add(m.user_id);
 
       const rawName = m.profile?.name ?? "";
       const normName = rawName.trim().toLowerCase().replace(/\s+/g, "");
-      if (normName && targetEmail) {
-        const key = `${normName}__${targetEmail}`;
-        nameEmailCount.set(key, (nameEmailCount.get(key) ?? 0) + 1);
+      if (normName) {
+        nameCount.set(normName, (nameCount.get(normName) ?? 0) + 1);
       }
       result.push({ ...m });
     }
     return result.map((m) => {
       const rawName = m.profile?.name ?? "";
       const normName = rawName.trim().toLowerCase().replace(/\s+/g, "");
-      const targetEmail = m.profile?.email?.trim().toLowerCase();
-      const key = normName && targetEmail ? `${normName}__${targetEmail}` : null;
-      const count = key ? (nameEmailCount.get(key) ?? 0) : 0;
+      const count = normName ? (nameCount.get(normName) ?? 0) : 0;
       return count > 1 ? { ...m, __dupCount: count - 1 } : m;
     });
-  }, [mutualMatches, dismissedSet, myId, myEmail]);
+  }, [mutualMatches, dismissedSet, myId]);
 
   const bookmarkedIds = useMemo(() => {
     if (!Array.isArray(bookmarks)) return new Set<string>();
@@ -215,11 +204,7 @@ export default function MatchingPage() {
           </header>
           <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
             {filteredMutual.map((m: MutualMatch & { __dupCount?: number }) => {
-              const isSelf =
-                (!!myId && m.user_id === myId) ||
-                (!!myEmail &&
-                  !!m.profile?.email &&
-                  m.profile.email.trim().toLowerCase() === myEmail);
+              const isSelf = !!myId && m.user_id === myId;
               return (
                 <MutualCard
                   key={m.user_id}
@@ -268,11 +253,7 @@ export default function MatchingPage() {
       ) : filteredScores && filteredScores.length > 0 ? (
         <div className="space-y-4">
           {filteredScores.map((score: MatchScore & { __dupCount?: number }, i: number) => {
-            const isSelf =
-              (!!myId && score.target_id === myId) ||
-              (!!myEmail &&
-                !!score.target_profile?.email &&
-                score.target_profile.email.trim().toLowerCase() === myEmail);
+            const isSelf = !!myId && score.target_id === myId;
             return (
               <div key={score.target_id} data-tour={i === 0 ? "matching-card-first" : undefined}>
                 <ScoreCard
