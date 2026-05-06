@@ -113,7 +113,7 @@ export default function NotificationsPage() {
                 </p>
                 {/* Action buttons — show regardless of read status */}
                 {n.actions && Array.isArray(n.actions) && n.actions.length > 0 && (
-                  <div className="mt-2 flex gap-2">
+                  <div className="mt-2 flex flex-wrap gap-2">
                     {(n.actions as NotificationAction[])
                       .filter((a) => NOTIFICATION_ACTION_WHITELIST.has(a.type))
                       .map((action) => (

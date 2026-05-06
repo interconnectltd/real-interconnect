@@ -191,7 +191,8 @@ export function Sidebar({ onNavigate }: { onNavigate?: () => void }) {
        */}
       {isAdmin && (
         <div className="mt-3 border-t border-border pt-3">
-          <p className="mb-1 px-3 text-[10px] font-bold uppercase tracking-[0.18em] text-emerald-600/80 dark:text-emerald-400/80">
+          {/* WCAG AA: 4.5:1 を担保するため alpha を外し emerald-700 / 300 を使用 */}
+          <p className="mb-1 px-3 text-[10px] font-bold uppercase tracking-[0.18em] text-emerald-700 dark:text-emerald-300">
             Admin
           </p>
           <AdminGroup

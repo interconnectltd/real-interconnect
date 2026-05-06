@@ -160,7 +160,7 @@ export function ImportRequestCTA() {
                 rows={3}
                 maxLength={1000}
                 placeholder="例: tl:dv の○月○日以降の会議を取り込んでほしい"
-                className="w-full resize-none rounded-md border bg-background px-3 py-2 text-sm placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
+                className="w-full resize-none rounded-md border bg-background px-3 py-2 text-base placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/70 sm:text-sm"
               />
               <div className="flex gap-2">
                 <Button

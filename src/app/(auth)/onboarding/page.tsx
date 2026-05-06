@@ -532,21 +532,23 @@ export default function OnboardingPage() {
                 </p>
               </div>
 
-              <div className="flex items-start gap-2 rounded-md border border-amber-300 bg-amber-50 p-2 dark:border-amber-700 dark:bg-amber-950">
+              <div className="flex items-start gap-2 rounded-md border border-amber-300 bg-amber-50 p-3 dark:border-amber-700 dark:bg-amber-950">
                 <input
                   id="ob-contact-sharing"
                   type="checkbox"
                   checked={agreeContactSharing}
                   onChange={(e) => setAgreeContactSharing(e.target.checked)}
-                  className="mt-1"
+                  className="mt-1 h-4 w-4 shrink-0 cursor-pointer"
                   aria-required="true"
                   aria-invalid={!agreeContactSharing}
                 />
-                {/* Label は htmlFor で input の accessible name を兼ねる。
-                    aria-describedby で同じ要素を二重参照しないこと(SR が同テキストを 2 回読む) */}
-                <Label
+                {/* shadcn Label は base が `flex items-center gap-2` なため、内側に
+                    rich content (text + <strong> + <a>) を入れると各子要素が flex
+                    item として扱われて縦割り状の改行崩れが起きる。
+                    第三者提供の同意文は long-form なので plain <label> を使う。 */}
+                <label
                   htmlFor="ob-contact-sharing"
-                  className="cursor-pointer text-xs leading-relaxed text-amber-900 dark:text-amber-200"
+                  className="block min-w-0 flex-1 cursor-pointer text-xs leading-relaxed text-amber-900 dark:text-amber-200"
                 >
                   上記連絡先(または登録メールアドレス)が、<strong>マッチング承諾された相手ユーザー</strong>に開示されることに同意します。
                   これは個人情報保護法第27条に基づく第三者提供の同意です。詳細は{" "}
@@ -559,7 +561,7 @@ export default function OnboardingPage() {
                     プライバシーポリシー
                   </a>
                   をご参照ください。
-                </Label>
+                </label>
               </div>
             </CardContent>
           </Card>

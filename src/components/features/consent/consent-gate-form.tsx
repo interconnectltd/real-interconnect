@@ -183,14 +183,16 @@ export function ConsentGateForm() {
             onCheckedChange={(v) => setAgreeAi(v === true)}
             aria-describedby="cg-ai-desc"
           />
-          <Label
+          {/* shadcn Label の base flex が rich content を縦割り化するので
+              plain <label> を使用 (consent 同意文は long-form のため) */}
+          <label
             htmlFor="cg-ai"
             id="cg-ai-desc"
-            className="cursor-pointer text-xs leading-relaxed text-amber-900 dark:text-amber-200"
+            className="block min-w-0 flex-1 cursor-pointer text-xs leading-relaxed text-amber-900 dark:text-amber-200"
           >
             過去のビジネスミーティングのトランスクリプトを<strong>米国Anthropic PBC</strong>のClaude Opus等のAIサービスに送信し、
             スキル・ニーズ等の構造化情報を抽出することに同意します (越境移転・委託先処理を含む)。
-          </Label>
+          </label>
         </div>
 
         <div className="flex items-start gap-2">
@@ -199,9 +201,9 @@ export function ConsentGateForm() {
             checked={agreeAge}
             onCheckedChange={(v) => setAgreeAge(v === true)}
           />
-          <Label htmlFor="cg-age" className="cursor-pointer text-sm leading-relaxed">
+          <label htmlFor="cg-age" className="block min-w-0 flex-1 cursor-pointer text-sm leading-relaxed">
             私は<strong>18歳以上</strong>であり、本サービスを<strong>事業の用に供する目的</strong>で利用する事業従事者であることを表明します。
-          </Label>
+          </label>
         </div>
 
         <Button

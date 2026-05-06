@@ -1114,10 +1114,10 @@ export default function SettingsPage() {
               </div>
             ) : (
               <>
-                {/* Weekly template */}
+                {/* Weekly template — SP では時刻 select 群が右にはみ出すため flex-wrap で折返し許可 */}
                 <div className="space-y-2">
                   {DAY_KEYS.map((day) => (
-                    <div key={day} className="flex items-center gap-3">
+                    <div key={day} className="flex flex-wrap items-center gap-x-3 gap-y-1.5">
                       <span className="w-6 text-sm font-medium">{DAY_LABELS[day]}</span>
                       <Checkbox
                         checked={weeklyTemplate[day].enabled}
@@ -1126,7 +1126,7 @@ export default function SettingsPage() {
                         }
                       />
                       {weeklyTemplate[day].enabled ? (
-                        <div className="flex items-center gap-1.5">
+                        <div className="flex flex-wrap items-center gap-1.5">
                           <select
                             value={weeklyTemplate[day].start}
                             onChange={(e) => updateDayRule(day, "start", e.target.value)}
@@ -1184,8 +1184,10 @@ export default function SettingsPage() {
                               {o.label ? ` ${o.label}` : ""}
                             </span>
                             <button
+                              type="button"
                               onClick={() => handleDeleteOverride(o.id)}
-                              className="rounded p-1 text-muted-foreground hover:text-destructive"
+                              aria-label={`${o.date} の除外日を削除`}
+                              className="inline-flex h-11 w-11 items-center justify-center rounded text-muted-foreground hover:bg-destructive/10 hover:text-destructive focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/70"
                             >
                               <X className="h-3.5 w-3.5" />
                             </button>

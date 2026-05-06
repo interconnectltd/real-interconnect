@@ -88,18 +88,22 @@ export default function ConnectionsPage() {
         </p>
       </div>
 
-      <div className="flex flex-wrap gap-2">
-        {tabs.map((tab) => (
-          <Button
-            key={tab.key}
-            variant={connectionTab === tab.key ? "default" : "outline"}
-            size="sm"
-            onClick={() => setConnectionTab(tab.key)}
-          >
-            <tab.icon className="mr-1.5 h-3.5 w-3.5" />
-            {tab.label}
-          </Button>
-        ))}
+      {/* SP では 3 タブが flex-wrap で 2 行折返ししていたため横スクロール segmented に変更 */}
+      <div className="-mx-4 overflow-x-auto px-4 pb-1 sm:mx-0 sm:px-0">
+        <div className="flex w-max gap-2 sm:w-auto sm:flex-wrap">
+          {tabs.map((tab) => (
+            <Button
+              key={tab.key}
+              variant={connectionTab === tab.key ? "default" : "outline"}
+              size="sm"
+              className="shrink-0"
+              onClick={() => setConnectionTab(tab.key)}
+            >
+              <tab.icon className="mr-1.5 h-3.5 w-3.5" />
+              {tab.label}
+            </Button>
+          ))}
+        </div>
       </div>
 
       {isError ? (

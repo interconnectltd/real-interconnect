@@ -97,24 +97,27 @@ export default function AdminImportRequestsPage() {
         </p>
       </header>
 
-      {/* フィルタ */}
-      <div className="mb-4 flex flex-wrap gap-2" role="tablist">
-        {(["pending", "processing", "done", "rejected", "all"] as const).map((s) => {
-          const count = s === "all" ? data?.length ?? 0 : counts[s] ?? 0;
-          return (
-            <Button
-              key={s}
-              size="sm"
-              variant={filterStatus === s ? "default" : "outline"}
-              onClick={() => setFilterStatus(s)}
-              role="tab"
-              aria-selected={filterStatus === s}
-            >
-              {s === "all" ? "すべて" : STATUS_LABEL[s as Status]}
-              <span className="ml-1.5 text-xs opacity-70">({count})</span>
-            </Button>
-          );
-        })}
+      {/* フィルタ — SP では tablist が 2 段折返しすると ARIA 操作と矛盾するため横スクロール */}
+      <div className="-mx-4 mb-4 overflow-x-auto px-4 pb-1 sm:mx-0 sm:px-0">
+        <div className="flex w-max gap-2 sm:w-auto sm:flex-wrap" role="tablist">
+          {(["pending", "processing", "done", "rejected", "all"] as const).map((s) => {
+            const count = s === "all" ? data?.length ?? 0 : counts[s] ?? 0;
+            return (
+              <Button
+                key={s}
+                size="sm"
+                variant={filterStatus === s ? "default" : "outline"}
+                onClick={() => setFilterStatus(s)}
+                role="tab"
+                aria-selected={filterStatus === s}
+                className="shrink-0"
+              >
+                {s === "all" ? "すべて" : STATUS_LABEL[s as Status]}
+                <span className="ml-1.5 text-xs opacity-70">({count})</span>
+              </Button>
+            );
+          })}
+        </div>
       </div>
 
       {isLoading && (
@@ -141,9 +144,9 @@ export default function AdminImportRequestsPage() {
             key={req.id}
             className="rounded-lg border bg-card p-4 shadow-sm"
           >
-            <div className="flex items-start justify-between gap-3">
+            <div className="flex flex-col gap-3 md:flex-row md:items-start md:justify-between">
               <div className="min-w-0 flex-1">
-                <div className="flex items-center gap-2">
+                <div className="flex flex-wrap items-center gap-2">
                   <Badge variant={STATUS_VARIANT[req.status]}>
                     {STATUS_LABEL[req.status]}
                   </Badge>
@@ -177,9 +180,9 @@ export default function AdminImportRequestsPage() {
                 )}
               </div>
 
-              {/* 状態変更ボタン */}
+              {/* 状態変更ボタン: SP では行下段に flex-row 配置、md 以上で右側縦並び */}
               {(req.status === "pending" || req.status === "processing") && (
-                <div className="flex shrink-0 flex-col gap-2">
+                <div className="flex shrink-0 flex-row flex-wrap gap-2 md:flex-col">
                   {req.status === "pending" && (
                     <Button
                       size="sm"

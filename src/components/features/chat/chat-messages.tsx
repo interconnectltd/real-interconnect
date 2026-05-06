@@ -372,7 +372,7 @@ export function ChatMessages({
                   ) : (
                     <div
                       className={cn(
-                        "max-w-[75%] rounded-2xl px-3 py-2",
+                        "max-w-[85%] rounded-2xl px-3 py-2 sm:max-w-[75%]",
                         isOwn
                           ? "bg-primary text-primary-foreground"
                           : "bg-muted text-foreground",

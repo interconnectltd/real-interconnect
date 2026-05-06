@@ -77,8 +77,8 @@ export function ChatInput({ roomId, otherUserId, onMessageSent }: ChatInputProps
         e.preventDefault();
         sendMessage();
       }}
-      className="flex items-end gap-2 border-t p-3"
-      style={{ paddingBottom: "max(0.75rem, env(safe-area-inset-bottom))" }}
+      className="flex items-end gap-1.5 border-t p-2 sm:gap-2 sm:p-3"
+      style={{ paddingBottom: "max(0.5rem, env(safe-area-inset-bottom))" }}
     >
       <label htmlFor="chat-input-textarea" className="sr-only">
         メッセージ本文
@@ -97,13 +97,14 @@ export function ChatInput({ roomId, otherUserId, onMessageSent }: ChatInputProps
         rows={1}
         disabled={isSending}
         aria-label="メッセージ本文"
-        className="flex-1 resize-none rounded-md border bg-background px-3 py-2 text-base md:text-sm placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:opacity-50"
+        className="min-w-0 flex-1 resize-none rounded-md border bg-background px-3 py-2 text-base md:text-sm placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:opacity-50"
       />
       {otherUserId && (
         <Button
           type="button"
           size="sm"
           variant="outline"
+          className="min-h-11 shrink-0"
           title="日程調整"
           aria-label="日程調整カードを送信"
           disabled={isSending}
@@ -133,6 +134,7 @@ export function ChatInput({ roomId, otherUserId, onMessageSent }: ChatInputProps
       <Button
         type="submit"
         size="sm"
+        className="shrink-0"
         aria-label="送信"
         disabled={isSending || !content.trim()}
       >

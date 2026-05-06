@@ -61,22 +61,34 @@ function ChatPageInner() {
     return () => window.removeEventListener("popstate", handlePopState);
   }, [rooms]);
 
-  // Handle mobile keyboard — shrink chat container when keyboard opens
+  // Handle mobile keyboard — chat-container を visualViewport の実残量に合わせる。
+  // hard-coded 220px の引き算は header/consent banner の有無で誤差が大きく iOS で
+  // input bar が keyboard 裏に潜るバグを起こしていたため、DOM の現在位置から動的
+  // 計算に切り替え。SSR fallback の `h-[calc(100dvh-220px)]` は初期描画用に維持。
+  // selectedRoom 切替で left/right panel の hidden が変わると同 id 要素のレイアウト
+  // が変わるため、selectedRoom?.id を依存にして再計算。unmount 時には inline style
+  // をクリアして CSS class fallback に戻す。
   useEffect(() => {
     const vv = window.visualViewport;
     if (!vv) return;
-    const handleResize = () => {
+    const apply = () => {
       const el = document.getElementById("chat-container");
-      if (el) {
-        const offset = window.innerHeight - vv.height;
-        el.style.height = offset > 50
-          ? `calc(100dvh - 220px - ${offset}px)`
-          : "";
-      }
+      if (!el) return;
+      const rect = el.getBoundingClientRect();
+      const top = rect.top - vv.offsetTop;
+      const next = Math.max(200, vv.height - top);
+      el.style.height = `${next}px`;
     };
-    vv.addEventListener("resize", handleResize);
-    return () => vv.removeEventListener("resize", handleResize);
-  }, []);
+    vv.addEventListener("resize", apply);
+    vv.addEventListener("scroll", apply);
+    apply();
+    return () => {
+      vv.removeEventListener("resize", apply);
+      vv.removeEventListener("scroll", apply);
+      const el = document.getElementById("chat-container");
+      if (el) el.style.height = "";
+    };
+  }, [selectedRoom?.id]);
 
   return (
     <div className="space-y-4">
