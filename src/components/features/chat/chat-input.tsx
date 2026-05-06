@@ -3,13 +3,28 @@
 import { useState, useCallback, useRef, type KeyboardEvent } from "react";
 import { Send, CalendarDays } from "lucide-react";
 import { toast } from "sonner";
+import { useQueryClient } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import { api } from "@/lib/api-client";
 
 interface ChatInputProps {
   roomId: string;
+  /** 楽観更新で送信主を sender_id に設定するための viewer */
+  currentUserId?: string;
   otherUserId?: string;
   onMessageSent?: () => void;
+}
+
+interface OptimisticMessage {
+  id: string;
+  room_id: string;
+  sender_id: string;
+  content: string;
+  content_type: string;
+  created_at: string;
+  is_read: boolean;
+  /** 楽観 message を識別するフラグ (reconcile 用) */
+  __optimistic?: true;
 }
 
 /**
@@ -26,33 +41,83 @@ function newIdempotencyKey(): string {
   return `${Date.now()}-${Math.random().toString(36).slice(2, 18)}`;
 }
 
-export function ChatInput({ roomId, otherUserId, onMessageSent }: ChatInputProps) {
+export function ChatInput({
+  roomId,
+  currentUserId,
+  otherUserId,
+  onMessageSent,
+}: ChatInputProps) {
   const [content, setContent] = useState("");
   const [isSending, setIsSending] = useState(false);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
+  const queryClient = useQueryClient();
 
   const sendMessage = useCallback(async () => {
     const trimmed = content.trim();
     if (!trimmed || isSending) return;
 
+    // 楽観更新: tmp ID で即時 cache push (送信遅延 200ms-1s での体感改善)
+    const tmpId = `tmp-${newIdempotencyKey()}`;
+    const optimistic: OptimisticMessage | null = currentUserId
+      ? {
+          id: tmpId,
+          room_id: roomId,
+          sender_id: currentUserId,
+          content: trimmed,
+          content_type: "text",
+          created_at: new Date().toISOString(),
+          is_read: true,
+          __optimistic: true,
+        }
+      : null;
+
+    if (optimistic) {
+      queryClient.setQueryData<{
+        messages: OptimisticMessage[];
+        next_cursor: string | null;
+        has_more: boolean;
+      }>(["chat-messages", roomId], (old) => {
+        if (!old) return old;
+        return { ...old, messages: [...old.messages, optimistic] };
+      });
+    }
+
     setIsSending(true);
+    setContent("");
+    if (textareaRef.current) textareaRef.current.style.height = "auto";
+
     try {
       await api.post(
         `/chat/rooms/${roomId}/messages`,
         { content: trimmed },
         { headers: { "Idempotency-Key": newIdempotencyKey() } },
       );
-      setContent("");
+      // Realtime broadcast で実 ID 入りメッセージが来るので、
+      // 古い tmp- は次の broadcast 受信後の reconcile で除去される。
+      // 念のため API 直後にも invalidate して取りこぼしを補完。
+      queryClient.invalidateQueries({ queryKey: ["chat-messages", roomId] });
       onMessageSent?.();
-      if (textareaRef.current) {
-        textareaRef.current.style.height = "auto";
-      }
     } catch {
-      toast.error("メッセージの送信に失敗しました");
+      // 失敗時は楽観追加を撤去 + content を復元
+      if (optimistic) {
+        queryClient.setQueryData<{
+          messages: OptimisticMessage[];
+          next_cursor: string | null;
+          has_more: boolean;
+        }>(["chat-messages", roomId], (old) => {
+          if (!old) return old;
+          return {
+            ...old,
+            messages: old.messages.filter((m) => m.id !== tmpId),
+          };
+        });
+      }
+      setContent(trimmed);
+      toast.error("メッセージの送信に失敗しました。再試行してください");
     } finally {
       setIsSending(false);
     }
-  }, [content, isSending, roomId, onMessageSent]);
+  }, [content, isSending, roomId, currentUserId, queryClient, onMessageSent]);
 
   const handleKeyDown = (e: KeyboardEvent<HTMLTextAreaElement>) => {
     if (e.key === "Enter" && !e.shiftKey && !e.nativeEvent.isComposing) {

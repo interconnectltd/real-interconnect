@@ -8,7 +8,9 @@
  */
 
 import { useMemo } from "react";
+import Link from "next/link";
 import { Bookmark, Loader2 } from "lucide-react";
+import { toast } from "sonner";
 import { useBookmarks } from "@/hooks/queries/use-bookmarks";
 import { useToggleBookmark } from "@/hooks/mutations/use-toggle-bookmark";
 import { useUIStore } from "@/stores/ui-store";
@@ -83,10 +85,10 @@ export default function BookmarksPage() {
             タップすると、ここに保存されます。
           </p>
           <div className="mt-4 flex flex-wrap items-center justify-center gap-2">
-            <Button variant="accent" size="sm" render={<a href="/matching" />}>
+            <Button variant="accent" size="sm" render={<Link href="/matching" />}>
               マッチング画面へ
             </Button>
-            <Button variant="outline" size="sm" render={<a href="/members" />}>
+            <Button variant="outline" size="sm" render={<Link href="/members" />}>
               メンバー一覧へ
             </Button>
           </div>
@@ -148,10 +150,26 @@ export default function BookmarksPage() {
                     type="button"
                     onClick={(e) => {
                       e.stopPropagation();
-                      toggle.mutate({
-                        userId: p.id,
-                        isBookmarked: true,
-                      });
+                      toggle.mutate(
+                        { userId: p.id, isBookmarked: true },
+                        {
+                          onSuccess: () => {
+                            // 5 秒間 Undo を出す (誤タップ救済)
+                            toast.success(`${p.name} の保存を解除しました`, {
+                              action: {
+                                label: "元に戻す",
+                                onClick: () => {
+                                  toggle.mutate({
+                                    userId: p.id,
+                                    isBookmarked: false,
+                                  });
+                                },
+                              },
+                              duration: 5000,
+                            });
+                          },
+                        },
+                      );
                     }}
                     disabled={toggle.isPending}
                     aria-label={`${p.name} の保存を解除`}

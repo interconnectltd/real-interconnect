@@ -666,7 +666,15 @@ export default function OnboardingPage() {
               )}
             >
               求めていること{" "}
-              <Badge variant="secondary" className="ml-1 text-xs">
+              <Badge
+                variant={selectedGoals.size === 0 ? "destructive" : "secondary"}
+                className="ml-1 text-xs"
+                aria-label={
+                  selectedGoals.size === 0
+                    ? "求めていることが未選択です"
+                    : `求めていること ${selectedGoals.size} 件選択中`
+                }
+              >
                 {selectedGoals.size}
               </Badge>
               {step2Tab === "goals" && (
@@ -690,7 +698,17 @@ export default function OnboardingPage() {
               )}
             >
               提供できること{" "}
-              <Badge variant="secondary" className="ml-1 text-xs">
+              <Badge
+                variant={
+                  selectedOfferings.size === 0 ? "destructive" : "secondary"
+                }
+                className="ml-1 text-xs"
+                aria-label={
+                  selectedOfferings.size === 0
+                    ? "提供できることが未選択です"
+                    : `提供できること ${selectedOfferings.size} 件選択中`
+                }
+              >
                 {selectedOfferings.size}
               </Badge>
               {step2Tab === "offerings" && (

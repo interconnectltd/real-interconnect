@@ -84,8 +84,11 @@ export function ChatMessages({
   const loadMore = useCallback(async () => {
     if (isLoadingMore || !data?.has_more || !data.next_cursor) return;
     setIsLoadingMore(true);
+    // scroll anchor: prepend 前後で scrollHeight 差分を scrollTop に加算し
+    // 過去メッセージ追加時にユーザーの読み位置を維持する (旧版は最上部に飛んでいた)
+    const prevH = scrollRef.current?.scrollHeight ?? 0;
+    const prevTop = scrollRef.current?.scrollTop ?? 0;
     try {
-      // next_cursor は JSON.stringify({at, id}) されている
       let cursor: { at?: string; id?: string } = {};
       try {
         cursor = JSON.parse(data.next_cursor);
@@ -98,7 +101,6 @@ export function ChatMessages({
         ["chat-messages", roomId],
         (old) => {
           const oldMsgs = old?.messages ?? [];
-          // 重複除去
           const seen = new Set(oldMsgs.map((m) => m.id));
           const merged = [
             ...older.messages.filter((m) => !seen.has(m.id)),
@@ -111,6 +113,13 @@ export function ChatMessages({
           };
         },
       );
+      // DOM 更新後に scrollTop を補正 (rAF で paint 後)
+      requestAnimationFrame(() => {
+        if (scrollRef.current) {
+          const newH = scrollRef.current.scrollHeight;
+          scrollRef.current.scrollTop = prevTop + (newH - prevH);
+        }
+      });
     } finally {
       setIsLoadingMore(false);
     }
@@ -175,8 +184,20 @@ export function ChatMessages({
           (old) => {
             const msgs = old?.messages ?? [];
             if (msgs.some((m) => m.id === newMsg.id)) return old;
+            // 自分送信の楽観メッセージ (tmp-*) を実 ID 行で置換 (reconcile)
+            const filteredMsgs =
+              newMsg.sender_id === currentUserId
+                ? msgs.filter(
+                    (m) =>
+                      !(
+                        m.id.startsWith("tmp-") &&
+                        m.sender_id === newMsg.sender_id &&
+                        m.content === newMsg.content
+                      ),
+                  )
+                : msgs;
             return {
-              messages: [...msgs, newMsg],
+              messages: [...filteredMsgs, newMsg],
               next_cursor: old?.next_cursor ?? null,
               has_more: old?.has_more ?? false,
             };

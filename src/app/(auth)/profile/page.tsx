@@ -730,13 +730,93 @@ function ProfileViewMode({
             <Lock className="h-3 w-3" aria-hidden="true" />
             連絡先（コネクション成立後に公開）
           </dt>
-          <dd className="mt-1 flex items-center gap-1.5 text-sm font-medium text-foreground">
-            <AtSign className="h-3.5 w-3.5 text-accent-strong" aria-hidden="true" />
-            {profile.contact_info}
+          <dd className="mt-1 flex items-start gap-1.5 text-sm font-medium text-foreground">
+            <AtSign className="mt-1 h-3.5 w-3.5 shrink-0 text-accent-strong" aria-hidden="true" />
+            <span className="min-w-0 flex-1">
+              <LinkifiedText text={profile.contact_info} />
+            </span>
           </dd>
         </div>
       )}
     </dl>
+  );
+}
+
+/**
+ * LinkifiedText: テキスト中の URL / email / @handle を安全に <a> 化。
+ * - URL は new URL() で http(s) スキームのみ allow-list
+ * - rel="noopener noreferrer ugc" で SEO/フィッシング対策
+ * - React JSX 経由なので文字列 escape は自動
+ */
+function LinkifiedText({ text }: { text: string }) {
+  // 単語境界で split。URL / email を検出して a 化、その他はテキスト。
+  const urlRegex = /(https?:\/\/[^\s]+)/g;
+  const emailRegex = /([\w.+-]+@[\w-]+\.[\w.-]+)/g;
+  // 1) まず URL でトークン化
+  const tokens: Array<{ type: "url" | "text"; value: string }> = [];
+  let lastIdx = 0;
+  for (const m of text.matchAll(urlRegex)) {
+    if (m.index !== undefined && m.index > lastIdx) {
+      tokens.push({ type: "text", value: text.slice(lastIdx, m.index) });
+    }
+    tokens.push({ type: "url", value: m[0] });
+    lastIdx = (m.index ?? 0) + m[0].length;
+  }
+  if (lastIdx < text.length) {
+    tokens.push({ type: "text", value: text.slice(lastIdx) });
+  }
+
+  return (
+    <>
+      {tokens.map((t, i) => {
+        if (t.type === "url") {
+          try {
+            const u = new URL(t.value);
+            if (u.protocol !== "http:" && u.protocol !== "https:") {
+              return <span key={i}>{t.value}</span>;
+            }
+            return (
+              <a
+                key={i}
+                href={u.toString()}
+                target="_blank"
+                rel="noopener noreferrer ugc"
+                className="break-all text-accent-strong underline underline-offset-2"
+              >
+                {t.value}
+              </a>
+            );
+          } catch {
+            return <span key={i}>{t.value}</span>;
+          }
+        }
+        // text 内の email を mailto: 化
+        const sub: Array<React.ReactNode> = [];
+        let lastE = 0;
+        let key = 0;
+        for (const m of t.value.matchAll(emailRegex)) {
+          if (m.index !== undefined && m.index > lastE) {
+            sub.push(t.value.slice(lastE, m.index));
+          }
+          sub.push(
+            <a
+              key={`e-${i}-${key++}`}
+              href={`mailto:${m[0]}`}
+              className="break-all text-accent-strong underline underline-offset-2"
+            >
+              {m[0]}
+            </a>,
+          );
+          lastE = (m.index ?? 0) + m[0].length;
+        }
+        if (lastE < t.value.length) sub.push(t.value.slice(lastE));
+        return (
+          <span key={i} className="whitespace-pre-wrap">
+            {sub}
+          </span>
+        );
+      })}
+    </>
   );
 }
 

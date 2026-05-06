@@ -16,7 +16,7 @@ import { ChatInput } from "@/components/features/chat/chat-input";
 import { ChatConsentBanner } from "@/components/features/chat/chat-consent-banner";
 
 function ChatPageInner() {
-  const { user } = useSupabase();
+  const { user, supabase } = useSupabase();
   const searchParams = useSearchParams();
   const queryClient = useQueryClient();
   const [selectedRoom, setSelectedRoom] = useState<ChatRoom | null>(null);
@@ -25,6 +25,21 @@ function ChatPageInner() {
     queryKey: ["chat-rooms"],
     queryFn: () => api.get<ChatRoom[]>("/chat/rooms"),
   });
+
+  // 別 room の新着で last_message / unread_count を即時反映するため
+  // user 専用 private channel の broadcast を購読し、room 一覧を invalidate
+  useEffect(() => {
+    if (!user?.id) return;
+    const channel = supabase
+      .channel(`chat:user:${user.id}`, { config: { private: true } })
+      .on("broadcast", { event: "ROOM_UPDATE" }, () => {
+        queryClient.invalidateQueries({ queryKey: ["chat-rooms"] });
+      })
+      .subscribe();
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [user?.id, supabase, queryClient]);
 
   // Auto-select room from URL param ?room=xxx
   useEffect(() => {
@@ -188,6 +203,7 @@ function ChatPageInner() {
                 {/* Input */}
                 <ChatInput
                   roomId={selectedRoom.id}
+                  currentUserId={user.id}
                   otherUserId={selectedRoom.other_user.id}
                   onMessageSent={() => queryClient.invalidateQueries({ queryKey: ["chat-rooms"] })}
                 />
