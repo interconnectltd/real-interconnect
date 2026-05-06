@@ -1,27 +1,48 @@
 "use client";
 
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { AlertCircle, Loader2 } from "lucide-react";
+import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { createClient } from "@/lib/supabase/client";
 import { loginSchema, type LoginInput } from "@/validations/auth";
 
+interface LoginErrorState {
+  message: string;
+  /** "Email not confirmed" 時に確認メール再送ボタンを表示するか */
+  showResend: boolean;
+}
+
+/** 同一サイト内 path のみ許可 (open redirect 防止) */
+function safeRedirect(path: string | null): string {
+  if (!path) return "/dashboard";
+  if (path.startsWith("/") && !path.startsWith("//")) return path;
+  return "/dashboard";
+}
+
 export function LoginForm() {
   const router = useRouter();
-  const [error, setError] = useState<string | null>(null);
+  const searchParams = useSearchParams();
+  const [error, setError] = useState<LoginErrorState | null>(null);
   const [loading, setLoading] = useState(false);
+  const [resending, setResending] = useState(false);
+  const emailRef = useRef<HTMLInputElement | null>(null);
 
   const {
     register,
     handleSubmit,
+    getValues,
     formState: { errors },
   } = useForm<LoginInput>({ resolver: zodResolver(loginSchema) });
+
+  // forwarded ref + react-hook-form ref を両立
+  const emailRegister = register("email");
 
   async function onSubmit(data: LoginInput) {
     setLoading(true);
@@ -34,15 +55,69 @@ export function LoginForm() {
     });
 
     if (authError) {
-      setError("メールアドレスまたはパスワードが正しくありません");
+      const status = (authError as { status?: number }).status ?? 0;
+      const msg = authError.message ?? "";
+      // 文言を 401 / 429 / 500 / Email not confirmed で分岐
+      let display: LoginErrorState;
+      if (msg.toLowerCase().includes("email not confirmed")) {
+        display = {
+          message:
+            "メール確認が完了していません。受信トレイの確認メールのリンクをクリックしてください。",
+          showResend: true,
+        };
+      } else if (status === 429) {
+        display = {
+          message:
+            "短時間にログインを繰り返しました。1 分ほどお待ちいただいてから再度お試しください。",
+          showResend: false,
+        };
+      } else if (status >= 500) {
+        display = {
+          message:
+            "サーバーで一時的なエラーが発生しています。少し時間をおいて再度お試しください。",
+          showResend: false,
+        };
+      } else {
+        // 401 含む既定 (user enumeration 防止のため一般メッセージ)
+        display = {
+          message: "メールアドレスまたはパスワードが正しくありません",
+          showResend: false,
+        };
+      }
+      setError(display);
       setLoading(false);
+      // a11y: エラー後はメール入力にフォーカスを戻す
+      requestAnimationFrame(() => emailRef.current?.focus());
       return;
     }
 
-    // 順序: refresh で middleware が新しい session cookie を読む → push で navigation
-    // setLoading(false) しないことで「ログイン中…」表示を遷移完了まで維持 (ボタン誤押下防止)
+    // ?redirect=<path> があればそちらへ (open redirect は safeRedirect で遮断)
+    const target = safeRedirect(searchParams.get("redirect"));
     router.refresh();
-    router.push("/dashboard");
+    router.push(target);
+  }
+
+  async function handleResendConfirmation() {
+    const email = getValues("email");
+    if (!email) {
+      toast.error("確認メールを再送するにはメールアドレスを入力してください");
+      emailRef.current?.focus();
+      return;
+    }
+    setResending(true);
+    try {
+      const supabase = createClient();
+      const { error: resendErr } = await supabase.auth.resend({
+        type: "signup",
+        email,
+      });
+      if (resendErr) throw resendErr;
+      toast.success("確認メールを再送しました。受信トレイをご確認ください");
+    } catch {
+      toast.error("再送に失敗しました。しばらくしてから再度お試しください");
+    } finally {
+      setResending(false);
+    }
   }
 
   return (
@@ -54,8 +129,21 @@ export function LoginForm() {
         >
           <AlertCircle className="mt-0.5 h-4 w-4 shrink-0" aria-hidden="true" />
           <div className="space-y-1">
-            <span>{error}</span>
+            <span>{error.message}</span>
             <p className="text-xs">
+              {error.showResend && (
+                <>
+                  <button
+                    type="button"
+                    onClick={handleResendConfirmation}
+                    disabled={resending}
+                    className="font-medium text-destructive underline underline-offset-2 hover:opacity-80 disabled:opacity-50"
+                  >
+                    {resending ? "再送中..." : "確認メールを再送する"}
+                  </button>
+                  {" / "}
+                </>
+              )}
               <Link
                 href="/forgot-password"
                 className="font-medium text-destructive underline underline-offset-2 hover:opacity-80"
@@ -86,7 +174,11 @@ export function LoginForm() {
           enterKeyHint="next"
           aria-invalid={Boolean(errors.email) || undefined}
           aria-describedby={errors.email ? "email-error" : undefined}
-          {...register("email")}
+          {...emailRegister}
+          ref={(el) => {
+            emailRegister.ref(el);
+            emailRef.current = el;
+          }}
         />
         {errors.email && (
           <p id="email-error" className="text-xs text-destructive">
@@ -133,6 +225,18 @@ export function LoginForm() {
           "ログイン"
         )}
       </Button>
+
+      <p className="text-center text-[11px] leading-relaxed text-muted-foreground">
+        ログインすることで{" "}
+        <Link href="/terms" className="underline underline-offset-2">
+          利用規約
+        </Link>
+        {" / "}
+        <Link href="/privacy" className="underline underline-offset-2">
+          プライバシーポリシー
+        </Link>
+        に同意したものとみなされます。
+      </p>
     </form>
   );
 }

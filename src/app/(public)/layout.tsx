@@ -9,6 +9,13 @@ export default function PublicLayout({
 }) {
   return (
     <div className="flex min-h-dvh flex-col pb-safe">
+      {/* Skip link (WCAG 2.4.1 Bypass Blocks) */}
+      <a
+        href="#main"
+        className="sr-only z-[200] rounded-md bg-foreground px-3 py-2 text-sm font-medium text-background shadow-lg focus:not-sr-only focus:fixed focus:left-4 focus:top-4"
+      >
+        本文へスキップ
+      </a>
       <header className="border-b border-border/50 pt-safe pl-safe pr-safe">
         <div className="mx-auto flex h-16 max-w-5xl items-center justify-between px-4">
           <Link href="/" aria-label="INTER CONNECT" className="flex items-center">
@@ -42,7 +49,7 @@ export default function PublicLayout({
         </div>
       </header>
 
-      <main className="flex-1">{children}</main>
+      <main id="main" tabIndex={-1} className="flex-1 outline-none">{children}</main>
 
       <footer className="border-t border-border/50 py-6">
         <div className="mx-auto max-w-5xl px-4">

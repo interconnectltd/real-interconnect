@@ -80,10 +80,10 @@ export function RegisterForm() {
     setError(null);
 
     log.group("[register] submit");
+    // PII (email / invitationCode) は本番ログに残さない (長さのみ)
     log.info("[register] form data", {
-      invitationCode: data.invitationCode,
       invitationCodeLen: data.invitationCode?.length,
-      email: data.email,
+      emailLen: data.email?.length,
       industry: data.industry,
       agreeToTerms: data.agreeToTerms,
       agreeToPrivacy: data.agreeToPrivacy,
@@ -92,7 +92,7 @@ export function RegisterForm() {
 
     let invitationId: string | null = null;
     try {
-      log.info("[register] POST /api/v1/invitation", { code: data.invitationCode });
+      log.info("[register] POST /api/v1/invitation");
       const res = await fetch("/api/v1/invitation", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -100,7 +100,6 @@ export function RegisterForm() {
       });
       log.info("[register] invitation response", { status: res.status, ok: res.ok });
       const bodyText = await res.text();
-      log.info("[register] invitation body", bodyText);
       const parsed = bodyText ? JSON.parse(bodyText) : null;
       if (!res.ok) {
         const errMsg = parsed?.error?.message ?? "招待コードが無効です";
@@ -122,11 +121,17 @@ export function RegisterForm() {
 
     const supabase = createClient();
     const consentTimestamp = new Date().toISOString();
-    log.info("[register] supabase.auth.signUp", { email: data.email });
+    // PII (email) は本番ログに残さない
+    log.info("[register] supabase.auth.signUp");
     const { data: signUpData, error: authError } = await supabase.auth.signUp({
       email: data.email,
       password: data.password,
+      // 確認メールから戻る先を明示 (フィッシング対策で Supabase Site URL 任せにしない)
       options: {
+        emailRedirectTo:
+          typeof window !== "undefined"
+            ? `${window.location.origin}/login?confirmed=true`
+            : undefined,
         data: {
           name: data.name,
           company: data.company ?? "",
@@ -144,14 +149,32 @@ export function RegisterForm() {
       },
     });
     log.info("[register] signUp result", {
-      user: signUpData?.user?.id ?? null,
+      hasUser: signUpData?.user != null,
       session: signUpData?.session ? "present" : "null",
-      authError,
     });
 
     if (authError) {
-      log.error("[register] signUp error", authError);
-      setError(authError.message);
+      log.error("[register] signUp error", { code: (authError as { code?: string }).code });
+      // Supabase エラーコード分岐: enumeration 防止 + 動線提供
+      const status = (authError as { status?: number }).status ?? 0;
+      const msg = authError.message ?? "";
+      let display: string;
+      if (msg.toLowerCase().includes("user already registered") || status === 422) {
+        display =
+          "このメールアドレスは既に登録されています。ログイン画面からお進みください。";
+      } else if (msg.toLowerCase().includes("weak password") || msg.toLowerCase().includes("password")) {
+        display =
+          "パスワードが要件を満たしていません。8 文字以上で英数字を含めてください。";
+      } else if (status === 429) {
+        display =
+          "短時間に多くのリクエストが発生しました。しばらく待ってから再度お試しください。";
+      } else if (status >= 500) {
+        display =
+          "サーバーで一時的なエラーが発生しています。しばらく待ってから再度お試しください。";
+      } else {
+        display = "登録に失敗しました。入力内容を確認してください。";
+      }
+      setError(display);
       setLoading(false);
       log.groupEnd();
       return;
@@ -169,7 +192,17 @@ export function RegisterForm() {
     }
 
     log.info("[register] POST /api/v1/legal/accept");
-    await fetch("/api/v1/legal/accept", { method: "POST" }).catch((e) => {
+    // body 必須化 (法的証跡偽装防止 / Sec audit 2026-05-07)
+    await fetch("/api/v1/legal/accept", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        terms: true,
+        privacy: true,
+        tokushoho: true,
+        ai_cross_border: true,
+      }),
+    }).catch((e) => {
       log.warn("[register] legal/accept failed (non-critical)", e);
     });
 
@@ -181,7 +214,19 @@ export function RegisterForm() {
   return (
     <form
       onSubmit={handleSubmit(onSubmit, (validationErrors) => {
-        log.warn("[register] zod validation blocked submit", validationErrors);
+        log.warn("[register] zod validation blocked submit", {
+          fields: Object.keys(validationErrors),
+        });
+        // 最初のエラーフィールドにフォーカス (a11y / UX)
+        const firstKey = Object.keys(validationErrors)[0];
+        if (firstKey) {
+          requestAnimationFrame(() => {
+            const el = document.querySelector<HTMLElement>(
+              `[name="${firstKey}"]`,
+            );
+            el?.focus({ preventScroll: false });
+          });
+        }
       })}
       onFocusCapture={handleFocus}
       className="space-y-5"

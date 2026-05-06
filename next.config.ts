@@ -35,6 +35,16 @@ const nextConfig: NextConfig = {
       },
     ];
   },
+  // 流入取りこぼし対策: 業界標準 path (/signup /sign-up /sign_up) を /register へ寄せる
+  async redirects() {
+    return [
+      { source: "/signup", destination: "/register", permanent: true },
+      { source: "/sign-up", destination: "/register", permanent: true },
+      { source: "/sign_up", destination: "/register", permanent: true },
+      { source: "/signin", destination: "/login", permanent: true },
+      { source: "/sign-in", destination: "/login", permanent: true },
+    ];
+  },
 };
 
 export default nextConfig;

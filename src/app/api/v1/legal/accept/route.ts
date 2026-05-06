@@ -7,16 +7,14 @@ const KINDS: LegalDocKind[] = ["terms", "privacy", "tokushoho", "ai_cross_border
 
 /**
  * POST /api/v1/legal/accept
- * 同意ログをuser_terms_acceptancesに記録する。
- * クライアントは登録直後（auth.signUp成功直後）にこれを呼び出す。
+ * 同意ログを user_terms_acceptances に記録する。
  *
  * 認証済みユーザーが自分自身の同意を記録するエンドポイント。
- * IPとUAはサーバー側headersから取得し、クライアントの自己申告ではない値を保存する。
+ * IP / UA はサーバー側 headers から取得し、クライアント自己申告ではない値を保存する。
  *
- * Body: { terms: boolean, privacy: boolean, tokushoho: boolean, ai_cross_border: boolean }
- *   - 4つ全てが true でなければ 400 を返す
- *   - 通常signUpフロー(register-form)では body 省略可 (互換性維持)
- *     ただし prospect招待ユーザーは consent-gate-form 経由で必ず4チェック付きで呼ぶ
+ * Body 必須: { terms: true, privacy: true, tokushoho: true, ai_cross_border: true }
+ *   - 4 kind 全てが true でなければ 400 を返す (法的証跡の偽装防止)
+ *   - body 省略 / 不足の旧仕様は撤廃 (Sec audit Critical 対応 / 2026-05-07)
  */
 export async function POST(request: Request) {
   try {
@@ -30,26 +28,23 @@ export async function POST(request: Request) {
       return jsonError(401, "UNAUTHORIZED", "認証が必要です");
     }
 
-    // Body 検証 (省略時はregister-form経由のフロー、4チェック前提でメタデータ側で取得済)
-    let bodyConsents: Partial<Record<LegalDocKind, boolean>> = {};
-    if (request.headers.get("content-length") && request.headers.get("content-length") !== "0") {
-      const parsed = (await request.json().catch(() => null)) as Record<string, unknown> | null;
-      if (parsed && typeof parsed === "object") {
-        bodyConsents = parsed as Partial<Record<LegalDocKind, boolean>>;
-      }
+    // Body 必須化: 4 kind 全 true でなければ 400
+    const parsed = (await request.json().catch(() => null)) as Record<string, unknown> | null;
+    if (!parsed || typeof parsed !== "object") {
+      return jsonError(
+        400,
+        "BODY_REQUIRED",
+        "同意内容 (terms / privacy / tokushoho / ai_cross_border) を body で送信してください",
+      );
     }
-
-    // body指定がある場合 (consent gateフロー) は全kindがtrueでなければ拒否
-    const hasBodyHint = Object.keys(bodyConsents).length > 0;
-    if (hasBodyHint) {
-      const missing = KINDS.filter((k) => bodyConsents[k] !== true);
-      if (missing.length > 0) {
-        return jsonError(
-          400,
-          "INSUFFICIENT_CONSENT",
-          `以下の同意が必要です: ${missing.join(", ")}`,
-        );
-      }
+    const bodyConsents = parsed as Partial<Record<LegalDocKind, boolean>>;
+    const missing = KINDS.filter((k) => bodyConsents[k] !== true);
+    if (missing.length > 0) {
+      return jsonError(
+        400,
+        "INSUFFICIENT_CONSENT",
+        `以下の同意が必要です: ${missing.join(", ")}`,
+      );
     }
 
     const headersList = await headers();
