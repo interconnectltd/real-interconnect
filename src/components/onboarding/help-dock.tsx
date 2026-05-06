@@ -111,7 +111,12 @@ export function HelpDock({
           role="menu"
           aria-orientation="vertical"
           aria-label="ヘルプ"
-          className="absolute bottom-14 right-0 w-64 rounded-lg border border-border bg-card p-1.5 shadow-lg sm:bottom-16"
+          className="absolute bottom-14 right-0 flex w-64 flex-col overflow-hidden rounded-lg border border-border bg-card p-1.5 shadow-lg sm:bottom-16"
+          style={{
+            // FAB (h-14) + safe-area + 上余白 16px を確保した残量で内部 scroll
+            maxHeight:
+              "calc(100dvh - 7rem - env(safe-area-inset-bottom) - env(safe-area-inset-top))",
+          }}
         >
           <div className="flex items-center justify-between border-b border-border px-3 py-2">
             <span className="ds-kpi-label">ヘルプ</span>
@@ -127,7 +132,7 @@ export function HelpDock({
               <X className="h-3.5 w-3.5" aria-hidden="true" />
             </button>
           </div>
-          <ul className="py-1">
+          <ul className="min-h-0 flex-1 overflow-y-auto py-1">
             <li>
               <button
                 type="button"

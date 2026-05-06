@@ -121,8 +121,9 @@ export function LinkMeetingsDialog({
 
   return (
     <Dialog open onOpenChange={(o) => !o && onClose()}>
-      {/* sm:max-w-3xl にして base の `max-w-[calc(100%-2rem)]` (SP 16px gutter) を温存 */}
-      <DialogContent className="sm:max-w-3xl">
+      {/* sm:max-w-3xl で SP gutter 温存 + 90dvh 制限で footer が画面外に出ないよう
+          flex column 化。中身 ul は flex-1 で残空間に閉じこめ overflow-y-auto. */}
+      <DialogContent className="flex max-h-[90dvh] flex-col overflow-hidden sm:max-w-3xl">
         <DialogHeader>
           <DialogTitle>会議を紐付ける</DialogTitle>
           <DialogDescription>
@@ -151,7 +152,7 @@ export function LinkMeetingsDialog({
         )}
 
         {data && sortedMeetings.length > 0 && (
-          <ul className="max-h-[60vh] space-y-2 overflow-y-auto list-none p-0 pr-1">
+          <ul className="-mx-1 min-h-0 flex-1 space-y-2 overflow-y-auto list-none px-1 py-1">
             {sortedMeetings.map((m) => {
               const isSelected = selected.has(m.transcript_id);
               const noCandidate = m.candidates.length === 0;

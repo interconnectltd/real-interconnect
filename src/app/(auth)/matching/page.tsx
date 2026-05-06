@@ -10,6 +10,7 @@ import {
   Sparkles,
   RotateCcw,
   ArrowUpDown,
+  Bookmark,
 } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -17,6 +18,8 @@ import { Badge } from "@/components/ui/badge";
 import { useMatchingScores, useMutualMatches } from "@/hooks/queries/use-matching-scores";
 import { useConnections } from "@/hooks/queries/use-connections";
 import { useRequestConnection } from "@/hooks/mutations/use-request-connection";
+import { useBookmarks } from "@/hooks/queries/use-bookmarks";
+import { useToggleBookmark } from "@/hooks/mutations/use-toggle-bookmark";
 import { useDismissedUsers } from "@/hooks/use-dismissed-users";
 import { useMyProfile } from "@/hooks/queries/use-profile";
 import { useFilterStore } from "@/stores/filter-store";
@@ -61,6 +64,8 @@ export default function MatchingPage() {
   const { data: mutualMatches } = useMutualMatches();
   const { openProfileModal } = useUIStore();
   const requestConnection = useRequestConnection();
+  const toggleBookmark = useToggleBookmark();
+  const { data: bookmarks } = useBookmarks({ enabled: true });
   const { data: connections } = useConnections();
   const { data: myProfile } = useMyProfile();
   const { dismissedSet, dismiss, restore, resetAll } = useDismissedUsers(myProfile?.id);
@@ -144,6 +149,15 @@ export default function MatchingPage() {
     });
   }, [mutualMatches, dismissedSet, myId, myEmail]);
 
+  const bookmarkedIds = useMemo(() => {
+    if (!Array.isArray(bookmarks)) return new Set<string>();
+    return new Set<string>(
+      (bookmarks as Array<{ bookmarked_user_id?: string }>)
+        .map((b) => b.bookmarked_user_id)
+        .filter((v): v is string => typeof v === "string"),
+    );
+  }, [bookmarks]);
+
   const { connectedIds, pendingIds } = useMemo(() => {
     const conns = connections as Connection[] | undefined;
     const connected = new Set(
@@ -213,6 +227,8 @@ export default function MatchingPage() {
                   connected={connectedIds.has(m.user_id)}
                   pending={pendingIds.has(m.user_id)}
                   connectPending={requestConnection.isPending}
+                  bookmarked={bookmarkedIds.has(m.user_id)}
+                  bookmarkPending={toggleBookmark.isPending}
                   isSelf={isSelf}
                   dupCount={m.__dupCount ?? 0}
                   onOpen={() => {
@@ -220,6 +236,12 @@ export default function MatchingPage() {
                     openProfileModal(m.user_id);
                   }}
                   onConnect={() => requestConnection.mutate(m.user_id)}
+                  onToggleBookmark={() =>
+                    toggleBookmark.mutate({
+                      userId: m.user_id,
+                      isBookmarked: bookmarkedIds.has(m.user_id),
+                    })
+                  }
                   onDismiss={() => handleDismiss(m.user_id)}
                 />
               );
@@ -258,6 +280,8 @@ export default function MatchingPage() {
                   connected={connectedIds.has(score.target_id)}
                   pending={pendingIds.has(score.target_id)}
                   connectPending={requestConnection.isPending}
+                  bookmarked={bookmarkedIds.has(score.target_id)}
+                  bookmarkPending={toggleBookmark.isPending}
                   isSelf={isSelf}
                   dupCount={score.__dupCount ?? 0}
                   onOpen={() => {
@@ -265,6 +289,12 @@ export default function MatchingPage() {
                     openProfileModal(score.target_id);
                   }}
                   onConnect={() => requestConnection.mutate(score.target_id)}
+                  onToggleBookmark={() =>
+                    toggleBookmark.mutate({
+                      userId: score.target_id,
+                      isBookmarked: bookmarkedIds.has(score.target_id),
+                    })
+                  }
                   onDismiss={() => handleDismiss(score.target_id)}
                 />
               </div>
@@ -360,20 +390,26 @@ function MutualCard({
   connected,
   pending,
   connectPending,
+  bookmarked,
+  bookmarkPending,
   isSelf = false,
   dupCount = 0,
   onOpen,
   onConnect,
+  onToggleBookmark,
   onDismiss,
 }: {
   match: MutualMatch;
   connected: boolean;
   pending: boolean;
   connectPending: boolean;
+  bookmarked: boolean;
+  bookmarkPending: boolean;
   isSelf?: boolean;
   dupCount?: number;
   onOpen: () => void;
   onConnect: () => void;
+  onToggleBookmark: () => void;
   onDismiss: () => void;
 }) {
   const p = match.profile;
@@ -468,6 +504,13 @@ function MutualCard({
           </CardContent>
         </Card>
       </div>
+      {!isSelf && (
+        <BookmarkButton
+          bookmarked={bookmarked}
+          pending={bookmarkPending}
+          onClick={onToggleBookmark}
+        />
+      )}
       <DismissButton onClick={onDismiss} />
     </div>
   );
@@ -478,20 +521,26 @@ function ScoreCard({
   connected,
   pending,
   connectPending,
+  bookmarked,
+  bookmarkPending,
   isSelf = false,
   dupCount = 0,
   onOpen,
   onConnect,
+  onToggleBookmark,
   onDismiss,
 }: {
   score: MatchScore;
   connected: boolean;
   pending: boolean;
   connectPending: boolean;
+  bookmarked: boolean;
+  bookmarkPending: boolean;
   isSelf?: boolean;
   dupCount?: number;
   onOpen: () => void;
   onConnect: () => void;
+  onToggleBookmark: () => void;
   onDismiss: () => void;
 }) {
   const p = score.target_profile;
@@ -618,6 +667,13 @@ function ScoreCard({
           </CardContent>
         </Card>
       </div>
+      {!isSelf && (
+        <BookmarkButton
+          bookmarked={bookmarked}
+          pending={bookmarkPending}
+          onClick={onToggleBookmark}
+        />
+      )}
       <DismissButton onClick={onDismiss} />
     </div>
   );
@@ -685,9 +741,43 @@ function DismissButton({ onClick }: { onClick: () => void }) {
         onClick();
       }}
       aria-label="この推薦を非表示にする"
-      className="absolute right-1.5 top-1.5 inline-flex h-11 w-11 items-center justify-center rounded-full text-muted-foreground/60 transition-colors hover:bg-muted hover:text-foreground focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/70"
+      className="absolute right-1.5 top-1.5 z-10 inline-flex h-11 w-11 items-center justify-center rounded-full text-muted-foreground/60 transition-colors hover:bg-muted hover:text-foreground focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/70"
     >
       <X className="h-3.5 w-3.5" aria-hidden="true" />
+    </button>
+  );
+}
+
+function BookmarkButton({
+  bookmarked,
+  pending,
+  onClick,
+}: {
+  bookmarked: boolean;
+  pending: boolean;
+  onClick: () => void;
+}) {
+  return (
+    <button
+      type="button"
+      onClick={(e) => {
+        e.stopPropagation();
+        onClick();
+      }}
+      disabled={pending}
+      aria-pressed={bookmarked}
+      aria-label={bookmarked ? "保存を解除" : "後で見るために保存"}
+      className={`absolute right-12 top-1.5 z-10 inline-flex h-11 w-11 items-center justify-center rounded-full transition-colors focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/70 disabled:opacity-50 ${
+        bookmarked
+          ? "text-accent-strong hover:bg-muted"
+          : "text-muted-foreground/60 hover:bg-muted hover:text-foreground"
+      }`}
+    >
+      <Bookmark
+        className="h-3.5 w-3.5"
+        fill={bookmarked ? "currentColor" : "none"}
+        aria-hidden="true"
+      />
     </button>
   );
 }

@@ -21,6 +21,7 @@ import {
   Inbox,
   LayoutGrid,
   ScrollText,
+  Bookmark,
   type LucideIcon,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
@@ -58,6 +59,7 @@ const navGroups: NavGroup[] = [
       { href: "/matching", label: "マッチング", icon: Heart },
       { href: "/members", label: "メンバー", icon: Users },
       { href: "/connections", label: "コネクション", icon: UserCheck },
+      { href: "/bookmarks", label: "保存したメンバー", icon: Bookmark },
     ],
   },
   {

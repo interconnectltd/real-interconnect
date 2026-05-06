@@ -38,6 +38,16 @@ export interface TourStep {
   next?: string;
   /** target が見つからない場合に skip するか (true: skip, false: 中央表示) */
   skipIfMissing?: boolean;
+  /**
+   * 配置希望。指定無しは "auto" (空きが大きい方向に自動)。
+   * 縦長 target (page bottom の section 等) は "top" 固定で確実に画面内に出す。
+   */
+  placement?: "auto" | "top" | "bottom" | "left" | "right";
+  /**
+   * scrollIntoView の block 値 (default "start")。
+   * 縦長 target は "start" にして対象上端を画面上に持ち上げ、tooltip を下に出せる空きを確保。
+   */
+  scrollBlock?: "start" | "center" | "end" | "nearest";
 }
 
 interface ProductTourProps {
@@ -115,9 +125,14 @@ export function ProductTour({ steps, storageKey, open, onClose }: ProductTourPro
     }
     const r = el.getBoundingClientRect();
     setRect({ top: r.top, left: r.left, width: r.width, height: r.height });
-    // viewport にスクロールイン
-    if (r.top < 0 || r.bottom > window.innerHeight) {
-      el.scrollIntoView({ behavior: "smooth", block: "center" });
+    // viewport にスクロールイン。縦長 target はデフォ "start" で対象上端を画面上部へ。
+    // visualViewport を参照して iOS keyboard 出現時の擬似ビュー高でも判定。
+    const viewportH = window.visualViewport?.height ?? window.innerHeight;
+    if (r.top < 0 || r.bottom > viewportH) {
+      el.scrollIntoView({
+        behavior: "smooth",
+        block: step.scrollBlock ?? "start",
+      });
     }
   }, [step]);
 
@@ -159,60 +174,90 @@ export function ProductTour({ steps, storageKey, open, onClose }: ProductTourPro
     };
   }, [open, current, measure, step?.target]);
 
-  // tooltip 位置を計算 (上下左右で空きが多い方を選ぶ)
+  // tooltip 位置を計算
+  // - per-step `placement` 指定があれば優先 (auto 時のみ自動配置)
+  // - 縦/横どちらにも入らない場合の fallback も「対象上端より上に貼り付け」に変更
+  //   (旧版は画面最下部固定で keyboard / safe-area と衝突していた)
+  // - visualViewport 参照で iOS Safari URL bar / keyboard 出現時の実残量を使う
   useLayoutEffect(() => {
+    const vw = window.visualViewport?.width ?? window.innerWidth;
+    const vh = window.visualViewport?.height ?? window.innerHeight;
+
     if (!rect) {
-      // 対象なし → 画面中央に表示
       const tw = tooltipRef.current?.offsetWidth ?? 360;
       const th = tooltipRef.current?.offsetHeight ?? 200;
       setTooltipPos({
-        top: Math.max(16, window.innerHeight / 2 - th / 2),
-        left: Math.max(16, window.innerWidth / 2 - tw / 2),
+        top: Math.max(16, vh / 2 - th / 2),
+        left: Math.max(16, vw / 2 - tw / 2),
         placement: "center",
       });
       return;
     }
     const tw = tooltipRef.current?.offsetWidth ?? 360;
     const th = tooltipRef.current?.offsetHeight ?? 200;
-    const vw = window.innerWidth;
-    const vh = window.innerHeight;
 
-    // 各方向の空き
     const spaceBottom = vh - (rect.top + rect.height);
     const spaceTop = rect.top;
+    const spaceRight = vw - (rect.left + rect.width);
+    const spaceLeft = rect.left;
+    const need = th + TOOLTIP_GAP + 16;
+    const needX = tw + TOOLTIP_GAP + 16;
+
+    // 中央寄せ left の clamp
+    const clampX = (x: number) =>
+      Math.max(16, Math.min(vw - tw - 16, x));
+    const clampY = (y: number) =>
+      Math.max(16, Math.min(vh - th - 16, y));
+
+    const wanted = step?.placement ?? "auto";
+    const fits = {
+      top: spaceTop >= need,
+      bottom: spaceBottom >= need,
+      left: spaceLeft >= needX,
+      right: spaceRight >= needX,
+    };
 
     let placement: "top" | "bottom" | "left" | "right" = "bottom";
+
+    // 1. per-step placement (フィットしない時は反対側 → 横にフォールバック)
+    const order: Array<"top" | "bottom" | "left" | "right"> =
+      wanted === "top" ? ["top", "bottom", "right", "left"]
+      : wanted === "bottom" ? ["bottom", "top", "right", "left"]
+      : wanted === "left" ? ["left", "right", "top", "bottom"]
+      : wanted === "right" ? ["right", "left", "top", "bottom"]
+      // auto: 縦優先 (空きが大きい方)
+      : spaceBottom >= spaceTop
+        ? ["bottom", "top", "right", "left"]
+        : ["top", "bottom", "right", "left"];
+
+    placement = order.find((p) => fits[p]) ?? order[0]!;
+
     let top = 0;
     let left = 0;
-
-    if (spaceBottom >= th + TOOLTIP_GAP + 16) {
-      placement = "bottom";
+    if (placement === "bottom") {
       top = rect.top + rect.height + TOOLTIP_GAP;
-      left = Math.max(16, Math.min(vw - tw - 16, rect.left + rect.width / 2 - tw / 2));
-    } else if (spaceTop >= th + TOOLTIP_GAP + 16) {
-      placement = "top";
+      left = clampX(rect.left + rect.width / 2 - tw / 2);
+    } else if (placement === "top") {
       top = rect.top - th - TOOLTIP_GAP;
-      left = Math.max(16, Math.min(vw - tw - 16, rect.left + rect.width / 2 - tw / 2));
+      left = clampX(rect.left + rect.width / 2 - tw / 2);
+    } else if (placement === "right") {
+      left = rect.left + rect.width + TOOLTIP_GAP;
+      top = clampY(rect.top + rect.height / 2 - th / 2);
     } else {
-      // 縦に入らない → 横方向 or center fallback
-      const spaceRight = vw - (rect.left + rect.width);
-      if (spaceRight >= tw + TOOLTIP_GAP + 16) {
-        placement = "right";
-        left = rect.left + rect.width + TOOLTIP_GAP;
-        top = Math.max(16, Math.min(vh - th - 16, rect.top + rect.height / 2 - th / 2));
-      } else if (rect.left >= tw + TOOLTIP_GAP + 16) {
-        placement = "left";
-        left = rect.left - tw - TOOLTIP_GAP;
-        top = Math.max(16, Math.min(vh - th - 16, rect.top + rect.height / 2 - th / 2));
-      } else {
-        placement = "bottom";
-        top = Math.max(16, vh - th - 16);
-        left = Math.max(16, vw / 2 - tw / 2);
-      }
+      left = rect.left - tw - TOOLTIP_GAP;
+      top = clampY(rect.top + rect.height / 2 - th / 2);
+    }
+
+    // 縦/横どこにも fits しない場合: 対象を画面上端に押し上げる前提で
+    // tooltip は対象上に固定 (画面下端への落下を回避)
+    if (!fits.top && !fits.bottom && !fits.left && !fits.right) {
+      placement = "bottom";
+      top = clampY(16);
+      left = clampX(rect.left + rect.width / 2 - tw / 2);
     }
 
     setTooltipPos({ top, left, placement });
-  }, [rect, current]);
+  }, [rect, current, step?.placement]);
 
   // ESC / 矢印キー / Focus trap (Tab で tooltip 内を循環)
   useEffect(() => {
@@ -275,6 +320,27 @@ export function ProductTour({ steps, storageKey, open, onClose }: ProductTourPro
       document.body.style.top = prevTop;
       document.body.style.width = prevWidth;
       window.scrollTo(0, scrollY);
+    };
+  }, [open]);
+
+  // visualViewport 高を CSS var (--tour-vh) で公開 (iOS keyboard 連動の max-height 用)
+  useEffect(() => {
+    if (!open) return;
+    const vv = window.visualViewport;
+    if (!vv) {
+      document.documentElement.style.setProperty("--tour-vh", `${window.innerHeight}px`);
+      return;
+    }
+    const apply = () => {
+      document.documentElement.style.setProperty("--tour-vh", `${vv.height}px`);
+    };
+    apply();
+    vv.addEventListener("resize", apply);
+    vv.addEventListener("scroll", apply);
+    return () => {
+      vv.removeEventListener("resize", apply);
+      vv.removeEventListener("scroll", apply);
+      document.documentElement.style.removeProperty("--tour-vh");
     };
   }, [open]);
 
@@ -372,10 +438,16 @@ export function ProductTour({ steps, storageKey, open, onClose }: ProductTourPro
 
       <div
         ref={tooltipRef}
-        className="fixed w-[min(92vw,360px)] rounded-lg border border-border bg-card p-5 shadow-lg motion-safe:transition-[top,left] motion-safe:duration-200"
-        style={{ top: tooltipPos.top, left: tooltipPos.left }}
+        className="fixed flex w-[min(92vw,360px)] flex-col overflow-hidden rounded-lg border border-border bg-card shadow-lg motion-safe:transition-[top,left] motion-safe:duration-200"
+        style={{
+          top: tooltipPos.top,
+          left: tooltipPos.left,
+          // visualViewport 高 - 32px (上下 16px 余白) を上限に。本文長文時は内部 scroll
+          maxHeight: "calc(var(--tour-vh, 100dvh) - 32px)",
+        }}
       >
-        <div className="flex items-center justify-between gap-3">
+        {/* ヘッダ (固定) */}
+        <div className="flex items-center justify-between gap-3 border-b border-border/60 px-5 pt-4 pb-3">
           <span className="ds-kpi-label" role="status" aria-live="polite" aria-atomic="true">
             ステップ {current + 1} / {steps.length}
           </span>
@@ -390,78 +462,82 @@ export function ProductTour({ steps, storageKey, open, onClose }: ProductTourPro
           </button>
         </div>
 
-        <h2 id="tour-title" className="mt-2 text-base font-semibold text-foreground">
-          {step.title}
-        </h2>
-        <p id="tour-description" className="mt-1.5 text-sm leading-relaxed text-muted-foreground">
-          {step.description}
-        </p>
-
-        {step.rationale && (
-          <p
-            id="tour-rationale"
-            className="mt-3 rounded-md bg-muted/60 px-3 py-2 text-xs leading-relaxed text-muted-foreground"
-          >
-            <span className="font-semibold text-foreground">なぜ重要？</span>
-            <br />
-            {step.rationale}
+        {/* 本文 (内部 scroll、長文 step でも見切れない) */}
+        <div className="min-h-0 flex-1 overflow-y-auto px-5 py-4">
+          <h2 id="tour-title" className="text-base font-semibold text-foreground">
+            {step.title}
+          </h2>
+          <p id="tour-description" className="mt-1.5 text-sm leading-relaxed text-muted-foreground">
+            {step.description}
           </p>
-        )}
 
-        {step.next && (
-          <p
-            id="tour-next"
-            className="mt-2 text-xs leading-relaxed text-accent-strong"
-          >
-            <span className="font-semibold">次のアクション:</span> {step.next}
-          </p>
-        )}
+          {step.rationale && (
+            <p
+              id="tour-rationale"
+              className="mt-3 rounded-md bg-muted/60 px-3 py-2 text-xs leading-relaxed text-muted-foreground"
+            >
+              <span className="font-semibold text-foreground">なぜ重要？</span>
+              <br />
+              {step.rationale}
+            </p>
+          )}
 
-        {/* progress dots */}
-        <div className="mt-4 flex items-center justify-center gap-1.5" aria-hidden="true">
-          {steps.map((_, i) => (
-            <span
-              key={i}
-              className={`h-1.5 rounded-full transition-all ${
-                i === current
-                  ? "w-5 bg-accent"
-                  : i < current
-                  ? "w-1.5 bg-accent/60"
-                  : "w-1.5 bg-border"
-              }`}
-            />
-          ))}
+          {step.next && (
+            <p
+              id="tour-next"
+              className="mt-2 text-xs leading-relaxed text-accent-strong"
+            >
+              <span className="font-semibold">次のアクション:</span> {step.next}
+            </p>
+          )}
         </div>
 
-        <div className="mt-4 flex items-center justify-between gap-2">
-          <Button
-            type="button"
-            variant="ghost"
-            size="sm"
-            onClick={isFirst ? handleDismiss : prev}
-          >
-            {isFirst ? (
-              "後で"
-            ) : (
-              <>
-                <ArrowLeft className="h-3.5 w-3.5" aria-hidden="true" />
-                戻る
-              </>
-            )}
-          </Button>
-          <Button type="button" size="sm" variant="accent" onClick={next}>
-            {isLast ? (
-              <>
-                <CheckCircle2 className="h-3.5 w-3.5" aria-hidden="true" />
-                完了
-              </>
-            ) : (
-              <>
-                次へ
-                <ArrowRight className="h-3.5 w-3.5" aria-hidden="true" />
-              </>
-            )}
-          </Button>
+        {/* フッタ (固定) */}
+        <div className="border-t border-border/60 px-5 py-3">
+          <div className="mb-3 flex items-center justify-center gap-1.5" aria-hidden="true">
+            {steps.map((_, i) => (
+              <span
+                key={i}
+                className={`h-1.5 rounded-full transition-all ${
+                  i === current
+                    ? "w-5 bg-accent"
+                    : i < current
+                      ? "w-1.5 bg-accent/60"
+                      : "w-1.5 bg-border"
+                }`}
+              />
+            ))}
+          </div>
+          <div className="flex items-center justify-between gap-2">
+            <Button
+              type="button"
+              variant="ghost"
+              size="sm"
+              onClick={isFirst ? handleDismiss : prev}
+            >
+              {isFirst ? (
+                "後で"
+              ) : (
+                <>
+                  <ArrowLeft className="h-3.5 w-3.5" aria-hidden="true" />
+                  戻る
+                </>
+              )}
+            </Button>
+            <Button type="button" size="sm" variant="accent" onClick={next}>
+              {isLast ? (
+                <>
+                  <CheckCircle2 className="h-3.5 w-3.5" aria-hidden="true" />
+                  完了
+                </>
+              ) : (
+                <>
+                  次へ
+                  <ArrowRight className="h-3.5 w-3.5" aria-hidden="true" />
+                </>
+              )}
+            </Button>
+          </div>
         </div>
       </div>
     </div>,

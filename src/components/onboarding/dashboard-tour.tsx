@@ -53,6 +53,10 @@ const STEPS_ALL: TourStep[] = [
       "理由付き推薦により、商談前から「何を話すべきか」が明確になり、初回ミーティングの成果が出やすくなります。",
     next: "気になる方の「つながる」ボタンで申請。相手が承諾するとコネクション成立です。",
     skipIfMissing: true,
+    // recommendation-section は 3 カードグリッドで縦長 → tooltip を target 上端に
+    // 配置 + scrollIntoView block:start で対象見出しを画面上部に持ち上げる
+    placement: "top",
+    scrollBlock: "start",
   },
 ];
 
