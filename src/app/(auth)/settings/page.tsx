@@ -117,11 +117,13 @@ const DEFAULT_TEMPLATE: WeeklyTemplate = {
   sun: { enabled: false, start: "10:00", end: "17:00" },
 };
 
+// 経営者ユーザーは早朝/深夜の MTG も多いため 24h × 30 分刻みで生成。
+// 開始 00:00 〜 終了 23:30 (=最後の 30 分単位スロット開始時刻) を網羅。
 function generateTimeOptions(): string[] {
   const options: string[] = [];
-  for (let h = 9; h <= 18; h++) {
+  for (let h = 0; h <= 23; h++) {
     options.push(`${String(h).padStart(2, "0")}:00`);
-    if (h < 18) options.push(`${String(h).padStart(2, "0")}:30`);
+    options.push(`${String(h).padStart(2, "0")}:30`);
   }
   return options;
 }

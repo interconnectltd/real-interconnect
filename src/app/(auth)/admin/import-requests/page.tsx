@@ -10,11 +10,12 @@
 
 import { useState } from "react";
 import { useQuery, useQueryClient, useMutation } from "@tanstack/react-query";
-import { Loader2, Check, X, PlayCircle } from "lucide-react";
+import { Loader2, Check, X, FolderInput } from "lucide-react";
 import { toast } from "sonner";
 import { api } from "@/lib/api-client";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { LinkMeetingsDialog } from "./_link-meetings-dialog";
 
 type Status = "pending" | "processing" | "done" | "rejected" | "cancelled";
 
@@ -54,6 +55,7 @@ const STATUS_VARIANT: Record<Status, "default" | "secondary" | "destructive" | "
 export default function AdminImportRequestsPage() {
   const queryClient = useQueryClient();
   const [filterStatus, setFilterStatus] = useState<Status | "all">("pending");
+  const [linkingRequest, setLinkingRequest] = useState<ImportRequest | null>(null);
 
   const { data, isLoading, isError } = useQuery({
     queryKey: ["admin-import-requests", filterStatus],
@@ -180,23 +182,19 @@ export default function AdminImportRequestsPage() {
                 )}
               </div>
 
-              {/* 状態変更ボタン: SP では行下段に flex-row 配置、md 以上で右側縦並び */}
+              {/* 状態変更ボタン: SP では行下段に flex-row 配置、md 以上で右側縦並び。
+                  「会議を選んで紐付ける」が主アクション (これが処理本体)。 */}
               {(req.status === "pending" || req.status === "processing") && (
                 <div className="flex shrink-0 flex-row flex-wrap gap-2 md:flex-col">
-                  {req.status === "pending" && (
-                    <Button
-                      size="sm"
-                      variant="secondary"
-                      onClick={() =>
-                        updateMutation.mutate({ id: req.id, status: "processing" })
-                      }
-                      disabled={updateMutation.isPending}
-                      aria-label="処理開始"
-                    >
-                      <PlayCircle className="mr-1 h-4 w-4" aria-hidden="true" />
-                      処理開始
-                    </Button>
-                  )}
+                  <Button
+                    size="sm"
+                    variant="secondary"
+                    onClick={() => setLinkingRequest(req)}
+                    aria-label="会議を選んで紐付ける"
+                  >
+                    <FolderInput className="mr-1 h-4 w-4" aria-hidden="true" />
+                    会議を選択
+                  </Button>
                   <Button
                     size="sm"
                     onClick={() => {
@@ -229,6 +227,16 @@ export default function AdminImportRequestsPage() {
           </li>
         ))}
       </ul>
+
+      {linkingRequest && (
+        <LinkMeetingsDialog
+          request={linkingRequest}
+          onClose={() => setLinkingRequest(null)}
+          onLinked={() => {
+            queryClient.invalidateQueries({ queryKey: ["admin-import-requests"] });
+          }}
+        />
+      )}
     </div>
   );
 }

@@ -23,14 +23,36 @@ const PostSchema = z.object({
 export async function GET(request: Request) {
   try {
     const { user, supabase } = await withAuth(request);
-    const { data, error } = await supabase
-      .from("meeting_data_import_requests")
-      .select("*")
-      .eq("user_id", user.id)
-      .order("created_at", { ascending: false })
-      .abortSignal(request.signal);
-    if (error) throw error;
-    return json(data ?? []);
+
+    const [reqRes, linkedCountRes] = await Promise.all([
+      supabase
+        .from("meeting_data_import_requests")
+        .select("*")
+        .eq("user_id", user.id)
+        .order("created_at", { ascending: false })
+        .abortSignal(request.signal),
+      // 自分に紐付けられた meeting_participants の件数 (=取込済 transcript の概算)
+      supabase
+        .from("meeting_participants")
+        .select("transcript_id", { count: "exact", head: false })
+        .eq("user_id", user.id),
+    ]);
+    if (reqRes.error) throw reqRes.error;
+    if (linkedCountRes.error) throw linkedCountRes.error;
+
+    type LinkedRow = { transcript_id: string | null };
+    const distinctTranscripts = new Set(
+      ((linkedCountRes.data as LinkedRow[] | null) ?? [])
+        .map((r) => r.transcript_id)
+        .filter((v): v is string => v !== null),
+    ).size;
+
+    return json({
+      requests: reqRes.data ?? [],
+      stats: {
+        linked_meetings: distinctTranscripts,
+      },
+    });
   } catch (error) {
     return handleApiError(error);
   }

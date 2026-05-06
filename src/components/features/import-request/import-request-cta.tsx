@@ -28,6 +28,11 @@ interface ImportRequest {
   processed_at: string | null;
 }
 
+interface ImportRequestResponse {
+  requests: ImportRequest[];
+  stats: { linked_meetings: number };
+}
+
 const STATUS_LABEL: Record<string, string> = {
   pending: "申請中（運営の対応待ち）",
   processing: "運営が処理中",
@@ -51,8 +56,10 @@ export function ImportRequestCTA() {
 
   const { data, isLoading } = useQuery({
     queryKey: ["import-requests"],
-    queryFn: () => api.get<ImportRequest[]>("/import-requests"),
+    queryFn: () => api.get<ImportRequestResponse>("/import-requests"),
   });
+  const requests = data?.requests ?? [];
+  const linkedMeetings = data?.stats.linked_meetings ?? 0;
 
   const submitMutation = useMutation({
     mutationFn: async (msg: string) =>
@@ -72,7 +79,7 @@ export function ImportRequestCTA() {
     },
   });
 
-  const latest = data?.[0];
+  const latest = requests[0];
   const activeStatus =
     latest && (latest.status === "pending" || latest.status === "processing")
       ? latest.status
@@ -109,6 +116,12 @@ export function ImportRequestCTA() {
             <p className="mt-2 text-xs opacity-80">
               運営が会議データを取り込み中です。完了次第マッチング精度が向上します。
             </p>
+            {linkedMeetings > 0 && (
+              <p className="mt-1 inline-flex items-center gap-1 text-xs font-medium">
+                <CheckCircle2 className="h-3.5 w-3.5" aria-hidden="true" />
+                取込済 {linkedMeetings} 件
+              </p>
+            )}
           </div>
         </div>
       </div>
@@ -117,7 +130,7 @@ export function ImportRequestCTA() {
 
   // 完了済 / 拒否 / キャンセル → 申請可能
   // 直近 rejected の場合、admin_note を表示
-  const lastRejected = data?.find((r) => r.status === "rejected");
+  const lastRejected = requests.find((r) => r.status === "rejected");
 
   return (
     <div className="rounded-lg border bg-gradient-to-br from-emerald-50 to-blue-50 px-5 py-5 dark:from-emerald-950/20 dark:to-blue-950/20">
@@ -141,10 +154,10 @@ export function ImportRequestCTA() {
             </div>
           )}
 
-          {data?.some((r) => r.status === "done") && (
+          {requests.some((r) => r.status === "done") && (
             <div className="mt-3 flex items-center gap-2 text-xs text-emerald-700">
               <CheckCircle2 className="h-3.5 w-3.5" aria-hidden="true" />
-              過去に取込完了した履歴があります
+              過去に取込完了した履歴があります {linkedMeetings > 0 && `(取込済 ${linkedMeetings} 件)`}
             </div>
           )}
 
