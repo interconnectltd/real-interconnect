@@ -12,6 +12,11 @@ export function TermsContent() {
         <h1 className="text-2xl font-bold text-foreground">利用規約</h1>
         <p className="mt-2 text-xs text-muted-foreground">
           バージョン: {TERMS_VERSION} / 制定日: 2026年4月1日 / 最終改定日: {TERMS_VERSION}
+          <br />
+          <span className="text-[11px]">
+            ※ 制定日時点の事業者は代表者個人 (吉井和樹) の準備事業者でした。本規約は INTER CONNECT株式会社
+            (2026年5月15日設立予定) の設立日において、同法人に承継されます。
+          </span>
         </p>
       </header>
 
