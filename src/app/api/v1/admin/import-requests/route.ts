@@ -7,7 +7,7 @@
 
 import { z } from "zod";
 import {
-  withAuth,
+  withAdminAuth,
   json,
   jsonError,
   handleApiError,
@@ -20,21 +20,9 @@ const PatchSchema = z.object({
   admin_note: z.string().max(2000).optional().nullable(),
 });
 
-async function ensureAdmin(supabase: import("@supabase/supabase-js").SupabaseClient<import("@/types/database").Database>, userId: string) {
-  const { data } = await supabase
-    .from("user_profiles")
-    .select("is_admin")
-    .eq("id", userId)
-    .maybeSingle();
-  return Boolean(data?.is_admin);
-}
-
 export async function GET(request: Request) {
   try {
-    const { user, supabase } = await withAuth(request);
-    if (!(await ensureAdmin(supabase, user.id))) {
-      return jsonError(403, "FORBIDDEN", "admin 権限が必要です");
-    }
+    const { supabase } = await withAdminAuth(request);
 
     const url = new URL(request.url);
     const status = url.searchParams.get("status");
@@ -58,10 +46,7 @@ export async function GET(request: Request) {
 
 export async function PATCH(request: Request) {
   try {
-    const { user, supabase } = await withAuth(request);
-    if (!(await ensureAdmin(supabase, user.id))) {
-      return jsonError(403, "FORBIDDEN", "admin 権限が必要です");
-    }
+    const { user, supabase } = await withAdminAuth(request);
 
     const url = new URL(request.url);
     const id = url.searchParams.get("id");
@@ -103,7 +88,7 @@ export async function PATCH(request: Request) {
     const client = extractClientInfo(request);
     void writeAuditLog(supabase, {
       actor_id: user.id,
-      action: "chat.message.send",
+      action: "admin.import_request.update",
       target_type: "import_request",
       target_id: id,
       payload: { status: parsed.data.status },

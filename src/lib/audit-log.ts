@@ -17,12 +17,20 @@ export type AuditAction =
   | "chat.message.send"
   | "chat.message.read"
   | "chat.room.create"
-  // 将来拡張
   | "chat.message.delete"
   | "chat.message.edit"
+  // calendar
   | "calendar.connect"
   | "calendar.disconnect"
-  | "calendar.event.create";
+  | "calendar.event.create"
+  // admin 操作 (法務 R5 / 個情法 27 条対応の追跡用)
+  | "admin.view_user"
+  | "admin.import_request.update"
+  | "admin.user.suspend"
+  | "admin.user.unsuspend"
+  | "admin.user.delete"
+  | "admin.role.grant"
+  | "admin.role.revoke";
 
 export type AuditLogParams = {
   actor_id: string;

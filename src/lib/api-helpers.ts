@@ -205,6 +205,56 @@ export async function sha256Hex(input: string): Promise<string> {
   return out;
 }
 
+/**
+ * withAdminAuth - admin 限定 API helper.
+ *
+ * - 既存 withAuth を内部呼び出し (CSRF / RL / 認証は継承)
+ * - user_profiles.is_admin = true を強制チェック (403)
+ * - requireReason: true なら **`?reason=...` query string** (5..500 chars) 必須化 (法務 R5 整合)
+ *
+ * 注意: reason は現状 query string 専用。POST/PATCH の body 経由 reason は未対応。
+ *       将来の mutation で reason 必須化する場合は header 経由 (`X-Admin-Reason`) への
+ *       移行を検討 (URL 履歴・Referer leak 回避)。
+ *
+ * 使用例:
+ *   const { user, supabase, reason } = await withAdminAuth(request, { requireReason: true });
+ */
+export async function withAdminAuth(
+  request: Request,
+  options: WithAuthOptions & { requireReason?: boolean } = {},
+): Promise<{
+  user: User;
+  supabase: SupabaseClient<Database>;
+  reason: string | null;
+}> {
+  const { user, supabase } = await withAuth(request, options);
+
+  const { data, error } = await supabase
+    .from("user_profiles")
+    .select("is_admin")
+    .eq("id", user.id)
+    .maybeSingle();
+  if (error || !data?.is_admin) {
+    throw new ApiError(403, "FORBIDDEN", "admin 権限が必要です");
+  }
+
+  let reason: string | null = null;
+  if (options.requireReason) {
+    const url = new URL(request.url);
+    const raw = (url.searchParams.get("reason") ?? "").trim();
+    if (raw.length < 5 || raw.length > 500) {
+      throw new ApiError(
+        400,
+        "REASON_REQUIRED",
+        "個人情報を閲覧するには理由 (5-500 字) が必要です",
+      );
+    }
+    reason = raw;
+  }
+
+  return { user, supabase, reason };
+}
+
 export function handleApiError(error: unknown): NextResponse {
   if (error instanceof ApiError) {
     return jsonError(error.status, error.code, error.message);

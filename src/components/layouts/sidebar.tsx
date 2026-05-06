@@ -19,6 +19,8 @@ import {
   ChevronDown,
   ShieldCheck,
   Inbox,
+  LayoutGrid,
+  ScrollText,
   type LucideIcon,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
@@ -85,7 +87,10 @@ const adminGroup: NavGroup = {
   label: "運営",
   icon: ShieldCheck,
   items: [
+    { href: "/admin/dashboard", label: "ダッシュボード", icon: LayoutGrid },
+    { href: "/admin/users", label: "ユーザー", icon: Users },
     { href: "/admin/import-requests", label: "取込申請", icon: Inbox },
+    { href: "/admin/audit-logs", label: "監査ログ", icon: ScrollText },
   ],
 };
 
