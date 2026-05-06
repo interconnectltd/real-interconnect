@@ -1,26 +1,52 @@
-import { withAuth, json, jsonError, handleApiError } from "@/lib/api-helpers";
+/**
+ * GET  /api/v1/chat/rooms
+ * POST /api/v1/chat/rooms
+ *
+ * R2 改修:
+ *   - GET の serviceClient (RLS bypass) を撤廃 → authenticated client + RLS で十分 (Arch R1: 過剰特権)
+ *   - last_message.sender_id の "" 嘘データを廃止し、chat_rooms.last_message_sender_id を返却 (Arch R1)
+ *   - last_message_content_type も同梱 (UI 側で「📅日程提案」等のラベル分岐に使用)
+ *   - audit-log chat.room.create
+ *
+ * 既存仕様維持:
+ *   - 認証ユーザーが user_a / user_b の room のみ取得 (RLS で保証)
+ *   - unread_count を集計
+ *   - other_user として相手プロフィールを enrich
+ */
+
+import {
+  withAuth,
+  json,
+  jsonError,
+  handleApiError,
+} from "@/lib/api-helpers";
 import { isValidUUID } from "@/lib/sanitize";
 import { createServiceClient } from "@/lib/supabase/server";
+import { writeAuditLog, extractClientInfo } from "@/lib/audit-log";
 
 export async function GET() {
   try {
-    const { user } = await withAuth();
-    const serviceClient = await createServiceClient();
+    const { user, supabase } = await withAuth();
 
-    // Fetch chat rooms where user is either side
-    const { data: rooms, error } = await serviceClient
+    // RLS で auth.uid() が user_a/user_b の room のみ取得可能
+    const { data: rooms, error } = await supabase
       .from("chat_rooms")
       .select("*")
-      .or(`user_a_id.eq.${user.id},user_b_id.eq.${user.id}`)
       .order("last_message_at", { ascending: false, nullsFirst: false });
 
     if (error) throw error;
     if (!rooms || rooms.length === 0) return json([]);
 
-    // Collect other user IDs and fetch profiles
+    // Collect other user IDs
     const otherUserIds = rooms.map((r) =>
       r.user_a_id === user.id ? r.user_b_id : r.user_a_id,
     );
+
+    // 相手プロフィール (RLS で他人の profile が読めるかは user_profiles 側の policy 依存。
+    // 既存実装が serviceClient を使っていたのは profile 制約回避のためと推察されるため、
+    // profile 取得のみ serviceClient を維持。読み取り対象は connection 済の相手限定で
+    // 漏洩リスクは限定的)
+    const serviceClient = await createServiceClient();
     const { data: profiles } = await serviceClient
       .from("user_profiles")
       .select("id, name, company, avatar_url")
@@ -28,9 +54,9 @@ export async function GET() {
 
     const profileMap = new Map(profiles?.map((p) => [p.id, p]) ?? []);
 
-    // Fetch unread counts per room (messages not sent by current user and unread)
+    // unread_count: RLS 配下で自分の room の messages を集計
     const roomIds = rooms.map((r) => r.id);
-    const { data: unreadRows } = await serviceClient
+    const { data: unreadRows } = await supabase
       .from("chat_messages")
       .select("room_id")
       .in("room_id", roomIds)
@@ -44,15 +70,17 @@ export async function GET() {
 
     const enriched = rooms.map((r) => ({
       ...r,
-      other_user: profileMap.get(
-        r.user_a_id === user.id ? r.user_b_id : r.user_a_id,
-      ) ?? null,
+      other_user:
+        profileMap.get(
+          r.user_a_id === user.id ? r.user_b_id : r.user_a_id,
+        ) ?? null,
       unread_count: unreadMap.get(r.id) ?? 0,
       last_message: r.last_message_at
         ? {
             content: r.last_message_preview ?? "",
+            content_type: r.last_message_content_type ?? "text",
             created_at: r.last_message_at,
-            sender_id: "",
+            sender_id: r.last_message_sender_id ?? null,
           }
         : null,
     }));
@@ -72,13 +100,15 @@ export async function POST(request: Request) {
       return jsonError(400, "BAD_REQUEST", "リクエストボディが不正です");
     }
 
-    const { connection_id } = body;
+    const { connection_id } = body as { connection_id?: unknown };
 
-    if (!connection_id || !isValidUUID(connection_id)) {
+    if (
+      typeof connection_id !== "string" ||
+      !isValidUUID(connection_id)
+    ) {
       return jsonError(400, "BAD_REQUEST", "有効なコネクションIDが必要です");
     }
 
-    // Verify the connection exists and is accepted/reaccepted
     const { data: connection, error: connError } = await supabase
       .from("connections")
       .select("id, user_id, connected_user_id, status")
@@ -92,8 +122,15 @@ export async function POST(request: Request) {
       return jsonError(404, "NOT_FOUND", "コネクションが見つかりません");
     }
 
-    if (connection.status !== "accepted" && connection.status !== "reaccepted") {
-      return jsonError(400, "BAD_REQUEST", "承認済みのコネクションのみチャットルームを作成できます");
+    if (
+      connection.status !== "accepted" &&
+      connection.status !== "reaccepted"
+    ) {
+      return jsonError(
+        400,
+        "BAD_REQUEST",
+        "承認済みのコネクションのみチャットルームを作成できます",
+      );
     }
 
     // Check no existing room for this connection
@@ -105,10 +142,13 @@ export async function POST(request: Request) {
       .maybeSingle();
 
     if (existing) {
-      return jsonError(409, "CONFLICT", "このコネクションのチャットルームは既に存在します");
+      return jsonError(
+        409,
+        "CONFLICT",
+        "このコネクションのチャットルームは既に存在します",
+      );
     }
 
-    // Determine user_a and user_b
     const userAId = connection.user_id;
     const userBId = connection.connected_user_id;
 
@@ -123,6 +163,18 @@ export async function POST(request: Request) {
       .single();
 
     if (insertError) throw insertError;
+
+    // audit-log
+    const client = extractClientInfo(request);
+    void writeAuditLog(supabase, {
+      actor_id: user.id,
+      action: "chat.room.create",
+      target_type: "chat_room",
+      target_id: room?.id ?? null,
+      payload: { connection_id, peer_user_id: userBId === user.id ? userAId : userBId },
+      ip: client.ip,
+      ua: client.ua,
+    });
 
     return json(room, 201);
   } catch (error) {

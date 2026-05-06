@@ -753,6 +753,8 @@ export interface Database {
           user_b_id: string;
           last_message_at: string | null;
           last_message_preview: string | null;
+          last_message_sender_id: string | null;
+          last_message_content_type: string | null;
           created_at: string;
         };
         Insert: {
@@ -761,10 +763,14 @@ export interface Database {
           user_b_id: string;
           last_message_at?: string | null;
           last_message_preview?: string | null;
+          last_message_sender_id?: string | null;
+          last_message_content_type?: string | null;
         };
         Update: {
           last_message_at?: string | null;
           last_message_preview?: string | null;
+          last_message_sender_id?: string | null;
+          last_message_content_type?: string | null;
         };
         Relationships: [];
       };
@@ -775,6 +781,7 @@ export interface Database {
           sender_id: string;
           content: string;
           content_type: "text" | "image" | "file" | "scheduling_card" | "meeting_suggestion" | "meeting_confirmed";
+          payload: Json | null;
           is_read: boolean;
           created_at: string;
         };
@@ -783,10 +790,53 @@ export interface Database {
           sender_id: string;
           content: string;
           content_type?: "text" | "image" | "file" | "scheduling_card" | "meeting_suggestion" | "meeting_confirmed";
+          payload?: Json | null;
           is_read?: boolean;
         };
         Update: {
           is_read?: boolean;
+        };
+        Relationships: [];
+      };
+      audit_logs: {
+        Row: {
+          id: number;
+          actor_id: string;
+          action: string;
+          target_type: string | null;
+          target_id: string | null;
+          payload: Json | null;
+          ip: string | null;
+          ua: string | null;
+          created_at: string;
+        };
+        Insert: {
+          actor_id: string;
+          action: string;
+          target_type?: string | null;
+          target_id?: string | null;
+          payload?: Json | null;
+          ip?: string | null;
+          ua?: string | null;
+        };
+        Update: never;
+        Relationships: [];
+      };
+      rate_limits: {
+        Row: {
+          user_id: string;
+          bucket: string;
+          window_start: string;
+          count: number;
+        };
+        Insert: {
+          user_id: string;
+          bucket: string;
+          window_start: string;
+          count?: number;
+        };
+        Update: {
+          count?: number;
         };
         Relationships: [];
       };
