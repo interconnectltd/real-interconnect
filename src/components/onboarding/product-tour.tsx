@@ -72,11 +72,11 @@ const TOOLTIP_GAP = 12; // ターゲットと tooltip の隙間
 export function ProductTour({ steps, storageKey, open, onClose }: ProductTourProps) {
   const [current, setCurrent] = useState(0);
   const [rect, setRect] = useState<Rect | null>(null);
-  const [tooltipPos, setTooltipPos] = useState<{ top: number; left: number; placement: "top" | "bottom" | "left" | "right" | "center" }>({
-    top: 0,
-    left: 0,
-    placement: "bottom",
-  });
+  const [tooltipPos, setTooltipPos] = useState<{
+    top: number;
+    left: number;
+    placement: "top" | "bottom" | "left" | "right" | "center";
+  }>({ top: 0, left: 0, placement: "bottom" });
   const tooltipRef = useRef<HTMLDivElement>(null);
   const closeBtnRef = useRef<HTMLButtonElement>(null);
   const measureRafRef = useRef<number | null>(null);
@@ -217,7 +217,7 @@ export function ProductTour({ steps, storageKey, open, onClose }: ProductTourPro
       right: spaceRight >= needX,
     };
 
-    let placement: "top" | "bottom" | "left" | "right" = "bottom";
+    let placement: "top" | "bottom" | "left" | "right" | "center" = "bottom";
 
     // 1. per-step placement (フィットしない時は反対側 → 横にフォールバック)
     const order: Array<"top" | "bottom" | "left" | "right"> =
@@ -249,9 +249,10 @@ export function ProductTour({ steps, storageKey, open, onClose }: ProductTourPro
     }
 
     // 縦/横どこにも fits しない場合: tooltip を画面中央に出して spotlight で
-    // 対象を強調する fallback (旧版は y=16 固定で対象自体を覆っていた)
+    // 対象を強調する fallback (旧版は y=16 固定で対象自体を覆っていた)。
+    // placement は "center" にして tooltip 側の方向矢印 / border-radius を中立化可能に。
     if (!fits.top && !fits.bottom && !fits.left && !fits.right) {
-      placement = "bottom";
+      placement = "center";
       top = Math.max(16, vh / 2 - th / 2);
       left = Math.max(16, vw / 2 - tw / 2);
     }
