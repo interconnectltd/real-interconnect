@@ -15,6 +15,7 @@ import { queryKeys } from "@/hooks/queries/keys";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 import { NOTIFICATION_ACTION_WHITELIST } from "@/lib/constants";
+import { ConnectionRequestContext } from "@/components/features/notifications/connection-request-context";
 import type { Notification, NotificationAction } from "@/types";
 
 export default function NotificationsPage() {
@@ -111,6 +112,12 @@ export default function NotificationsPage() {
                 <p className="mt-1 text-xs text-muted-foreground/60">
                   {new Date(n.created_at).toLocaleString("ja-JP")}
                 </p>
+
+                {/* コネクション申請通知は相手プロフィール + マッチ理由を inline 展開 */}
+                {n.type === "connection_request" && (
+                  <ConnectionRequestContext notificationId={n.id} />
+                )}
+
                 {/* Action buttons — show regardless of read status */}
                 {n.actions && Array.isArray(n.actions) && n.actions.length > 0 && (
                   <div className="mt-2 flex flex-wrap gap-2">
