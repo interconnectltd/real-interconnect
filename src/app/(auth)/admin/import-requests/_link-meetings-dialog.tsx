@@ -76,7 +76,13 @@ export function LinkMeetingsDialog({
       }>(`/admin/import-requests/${request.id}/meetings`, { meetings });
     },
     onSuccess: (res) => {
-      toast.success(`${res.participants_linked} 件の会議参加者を紐付けました`);
+      if (res.participants_linked === 0) {
+        toast.warning(
+          "一致する参加者が見つかりませんでした。speaker_name の表記揺れの可能性があります",
+        );
+      } else {
+        toast.success(`${res.participants_linked} 件の会議参加者を紐付けました`);
+      }
       onLinked();
       onClose();
     },
@@ -99,22 +105,24 @@ export function LinkMeetingsDialog({
   function toggle(m: MeetingCandidate) {
     if (m.linked_to_this_user) return; // 既に紐付け済はトグル不可
     if (m.candidates.length === 0) return; // 候補がない会議は紐付け不可
+    // 最初の non-null speaker_name 候補を採用
+    const speakerName = m.candidates.find((c) => c.speaker_name)?.speaker_name ?? "";
+    if (!speakerName) {
+      toast.warning("候補に speaker_name が無いため自動選択できません");
+      return;
+    }
     setSelected((prev) => {
       const next = new Map(prev);
-      if (next.has(m.transcript_id)) {
-        next.delete(m.transcript_id);
-      } else {
-        // 最初の候補の speaker_name を使う
-        const speakerName = m.candidates[0]?.speaker_name ?? "";
-        if (speakerName) next.set(m.transcript_id, speakerName);
-      }
+      if (next.has(m.transcript_id)) next.delete(m.transcript_id);
+      else next.set(m.transcript_id, speakerName);
       return next;
     });
   }
 
   return (
     <Dialog open onOpenChange={(o) => !o && onClose()}>
-      <DialogContent className="max-w-3xl">
+      {/* sm:max-w-3xl にして base の `max-w-[calc(100%-2rem)]` (SP 16px gutter) を温存 */}
+      <DialogContent className="sm:max-w-3xl">
         <DialogHeader>
           <DialogTitle>会議を紐付ける</DialogTitle>
           <DialogDescription>
@@ -211,8 +219,12 @@ export function LinkMeetingsDialog({
           </ul>
         )}
 
-        <div className="mt-4 flex justify-between gap-2 border-t pt-4">
-          <p className="text-xs text-muted-foreground">
+        <div className="mt-4 flex flex-wrap justify-between gap-2 border-t pt-4">
+          <p
+            className="text-xs text-muted-foreground"
+            aria-live="polite"
+            aria-atomic="true"
+          >
             選択中: <strong>{selected.size}</strong> 件
           </p>
           <div className="flex gap-2">
@@ -223,6 +235,7 @@ export function LinkMeetingsDialog({
               size="sm"
               onClick={() => linkMutation.mutate()}
               disabled={selected.size === 0 || linkMutation.isPending}
+              aria-label={`選択中の ${selected.size} 件を紐付ける`}
             >
               {linkMutation.isPending ? "紐付け中..." : `${selected.size} 件を紐付ける`}
             </Button>

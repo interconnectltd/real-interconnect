@@ -14,6 +14,7 @@ import {
   handleApiError,
 } from "@/lib/api-helpers";
 import { writeAuditLog, extractClientInfo } from "@/lib/audit-log";
+import { isValidUUID } from "@/lib/sanitize";
 
 const PostSchema = z.object({
   message: z.string().trim().max(1000).optional().nullable(),
@@ -24,34 +25,31 @@ export async function GET(request: Request) {
   try {
     const { user, supabase } = await withAuth(request);
 
-    const [reqRes, linkedCountRes] = await Promise.all([
+    type RpcLoose = {
+      rpc: (
+        fn: string,
+        args: Record<string, unknown>,
+      ) => Promise<{ data: unknown; error: { message?: string } | null }>;
+    };
+    // RPC で COUNT(DISTINCT) を SQL 側で完結させる (旧実装は全件転送で payload 肥大)
+    const [reqRes, countRes] = await Promise.all([
       supabase
         .from("meeting_data_import_requests")
         .select("*")
         .eq("user_id", user.id)
         .order("created_at", { ascending: false })
         .abortSignal(request.signal),
-      // 自分に紐付けられた meeting_participants の件数 (=取込済 transcript の概算)
-      supabase
-        .from("meeting_participants")
-        .select("transcript_id", { count: "exact", head: false })
-        .eq("user_id", user.id),
+      (supabase as unknown as RpcLoose).rpc("user_linked_meetings_count", {
+        p_user_id: user.id,
+      }),
     ]);
     if (reqRes.error) throw reqRes.error;
-    if (linkedCountRes.error) throw linkedCountRes.error;
 
-    type LinkedRow = { transcript_id: string | null };
-    const distinctTranscripts = new Set(
-      ((linkedCountRes.data as LinkedRow[] | null) ?? [])
-        .map((r) => r.transcript_id)
-        .filter((v): v is string => v !== null),
-    ).size;
+    const linkedMeetings = typeof countRes.data === "number" ? countRes.data : 0;
 
     return json({
       requests: reqRes.data ?? [],
-      stats: {
-        linked_meetings: distinctTranscripts,
-      },
+      stats: { linked_meetings: linkedMeetings },
     });
   } catch (error) {
     return handleApiError(error);
@@ -96,7 +94,7 @@ export async function POST(request: Request) {
     const client = extractClientInfo(request);
     void writeAuditLog(supabase, {
       actor_id: user.id,
-      action: "chat.message.send", // 既存 enum 制約内で代用 (audit_logs 改修は後)
+      action: "import_request.create",
       target_type: "import_request",
       target_id: data?.id ?? null,
       payload: { source: parsed.data.source },
@@ -105,6 +103,56 @@ export async function POST(request: Request) {
     });
 
     return json(data, 201);
+  } catch (error) {
+    return handleApiError(error);
+  }
+}
+
+/**
+ * DELETE /api/v1/import-requests?id=xxx
+ *
+ * pending な自分の申請をキャンセルする (status = cancelled に遷移)。
+ * UNIQUE(user_id) WHERE status='pending' partial index が解放されるので再申請可能になる。
+ */
+export async function DELETE(request: Request) {
+  try {
+    const { user, supabase } = await withAuth(request);
+    const url = new URL(request.url);
+    const id = url.searchParams.get("id");
+    if (!id || !isValidUUID(id)) {
+      return jsonError(400, "BAD_REQUEST", "id (UUID) 必須");
+    }
+
+    const { data, error } = await supabase
+      .from("meeting_data_import_requests")
+      .update({ status: "cancelled" })
+      .eq("id", id)
+      .eq("user_id", user.id)
+      .eq("status", "pending")
+      .select()
+      .single();
+    if (error) {
+      if ((error as { code?: string }).code === "PGRST116") {
+        return jsonError(
+          404,
+          "NOT_FOUND",
+          "キャンセル可能な pending 申請が見つかりません",
+        );
+      }
+      throw error;
+    }
+
+    const client = extractClientInfo(request);
+    void writeAuditLog(supabase, {
+      actor_id: user.id,
+      action: "import_request.cancel",
+      target_type: "import_request",
+      target_id: id,
+      ip: client.ip,
+      ua: client.ua,
+    });
+
+    return json(data);
   } catch (error) {
     return handleApiError(error);
   }

@@ -39,6 +39,12 @@ type ExtraOpts = { headers?: Record<string, string> };
 
 export const api = {
   get: <T>(path: string, options?: RequestInit) => request<T>(path, options),
+  /**
+   * GET with custom headers. Useful for sending sensitive context (e.g.,
+   * X-Admin-Reason) without leaking via URL query / Referer.
+   */
+  getWithHeaders: <T>(path: string, headers: Record<string, string>) =>
+    request<T>(path, { headers }),
   post: <T>(path: string, body?: unknown, opts?: ExtraOpts) =>
     request<T>(path, {
       method: "POST",

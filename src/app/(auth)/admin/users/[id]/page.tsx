@@ -91,11 +91,11 @@ export default function AdminUserDetailPage({
 
   const { data, isLoading, isError, error } = useQuery({
     queryKey: ["admin-user-detail", id, reason],
-    queryFn: () => {
-      const params = new URLSearchParams();
-      params.set("reason", reason!);
-      return api.get<UserDetail>(`/admin/users/${id}?${params.toString()}`);
-    },
+    queryFn: () =>
+      // reason はヘッダ経由で送信 (URL 履歴 / Referer leak 回避)
+      api.getWithHeaders<UserDetail>(`/admin/users/${id}`, {
+        "X-Admin-Reason": reason!,
+      }),
     enabled: Boolean(reason),
   });
 

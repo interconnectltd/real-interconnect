@@ -12,11 +12,14 @@
 
 import { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { CalendarClock, Send, CheckCircle2, Loader2, AlertCircle } from "lucide-react";
+import { CalendarClock, Send, CheckCircle2, Loader2, AlertCircle, X as XIcon } from "lucide-react";
 import { toast } from "sonner";
 import { api } from "@/lib/api-client";
 import { ApiError } from "@/lib/errors";
 import { Button } from "@/components/ui/button";
+import {
+  Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription,
+} from "@/components/ui/dialog";
 
 interface ImportRequest {
   id: string;
@@ -53,6 +56,7 @@ export function ImportRequestCTA() {
   const queryClient = useQueryClient();
   const [message, setMessage] = useState("");
   const [showForm, setShowForm] = useState(false);
+  const [confirmCancelId, setConfirmCancelId] = useState<string | null>(null);
 
   const { data, isLoading } = useQuery({
     queryKey: ["import-requests"],
@@ -79,6 +83,16 @@ export function ImportRequestCTA() {
     },
   });
 
+  const cancelMutation = useMutation({
+    mutationFn: async (id: string) =>
+      api.delete<{ id: string }>(`/import-requests?id=${id}`),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["import-requests"] });
+      toast.success("申請をキャンセルしました");
+    },
+    onError: () => toast.error("キャンセルに失敗しました"),
+  });
+
   const latest = requests[0];
   const activeStatus =
     latest && (latest.status === "pending" || latest.status === "processing")
@@ -100,13 +114,26 @@ export function ImportRequestCTA() {
       <div
         className={`rounded-lg border px-5 py-4 ${STATUS_COLOR[activeStatus]}`}
         role="status"
+        aria-live="polite"
       >
         <div className="flex items-start gap-3">
           <CalendarClock className="mt-0.5 h-5 w-5 shrink-0" aria-hidden="true" />
           <div className="min-w-0 flex-1">
-            <p className="text-sm font-bold">
-              {STATUS_LABEL[activeStatus]}
-            </p>
+            <div className="flex flex-wrap items-center justify-between gap-2">
+              <p className="text-sm font-bold">{STATUS_LABEL[activeStatus]}</p>
+              {activeStatus === "pending" && (
+                <Button
+                  size="sm"
+                  variant="ghost"
+                  onClick={() => setConfirmCancelId(latest.id)}
+                  disabled={cancelMutation.isPending}
+                  aria-label="申請をキャンセル"
+                >
+                  <XIcon className="mr-1 h-3.5 w-3.5" aria-hidden="true" />
+                  キャンセル
+                </Button>
+              )}
+            </div>
             <p className="mt-1 text-xs">
               {new Date(latest.created_at).toLocaleDateString("ja-JP")} 申請
               {msg && (
@@ -114,12 +141,14 @@ export function ImportRequestCTA() {
               )}
             </p>
             <p className="mt-2 text-xs opacity-80">
-              運営が会議データを取り込み中です。完了次第マッチング精度が向上します。
+              {activeStatus === "pending"
+                ? "運営の対応をお待ちください。完了するとマッチング精度が向上します。"
+                : "運営が会議データを取り込み中です。完了次第マッチング精度が向上します。"}
             </p>
-            {linkedMeetings > 0 && (
-              <p className="mt-1 inline-flex items-center gap-1 text-xs font-medium">
+            {linkedMeetings > 0 && activeStatus === "processing" && (
+              <p className="mt-1 inline-flex flex-wrap items-center gap-1 text-xs font-medium">
                 <CheckCircle2 className="h-3.5 w-3.5" aria-hidden="true" />
-                取込済 {linkedMeetings} 件
+                取込済 {linkedMeetings} 件 (随時追加されます)
               </p>
             )}
           </div>
@@ -157,7 +186,9 @@ export function ImportRequestCTA() {
           {requests.some((r) => r.status === "done") && (
             <div className="mt-3 flex items-center gap-2 text-xs text-emerald-700">
               <CheckCircle2 className="h-3.5 w-3.5" aria-hidden="true" />
-              過去に取込完了した履歴があります {linkedMeetings > 0 && `(取込済 ${linkedMeetings} 件)`}
+              {linkedMeetings > 0
+                ? `取込済 ${linkedMeetings} 件。新しい会議は追加で申請できます。`
+                : "過去に取込完了した履歴があります"}
             </div>
           )}
 
@@ -209,6 +240,43 @@ export function ImportRequestCTA() {
           )}
         </div>
       </div>
+
+      {/* キャンセル確認 Dialog (window.confirm 撤去) */}
+      <Dialog
+        open={Boolean(confirmCancelId)}
+        onOpenChange={(o) => !o && setConfirmCancelId(null)}
+      >
+        <DialogContent className="sm:max-w-sm">
+          <DialogHeader>
+            <DialogTitle>申請をキャンセル</DialogTitle>
+            <DialogDescription>
+              この取込申請を取り下げます。同じ内容で再度申請することは可能です。
+            </DialogDescription>
+          </DialogHeader>
+          <div className="mt-2 flex justify-end gap-2">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => setConfirmCancelId(null)}
+            >
+              戻る
+            </Button>
+            <Button
+              variant="destructive"
+              size="sm"
+              onClick={() => {
+                if (confirmCancelId) {
+                  cancelMutation.mutate(confirmCancelId);
+                  setConfirmCancelId(null);
+                }
+              }}
+              disabled={cancelMutation.isPending}
+            >
+              キャンセルする
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

@@ -25,6 +25,8 @@ export async function GET(request: Request) {
     const q = sanitizeFilterValue(url.searchParams.get("q") ?? "");
     const industry = sanitizeFilterValue(url.searchParams.get("industry") ?? "");
     const isActiveParam = url.searchParams.get("is_active");
+    const incomplete = url.searchParams.get("incomplete") === "1";
+    const isAdminParam = url.searchParams.get("is_admin");
     const orderByRaw = url.searchParams.get("order") ?? "created_at";
     const orderBy = ALLOWED_ORDER.has(orderByRaw) ? orderByRaw : "created_at";
 
@@ -52,6 +54,13 @@ export async function GET(request: Request) {
     if (industry) query = query.eq("industry", industry);
     if (isActiveParam === "true") query = query.eq("is_active", true);
     if (isActiveParam === "false") query = query.eq("is_active", false);
+    if (isAdminParam === "true") query = query.eq("is_admin", true);
+    if (isAdminParam === "false") query = query.eq("is_admin", false);
+    if (incomplete) {
+      query = query
+        .eq("is_active", true)
+        .or("industry.is.null,bio.is.null");
+    }
 
     query = query
       .order(orderBy as "created_at" | "name", { ascending: false })

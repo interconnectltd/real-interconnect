@@ -46,7 +46,19 @@ export async function GET(request: Request) {
     if (targetId) q = q.eq("target_id", targetId);
     if (from) q = q.gte("created_at", from);
     if (to) q = q.lte("created_at", to);
-    if (cursor) q = q.lt("created_at", cursor);
+
+    // cursor は `${created_at}|${id}` 形式で tie-break する。
+    // (created_at, id) DESC keyset pagination で同タイムスタンプ行のスキップ/重複を防ぐ。
+    if (cursor) {
+      const [cTs, cId] = cursor.split("|");
+      if (cTs && cId) {
+        q = q.or(
+          `created_at.lt.${cTs},and(created_at.eq.${cTs},id.lt.${cId})`,
+        );
+      } else {
+        q = q.lt("created_at", cursor);
+      }
+    }
 
     const { data, error } = await q;
     if (error) throw error;
@@ -54,9 +66,9 @@ export async function GET(request: Request) {
     const rows = data ?? [];
     const hasMore = rows.length > limit;
     const items = hasMore ? rows.slice(0, limit) : rows;
-    const nextCursor = hasMore && items.length > 0
-      ? items[items.length - 1]!.created_at
-      : null;
+    const last = items[items.length - 1];
+    const nextCursor =
+      hasMore && last ? `${last.created_at}|${last.id}` : null;
 
     return json({
       items,

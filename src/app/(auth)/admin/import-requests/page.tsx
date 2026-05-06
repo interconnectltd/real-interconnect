@@ -15,6 +15,9 @@ import { toast } from "sonner";
 import { api } from "@/lib/api-client";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import {
+  Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription,
+} from "@/components/ui/dialog";
 import { LinkMeetingsDialog } from "./_link-meetings-dialog";
 
 type Status = "pending" | "processing" | "done" | "rejected" | "cancelled";
@@ -56,6 +59,13 @@ export default function AdminImportRequestsPage() {
   const queryClient = useQueryClient();
   const [filterStatus, setFilterStatus] = useState<Status | "all">("pending");
   const [linkingRequest, setLinkingRequest] = useState<ImportRequest | null>(null);
+  // 完了 / 却下 メモ入力 Dialog
+  const [noteDialog, setNoteDialog] = useState<{
+    request: ImportRequest;
+    target: "done" | "rejected";
+  } | null>(null);
+  const [noteInput, setNoteInput] = useState("");
+  const [noteError, setNoteError] = useState<string | null>(null);
 
   const { data, isLoading, isError } = useQuery({
     queryKey: ["admin-import-requests", filterStatus],
@@ -198,8 +208,9 @@ export default function AdminImportRequestsPage() {
                   <Button
                     size="sm"
                     onClick={() => {
-                      const note = prompt("完了メモ (任意)") ?? undefined;
-                      updateMutation.mutate({ id: req.id, status: "done", note });
+                      setNoteInput("");
+                      setNoteError(null);
+                      setNoteDialog({ request: req, target: "done" });
                     }}
                     disabled={updateMutation.isPending}
                     aria-label="完了"
@@ -211,9 +222,9 @@ export default function AdminImportRequestsPage() {
                     size="sm"
                     variant="destructive"
                     onClick={() => {
-                      const note = prompt("却下理由") ?? undefined;
-                      if (!note) return;
-                      updateMutation.mutate({ id: req.id, status: "rejected", note });
+                      setNoteInput("");
+                      setNoteError(null);
+                      setNoteDialog({ request: req, target: "rejected" });
                     }}
                     disabled={updateMutation.isPending}
                     aria-label="却下"
@@ -237,6 +248,85 @@ export default function AdminImportRequestsPage() {
           }}
         />
       )}
+
+      {/* 完了 / 却下 メモ入力 Dialog (旧 prompt() 撤去) */}
+      <Dialog
+        open={Boolean(noteDialog)}
+        onOpenChange={(o) => {
+          if (!o) {
+            setNoteDialog(null);
+            setNoteInput("");
+            setNoteError(null);
+          }
+        }}
+      >
+        <DialogContent className="sm:max-w-md">
+          {noteDialog && (
+            <>
+              <DialogHeader>
+                <DialogTitle>
+                  {noteDialog.target === "done" ? "申請を完了" : "申請を却下"}
+                </DialogTitle>
+                <DialogDescription>
+                  {noteDialog.target === "done"
+                    ? "申請者に表示される完了メモ (任意)"
+                    : "申請者に表示される却下理由 (必須)"}
+                </DialogDescription>
+              </DialogHeader>
+              <textarea
+                value={noteInput}
+                onChange={(e) => {
+                  setNoteInput(e.target.value);
+                  if (noteError) setNoteError(null);
+                }}
+                rows={4}
+                maxLength={500}
+                placeholder={
+                  noteDialog.target === "done"
+                    ? "例: tl:dv 同期済の 5 件の会議を取り込みました"
+                    : "例: tl:dv に該当する会議が見つかりませんでした"
+                }
+                className="w-full resize-none rounded-md border bg-background px-3 py-2 text-base placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/70 sm:text-sm"
+                aria-invalid={Boolean(noteError)}
+                autoFocus
+              />
+              <div className="flex items-center justify-between text-xs text-muted-foreground">
+                <span>{noteInput.length} / 500</span>
+                {noteError && <span className="text-destructive">{noteError}</span>}
+              </div>
+              <div className="mt-2 flex justify-end gap-2">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setNoteDialog(null)}
+                >
+                  キャンセル
+                </Button>
+                <Button
+                  size="sm"
+                  variant={noteDialog.target === "rejected" ? "destructive" : "default"}
+                  onClick={() => {
+                    const trimmed = noteInput.trim();
+                    if (noteDialog.target === "rejected" && trimmed.length < 5) {
+                      setNoteError("却下理由は 5 文字以上で入力してください");
+                      return;
+                    }
+                    updateMutation.mutate({
+                      id: noteDialog.request.id,
+                      status: noteDialog.target,
+                      note: trimmed || undefined,
+                    });
+                    setNoteDialog(null);
+                  }}
+                  disabled={updateMutation.isPending}
+                >
+                  {noteDialog.target === "done" ? "完了する" : "却下する"}
+                </Button>
+              </div>
+            </>
+          )}
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

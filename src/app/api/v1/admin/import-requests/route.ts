@@ -63,6 +63,17 @@ export async function PATCH(request: Request) {
         parsed.error.issues[0]?.message ?? "ボディ不正",
       );
     }
+    // 却下時は admin_note 必須 (UI の Dialog 検証が fetch 直叩きで bypass されるのを防ぐ)
+    if (
+      parsed.data.status === "rejected" &&
+      (!parsed.data.admin_note || parsed.data.admin_note.trim().length < 5)
+    ) {
+      return jsonError(
+        400,
+        "ADMIN_NOTE_REQUIRED",
+        "却下するには理由 (5 字以上) が必要です",
+      );
+    }
 
     const update = {
       status: parsed.data.status,
@@ -85,13 +96,34 @@ export async function PATCH(request: Request) {
       .single();
     if (error) throw error;
 
+    // ユーザー通知 (done/rejected の最終状態のみ)
+    if (parsed.data.status === "done" || parsed.data.status === "rejected") {
+      const userMessage =
+        parsed.data.status === "done"
+          ? "会議データの取込が完了しました。マッチング画面でご確認ください。"
+          : `申請は却下されました${parsed.data.admin_note ? `: ${parsed.data.admin_note}` : "。"}`;
+      void supabase.from("notifications").insert({
+        user_id: data.user_id,
+        type: "system",
+        title:
+          parsed.data.status === "done"
+            ? "会議データ取込が完了しました"
+            : "取込申請について",
+        message: userMessage,
+        link: "/dashboard",
+        is_read: false,
+      } as never).then(({ error: nerr }) => {
+        if (nerr) console.warn("[import-requests PATCH] notification failed:", nerr.message);
+      });
+    }
+
     const client = extractClientInfo(request);
     void writeAuditLog(supabase, {
       actor_id: user.id,
       action: "admin.import_request.update",
       target_type: "import_request",
       target_id: id,
-      payload: { status: parsed.data.status },
+      payload: { status: parsed.data.status, admin_note: parsed.data.admin_note ?? null },
       ip: client.ip,
       ua: client.ua,
     });

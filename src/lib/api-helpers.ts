@@ -240,8 +240,12 @@ export async function withAdminAuth(
 
   let reason: string | null = null;
   if (options.requireReason) {
+    // 優先順位: X-Admin-Reason ヘッダ > ?reason= クエリ (後方互換)
+    // ヘッダ経由なら URL 履歴 / Referer leak を回避できる (法務 R5 整合)
+    const headerReason = (request.headers.get("x-admin-reason") ?? "").trim();
     const url = new URL(request.url);
-    const raw = (url.searchParams.get("reason") ?? "").trim();
+    const queryReason = (url.searchParams.get("reason") ?? "").trim();
+    const raw = headerReason || queryReason;
     if (raw.length < 5 || raw.length > 500) {
       throw new ApiError(
         400,

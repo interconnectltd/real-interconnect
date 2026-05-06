@@ -23,6 +23,9 @@ export type AuditAction =
   | "calendar.connect"
   | "calendar.disconnect"
   | "calendar.event.create"
+  // 取込申請 (一般ユーザー操作)
+  | "import_request.create"
+  | "import_request.cancel"
   // admin 操作 (法務 R5 / 個情法 27 条対応の追跡用)
   | "admin.view_user"
   | "admin.import_request.update"

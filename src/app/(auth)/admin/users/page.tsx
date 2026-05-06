@@ -10,7 +10,8 @@
 import { useState, useDeferredValue } from "react";
 import { useQuery } from "@tanstack/react-query";
 import Link from "next/link";
-import { Loader2, Search, ChevronLeft, ChevronRight, ShieldCheck } from "lucide-react";
+import { useSearchParams } from "next/navigation";
+import { Loader2, Search, ChevronLeft, ChevronRight, ShieldCheck, FileWarning } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -35,20 +36,24 @@ interface ListResponse {
 }
 
 export default function AdminUsersPage() {
+  const searchParams = useSearchParams();
+  const incomplete = searchParams.get("incomplete") === "1";
   const [q, setQ] = useState("");
   const [page, setPage] = useState(1);
   const deferredQ = useDeferredValue(q);
 
   const { data, isLoading, isError } = useQuery({
-    queryKey: ["admin-users", deferredQ, page],
+    queryKey: ["admin-users", deferredQ, page, incomplete],
     queryFn: () => {
       const params = new URLSearchParams();
       if (deferredQ.trim()) params.set("q", deferredQ.trim());
+      if (incomplete) params.set("incomplete", "1");
       params.set("page", String(page));
       params.set("pageSize", "50");
       return api.get<ListResponse>(`/admin/users?${params.toString()}`);
     },
     staleTime: 30_000,
+    placeholderData: (prev) => prev,
   });
 
   return (
@@ -63,8 +68,24 @@ export default function AdminUsersPage() {
         </p>
       </header>
 
+      {/* アクティブフィルタ表示 */}
+      {incomplete && (
+        <div className="mb-3 flex flex-wrap items-center gap-2">
+          <Badge
+            variant="outline"
+            className="border-amber-300 bg-amber-50 text-amber-800 dark:border-amber-700 dark:bg-amber-950 dark:text-amber-200"
+          >
+            <FileWarning className="mr-1 h-3 w-3" aria-hidden="true" />
+            不完全プロフィール (industry/bio NULL)
+          </Badge>
+          <Link href="/admin/users" className="text-xs text-muted-foreground underline">
+            フィルタ解除
+          </Link>
+        </div>
+      )}
+
       {/* 検索バー: SP で sticky */}
-      <div className="sticky top-0 z-10 -mx-4 mb-4 bg-background/95 px-4 py-2 backdrop-blur supports-[backdrop-filter]:bg-background/80">
+      <div className="sticky top-0 z-30 -mx-4 mb-4 bg-background/95 px-4 py-2 backdrop-blur supports-[backdrop-filter]:bg-background/80">
         <div className="relative">
           <Search
             className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground"

@@ -34,6 +34,8 @@ const PostSchema = z.object({
     )
     .min(1)
     .max(100),
+  /** 既に他ユーザーに紐付け済の participant も上書きするか (誤紐付けの修正用) */
+  force: z.boolean().default(false),
 });
 
 export async function GET(
@@ -163,46 +165,44 @@ export async function POST(
       );
     }
 
-    // 申請ユーザー取得
-    const { data: req, error: reqErr } = await supabase
-      .from("meeting_data_import_requests")
-      .select("id, user_id, status")
-      .eq("id", id)
-      .maybeSingle();
-    if (reqErr) throw reqErr;
-    if (!req) return jsonError(404, "NOT_FOUND", "申請が見つかりません");
-
-    // speaker_name 一致行に user_id を back-fill (既に紐付き済は上書きしない)
-    let linkedCount = 0;
-    const errors: Array<{ transcript_id: string; message: string }> = [];
-
-    for (const m of parsed.data.meetings) {
-      const sn = m.speaker_name.trim();
-      // ILIKE で大小無視部分一致 (空白ゆらぎを吸収)
-      const { data: rows, error: upErr } = await supabase
-        .from("meeting_participants")
-        .update({
-          user_id: req.user_id,
-          is_linked: true,
-          linked_method: "manual",
-        })
-        .eq("transcript_id", m.transcript_id)
-        .ilike("speaker_name", `%${sn}%`)
-        .is("user_id", null)
-        .select("id");
-      if (upErr) {
-        errors.push({ transcript_id: m.transcript_id, message: upErr.message });
-        continue;
-      }
-      linkedCount += rows?.length ?? 0;
+    // RPC で 1 SQL 完結 (idempotent + transactional + speaker_name は exact 一致)
+    type RpcLoose = {
+      rpc: (
+        fn: string,
+        args: Record<string, unknown>,
+      ) => Promise<{ data: unknown; error: { message?: string } | null }>;
+    };
+    const { data: rpcData, error: rpcErr } = await (
+      supabase as unknown as RpcLoose
+    ).rpc("link_import_request_meetings", {
+      p_request_id: id,
+      p_meetings: parsed.data.meetings,
+      p_force: parsed.data.force,
+    });
+    if (rpcErr) {
+      return jsonError(500, "DB_ERROR", rpcErr.message ?? "RPC failed");
     }
 
-    // 申請を processing に遷移 (まだ pending の場合のみ)
-    if (req.status === "pending") {
-      await supabase
-        .from("meeting_data_import_requests")
-        .update({ status: "processing" })
-        .eq("id", id);
+    const result = (rpcData ?? {}) as {
+      participants_linked?: number;
+      request_user_id?: string;
+    };
+    const linkedCount = result.participants_linked ?? 0;
+
+    // 紐付け完了をユーザーへ in-app 通知 (notifications テーブル INSERT)
+    if (linkedCount > 0 && result.request_user_id) {
+      // notifications.type は enum (system / connection_request 等)。
+      // import_request_progress は未定義のため system で代用、title/message で明示。
+      void supabase.from("notifications").insert({
+        user_id: result.request_user_id,
+        type: "system",
+        title: "会議データの取込が進みました",
+        message: `${linkedCount} 件の会議参加情報をプロフィールに反映しました。マッチング精度が向上します。`,
+        link: "/dashboard",
+        is_read: false,
+      } as never).then(({ error }) => {
+        if (error) console.warn("[link-meetings] notification failed:", error.message);
+      });
     }
 
     const client = extractClientInfo(request);
@@ -213,10 +213,10 @@ export async function POST(
       target_id: id,
       payload: {
         op: "link_meetings",
-        target_user_id: req.user_id,
+        target_user_id: result.request_user_id ?? null,
         meetings_attempted: parsed.data.meetings.length,
         participants_linked: linkedCount,
-        errors,
+        force: parsed.data.force,
       },
       ip: client.ip,
       ua: client.ua,
@@ -225,7 +225,6 @@ export async function POST(
     return json({
       participants_linked: linkedCount,
       meetings_attempted: parsed.data.meetings.length,
-      errors,
     });
   } catch (error) {
     return handleApiError(error);

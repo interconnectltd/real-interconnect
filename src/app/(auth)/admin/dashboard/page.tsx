@@ -22,13 +22,14 @@ interface DashboardKpi {
   mau_30d: number;
   onboarding_completed: number;
   onboarding_in_progress: number;
-  onboarding_completion_rate: number;
   connections_accepted_total: number;
   connections_pending: number;
   matches_total: number;
   pending_import_requests: number;
+  processing_import_requests: number;
   transcript_errors: number;
   incomplete_profiles: number;
+  participants_linked_7d: number;
 }
 
 interface KpiCardProps {
@@ -131,15 +132,26 @@ export default function AdminDashboardPage() {
           />
           <KpiCard
             label="オンボ完了率"
-            value={`${Math.round(data.onboarding_completion_rate * 100)}%`}
+            value={`${
+              data.active_users_total === 0
+                ? 0
+                : Math.round(
+                    (data.onboarding_completed / data.active_users_total) * 100,
+                  )
+            }%`}
             hint={`${data.onboarding_completed} / ${data.active_users_total}`}
             icon={UserCheck}
-            tone={data.onboarding_completion_rate >= 0.7 ? "success" : "default"}
+            tone={
+              data.active_users_total > 0 &&
+              data.onboarding_completed / data.active_users_total >= 0.7
+                ? "success"
+                : "default"
+            }
           />
           <KpiCard
-            label="未処理 取込申請"
-            value={data.pending_import_requests}
-            hint="運営対応待ち"
+            label="取込申請 (未処理 / 処理中)"
+            value={`${data.pending_import_requests} / ${data.processing_import_requests}`}
+            hint="運営対応待ち / 紐付け作業中"
             icon={Inbox}
             href="/admin/import-requests"
             tone={data.pending_import_requests > 0 ? "warn" : "default"}
@@ -156,7 +168,14 @@ export default function AdminDashboardPage() {
             value={data.incomplete_profiles}
             hint="industry/bio が NULL"
             icon={FileWarning}
-            href="/admin/users"
+            href="/admin/users?incomplete=1"
+          />
+          <KpiCard
+            label="紐付け実績 (7日)"
+            value={data.participants_linked_7d}
+            hint="manual link で取り込んだ参加者数"
+            icon={TrendingUp}
+            tone={data.participants_linked_7d > 0 ? "success" : "default"}
           />
         </div>
       )}

@@ -33,18 +33,21 @@ interface PageResp {
 export default function AdminAuditLogsPage() {
   const [actionQ, setActionQ] = useState("");
   const [entityType, setEntityType] = useState("");
+  const [actor, setActor] = useState("");
   const deferredAction = useDeferredValue(actionQ);
   const deferredEntity = useDeferredValue(entityType);
+  const deferredActor = useDeferredValue(actor);
 
   const { data, isLoading, isError, fetchNextPage, hasNextPage, isFetchingNextPage } =
     useInfiniteQuery<PageResp>({
-      queryKey: ["admin-audit-logs", deferredAction, deferredEntity],
+      queryKey: ["admin-audit-logs", deferredAction, deferredEntity, deferredActor],
       initialPageParam: null as string | null,
       getNextPageParam: (last) => last.nextCursor,
       queryFn: ({ pageParam }) => {
         const params = new URLSearchParams();
         if (deferredAction.trim()) params.set("action", deferredAction.trim());
         if (deferredEntity.trim()) params.set("entity_type", deferredEntity.trim());
+        if (deferredActor.trim()) params.set("actor", deferredActor.trim());
         if (pageParam) params.set("cursor", pageParam as string);
         params.set("limit", "50");
         return api.get<PageResp>(`/admin/audit-logs?${params.toString()}`);
@@ -67,7 +70,7 @@ export default function AdminAuditLogsPage() {
       </header>
 
       {/* フィルタ */}
-      <div className="sticky top-0 z-10 -mx-4 mb-4 grid gap-2 bg-background/95 px-4 py-2 backdrop-blur sm:grid-cols-2 supports-[backdrop-filter]:bg-background/80">
+      <div className="sticky top-0 z-30 -mx-4 mb-4 grid gap-2 bg-background/95 px-4 py-2 backdrop-blur sm:grid-cols-3 supports-[backdrop-filter]:bg-background/80">
         <div className="relative">
           <Search
             className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground"
@@ -77,7 +80,7 @@ export default function AdminAuditLogsPage() {
             type="search"
             value={actionQ}
             onChange={(e) => setActionQ(e.target.value)}
-            placeholder="action で部分一致 (例: chat / view_user)"
+            placeholder="action 部分一致"
             aria-label="action で検索"
             className="pl-9"
           />
@@ -86,8 +89,15 @@ export default function AdminAuditLogsPage() {
           type="search"
           value={entityType}
           onChange={(e) => setEntityType(e.target.value)}
-          placeholder="entity_type 完全一致 (例: user / chat_message)"
+          placeholder="entity_type 完全一致"
           aria-label="entity_type で検索"
+        />
+        <Input
+          type="search"
+          value={actor}
+          onChange={(e) => setActor(e.target.value)}
+          placeholder="actor UUID 完全一致"
+          aria-label="actor UUID で検索"
         />
       </div>
 
@@ -109,31 +119,43 @@ export default function AdminAuditLogsPage() {
         </div>
       )}
 
-      <ul className="space-y-1.5 list-none p-0 font-mono text-xs">
+      <ul className="space-y-1.5 list-none p-0 text-xs">
         {allItems.map((log) => (
           <li
             key={log.id}
-            className="flex flex-wrap items-center gap-x-2 rounded border bg-card px-3 py-1.5 shadow-sm"
+            className="rounded border bg-card px-3 py-2 shadow-sm"
           >
-            <span className="text-muted-foreground">
-              {new Date(log.created_at).toLocaleString("ja-JP")}
-            </span>
-            <code className="rounded bg-muted px-1.5 py-0.5">
-              {log.action}
-            </code>
-            {log.target_type && (
+            <div className="flex flex-col gap-x-2 gap-y-0.5 font-mono sm:flex-row sm:flex-wrap sm:items-center">
               <span className="text-muted-foreground">
-                → {log.target_type}
-                {log.target_id ? `:${log.target_id.slice(0, 8)}…` : ""}
+                {new Date(log.created_at).toLocaleString("ja-JP")}
               </span>
-            )}
-            {log.actor_id && (
-              <span className="text-muted-foreground">
-                actor:{log.actor_id.slice(0, 8)}…
-              </span>
-            )}
-            {log.ip && (
-              <span className="text-muted-foreground">{log.ip}</span>
+              <code className="inline-block rounded bg-muted px-1.5 py-0.5">
+                {log.action}
+              </code>
+              {log.target_type && (
+                <span className="text-muted-foreground">
+                  → {log.target_type}
+                  {log.target_id ? `:${log.target_id.slice(0, 8)}…` : ""}
+                </span>
+              )}
+              {log.actor_id && (
+                <span className="text-muted-foreground">
+                  actor:{log.actor_id.slice(0, 8)}…
+                </span>
+              )}
+              {log.ip && (
+                <span className="text-muted-foreground">{log.ip}</span>
+              )}
+            </div>
+            {log.payload && Object.keys(log.payload).length > 0 && (
+              <details className="mt-1">
+                <summary className="cursor-pointer text-[10px] text-muted-foreground hover:text-foreground">
+                  payload を表示
+                </summary>
+                <pre className="mt-1 overflow-x-auto rounded bg-muted/40 p-2 text-[10px] leading-tight">
+                  {JSON.stringify(log.payload, null, 2)}
+                </pre>
+              </details>
             )}
           </li>
         ))}
