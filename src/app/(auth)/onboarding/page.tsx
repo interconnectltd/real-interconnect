@@ -1,11 +1,11 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import {
   Handshake, MessageCircle, TrendingUp, Users, RefreshCw, GraduationCap,
   ChevronRight, ChevronLeft, Check, Briefcase, Globe2, Wallet, Sprout,
-  UserPlus, Wrench, Megaphone, Scale, ShoppingBag, FileText, Pencil,
+  UserPlus, Wrench, Megaphone, Scale, ShoppingBag, Pencil,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -14,7 +14,6 @@ import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { useSupabase } from "@/providers/supabase-provider";
 import { GOAL_TYPES, GOAL_GROUPS, type GoalGroup } from "@/lib/constants";
-import { api } from "@/lib/api-client";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
 
@@ -34,7 +33,6 @@ const GOAL_ICONS: Record<string, React.ElementType> = {
   consulting:      MessageCircle,
   mentoring:       GraduationCap,
   expertise_pro:   Scale,
-  information:     FileText,
 };
 
 // ── Step Indicator ──
@@ -78,7 +76,7 @@ function StepIndicator({
               i === current ? "font-medium text-foreground" : "text-muted-foreground",
             )}
           >
-            {label === "目的と提供" && i === current && subProgress
+            {i === 1 && i === current && subProgress
               ? `目的${subProgress.goalsCount} / 提供${subProgress.offeringsCount}`
               : label}
           </span>
@@ -104,7 +102,7 @@ function GroupSection({
   detailValue,
   onDetailChange,
 }: {
-  group: { value: GoalGroup; label: string; emoji: string };
+  group: { value: GoalGroup; label: string };
   items: readonly GoalItem[];
   getDescription: (item: GoalItem) => string;
   isSelected: (type: string) => boolean;
@@ -112,7 +110,10 @@ function GroupSection({
   detailValue?: (type: string) => string;
   onDetailChange?: (type: string, value: string) => void;
 }) {
-  if (items.length === 0) return null;
+  // description が "" の項目は seek/offer 片側にしか意味が無いカテゴリ (投資家/起業家)。
+  // UI 上は反対側を非表示にして混乱を防ぐ。
+  const visibleItems = items.filter((g) => getDescription(g).trim().length > 0);
+  if (visibleItems.length === 0) return null;
   const headingId = `group-heading-${group.value}`;
   return (
     <section
@@ -124,11 +125,10 @@ function GroupSection({
         id={headingId}
         className="mb-2 text-xs font-medium uppercase tracking-wider text-muted-foreground"
       >
-        <span aria-hidden="true" className="mr-1">{group.emoji}</span>
         {group.label}
       </h3>
       <div className="grid gap-2 sm:grid-cols-2">
-        {items.map((g) => (
+        {visibleItems.map((g) => (
           <SelectableCard
             key={g.value}
             type={g.value}
@@ -190,7 +190,7 @@ function SelectableCard({
           )}
           aria-hidden="true"
         >
-          <Icon className="h-4.5 w-4.5" />
+          <Icon className="h-4 w-4" />
         </div>
         <div className="min-w-0 flex-1">
           <p className={cn("text-sm font-medium", selected && "text-primary")}>
@@ -211,7 +211,7 @@ function SelectableCard({
               htmlFor={detailId}
               className="text-xs font-medium text-muted-foreground"
             >
-              詳細・条件 (任意 / Claude AIマッチング精度向上)
+              詳細・条件 (任意・マッチング精度向上)
             </Label>
             <span
               className={cn(
@@ -252,19 +252,16 @@ export default function OnboardingPage() {
   }, [step]);
 
   // Step 1: 基本情報
-  // user_profiles を source of truth として読む。 signUp時の user_metadata は
-  // frozen snapshot のため、 /settings 等で変更されても反映されない問題を解消。
-  // フォールバック: profile 取得失敗時は user_metadata、それも無ければ email username。
+  // user_profiles を source of truth として読む (user_metadata は frozen snapshot)。
+  // 連絡先 (contact_info) は当アプリでは収集しない方針 — マッチング承諾後の連絡は
+  // アプリ内チャット + Google Meet 自動発行で完結させる (PII 非保持・越境移転回避)。
   const [profile, setProfile] = useState({
     name: user?.user_metadata?.name ?? "",
     company: user?.user_metadata?.company ?? "",
     position: user?.user_metadata?.position ?? "",
-    contact_info: "",
   });
   const [profileLoaded, setProfileLoaded] = useState(false);
-  // Step 1: 既登録情報の編集モード(デフォルト read-only summary、必要時のみ展開)
   const [editingBasic, setEditingBasic] = useState(false);
-  // editingBasic 開始時の snapshot で「キャンセル」復元できるようにする
   const [basicDraftSnapshot, setBasicDraftSnapshot] = useState<{
     name: string;
     company: string;
@@ -277,7 +274,7 @@ export default function OnboardingPage() {
     (async () => {
       const { data } = await supabase
         .from("user_profiles")
-        .select("name, company, position, contact_info")
+        .select("name, company, position")
         .eq("id", user.id)
         .maybeSingle();
       if (cancelled) return;
@@ -292,7 +289,6 @@ export default function OnboardingPage() {
             (data as { position?: string | null }).position ??
             user?.user_metadata?.position ??
             "",
-          contact_info: (data as { contact_info?: string | null }).contact_info ?? "",
         });
       }
       setProfileLoaded(true);
@@ -300,7 +296,8 @@ export default function OnboardingPage() {
     return () => {
       cancelled = true;
     };
-  }, [user?.id, profileLoaded, supabase, user?.user_metadata]);
+    // user.id 変化のみ依存。user_metadata は object reference で再 render 毎に変化するので除外
+  }, [user?.id, profileLoaded, supabase]);
 
   // Step 2: Goals & Offerings + 各カテゴリの詳細(任意 free-text)
   const [selectedGoals, setSelectedGoals] = useState<Set<string>>(new Set());
@@ -311,8 +308,6 @@ export default function OnboardingPage() {
   const [step2Tab, setStep2Tab] = useState<"goals" | "offerings">("goals");
   const goalsTabRef = useRef<HTMLButtonElement | null>(null);
   const offeringsTabRef = useRef<HTMLButtonElement | null>(null);
-  // 第三者提供(マッチング相手への連絡先開示)同意
-  const [agreeContactSharing, setAgreeContactSharing] = useState(false);
 
   function toggleGoal(type: string) {
     setSelectedGoals((prev) => {
@@ -332,11 +327,31 @@ export default function OnboardingPage() {
     });
   }
 
+  // GOAL_TYPES の label を value で引く Map (毎 render の find を回避)
+  const goalLabelMap = useMemo(() => {
+    const m = new Map<string, string>();
+    for (const g of GOAL_TYPES) m.set(g.value, g.label);
+    return m;
+  }, []);
+
+  // 重複選択 (goals ∩ offerings) のラベル一覧
+  const overlapLabels = useMemo(() => {
+    const labels: string[] = [];
+    for (const t of selectedGoals) {
+      if (selectedOfferings.has(t)) {
+        const l = goalLabelMap.get(t);
+        if (l) labels.push(l);
+      }
+    }
+    return labels;
+  }, [selectedGoals, selectedOfferings, goalLabelMap]);
+
   async function handleComplete() {
     setSaving(true);
     try {
-      // 単一トランザクションで profile + goals/offerings + onboarding_step を更新
-      // partial failure による「永久ロック」状態を防ぐ
+      // RPC は v2 シグネチャ (連絡先・第三者提供同意の引数を撤去済 / mig 00034)。
+      // 単一トランザクションで profile + goals/offerings + onboarding_step を更新し、
+      // partial failure による「永久ロック」状態を防ぐ。
       type RpcLoose = {
         rpc: (
           fn: string,
@@ -350,7 +365,6 @@ export default function OnboardingPage() {
         p_name: profile.name,
         p_company: profile.company,
         p_position: profile.position,
-        p_contact_info: profile.contact_info,
         p_goals: [...selectedGoals].map((type) => ({
           type,
           detail: goalDetails[type] ?? "",
@@ -359,8 +373,6 @@ export default function OnboardingPage() {
           type,
           detail: offeringDetails[type] ?? "",
         })),
-        p_contact_sharing_consent: agreeContactSharing,
-        p_consent_version: "2026-05-04",
       });
       if (rpcError) throw new Error(rpcError.message ?? "RPC failed");
 
@@ -508,70 +520,20 @@ export default function OnboardingPage() {
             </CardContent>
           </Card>
 
-          {/* 連絡先 (これがStep1の主入力) + 第三者提供同意 */}
-          <Card>
-            <CardContent className="space-y-3 p-6">
-              <div className="space-y-1.5">
-                <Label htmlFor="ob-contact" className="text-base font-semibold">
-                  連絡先 <span className="text-xs font-normal text-muted-foreground">(マッチング承諾後に相手に開示)</span>
-                </Label>
-                <Input
-                  id="ob-contact"
-                  autoComplete="off"
-                  enterKeyHint="done"
-                  placeholder="例: LINE ID、電話番号、メールアドレスなど"
-                  value={profile.contact_info}
-                  onChange={(e) =>
-                    setProfile({ ...profile, contact_info: e.target.value })
-                  }
-                  aria-describedby="ob-contact-help"
-                />
-                <p id="ob-contact-help" className="text-xs text-muted-foreground">
-                  未入力の場合、アカウントのメールアドレスが自動的に表示されます。
-                  最も連絡が取りやすい手段を入れておくと、マッチング相手から早く連絡が来やすくなります。
-                </p>
-              </div>
-
-              <div className="flex items-start gap-2 rounded-md border border-amber-300 bg-amber-50 p-3 dark:border-amber-700 dark:bg-amber-950">
-                <input
-                  id="ob-contact-sharing"
-                  type="checkbox"
-                  checked={agreeContactSharing}
-                  onChange={(e) => setAgreeContactSharing(e.target.checked)}
-                  className="mt-1 h-4 w-4 shrink-0 cursor-pointer"
-                  aria-required="true"
-                  aria-invalid={!agreeContactSharing}
-                />
-                {/* shadcn Label は base が `flex items-center gap-2` なため、内側に
-                    rich content (text + <strong> + <a>) を入れると各子要素が flex
-                    item として扱われて縦割り状の改行崩れが起きる。
-                    第三者提供の同意文は long-form なので plain <label> を使う。 */}
-                <label
-                  htmlFor="ob-contact-sharing"
-                  className="block min-w-0 flex-1 cursor-pointer text-xs leading-relaxed text-amber-900 dark:text-amber-200"
-                >
-                  上記連絡先(または登録メールアドレス)が、<strong>マッチング承諾された相手ユーザー</strong>に開示されることに同意します。
-                  これは個人情報保護法第27条に基づく第三者提供の同意です。詳細は{" "}
-                  <a
-                    href="/privacy"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="underline underline-offset-2"
-                  >
-                    プライバシーポリシー
-                  </a>
-                  をご参照ください。
-                </label>
-              </div>
-            </CardContent>
-          </Card>
+          {/* 連絡先・第三者提供同意は撤去 (2026-05-06)。
+              マッチング承諾後の連絡はアプリ内チャット + Google Meet 自動発行で完結。
+              個人情報の収集・第三者提供を発生させないことでプライバシーリスクと
+              越境移転コストを最小化。 */}
+          <div className="rounded-md border bg-muted/30 px-4 py-3 text-xs leading-relaxed text-muted-foreground">
+            マッチング後のやり取りはすべて<strong className="font-semibold text-foreground">アプリ内チャット</strong>で完結します。
+            日程調整は同チャット内のカードから Google Meet を自動発行できるため、
+            メールアドレスや電話番号などの<strong className="font-semibold text-foreground">連絡先を交換する必要はありません</strong>。
+          </div>
 
           <div className="flex justify-end">
             <Button
               onClick={() => setStep(1)}
-              disabled={
-                saving || !profileLoaded || !profile.name.trim() || !agreeContactSharing
-              }
+              disabled={saving || !profileLoaded || !profile.name.trim()}
               aria-describedby="step0-next-help"
             >
               次へ <ChevronRight className="ml-1 h-4 w-4" />
@@ -587,11 +549,6 @@ export default function OnboardingPage() {
               お名前の入力が必要です
             </p>
           )}
-          {profileLoaded && profile.name.trim() && !agreeContactSharing && (
-            <p id="step0-next-help" className="text-right text-xs text-destructive">
-              第三者提供への同意が必要です
-            </p>
-          )}
         </div>
       )}
 
@@ -601,7 +558,7 @@ export default function OnboardingPage() {
           <div className="text-center">
             <h1 className="text-2xl font-bold">あなたの目的と提供できること</h1>
             <p className="mt-1 text-sm text-muted-foreground">
-              それぞれ複数選択可能。商談で出てきたカテゴリほど Claude AI のマッチング精度が高まります。
+              求めていること・提供できることをそれぞれ複数選択。詳細を書き込むほどマッチング精度が向上します。
             </p>
           </div>
 
@@ -611,6 +568,8 @@ export default function OnboardingPage() {
             aria-label="目的と提供できることの選択"
             className="flex items-center gap-2 border-b"
             onKeyDown={(e) => {
+              // IME 変換中の矢印キーはタブ切替に流用しない (日本語入力中の暴発防止)
+              if (e.nativeEvent.isComposing) return;
               let next: "goals" | "offerings" | null = null;
               if (e.key === "ArrowRight" || e.key === "ArrowLeft") {
                 next = step2Tab === "goals" ? "offerings" : "goals";
@@ -682,31 +641,28 @@ export default function OnboardingPage() {
             </button>
           </div>
 
-          {/* aria-live で 0件→選択済みの差分のみ通知 (連続冗長読み上げ抑制) */}
+          {/* aria-live で 0件→選択済みの差分を通知 (両方未選択時も読み上げる) */}
           <p
             aria-live="polite"
             aria-atomic="true"
             className="sr-only"
           >
-            {selectedGoals.size === 0
-              ? "求めていることが未選択です"
-              : selectedOfferings.size === 0
-                ? "提供できることが未選択です"
-                : ""}
+            {selectedGoals.size === 0 && selectedOfferings.size === 0
+              ? "求めていること・提供できることがどちらも未選択です"
+              : selectedGoals.size === 0
+                ? "求めていることが未選択です"
+                : selectedOfferings.size === 0
+                  ? "提供できることが未選択です"
+                  : ""}
           </p>
 
-          {/* 重複選択の検出ヒント */}
-          {(() => {
-            const overlap = [...selectedGoals].filter((t) =>
-              selectedOfferings.has(t),
-            );
-            return overlap.length > 0 ? (
-              <p className="rounded-md border border-amber-300 bg-amber-50 px-3 py-2 text-xs text-amber-900 dark:border-amber-700 dark:bg-amber-950 dark:text-amber-200">
-                両方に選択中: {overlap.map((t) => GOAL_TYPES.find((g) => g.value === t)?.label).filter(Boolean).join("、")} ({overlap.length}個)。
-                求めていることと提供できることに同じカテゴリを入れる場合は、それぞれの<strong>詳細</strong>欄で違いを書くとマッチング精度が上がります。
-              </p>
-            ) : null;
-          })()}
+          {/* 重複選択の検出ヒント (label 検索を Map で O(1) 化) */}
+          {overlapLabels.length > 0 && (
+            <p className="rounded-md border border-amber-300 bg-amber-50 px-3 py-2 text-xs text-amber-900 dark:border-amber-700 dark:bg-amber-950 dark:text-amber-200">
+              両方に選択中: {overlapLabels.join("、")} ({overlapLabels.length}個)。
+              同じカテゴリを両方に入れる場合は、それぞれの<strong>詳細</strong>欄で違いを書くとマッチング精度が上がります。
+            </p>
+          )}
 
           {/* Goals タブ */}
           {step2Tab === "goals" && (
@@ -716,7 +672,7 @@ export default function OnboardingPage() {
               aria-labelledby="tab-goals"
             >
               {selectedGoals.size === 0 && (
-                <p className="mb-2 text-xs text-destructive">最低1つ選択してください</p>
+                <p role="alert" className="mb-2 text-xs text-destructive">最低1つ選択してください</p>
               )}
               {GOAL_GROUPS.map((grp) => (
                 <GroupSection
@@ -743,7 +699,7 @@ export default function OnboardingPage() {
               aria-labelledby="tab-offerings"
             >
               {selectedOfferings.size === 0 && (
-                <p className="mb-2 text-xs text-destructive">最低1つ選択してください</p>
+                <p role="alert" className="mb-2 text-xs text-destructive">最低1つ選択してください</p>
               )}
               {GOAL_GROUPS.map((grp) => (
                 <GroupSection
@@ -805,9 +761,6 @@ export default function OnboardingPage() {
                     </span>
                   )}
                 </p>
-                {profile.contact_info && (
-                  <p className="text-xs text-muted-foreground">連絡先: {profile.contact_info}</p>
-                )}
               </div>
 
               <div>

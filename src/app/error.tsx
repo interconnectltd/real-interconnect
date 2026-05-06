@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { useEffect } from "react";
+import { AlertTriangle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 export default function GlobalError({
@@ -23,7 +24,7 @@ export default function GlobalError({
   return (
     <div className="flex min-h-[50dvh] flex-col items-center justify-center gap-6 px-4">
       <div className="flex flex-col items-center gap-2">
-        <span className="text-5xl">⚠️</span>
+        <AlertTriangle className="h-12 w-12 text-amber-500" aria-hidden="true" />
         <h2 className="text-xl font-bold">エラーが発生しました</h2>
         <p className="max-w-md text-center text-sm text-muted-foreground">
           申し訳ありません。予期しないエラーが発生しました。

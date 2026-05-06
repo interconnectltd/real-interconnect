@@ -135,7 +135,7 @@ export async function POST(request: Request) {
       .insert({
         room_id: data.room_id,
         sender_id: user.id,
-        content: `📅 ${formatJa(data.start)} 〜 ${formatJa(data.end)} に確定 (${data.platform === "google_meet" ? "Google Meet" : "Zoom"})`,
+        content: `${formatJa(data.start)} 〜 ${formatJa(data.end)} に確定 (${data.platform === "google_meet" ? "Google Meet" : "Zoom"})`,
         content_type: "meeting_confirmed",
         payload: payload as unknown as Json,
       })

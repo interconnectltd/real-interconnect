@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { Check, Loader2, X } from "lucide-react";
+import { Check, Loader2, X, Calendar, Video } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -118,7 +118,7 @@ export function MeetingSuggestionCard({
         {suggestion.datetime && (
           <div className="space-y-1 text-sm">
             <div className="flex items-center gap-1.5">
-              <span className="text-muted-foreground">📅</span>
+              <Calendar className="h-3.5 w-3.5 text-muted-foreground" aria-hidden="true" />
               <span className="font-medium">
                 {formatDateTimeJa(suggestion.datetime)}
                 {!isConfirmed && (
@@ -128,7 +128,7 @@ export function MeetingSuggestionCard({
             </div>
             {isConfirmed && platformLabel && (
               <div className="flex items-center gap-1.5">
-                <span className="text-muted-foreground">📹</span>
+                <Video className="h-3.5 w-3.5 text-muted-foreground" aria-hidden="true" />
                 <span>{platformLabel}</span>
               </div>
             )}
