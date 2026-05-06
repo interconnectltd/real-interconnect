@@ -723,7 +723,7 @@ function ProfileViewMode({
           </dd>
         </div>
       )}
-      <ViewField icon={Mail} label="メールアドレス" value={profile.email} />
+      <EmailField email={profile.email} />
       {profile.contact_info && (
         <div className="rounded-lg border border-accent/25 bg-accent/5 p-3">
           <dt className="flex items-center gap-1.5 text-xs font-medium text-accent-strong">
@@ -739,6 +739,50 @@ function ProfileViewMode({
         </div>
       )}
     </dl>
+  );
+}
+
+/**
+ * EmailField: メアドを default で mask 表示し、トグルで 10 秒だけ revealed。
+ * 共有スクショ・配信時の漏洩リスクを軽減。
+ */
+function EmailField({ email }: { email: string }) {
+  const [revealed, setRevealed] = useState(false);
+  useEffect(() => {
+    if (!revealed) return;
+    const t = setTimeout(() => setRevealed(false), 10_000);
+    return () => clearTimeout(t);
+  }, [revealed]);
+
+  // a***@example.com 形式に mask
+  const masked = (() => {
+    const at = email.indexOf("@");
+    if (at <= 1) return email;
+    return email[0] + "***" + email.slice(at);
+  })();
+
+  return (
+    <div>
+      <dt className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
+        <Mail
+          className="mr-1 inline-block h-3.5 w-3.5 align-text-bottom"
+          aria-hidden="true"
+        />
+        メールアドレス
+      </dt>
+      <dd className="mt-1 flex flex-wrap items-center gap-2 text-sm">
+        <span className="font-mono">{revealed ? email : masked}</span>
+        <button
+          type="button"
+          onClick={() => setRevealed((v) => !v)}
+          aria-pressed={revealed}
+          aria-label={revealed ? "メールアドレスを隠す" : "メールアドレスを表示"}
+          className="inline-flex h-7 items-center justify-center rounded-md border border-input bg-card px-2 text-xs text-muted-foreground hover:bg-muted focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/70"
+        >
+          {revealed ? "隠す (自動 10 秒)" : "表示する"}
+        </button>
+      </dd>
+    </div>
   );
 }
 

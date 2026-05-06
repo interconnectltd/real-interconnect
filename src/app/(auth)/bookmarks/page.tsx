@@ -102,11 +102,28 @@ export default function BookmarksPage() {
             return (
               <li key={b.id}>
                 <div className="relative">
-                  <button
-                    type="button"
+                  {/* nested button 解消: 外殻は role="button" + tabIndex の div に。
+                      Enter/Space で profile modal を開く。 */}
+                  <div
+                    role="button"
+                    tabIndex={0}
                     onClick={() => openProfileModal(p.id)}
+                    onKeyDown={(e) => {
+                      if (e.key === "Enter") {
+                        e.preventDefault();
+                        openProfileModal(p.id);
+                      } else if (e.key === " ") {
+                        e.preventDefault();
+                      }
+                    }}
+                    onKeyUp={(e) => {
+                      if (e.key === " ") {
+                        e.preventDefault();
+                        openProfileModal(p.id);
+                      }
+                    }}
                     aria-label={`${p.name} のプロフィールを開く`}
-                    className="block w-full rounded-lg text-left outline-none focus-visible:ring-[3px] focus-visible:ring-ring/70"
+                    className="block w-full cursor-pointer rounded-lg text-left outline-none focus-visible:ring-[3px] focus-visible:ring-ring/70"
                   >
                     <Card className="ds-card-interactive h-full">
                       <CardContent className="space-y-2 pr-14">
@@ -145,7 +162,7 @@ export default function BookmarksPage() {
                         </p>
                       </CardContent>
                     </Card>
-                  </button>
+                  </div>
                   <button
                     type="button"
                     onClick={(e) => {

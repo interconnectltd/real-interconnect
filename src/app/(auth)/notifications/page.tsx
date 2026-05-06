@@ -87,12 +87,30 @@ export default function NotificationsPage() {
                 "flex w-full items-start gap-3 rounded-lg px-4 py-3 text-left transition-colors hover:bg-muted cursor-pointer",
                 !n.is_read && "bg-primary/10",
               )}
-              onClick={() => {
+              onClick={(e) => {
+                // 内側 button (action / context expand) のクリックでは親遷移しない
+                const target = e.target as HTMLElement;
+                if (target.closest("button")) return;
+                // mutation 進行中も通知行クリックを止める (二重実行 / 遷移レース防止)
+                if (updateConnection.isPending || updateMeeting.isPending) return;
                 if (!n.is_read) markRead.mutate([n.id]);
                 if (n.link && n.link.startsWith("/")) router.push(n.link);
               }}
               onKeyDown={(e) => {
+                if (e.target !== e.currentTarget) return;
+                if (updateConnection.isPending || updateMeeting.isPending) return;
                 if (e.key === "Enter") {
+                  if (!n.is_read) markRead.mutate([n.id]);
+                  if (n.link && n.link.startsWith("/")) router.push(n.link);
+                } else if (e.key === " ") {
+                  // Space でスクロール抑止 + Enter と同等動作 (ARIA APG 推奨)
+                  e.preventDefault();
+                }
+              }}
+              onKeyUp={(e) => {
+                if (e.target !== e.currentTarget) return;
+                if (e.key === " ") {
+                  e.preventDefault();
                   if (!n.is_read) markRead.mutate([n.id]);
                   if (n.link && n.link.startsWith("/")) router.push(n.link);
                 }

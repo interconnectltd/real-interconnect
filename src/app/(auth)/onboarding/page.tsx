@@ -800,11 +800,24 @@ export default function OnboardingPage() {
             </Button>
             <Button
               onClick={() => setStep(2)}
-              disabled={selectedGoals.size === 0 || selectedOfferings.size === 0}
+              disabled={selectedGoals.size + selectedOfferings.size === 0}
+              aria-describedby={
+                selectedGoals.size + selectedOfferings.size === 0
+                  ? "step1-next-help"
+                  : undefined
+              }
             >
               次へ <ChevronRight className="ml-1 h-4 w-4" />
             </Button>
           </div>
+          {selectedGoals.size + selectedOfferings.size === 0 && (
+            <p
+              id="step1-next-help"
+              className="text-right text-xs text-destructive"
+            >
+              「求めていること」または「提供できること」を 1 件以上選択してください
+            </p>
+          )}
         </div>
       )}
 
