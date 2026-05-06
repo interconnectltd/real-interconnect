@@ -106,7 +106,7 @@ export async function PATCH(request: Request) {
     const client = extractClientInfo(request);
     void writeAuditLog(supabase, {
       actor_id: user.id,
-      action: "admin.import_request.update", // 既存 enum 内の汎用 action で代用
+      action: "admin.contact.update",
       target_type: "contact_message",
       target_id: id,
       payload: update,

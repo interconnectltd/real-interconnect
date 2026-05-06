@@ -3,6 +3,7 @@ import { Inter, Noto_Sans_JP } from "next/font/google";
 import { Toaster } from "@/components/ui/sonner";
 import { SupabaseProvider } from "@/providers/supabase-provider";
 import { QueryProvider } from "@/providers/query-provider";
+import { WebVitalsReporter } from "@/components/observability/web-vitals";
 import "./globals.css";
 
 const inter = Inter({
@@ -73,6 +74,7 @@ export default function RootLayout({
         {/* Provider を root に配置: route group 横断時に QueryClient cache が維持される */}
         <SupabaseProvider>
           <QueryProvider>
+            <WebVitalsReporter />
             {children}
             <Toaster />
           </QueryProvider>
