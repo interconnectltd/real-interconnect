@@ -91,6 +91,7 @@ const adminGroup: NavGroup = {
   items: [
     { href: "/admin/dashboard", label: "ダッシュボード", icon: LayoutGrid },
     { href: "/admin/users", label: "ユーザー", icon: Users },
+    { href: "/admin/contacts", label: "お問い合わせ", icon: MessageCircle },
     { href: "/admin/import-requests", label: "取込申請", icon: Inbox },
     { href: "/admin/audit-logs", label: "監査ログ", icon: ScrollText },
   ],
