@@ -45,6 +45,7 @@ next-env.d.ts
 # Supabase
 .supabase/
 supabase/.temp/
+supabase/_apply/
 
 # Local Netlify folder
 .netlify

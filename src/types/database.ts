@@ -840,6 +840,35 @@ export interface Database {
         };
         Relationships: [];
       };
+      meeting_data_import_requests: {
+        Row: {
+          id: string;
+          user_id: string;
+          status: "pending" | "processing" | "done" | "rejected" | "cancelled";
+          message: string | null;
+          source: "tldv" | "manual_csv" | "other";
+          admin_note: string | null;
+          processed_at: string | null;
+          processed_by: string | null;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          user_id: string;
+          status?: "pending" | "processing" | "done" | "rejected" | "cancelled";
+          message?: string | null;
+          source?: "tldv" | "manual_csv" | "other";
+          admin_note?: string | null;
+        };
+        Update: {
+          status?: "pending" | "processing" | "done" | "rejected" | "cancelled";
+          message?: string | null;
+          admin_note?: string | null;
+          processed_at?: string | null;
+          processed_by?: string | null;
+        };
+        Relationships: [];
+      };
       chat_message_idempotency_keys: {
         Row: {
           user_id: string;

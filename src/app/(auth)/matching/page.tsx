@@ -22,6 +22,7 @@ import { useMyProfile } from "@/hooks/queries/use-profile";
 import { useFilterStore } from "@/stores/filter-store";
 import { useUIStore } from "@/stores/ui-store";
 import { TldvConnectCta } from "@/components/shared/tldv-connect-cta";
+import { ImportRequestCTA } from "@/components/features/import-request/import-request-cta";
 import { ScoreBar, ReasonList } from "@/components/shared/score-bar";
 import { UserAvatar } from "@/components/shared/user-avatar";
 import { toast } from "sonner";
@@ -275,6 +276,7 @@ export default function MatchingPage() {
         <div className="space-y-4">
           <EmptyState hasMyProfile={!!myProfile} />
           <TldvConnectCta />
+          <ImportRequestCTA />
         </div>
       )}
 

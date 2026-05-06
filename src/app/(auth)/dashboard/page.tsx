@@ -27,6 +27,7 @@ import { useMembers } from "@/hooks/queries/use-members";
 import { useUIStore } from "@/stores/ui-store";
 import { useAnalysisCount } from "@/hooks/queries/use-ai-profile";
 import { TldvConnectCta } from "@/components/shared/tldv-connect-cta";
+import { ImportRequestCTA } from "@/components/features/import-request/import-request-cta";
 import { ProfileCompleteness } from "@/components/shared/profile-completeness";
 import { DashboardTour } from "@/components/onboarding/dashboard-tour";
 import { api } from "@/lib/api-client";
@@ -133,6 +134,11 @@ export default function DashboardPage() {
         <div data-tour="tldv-cta">
           <TldvConnectCta />
         </div>
+      )}
+
+      {/* tl:dv 接続済でも会議データが取り込まれていない場合の運営申請 CTA */}
+      {analysisCount === 0 && (
+        <ImportRequestCTA />
       )}
 
       {/* KPI Overview — Linear/Stripe Dashboard 系の "罫線区切り inline grid"
