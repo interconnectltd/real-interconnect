@@ -227,7 +227,7 @@ export default function MatchingPage() {
                   connected={connectedIds.has(m.user_id)}
                   pending={pendingIds.has(m.user_id)}
                   connectPending={requestConnection.isPending}
-                  bookmarked={bookmarkedIds.has(m.user_id)}
+                  bookmarked={!isSelf && bookmarkedIds.has(m.user_id)}
                   bookmarkPending={toggleBookmark.isPending}
                   isSelf={isSelf}
                   dupCount={m.__dupCount ?? 0}
@@ -280,7 +280,7 @@ export default function MatchingPage() {
                   connected={connectedIds.has(score.target_id)}
                   pending={pendingIds.has(score.target_id)}
                   connectPending={requestConnection.isPending}
-                  bookmarked={bookmarkedIds.has(score.target_id)}
+                  bookmarked={!isSelf && bookmarkedIds.has(score.target_id)}
                   bookmarkPending={toggleBookmark.isPending}
                   isSelf={isSelf}
                   dupCount={score.__dupCount ?? 0}
@@ -451,7 +451,7 @@ function MutualCard({
         }`}
       >
         <Card className="ds-card-interactive h-full border-accent/25 bg-[color:color-mix(in_oklab,var(--accent)_4%,var(--card))]">
-          <CardContent className="space-y-3 pr-9">
+          <CardContent className="space-y-3 pr-24">
             <div className="flex items-start gap-3">
               <UserAvatar name={p?.name} avatarUrl={p?.avatar_url} size="md" />
               <div className="min-w-0 flex-1">
@@ -587,7 +587,7 @@ function ScoreCard({
       >
         <Card className="ds-card-interactive">
           <CardContent className="space-y-4">
-            <div className="flex items-start gap-3 pr-9">
+            <div className="flex items-start gap-3 pr-24">
               <UserAvatar name={p?.name} avatarUrl={p?.avatar_url} size="md" />
               <div className="min-w-0 flex-1">
                 <div className="flex flex-wrap items-center gap-x-2 gap-y-1">
@@ -767,7 +767,7 @@ function BookmarkButton({
       disabled={pending}
       aria-pressed={bookmarked}
       aria-label={bookmarked ? "保存を解除" : "後で見るために保存"}
-      className={`absolute right-12 top-1.5 z-10 inline-flex h-11 w-11 items-center justify-center rounded-full transition-colors focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/70 disabled:opacity-50 ${
+      className={`absolute right-14 top-1.5 z-10 inline-flex h-11 w-11 items-center justify-center rounded-full transition-colors focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/70 disabled:opacity-50 ${
         bookmarked
           ? "text-accent-strong hover:bg-muted"
           : "text-muted-foreground/60 hover:bg-muted hover:text-foreground"

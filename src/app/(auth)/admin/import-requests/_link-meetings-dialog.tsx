@@ -124,7 +124,7 @@ export function LinkMeetingsDialog({
       {/* sm:max-w-3xl で SP gutter 温存 + 90dvh 制限で footer が画面外に出ないよう
           flex column 化。中身 ul は flex-1 で残空間に閉じこめ overflow-y-auto. */}
       <DialogContent className="flex max-h-[90dvh] flex-col overflow-hidden sm:max-w-3xl">
-        <DialogHeader>
+        <DialogHeader className="shrink-0">
           <DialogTitle>会議を紐付ける</DialogTitle>
           <DialogDescription>
             <strong>{request.user_profiles?.name}</strong>{" "}
@@ -220,7 +220,7 @@ export function LinkMeetingsDialog({
           </ul>
         )}
 
-        <div className="mt-4 flex flex-wrap justify-between gap-2 border-t pt-4">
+        <div className="mt-4 flex shrink-0 flex-wrap justify-between gap-2 border-t pt-4">
           <p
             className="text-xs text-muted-foreground"
             aria-live="polite"

@@ -23,7 +23,10 @@ export function Toaster() {
     <SonnerToaster
       position={isMobile ? "bottom-center" : "top-center"}
       richColors
-      mobileOffset={{ bottom: "calc(env(safe-area-inset-bottom) + 1rem)" }}
+      mobileOffset={{
+        top: "calc(env(safe-area-inset-top) + 1rem)",
+        bottom: "calc(env(safe-area-inset-bottom) + 1rem)",
+      }}
       toastOptions={{
         className: "font-sans",
       }}

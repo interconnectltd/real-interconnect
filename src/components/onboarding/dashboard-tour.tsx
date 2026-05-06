@@ -16,6 +16,7 @@ const STEPS_ALL: TourStep[] = [
       "プロフィール文だけでは捉えきれない「本当の関心」を AI が学習することで、おすすめ精度が Lv1 から Lv3 へ進化し、推薦の的中率が約3倍になります。",
     next: "右側の「接続する」をクリック。所要時間 約2分です。",
     skipIfMissing: true,
+    placement: "bottom",
   },
   {
     target: "kpi-overview",
@@ -25,6 +26,7 @@ const STEPS_ALL: TourStep[] = [
     rationale:
       "経営層の意思決定は数字から始まります。今週の商談機会と進捗を瞬時に把握できる設計です。",
     next: "数字 0 のときは下の「次のアクション」コメントが出ます。",
+    placement: "bottom",
   },
   {
     target: "maturity-card",
@@ -34,6 +36,9 @@ const STEPS_ALL: TourStep[] = [
     rationale:
       "Lv3 になると「この相手はあなたの今の課題に直接答えられる」という根拠付き推薦が表示されるようになります。",
     next: "Lv2 になるには 1回、Lv3 までは 5回のミーティング分析が必要です。",
+    // ページ中段: SP では下に出すと footer/HelpDock と被るため top
+    placement: "top",
+    scrollBlock: "center",
   },
   {
     target: "completeness-card",
@@ -43,6 +48,8 @@ const STEPS_ALL: TourStep[] = [
     rationale:
       "限られた時間で「会う価値があるか」を判断する経営層にとって、空白だらけのプロフィールは信頼形成の機会を失います。",
     next: "右側の「+%」が大きい項目 (自己紹介 +20% など) から埋めましょう。",
+    placement: "top",
+    scrollBlock: "center",
   },
   {
     target: "recommendation-section",

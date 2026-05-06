@@ -4,6 +4,30 @@ import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
 import { HelpCircle, MapPin, Home, MessageSquare, BookOpen, X } from "lucide-react";
 
+/**
+ * visualViewport.height を `--vv-h` CSS 変数に publish。
+ * iOS Safari の URL bar / 外部キーボード接続時の実残量を popover max-height に反映。
+ * (tour とは別 var にして tour 終了時の cleanup と独立)
+ */
+function useVisualViewportHeight(active: boolean) {
+  useEffect(() => {
+    if (!active) return;
+    const vv = typeof window !== "undefined" ? window.visualViewport : null;
+    const apply = () => {
+      const h = vv?.height ?? window.innerHeight;
+      document.documentElement.style.setProperty("--vv-h", `${h}px`);
+    };
+    apply();
+    if (!vv) return;
+    vv.addEventListener("resize", apply);
+    vv.addEventListener("scroll", apply);
+    return () => {
+      vv.removeEventListener("resize", apply);
+      vv.removeEventListener("scroll", apply);
+    };
+  }, [active]);
+}
+
 interface HelpDockProps {
   /** 「このページの使い方を見る」コールバック (pathname に応じた step を起動) */
   onStartPageTour?: () => void;
@@ -43,6 +67,8 @@ export function HelpDock({
   const dashAvailable = onStartDashboardTour != null || (tourAvailable ?? false);
   const [open, setOpen] = useState(false);
   const fabRef = useRef<HTMLButtonElement>(null);
+  // popover open 中だけ visualViewport.height を CSS var にエクスポート
+  useVisualViewportHeight(open);
   const menuRef = useRef<HTMLDivElement>(null);
 
   // Open 時に最初のメニュー項目にフォーカス
@@ -113,9 +139,10 @@ export function HelpDock({
           aria-label="ヘルプ"
           className="absolute bottom-14 right-0 flex w-64 flex-col overflow-hidden rounded-lg border border-border bg-card p-1.5 shadow-lg sm:bottom-16"
           style={{
-            // FAB (h-14) + safe-area + 上余白 16px を確保した残量で内部 scroll
+            // visualViewport (= --vv-h) があれば優先、無ければ 100dvh fallback。
+            // FAB (h-14=56) + 上下余白 + safe-area を確保した残量で内部 scroll
             maxHeight:
-              "calc(100dvh - 7rem - env(safe-area-inset-bottom) - env(safe-area-inset-top))",
+              "calc(var(--vv-h, 100dvh) - 7rem - env(safe-area-inset-bottom) - env(safe-area-inset-top))",
           }}
         >
           <div className="flex items-center justify-between border-b border-border px-3 py-2">

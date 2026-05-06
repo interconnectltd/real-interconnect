@@ -248,12 +248,12 @@ export function ProductTour({ steps, storageKey, open, onClose }: ProductTourPro
       top = clampY(rect.top + rect.height / 2 - th / 2);
     }
 
-    // 縦/横どこにも fits しない場合: 対象を画面上端に押し上げる前提で
-    // tooltip は対象上に固定 (画面下端への落下を回避)
+    // 縦/横どこにも fits しない場合: tooltip を画面中央に出して spotlight で
+    // 対象を強調する fallback (旧版は y=16 固定で対象自体を覆っていた)
     if (!fits.top && !fits.bottom && !fits.left && !fits.right) {
       placement = "bottom";
-      top = clampY(16);
-      left = clampX(rect.left + rect.width / 2 - tw / 2);
+      top = Math.max(16, vh / 2 - th / 2);
+      left = Math.max(16, vw / 2 - tw / 2);
     }
 
     setTooltipPos({ top, left, placement });

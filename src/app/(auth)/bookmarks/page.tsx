@@ -107,7 +107,7 @@ export default function BookmarksPage() {
                     className="block w-full rounded-lg text-left outline-none focus-visible:ring-[3px] focus-visible:ring-ring/70"
                   >
                     <Card className="ds-card-interactive h-full">
-                      <CardContent className="space-y-2 pr-12">
+                      <CardContent className="space-y-2 pr-14">
                         <div className="flex items-start gap-3">
                           <UserAvatar
                             name={p.name}
