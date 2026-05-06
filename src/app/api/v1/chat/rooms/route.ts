@@ -24,15 +24,16 @@ import { isValidUUID } from "@/lib/sanitize";
 import { createServiceClient } from "@/lib/supabase/server";
 import { writeAuditLog, extractClientInfo } from "@/lib/audit-log";
 
-export async function GET() {
+export async function GET(request: Request) {
   try {
-    const { user, supabase } = await withAuth();
+    const { user, supabase } = await withAuth(request);
 
     // RLS で auth.uid() が user_a/user_b の room のみ取得可能
     const { data: rooms, error } = await supabase
       .from("chat_rooms")
       .select("*")
-      .order("last_message_at", { ascending: false, nullsFirst: false });
+      .order("last_message_at", { ascending: false, nullsFirst: false })
+      .abortSignal(request.signal);
 
     if (error) throw error;
     if (!rooms || rooms.length === 0) return json([]);
@@ -42,20 +43,21 @@ export async function GET() {
       r.user_a_id === user.id ? r.user_b_id : r.user_a_id,
     );
 
-    // 相手プロフィール (RLS で他人の profile が読めるかは user_profiles 側の policy 依存。
-    // 既存実装が serviceClient を使っていたのは profile 制約回避のためと推察されるため、
-    // profile 取得のみ serviceClient を維持。読み取り対象は connection 済の相手限定で
-    // 漏洩リスクは限定的)
-    const serviceClient = await createServiceClient();
-    const { data: profiles } = await serviceClient
+    // R5 Arch: serviceClient 撤廃。
+    // user_profiles の auth_select_connected_profiles policy (00029) で
+    // 相互 connection 経由のみ SELECT 可、authenticated client で十分
+    const { data: profiles } = await supabase
       .from("user_profiles")
       .select("id, name, company, avatar_url")
-      .in("id", otherUserIds);
+      .in("id", otherUserIds)
+      .abortSignal(request.signal);
 
     const profileMap = new Map(profiles?.map((p) => [p.id, p]) ?? []);
 
     // unread_count: RPC (SECURITY DEFINER + GROUP BY) で N+1 を解消
-    const { data: unreadRows } = await supabase.rpc("get_unread_counts");
+    const { data: unreadRows } = await supabase
+      .rpc("get_unread_counts")
+      .abortSignal(request.signal);
     const unreadMap = new Map<string, number>();
     for (const row of unreadRows ?? []) {
       unreadMap.set(row.room_id, Number(row.unread_count));

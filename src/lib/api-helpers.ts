@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import { ApiError } from "@/lib/errors";
-import { checkGeneralRateLimit } from "@/lib/rate-limit";
+import { checkGeneralRateLimit, checkRateLimit } from "@/lib/rate-limit";
 import type { ApiResponse } from "@/types";
 import type { SupabaseClient, User } from "@supabase/supabase-js";
 import type { Database } from "@/types/database";
@@ -88,8 +88,16 @@ export type WithAuthOptions = {
    * true 時に in-memory checkGeneralRateLimit を skip。
    * R3 Arch:「withAuth と DB rate-limit 二重評価で偽陽性 429」解消。
    * chat 系のように route 側で checkDbRateLimit を呼ぶ場合に true。
+   *
+   * R4 Sec 補足: chat 系で完全 skip すると burst (短秒間連投) 防御が消える。
+   * → burstLimit を併用すること。
    */
   skipMemoryRl?: boolean;
+  /**
+   * 短期 burst 防御: per-second スパムを抑制 (例: { perSecond: 10 })。
+   * skipMemoryRl=true と併用しても短期窓の throttle は残す。
+   */
+  burstLimit?: { perSecond: number };
 };
 
 export async function withAuth(
@@ -113,7 +121,7 @@ export async function withAuth(
   }
 
   // General API rate limit (in-memory fast path)
-  // chat 系は DB-backed limiter のみ使うため skip
+  // chat 系は DB-backed limiter のみ使うため skip 可
   if (!options.skipMemoryRl) {
     const rl = checkGeneralRateLimit(user.id);
     if (!rl.allowed) {
@@ -125,18 +133,33 @@ export async function withAuth(
     }
   }
 
+  // Burst 防御 (短期窓): skipMemoryRl=true でも残せる
+  if (options.burstLimit) {
+    const burst = checkRateLimit(
+      `burst:${user.id}`,
+      options.burstLimit.perSecond,
+      1000, // 1 秒窓
+    );
+    if (!burst.allowed) {
+      throw new ApiError(
+        429,
+        "RATE_LIMITED",
+        "短時間にリクエストが集中しました。少し待ってください",
+      );
+    }
+  }
+
   return { user, supabase };
 }
 
 /**
- * DB-backed rate limit (Netlify multi-instance 分散対応)。
- * R2 レビュー指摘:「in-memory rate-limit は分散で N倍カウント」の解消。
+ * DB-backed rate limit (Netlify multi-instance 分散対応, sliding window)。
  *
- * @param supabase service_role 不要 (function は SECURITY DEFINER)
- * @param bucket   "chat.message.post" 等の識別子
- * @param limit    閾値 (window 内 max リクエスト数)
- * @param windowSeconds  sliding window の長さ
- * @returns true=許可, false=超過
+ * R2: in-memory N倍カウント解消
+ * R4 Sec: fail-open 三段重ね指摘 → strict=true で fail-closed 化可能
+ *
+ * @param supabase service_role 不要 (RPC は SECURITY DEFINER)
+ * @param strict   true なら DB 障害時に false (拒否) を返す。chat 系は true 推奨。
  */
 export async function checkDbRateLimit(
   supabase: SupabaseClient<Database>,
@@ -144,6 +167,7 @@ export async function checkDbRateLimit(
   bucket: string,
   limit: number,
   windowSeconds = 60,
+  strict = false,
 ): Promise<boolean> {
   try {
     const { data, error } = await supabase.rpc("check_rate_limit", {
@@ -153,14 +177,32 @@ export async function checkDbRateLimit(
       p_window_seconds: windowSeconds,
     });
     if (error) {
-      console.warn("[rate-limit] db check failed, falling open:", error.message);
-      return true; // fail-open (DB 障害でサービス全停止を避ける)
+      console.warn(
+        `[rate-limit] db check failed (strict=${strict}):`,
+        error.message,
+      );
+      return !strict; // strict=true なら拒否、false なら fail-open
     }
     return data === true;
   } catch (err) {
-    console.warn("[rate-limit] exception, falling open:", err);
-    return true;
+    console.warn(`[rate-limit] exception (strict=${strict}):`, err);
+    return !strict;
   }
+}
+
+/**
+ * Idempotency-Key で送信される body の SHA-256 hex hash を計算。
+ * R4 Sec: payload 差し替え検知用。
+ */
+export async function sha256Hex(input: string): Promise<string> {
+  const enc = new TextEncoder().encode(input);
+  const hashBuf = await crypto.subtle.digest("SHA-256", enc);
+  const bytes = new Uint8Array(hashBuf);
+  let out = "";
+  for (let i = 0; i < bytes.length; i++) {
+    out += bytes[i]!.toString(16).padStart(2, "0");
+  }
+  return out;
 }
 
 export function handleApiError(error: unknown): NextResponse {

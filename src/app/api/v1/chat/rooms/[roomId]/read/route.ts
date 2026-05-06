@@ -32,7 +32,10 @@ export async function POST(
   context: { params: Promise<{ roomId: string }> },
 ) {
   try {
-    const { user, supabase } = await withAuth(request, { skipMemoryRl: true });
+    const { user, supabase } = await withAuth(request, {
+      skipMemoryRl: true,
+      burstLimit: { perSecond: 10 },
+    });
     const { roomId } = await context.params;
     if (!isValidUUID(roomId)) {
       return jsonError(400, "BAD_REQUEST", "ルーム ID が不正です");
@@ -44,6 +47,7 @@ export async function POST(
       "chat.msg.read",
       RL_MAX,
       60,
+      true, // fail-closed
     );
     if (!allowed) {
       return jsonError(429, "RATE_LIMITED", "リクエストが多すぎます");

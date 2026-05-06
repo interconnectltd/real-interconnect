@@ -845,12 +845,14 @@ export interface Database {
           user_id: string;
           idempotency_key: string;
           message_id: string;
+          body_hash: string;
           created_at: string;
         };
         Insert: {
           user_id: string;
           idempotency_key: string;
           message_id: string;
+          body_hash?: string;
         };
         Update: never;
         Relationships: [];

@@ -28,6 +28,7 @@ import {
   jsonError,
   handleApiError,
   checkDbRateLimit,
+  sha256Hex,
 } from "@/lib/api-helpers";
 import { isValidUUID } from "@/lib/sanitize";
 import { writeAuditLog, extractClientInfo } from "@/lib/audit-log";
@@ -46,19 +47,23 @@ export async function GET(
   context: { params: Promise<{ roomId: string }> },
 ) {
   try {
-    const { user, supabase } = await withAuth(request, { skipMemoryRl: true });
+    const { user, supabase } = await withAuth(request, {
+      skipMemoryRl: true,
+      burstLimit: { perSecond: 20 },
+    });
     const { roomId } = await context.params;
     if (!isValidUUID(roomId)) {
       return jsonError(400, "BAD_REQUEST", "ルーム ID が不正です");
     }
 
-    // DB-backed rate limit (multi-instance 分散対応, 真の sliding window)
+    // DB-backed rate limit (sliding window, fail-closed for chat)
     const allowed = await checkDbRateLimit(
       supabase,
       user.id,
       "chat.msg.get",
       RL_GET_MAX,
       60,
+      true,
     );
     if (!allowed) {
       return jsonError(429, "RATE_LIMITED", "リクエストが多すぎます");
@@ -147,26 +152,36 @@ export async function POST(
   context: { params: Promise<{ roomId: string }> },
 ) {
   try {
-    const { user, supabase } = await withAuth(request, { skipMemoryRl: true });
+    // burst 防御 (per-second 5) を残しつつ通常の memory RL を skip
+    const { user, supabase } = await withAuth(request, {
+      skipMemoryRl: true,
+      burstLimit: { perSecond: 5 },
+    });
     const { roomId } = await context.params;
     if (!isValidUUID(roomId)) {
       return jsonError(400, "BAD_REQUEST", "ルーム ID が不正です");
     }
 
-    // DB-backed rate limit (multi-instance 分散対応, 真の sliding window)
+    // DB-backed rate limit (sliding window, fail-closed for chat)
     const allowed = await checkDbRateLimit(
       supabase,
       user.id,
       "chat.msg.post",
       RL_POST_MAX,
       60,
+      true, // strict=true: DB 障害時は拒否
     );
     if (!allowed) {
       return jsonError(429, "RATE_LIMITED", "送信が多すぎます。少し待ってください");
     }
 
+    // body 先読み (Idempotency body_hash 計算のため)
+    const bodyText = await request.text();
+
     // Idempotency-Key (R3 Arch: client retry 二重 INSERT 防止)
+    // R4 Sec: body_hash で payload 差し替え検知
     const idempotencyKey = request.headers.get("idempotency-key");
+    let bodyHash = "";
     if (idempotencyKey) {
       if (idempotencyKey.length < 8 || idempotencyKey.length > 128) {
         return jsonError(
@@ -175,30 +190,48 @@ export async function POST(
           "Idempotency-Key は 8〜128 文字",
         );
       }
+      bodyHash = await sha256Hex(bodyText);
+
       // 既存 key check (2 step: key→message_id→message)
       const { data: idemRow } = await supabase
         .from("chat_message_idempotency_keys")
-        .select("message_id")
+        .select("message_id, body_hash")
         .eq("user_id", user.id)
         .eq("idempotency_key", idempotencyKey)
+        .abortSignal(request.signal)
         .maybeSingle();
       if (idemRow?.message_id) {
+        // body_hash 不一致 = 同 key で異 body → 409 Conflict (RFC 9457 風)
+        if (idemRow.body_hash && idemRow.body_hash !== bodyHash) {
+          return jsonError(
+            409,
+            "IDEMPOTENCY_CONFLICT",
+            "同じ Idempotency-Key で異なる body は許可されません",
+          );
+        }
         const { data: prevMsg } = await supabase
           .from("chat_messages")
           .select(
             "id, room_id, sender_id, content, content_type, payload, is_read, created_at",
           )
           .eq("id", idemRow.message_id)
+          .abortSignal(request.signal)
           .maybeSingle();
         if (prevMsg) {
-          // 同 key の以前の message を返却 (idempotent)
           return json(prevMsg, 200);
         }
       }
     }
 
     // Zod validation で body 全フィールド型保証
-    const raw: unknown = await request.json().catch(() => null);
+    let raw: unknown = null;
+    if (bodyText) {
+      try {
+        raw = JSON.parse(bodyText);
+      } catch {
+        return jsonError(400, "BAD_REQUEST", "JSON parse error");
+      }
+    }
     const parsed = PostMessageSchema.safeParse(raw);
     if (!parsed.success) {
       return jsonError(
@@ -255,6 +288,7 @@ export async function POST(
           user_id: user.id,
           idempotency_key: idempotencyKey,
           message_id: message.id,
+          body_hash: bodyHash,
         })
         .then(({ error: idemErr }) => {
           if (idemErr && idemErr.code !== "23505") {
