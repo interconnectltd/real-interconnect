@@ -309,6 +309,55 @@ export default function OnboardingPage() {
   const goalsTabRef = useRef<HTMLButtonElement | null>(null);
   const offeringsTabRef = useRef<HTMLButtonElement | null>(null);
 
+  // localStorage hydrate/persist (入力消失防止 / 誤リロード対策)
+  // user.id 別 key で他人と混在しない、handleComplete 成功時に削除。
+  // Set はシリアライズ不能なので Array で往復させる。
+  const draftKey = user?.id ? `interconnect:onboarding-draft:${user.id}:v1` : null;
+  const hydratedRef = useRef(false);
+
+  useEffect(() => {
+    if (!draftKey || hydratedRef.current) return;
+    try {
+      const raw = localStorage.getItem(draftKey);
+      if (raw) {
+        const draft = JSON.parse(raw) as {
+          goals?: string[];
+          offerings?: string[];
+          goalDetails?: Record<string, string>;
+          offeringDetails?: Record<string, string>;
+        };
+        if (Array.isArray(draft.goals)) setSelectedGoals(new Set(draft.goals));
+        if (Array.isArray(draft.offerings))
+          setSelectedOfferings(new Set(draft.offerings));
+        if (draft.goalDetails) setGoalDetails(draft.goalDetails);
+        if (draft.offeringDetails) setOfferingDetails(draft.offeringDetails);
+      }
+    } catch {
+      // 破損 JSON は無視 (次回保存で上書き)
+    }
+    hydratedRef.current = true;
+  }, [draftKey]);
+
+  useEffect(() => {
+    if (!draftKey || !hydratedRef.current) return;
+    const t = setTimeout(() => {
+      try {
+        localStorage.setItem(
+          draftKey,
+          JSON.stringify({
+            goals: [...selectedGoals],
+            offerings: [...selectedOfferings],
+            goalDetails,
+            offeringDetails,
+          }),
+        );
+      } catch {
+        // QuotaExceeded 等は無視
+      }
+    }, 400);
+    return () => clearTimeout(t);
+  }, [draftKey, selectedGoals, selectedOfferings, goalDetails, offeringDetails]);
+
   function toggleGoal(type: string) {
     setSelectedGoals((prev) => {
       const next = new Set(prev);
@@ -375,6 +424,15 @@ export default function OnboardingPage() {
         })),
       });
       if (rpcError) throw new Error(rpcError.message ?? "RPC failed");
+
+      // 保存成功 → localStorage draft を破棄 (再 onboarding 時の誤復元防止)
+      if (draftKey) {
+        try {
+          localStorage.removeItem(draftKey);
+        } catch {
+          /* noop */
+        }
+      }
 
       router.replace("/dashboard?onboarding_complete=true");
       router.refresh();

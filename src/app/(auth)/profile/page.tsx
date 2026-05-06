@@ -37,6 +37,14 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+  DialogFooter,
+} from "@/components/ui/dialog";
 import { useMyProfile } from "@/hooks/queries/use-profile";
 import { INDUSTRIES } from "@/lib/constants";
 import { useUpdateProfile } from "@/hooks/mutations/use-update-profile";
@@ -79,6 +87,7 @@ export default function ProfilePage() {
   const [editing, setEditing] = useState(false);
   const [avatarPreview, setAvatarPreview] = useState<string | null>(null);
   const [pickerOpen, setPickerOpen] = useState(false);
+  const [showDiscardDialog, setShowDiscardDialog] = useState(false);
   const [form, setForm] = useState<ProfileForm>({
     name: "",
     company: "",
@@ -193,9 +202,17 @@ export default function ProfilePage() {
   }
 
   function handleCancel() {
-    if (isDirty() && !window.confirm("変更が保存されていません。破棄しますか？")) {
+    if (isDirty()) {
+      // window.confirm 撤去 (a11y / モバイル UX / focus trap 改善)
+      // shadcn Dialog (AlertDialog 系) で破棄確認、編集継続を default に
+      setShowDiscardDialog(true);
       return;
     }
+    setEditing(false);
+  }
+
+  function confirmDiscard() {
+    setShowDiscardDialog(false);
     setEditing(false);
   }
 
@@ -487,6 +504,34 @@ export default function ProfilePage() {
           </p>
         </CardContent>
       </Card>
+
+      {/* 編集破棄確認 Dialog (window.confirm 撤去 / a11y 強化) */}
+      <Dialog open={showDiscardDialog} onOpenChange={setShowDiscardDialog}>
+        <DialogContent className="sm:max-w-sm">
+          <DialogHeader>
+            <DialogTitle>変更を破棄しますか?</DialogTitle>
+            <DialogDescription>
+              編集中の変更が保存されていません。破棄すると元の内容に戻ります。
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <button
+              type="button"
+              className="inline-flex h-11 items-center justify-center rounded-md border border-input bg-card px-4 text-sm font-medium hover:bg-muted focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/70"
+              onClick={() => setShowDiscardDialog(false)}
+            >
+              編集を続ける
+            </button>
+            <button
+              type="button"
+              className="inline-flex h-11 items-center justify-center rounded-md bg-destructive px-4 text-sm font-medium text-destructive-foreground hover:bg-destructive/90 focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/70"
+              onClick={confirmDiscard}
+            >
+              破棄する
+            </button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

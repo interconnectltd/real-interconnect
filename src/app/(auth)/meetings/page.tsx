@@ -147,6 +147,7 @@ export default function MeetingsPage() {
     data: calendarEvents,
     isLoading: isCalendarLoading,
     isError: isCalendarError,
+    error: calendarError,
     refetch: refetchCalendar,
   } = useQuery({
     queryKey: ["calendar-events", weekRange.from, weekRange.to],
@@ -156,8 +157,14 @@ export default function MeetingsPage() {
       ),
   });
 
-  // Treat 404 / no-data as "not connected" for the empty state
-  const calendarNotConnected = isCalendarError;
+  // 旧: あらゆる error を「未接続」扱いにしていた → 401/500/network 断でも
+  // 「Google カレンダー未接続」と誤誘導しユーザーを再接続地獄に追い込む。
+  // 修正: ApiError の code === "NOT_CONNECTED" or status === 404 のみ未接続扱い。
+  const calendarNotConnected = (() => {
+    if (!isCalendarError || !calendarError) return false;
+    const e = calendarError as { code?: string; status?: number };
+    return e.code === "NOT_CONNECTED" || e.status === 404;
+  })();
   const [syncingCalendar, setSyncingCalendar] = useState(false);
 
   async function handleSyncCalendar() {
@@ -594,17 +601,20 @@ export default function MeetingsPage() {
               )}
             </div>
 
-            {/* Recording toggle for INTERCONNECT meetings */}
+            {/* Recording toggle: 表示専用 (mutation 未実装、誤発火防止のため disabled)。
+                onClick を持たない見た目だけのボタンはプライバシー事故を招くので状態表示のみ。 */}
             {event.is_interconnect && (
               <div className="flex shrink-0 items-center">
                 <Button
                   size="sm"
                   variant={event.recording_enabled ? "default" : "outline"}
                   className="gap-1.5"
+                  disabled
+                  aria-disabled="true"
                   title={
                     event.recording_enabled
-                      ? "録音オン"
-                      : "録音オフ"
+                      ? "録音設定: オン (変更機能は近日対応予定)"
+                      : "録音設定: オフ (変更機能は近日対応予定)"
                   }
                 >
                   {event.recording_enabled ? (

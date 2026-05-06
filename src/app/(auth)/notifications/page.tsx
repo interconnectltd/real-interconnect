@@ -115,7 +115,12 @@ export default function NotificationsPage() {
 
                 {/* コネクション申請通知は相手プロフィール + マッチ理由を inline 展開 */}
                 {n.type === "connection_request" && (
-                  <ConnectionRequestContext notificationId={n.id} />
+                  <ConnectionRequestContext
+                    notificationId={n.id}
+                    onExpand={() => {
+                      if (!n.is_read) markRead.mutate([n.id]);
+                    }}
+                  />
                 )}
 
                 {/* Action buttons — show regardless of read status */}

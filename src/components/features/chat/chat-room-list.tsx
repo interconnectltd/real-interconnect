@@ -13,10 +13,32 @@ export interface ChatRoom {
   };
   last_message: {
     content: string;
+    /** content_type を type 別ラベル化に使う (scheduling_card / meeting_confirmed の JSON 露出防止) */
+    content_type?: string | null;
     created_at: string;
     sender_id: string;
   } | null;
   unread_count: number;
+}
+
+/**
+ * last_message を type 別の安全プレビュー文字列に変換。
+ * scheduling_card / meeting_suggestion / meeting_confirmed は JSON 文字列をそのまま
+ * 表示すると `{"target_user_id":"..."}` 形式で UUID/PII が一覧に露出するためラベル化。
+ */
+function getLastMessagePreview(lm: ChatRoom["last_message"]): string {
+  if (!lm) return "メッセージはありません";
+  switch (lm.content_type) {
+    case "scheduling_card":
+      return "日程調整カードを送信";
+    case "meeting_suggestion":
+      return "ミーティング提案を送信";
+    case "meeting_confirmed":
+      return "ミーティング確定";
+    default:
+      // 通常テキスト。先頭 80 字に切り詰めて表示崩れ防止
+      return lm.content.length > 80 ? lm.content.slice(0, 80) + "…" : lm.content;
+  }
 }
 
 interface ChatRoomListProps {
@@ -115,7 +137,7 @@ export function ChatRoomList({
               </div>
               <div className="flex items-center justify-between gap-2">
                 <p className="truncate text-xs text-muted-foreground">
-                  {room.last_message?.content ?? "メッセージはありません"}
+                  {getLastMessagePreview(room.last_message)}
                 </p>
                 {room.unread_count > 0 && (
                   <span className="flex h-5 min-w-5 shrink-0 items-center justify-center rounded-full bg-primary px-1.5 text-xs font-semibold text-primary-foreground">

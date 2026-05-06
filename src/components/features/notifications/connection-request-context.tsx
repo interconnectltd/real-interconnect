@@ -62,8 +62,11 @@ const PHASE_LABEL: Record<string, string> = {
 
 export function ConnectionRequestContext({
   notificationId,
+  onExpand,
 }: {
   notificationId: string;
+  /** 展開時のコールバック (親側で markRead を呼ぶ用) */
+  onExpand?: () => void;
 }) {
   const [expanded, setExpanded] = useState(false);
   const { openProfileModal } = useUIStore();
@@ -84,7 +87,13 @@ export function ConnectionRequestContext({
     >
       <button
         type="button"
-        onClick={() => setExpanded((v) => !v)}
+        onClick={() => {
+          setExpanded((v) => {
+            // 展開した瞬間に既読化 (UX 期待値: 中身を見たので未読でなくなる)
+            if (!v) onExpand?.();
+            return !v;
+          });
+        }}
         aria-expanded={expanded}
         aria-controls={`ctx-${notificationId}`}
         className="flex w-full items-center justify-between gap-2 px-3 py-2 text-xs font-medium text-foreground transition-colors hover:bg-muted/40 focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/70"

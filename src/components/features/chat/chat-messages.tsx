@@ -187,31 +187,9 @@ export function ChatMessages({
         }
         queryClient.invalidateQueries({ queryKey: ["chat-rooms"] });
       })
-      // 後方互換: publication ベース postgres_changes も subscribe (移行中の冗長性)
-      .on(
-        "postgres_changes",
-        {
-          event: "INSERT",
-          schema: "public",
-          table: "chat_messages",
-          filter: `room_id=eq.${roomId}`,
-        },
-        (payload) => {
-          const newMsg = payload.new as ChatMessage;
-          queryClient.setQueryData<MessagesResponse>(
-            ["chat-messages", roomId],
-            (old) => {
-              const msgs = old?.messages ?? [];
-              if (msgs.some((m) => m.id === newMsg.id)) return old;
-              return {
-                messages: [...msgs, newMsg],
-                next_cursor: old?.next_cursor ?? null,
-                has_more: old?.has_more ?? false,
-              };
-            },
-          );
-        },
-      )
+      // postgres_changes ブランチは撤去 (Sec audit Critical):
+      // publication 単独では RLS を尊重せず、別 room の INSERT を漏洩する
+      // 潜在経路があった。broadcast 一本化で room 単位の権限境界に揃える。
       .subscribe();
 
     return () => {
