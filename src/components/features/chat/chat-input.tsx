@@ -56,8 +56,10 @@ export function ChatInput({
     const trimmed = content.trim();
     if (!trimmed || isSending) return;
 
-    // 楽観更新: tmp ID で即時 cache push (送信遅延 200ms-1s での体感改善)
-    const tmpId = `tmp-${newIdempotencyKey()}`;
+    // 楽観更新: 送信に使う Idempotency-Key と tmp_id を共有して reconcile に使う。
+    // これで「同一文面の連続送信で 1 行目しか reconcile されない」問題を解消。
+    const idemKey = newIdempotencyKey();
+    const tmpId = `tmp-${idemKey}`;
     const optimistic: OptimisticMessage | null = currentUserId
       ? {
           id: tmpId,
@@ -83,6 +85,7 @@ export function ChatInput({
     }
 
     setIsSending(true);
+    const prevContent = trimmed;
     setContent("");
     if (textareaRef.current) textareaRef.current.style.height = "auto";
 
@@ -90,15 +93,11 @@ export function ChatInput({
       await api.post(
         `/chat/rooms/${roomId}/messages`,
         { content: trimmed },
-        { headers: { "Idempotency-Key": newIdempotencyKey() } },
+        { headers: { "Idempotency-Key": idemKey } },
       );
-      // Realtime broadcast で実 ID 入りメッセージが来るので、
-      // 古い tmp- は次の broadcast 受信後の reconcile で除去される。
-      // 念のため API 直後にも invalidate して取りこぼしを補完。
       queryClient.invalidateQueries({ queryKey: ["chat-messages", roomId] });
       onMessageSent?.();
     } catch {
-      // 失敗時は楽観追加を撤去 + content を復元
       if (optimistic) {
         queryClient.setQueryData<{
           messages: OptimisticMessage[];
@@ -112,7 +111,8 @@ export function ChatInput({
           };
         });
       }
-      setContent(trimmed);
+      // 失敗時の入力復元: ユーザーが既に新しい入力を始めていたら上書きしない
+      setContent((curr) => (curr === "" ? prevContent : curr));
       toast.error("メッセージの送信に失敗しました。再試行してください");
     } finally {
       setIsSending(false);

@@ -113,15 +113,15 @@ export default function MembersPage() {
       <div>
         <p className="ds-eyebrow">Directory</p>
         <h1 className="ds-h1 mt-1 tracking-tight text-foreground">メンバー</h1>
-        <p
-          className="mt-1.5 text-sm text-muted-foreground"
-          role="status"
-          aria-live="polite"
-          aria-atomic="true"
-        >
+        <p className="mt-1.5 text-sm text-muted-foreground">
           ネットワーク内のプロフェッショナル
           {typeof totalCount === "number" && (
-            <span className="ml-1.5 tabular-nums text-foreground">
+            <span
+              className="ml-1.5 tabular-nums text-foreground"
+              role="status"
+              aria-live="polite"
+              aria-atomic="false"
+            >
               （{totalCount.toLocaleString()}名）
             </span>
           )}

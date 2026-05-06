@@ -749,9 +749,10 @@ function ProfileViewMode({
  * - React JSX 経由なので文字列 escape は自動
  */
 function LinkifiedText({ text }: { text: string }) {
-  // 単語境界で split。URL / email を検出して a 化、その他はテキスト。
-  const urlRegex = /(https?:\/\/[^\s]+)/g;
-  const emailRegex = /([\w.+-]+@[\w-]+\.[\w.-]+)/g;
+  // URL: http(s)、末尾の句読点 (. , ; : ! ? 。 、 ) ）」』 など) を除外
+  // email: 末尾ドットを許容しない / 一般的な部分集合をカバー (RFC5322 完全準拠は過剰)
+  const urlRegex = /(https?:\/\/[^\s<>"'`]+[^\s<>"'`.,;:!?。、)）」』])/g;
+  const emailRegex = /([A-Za-z0-9_.+-]+@[A-Za-z0-9-]+(?:\.[A-Za-z0-9-]+)+)/g;
   // 1) まず URL でトークン化
   const tokens: Array<{ type: "url" | "text"; value: string }> = [];
   let lastIdx = 0;

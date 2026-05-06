@@ -184,18 +184,24 @@ export function ChatMessages({
           (old) => {
             const msgs = old?.messages ?? [];
             if (msgs.some((m) => m.id === newMsg.id)) return old;
-            // 自分送信の楽観メッセージ (tmp-*) を実 ID 行で置換 (reconcile)
-            const filteredMsgs =
-              newMsg.sender_id === currentUserId
-                ? msgs.filter(
-                    (m) =>
-                      !(
-                        m.id.startsWith("tmp-") &&
-                        m.sender_id === newMsg.sender_id &&
-                        m.content === newMsg.content
-                      ),
-                  )
-                : msgs;
+            // 自分送信の楽観メッセージ (tmp-*) を実 ID 行で置換 (reconcile)。
+            // 同一文面の連続送信で複数 tmp が残るケースを避けるため、
+            // 該当する tmp の中で最古 1 件のみ除去する (FIFO 原則)。
+            let filteredMsgs = msgs;
+            if (newMsg.sender_id === currentUserId) {
+              const idx = msgs.findIndex(
+                (m) =>
+                  m.id.startsWith("tmp-") &&
+                  m.sender_id === newMsg.sender_id &&
+                  m.content === newMsg.content,
+              );
+              if (idx !== -1) {
+                filteredMsgs = [
+                  ...msgs.slice(0, idx),
+                  ...msgs.slice(idx + 1),
+                ];
+              }
+            }
             return {
               messages: [...filteredMsgs, newMsg],
               next_cursor: old?.next_cursor ?? null,

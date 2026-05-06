@@ -159,6 +159,8 @@ export default function BookmarksPage() {
                               action: {
                                 label: "元に戻す",
                                 onClick: () => {
+                                  // 二回目の toggle が pending と競合しないようガード
+                                  if (toggle.isPending) return;
                                   toggle.mutate({
                                     userId: p.id,
                                     isBookmarked: false,
