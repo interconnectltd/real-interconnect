@@ -1,9 +1,9 @@
 import { withAuth, json, handleApiError } from "@/lib/api-helpers";
 import { MATCHING_MUTUAL_THRESHOLD } from "@/lib/constants";
 
-export async function GET() {
+export async function GET(request: Request) {
   try {
-    const { user, supabase } = await withAuth();
+    const { user, supabase } = await withAuth(request);
 
     // Get scores where I score them >= threshold
     // Defense-in-depth: target_id != viewer_id で self pair を弾く

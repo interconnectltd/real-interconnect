@@ -2,7 +2,7 @@ import { withAuth, json, handleApiError } from "@/lib/api-helpers";
 
 export async function GET(request: Request) {
   try {
-    const { user, supabase } = await withAuth();
+    const { user, supabase } = await withAuth(request);
     const { searchParams } = new URL(request.url);
     const unreadOnly = searchParams.get("unread") === "true";
 
@@ -28,7 +28,7 @@ export async function GET(request: Request) {
 
 export async function PATCH(request: Request) {
   try {
-    const { user, supabase } = await withAuth();
+    const { user, supabase } = await withAuth(request);
     const { ids } = await request.json();
 
     if (!Array.isArray(ids) || ids.length === 0) {

@@ -1,9 +1,9 @@
 import { withAuth, json, handleApiError } from "@/lib/api-helpers";
 import { createServiceClient } from "@/lib/supabase/server";
 
-export async function GET() {
+export async function GET(request: Request) {
   try {
-    const { user } = await withAuth();
+    const { user } = await withAuth(request);
     const serviceClient = await createServiceClient();
 
     const { data, error } = await serviceClient

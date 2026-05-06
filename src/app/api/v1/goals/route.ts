@@ -3,9 +3,9 @@ import { GOAL_TYPES } from "@/lib/constants";
 
 const validTypes = new Set<string>(GOAL_TYPES.map((g) => g.value));
 
-export async function GET() {
+export async function GET(request: Request) {
   try {
-    const { user, supabase } = await withAuth();
+    const { user, supabase } = await withAuth(request);
     const { data, error } = await supabase
       .from("user_goals")
       .select("*")
@@ -19,7 +19,7 @@ export async function GET() {
 
 export async function POST(request: Request) {
   try {
-    const { user, supabase } = await withAuth();
+    const { user, supabase } = await withAuth(request);
     const body = await request.json().catch(() => null);
 
     if (!Array.isArray(body?.goals)) {

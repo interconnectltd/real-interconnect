@@ -4,7 +4,7 @@ import { createTldvClient, processTldvMeeting } from "@/lib/tldv";
 
 export async function POST(request: Request) {
   try {
-    await withAuth();
+    await withAuth(request);
 
     const { searchParams } = new URL(request.url);
     const maxMeetings = Math.min(Number(searchParams.get("limit") ?? "3"), 10);

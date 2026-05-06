@@ -18,7 +18,7 @@ import { expandSearchTerms, buildIlikeOrClause } from "@/lib/search/synonyms";
  */
 export async function GET(request: Request) {
   try {
-    const { user, supabase } = await withAuth();
+    const { user, supabase } = await withAuth(request);
     const { searchParams } = new URL(request.url);
     const rawSearch = searchParams.get("q") ?? "";
     const search = sanitizeFilterValue(rawSearch);

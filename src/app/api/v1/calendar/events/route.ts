@@ -6,7 +6,7 @@ const MAX_LIMIT = 100;
 /** GET /api/v1/calendar/events — カレンダーイベント一覧 */
 export async function GET(request: Request) {
   try {
-    const { user, supabase } = await withAuth();
+    const { user, supabase } = await withAuth(request);
     const { searchParams } = new URL(request.url);
 
     const from = searchParams.get("from");

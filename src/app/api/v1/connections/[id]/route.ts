@@ -17,7 +17,7 @@ export async function PATCH(
 ) {
   try {
     const { id } = await params;
-    const { user, supabase } = await withAuth();
+    const { user, supabase } = await withAuth(request);
     const { status: newStatus } = await request.json();
 
     // Fetch existing connection

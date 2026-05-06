@@ -59,9 +59,9 @@ function computeDetailMetrics(rows: DetailRow[]): DetailMetrics {
   };
 }
 
-export async function GET() {
+export async function GET(request: Request) {
   try {
-    const { user, supabase } = await withAuth();
+    const { user, supabase } = await withAuth(request);
 
     const [
       { data: goalsRows },

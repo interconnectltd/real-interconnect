@@ -88,13 +88,24 @@ export async function PATCH(request: Request) {
           : null,
     };
 
+    // 既に done/rejected/cancelled 済の申請に対する重複 PATCH を弾く (通知重複防止)
     const { data, error } = await supabase
       .from("meeting_data_import_requests")
       .update(update)
       .eq("id", id)
+      .not("status", "in", "(done,rejected,cancelled)")
       .select()
       .single();
-    if (error) throw error;
+    if (error) {
+      if ((error as { code?: string }).code === "PGRST116") {
+        return jsonError(
+          409,
+          "CONFLICT",
+          "既に最終状態の申請のため変更できません",
+        );
+      }
+      throw error;
+    }
 
     // ユーザー通知 (done/rejected の最終状態のみ)
     if (parsed.data.status === "done" || parsed.data.status === "rejected") {

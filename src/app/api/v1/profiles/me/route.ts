@@ -1,9 +1,9 @@
 import { withAuth, json, jsonError, handleApiError } from "@/lib/api-helpers";
 import { profileUpdateSchema } from "@/validations/profile";
 
-export async function GET() {
+export async function GET(request: Request) {
   try {
-    const { user, supabase } = await withAuth();
+    const { user, supabase } = await withAuth(request);
 
     const { data, error } = await supabase
       .from("user_profiles")
@@ -30,7 +30,7 @@ export async function GET() {
 
 export async function PATCH(request: Request) {
   try {
-    const { user, supabase } = await withAuth();
+    const { user, supabase } = await withAuth(request);
     const body = await request.json();
     const parsed = profileUpdateSchema.parse(body);
 

@@ -2,7 +2,7 @@ import { withAuth, json, handleApiError } from "@/lib/api-helpers";
 
 export async function GET(request: Request) {
   try {
-    const { user, supabase } = await withAuth();
+    const { user, supabase } = await withAuth(request);
     const { searchParams } = new URL(request.url);
     const sortBy = searchParams.get("sort") ?? "score";
     const minScore = Number(searchParams.get("min_score") ?? "0.35");

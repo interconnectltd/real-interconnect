@@ -11,7 +11,7 @@ import {
   jsonError,
   handleApiError,
 } from "@/lib/api-helpers";
-import { sanitizeFilterValue } from "@/lib/sanitize";
+import { sanitizeFilterValue, escapeLikePattern } from "@/lib/sanitize";
 
 export const dynamic = "force-dynamic";
 
@@ -45,8 +45,8 @@ export async function GET(request: Request) {
       );
 
     if (q) {
-      // ILIKE %q% を name / company / email で OR
-      const pattern = `%${q}%`;
+      // ILIKE %q% を name / company / email で OR (% _ \\ をエスケープ済)
+      const pattern = `%${escapeLikePattern(q)}%`;
       query = query.or(
         `name.ilike.${pattern},company.ilike.${pattern},email.ilike.${pattern}`,
       );

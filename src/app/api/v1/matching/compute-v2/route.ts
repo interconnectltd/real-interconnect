@@ -35,9 +35,9 @@ function mergeUnique(haiku: string[], attr: string[]): string[] {
   return out;
 }
 
-export async function POST() {
+export async function POST(request: Request) {
   try {
-    const { user } = await withAuth();
+    const { user } = await withAuth(request);
 
     // Matching compute rate limit: 5 req per 5 min per user
     const rl = checkMatchingRateLimit(user.id);

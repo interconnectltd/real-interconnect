@@ -3,7 +3,7 @@ import { createServiceClient } from "@/lib/supabase/server";
 
 export async function PATCH(request: Request) {
   try {
-    const { user } = await withAuth();
+    const { user } = await withAuth(request);
     const body = await request.json().catch(() => null);
 
     if (!body || typeof body !== "object") {

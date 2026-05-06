@@ -21,7 +21,7 @@ const MAX_SIZE = 50 * 1024 * 1024; // 50MB (Supabase Storage 上限と揃える)
  */
 export async function POST(request: Request) {
   try {
-    const { user, supabase } = await withAuth();
+    const { user, supabase } = await withAuth(request);
 
     const formData = await request.formData();
     const file = formData.get("file");
@@ -102,9 +102,9 @@ export async function POST(request: Request) {
  * Storage 内の自分の avatar を全削除し、profile.avatar_url を null に。
  * preset 切替や「クリア」時に呼び出して orphan を物理的に防ぐ。
  */
-export async function DELETE() {
+export async function DELETE(request: Request) {
   try {
-    const { user, supabase } = await withAuth();
+    const { user, supabase } = await withAuth(request);
 
     const { data: existing } = await supabase.storage
       .from("avatars")

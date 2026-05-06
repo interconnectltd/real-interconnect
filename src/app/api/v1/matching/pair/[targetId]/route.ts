@@ -48,11 +48,11 @@ interface PairMatchingRpcResult {
 }
 
 export async function GET(
-  _request: Request,
+  request: Request,
   context: { params: Promise<{ targetId: string }> },
 ) {
   try {
-    const { user, supabase } = await withAuth();
+    const { user, supabase } = await withAuth(request);
     const { targetId } = await context.params;
 
     if (!targetId || !UUID_RE.test(targetId)) {

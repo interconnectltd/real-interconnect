@@ -4,9 +4,9 @@ import { createServiceClient } from "@/lib/supabase/server";
 
 const VALID_VALUE_TAGS = ["アドバイス", "紹介", "気づき", "共通課題", "なし"] as const;
 
-export async function GET() {
+export async function GET(request: Request) {
   try {
-    const { user, supabase } = await withAuth();
+    const { user, supabase } = await withAuth(request);
 
     const { data, error } = await supabase
       .from("feedback_log")
@@ -23,7 +23,7 @@ export async function GET() {
 
 export async function POST(request: Request) {
   try {
-    const { user } = await withAuth();
+    const { user } = await withAuth(request);
     const body = await request.json().catch(() => null);
 
     if (!body || typeof body !== "object") {

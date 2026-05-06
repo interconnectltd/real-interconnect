@@ -8,9 +8,14 @@
 import {
   withAdminAuth,
   json,
+  jsonError,
   handleApiError,
 } from "@/lib/api-helpers";
-import { isValidUUID, sanitizeFilterValue } from "@/lib/sanitize";
+import {
+  isValidUUID,
+  sanitizeFilterValue,
+  isValidIsoTimestamp,
+} from "@/lib/sanitize";
 
 export const dynamic = "force-dynamic";
 
@@ -48,16 +53,15 @@ export async function GET(request: Request) {
     if (to) q = q.lte("created_at", to);
 
     // cursor は `${created_at}|${id}` 形式で tie-break する。
-    // (created_at, id) DESC keyset pagination で同タイムスタンプ行のスキップ/重複を防ぐ。
+    // 各成分を strict validate して PostgREST or() 句注入を排除。
     if (cursor) {
       const [cTs, cId] = cursor.split("|");
-      if (cTs && cId) {
-        q = q.or(
-          `created_at.lt.${cTs},and(created_at.eq.${cTs},id.lt.${cId})`,
-        );
-      } else {
-        q = q.lt("created_at", cursor);
+      if (!cTs || !cId || !isValidIsoTimestamp(cTs) || !isValidUUID(cId)) {
+        return jsonError(400, "BAD_REQUEST", "cursor が不正です");
       }
+      q = q.or(
+        `created_at.lt.${cTs},and(created_at.eq.${cTs},id.lt.${cId})`,
+      );
     }
 
     const { data, error } = await q;

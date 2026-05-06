@@ -5,7 +5,7 @@ import { createServiceClient } from "@/lib/supabase/server";
 /** POST /api/v1/meetings/request — 会議リクエスト送信 */
 export async function POST(request: Request) {
   try {
-    const { user, supabase } = await withAuth();
+    const { user, supabase } = await withAuth(request);
     const body = await request.json().catch(() => null);
 
     if (!body?.target_id || !isValidUUID(body.target_id)) {

@@ -1,8 +1,8 @@
 import { withAuth, json, handleApiError } from "@/lib/api-helpers";
 
-export async function PATCH() {
+export async function PATCH(request: Request) {
   try {
-    const { user, supabase } = await withAuth();
+    const { user, supabase } = await withAuth(request);
 
     const { error } = await supabase
       .from("notifications")

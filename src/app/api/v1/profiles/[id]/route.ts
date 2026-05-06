@@ -2,7 +2,7 @@ import { withAuth, json, jsonError, handleApiError } from "@/lib/api-helpers";
 import { isValidUUID } from "@/lib/sanitize";
 
 export async function GET(
-  _request: Request,
+  request: Request,
   { params }: { params: Promise<{ id: string }> },
 ) {
   try {
@@ -12,7 +12,7 @@ export async function GET(
       return jsonError(400, "BAD_REQUEST", "無効なユーザーIDです");
     }
 
-    const { user, supabase } = await withAuth();
+    const { user, supabase } = await withAuth(request);
 
     const { data: profile, error } = await supabase
       .from("user_profiles")

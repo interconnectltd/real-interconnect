@@ -101,14 +101,14 @@ export type WithAuthOptions = {
 };
 
 export async function withAuth(
-  request?: Request,
+  request: Request,
   options: WithAuthOptions = {},
 ): Promise<{
   user: User;
   supabase: SupabaseClient<Database>;
 }> {
-  // CSRF guard for state-changing methods
-  if (request) ensureSameOrigin(request);
+  // CSRF guard for state-changing methods (request 必須化で全 route が Origin 検証を受ける)
+  ensureSameOrigin(request);
 
   const supabase = await createClient();
   const {
@@ -229,6 +229,41 @@ export async function withAdminAuth(
 }> {
   const { user, supabase } = await withAuth(request, options);
 
+  // admin route は GET であっても副作用 (audit log) を伴うため CSRF guard を強制
+  // (withAuth は state-changing method のみ Origin 検証するので、admin GET の view_user 等が抜ける)
+  if (!new Set(["POST", "PUT", "PATCH", "DELETE"]).has(request.method)) {
+    // ensureSameOrigin と同等のチェックを内部で再実行 (GET でも本物の admin だけ通す)
+    const origin = request.headers.get("origin");
+    const referer = request.headers.get("referer");
+    if (origin) {
+      try {
+        const u = new URL(origin);
+        const allowed = new Set(
+          (process.env.ALLOWED_ORIGIN_HOSTS ?? "")
+            .split(",")
+            .map((h) => h.trim())
+            .filter(Boolean),
+        );
+        const defaults = ["inter-connect.app", "www.inter-connect.app"];
+        const hosts = allowed.size > 0 ? allowed : new Set(defaults);
+        if (
+          !hosts.has(u.hostname) &&
+          !(process.env.NODE_ENV !== "production" &&
+            (u.hostname === "localhost" || u.hostname === "127.0.0.1")) &&
+          !((process.env.ALLOW_NETLIFY_PREVIEW ?? "").toLowerCase() === "true" &&
+            u.hostname.endsWith(".netlify.app"))
+        ) {
+          throw new ApiError(403, "FORBIDDEN", "Cross-origin admin GET rejected");
+        }
+      } catch (e) {
+        if (e instanceof ApiError) throw e;
+        throw new ApiError(403, "FORBIDDEN", "Invalid origin header");
+      }
+    } else if (!referer) {
+      throw new ApiError(403, "FORBIDDEN", "Origin/Referer required for admin");
+    }
+  }
+
   const { data, error } = await supabase
     .from("user_profiles")
     .select("is_admin")
@@ -240,20 +275,19 @@ export async function withAdminAuth(
 
   let reason: string | null = null;
   if (options.requireReason) {
-    // 優先順位: X-Admin-Reason ヘッダ > ?reason= クエリ (後方互換)
-    // ヘッダ経由なら URL 履歴 / Referer leak を回避できる (法務 R5 整合)
-    const headerReason = (request.headers.get("x-admin-reason") ?? "").trim();
-    const url = new URL(request.url);
-    const queryReason = (url.searchParams.get("reason") ?? "").trim();
-    const raw = headerReason || queryReason;
-    if (raw.length < 5 || raw.length > 500) {
+    // X-Admin-Reason ヘッダ専用 (URL 履歴 / Referer leak / Netlify access log への
+    // PII 流出を完全回避するため query fallback は廃止)
+    const headerReason = (request.headers.get("x-admin-reason") ?? "")
+      .replace(/[\r\n\t\0]/g, " ")
+      .trim();
+    if (headerReason.length < 5 || headerReason.length > 500) {
       throw new ApiError(
         400,
         "REASON_REQUIRED",
-        "個人情報を閲覧するには理由 (5-500 字) が必要です",
+        "個人情報を閲覧するには X-Admin-Reason ヘッダで理由 (5-500 字) を送信してください",
       );
     }
-    reason = raw;
+    reason = headerReason;
   }
 
   return { user, supabase, reason };

@@ -1,9 +1,9 @@
 import { withAuth, json, handleApiError } from "@/lib/api-helpers";
 
 /** GET /api/v1/meetings — 自分の会議一覧 */
-export async function GET() {
+export async function GET(request: Request) {
   try {
-    const { user, supabase } = await withAuth();
+    const { user, supabase } = await withAuth(request);
 
     // meeting_participants_v2 経由で自分が参加する会議を取得
     const { data, error } = await supabase

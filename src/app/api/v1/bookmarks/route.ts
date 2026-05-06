@@ -1,8 +1,8 @@
 import { withAuth, json, jsonError, handleApiError } from "@/lib/api-helpers";
 
-export async function GET() {
+export async function GET(request: Request) {
   try {
-    const { user, supabase } = await withAuth();
+    const { user, supabase } = await withAuth(request);
 
     const { data, error } = await supabase
       .from("bookmarks")
@@ -19,7 +19,7 @@ export async function GET() {
 
 export async function POST(request: Request) {
   try {
-    const { user, supabase } = await withAuth();
+    const { user, supabase } = await withAuth(request);
     const { bookmarked_user_id, note } = await request.json();
 
     if (!bookmarked_user_id) {
@@ -44,7 +44,7 @@ export async function POST(request: Request) {
 
 export async function DELETE(request: Request) {
   try {
-    const { user, supabase } = await withAuth();
+    const { user, supabase } = await withAuth(request);
     const { searchParams } = new URL(request.url);
     const bookmarkedUserId = searchParams.get("bookmarked_user_id");
 

@@ -11,7 +11,7 @@ export async function PATCH(
     const { id } = await params;
     if (!isValidUUID(id)) return jsonError(400, "BAD_REQUEST", "無効なIDです");
 
-    const { user, supabase } = await withAuth();
+    const { user, supabase } = await withAuth(request);
     const body = await request.json().catch(() => null);
     const newStatus = body?.status;
 

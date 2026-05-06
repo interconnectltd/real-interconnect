@@ -5,7 +5,7 @@ import type { Database } from "@/types/database";
 
 export async function GET(request: Request) {
   try {
-    const { user, supabase } = await withAuth();
+    const { user, supabase } = await withAuth(request);
     const { searchParams } = new URL(request.url);
     const status = searchParams.get("status");
 
@@ -51,7 +51,7 @@ export async function GET(request: Request) {
 
 export async function POST(request: Request) {
   try {
-    const { user, supabase } = await withAuth();
+    const { user, supabase } = await withAuth(request);
     const body = await request.json().catch(() => null);
 
     if (!body || typeof body !== "object") {
