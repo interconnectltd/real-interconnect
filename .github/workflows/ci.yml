@@ -1,0 +1,46 @@
+name: CI
+
+on:
+  pull_request:
+    branches: [main]
+  push:
+    branches: [main]
+
+# 同じブランチで連続 push が走った時は前段をキャンセルして最新だけ完走
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  check:
+    name: Typecheck / Lint / Test
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 9
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: pnpm
+
+      - name: Install (frozen lockfile)
+        run: pnpm install --frozen-lockfile
+
+      - name: TypeScript
+        run: pnpm exec tsc --noEmit
+
+      - name: Lint
+        run: pnpm exec next lint
+        continue-on-error: false
+
+      - name: Vitest
+        run: pnpm test -- --run --reporter=default
+        env:
+          # テスト時に env 必要なら placeholder を渡す (本物は使わない)
+          NEXT_PUBLIC_SUPABASE_URL: https://example.supabase.co
+          NEXT_PUBLIC_SUPABASE_ANON_KEY: ci-placeholder

@@ -11,6 +11,13 @@ export default function AuthLayout({
 }) {
   return (
     <>
+      {/* Skip link (WCAG 2.4.1 Bypass Blocks) — focus 時のみ可視化 */}
+      <a
+        href="#main"
+        className="sr-only z-[200] rounded-md bg-foreground px-3 py-2 text-sm font-medium text-background shadow-lg focus:not-sr-only focus:fixed focus:left-4 focus:top-4"
+      >
+        本文へスキップ
+      </a>
       <div className="flex min-h-dvh flex-col pb-safe">
         <Header />
         <div className="flex flex-1">
@@ -20,7 +27,13 @@ export default function AuthLayout({
               <Sidebar />
             </div>
           </aside>
-          <main className="flex-1 overflow-x-hidden p-4 pb-24 landscape:pb-16 md:p-6">{children}</main>
+          <main
+            id="main"
+            tabIndex={-1}
+            className="flex-1 overflow-x-hidden p-4 pb-24 outline-none landscape:pb-16 md:p-6"
+          >
+            {children}
+          </main>
         </div>
       </div>
       <ProfileModal />

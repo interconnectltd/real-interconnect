@@ -91,9 +91,9 @@ export function PrivacyContent() {
           <tbody className="divide-y">
             <tr>
               <td className="py-2 pr-4">Supabase, Inc.</td>
-              <td className="py-2 pr-4">米国</td>
+              <td className="py-2 pr-4">米国（運営法人）／<br />シンガポール（データ保管: ap-southeast-1）</td>
               <td className="py-2 pr-4">データベース・認証基盤の提供</td>
-              <td className="py-2">同社のData Processing Addendum（DPA）にSCC（標準契約条項）を組み込み、SOC 2 Type II報告書により安全管理措置を確認</td>
+              <td className="py-2">同社のData Processing Addendum（DPA）にSCC（標準契約条項）を組み込み、SOC 2 Type II報告書により安全管理措置を確認。シンガポール所在のAWSデータセンターに保管されます。</td>
             </tr>
             <tr>
               <td className="py-2 pr-4">Anthropic PBC</td>

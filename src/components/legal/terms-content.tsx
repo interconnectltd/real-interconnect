@@ -217,7 +217,7 @@ export function TermsContent() {
 
       <h2 className="mt-6 text-lg font-semibold text-foreground">第21条（第三者依存・サービス停止）</h2>
       <ol className="list-decimal pl-5">
-        <li>本サービスは、tl;dv（米国）、Anthropic（米国）、Supabase（米国）、Render（米国）等の第三者サービスに依存します。</li>
+        <li>本サービスは、tl;dv（米国）、Anthropic（米国）、Supabase（米国法人／データ保管: シンガポール ap-southeast-1）、Netlify（米国）、Render（米国）等の第三者サービスに依存します。</li>
         <li>当社は、第三者サービスの停止・障害・仕様変更・契約終了に起因する本サービスの停止又は機能低下について、当社の故意又は重過失による場合を除き、責任を負いません。</li>
         <li>当社は、定期メンテナンス・緊急メンテナンス・障害対応のため、事前通知なく本サービスを一時的に停止することができます。</li>
       </ol>

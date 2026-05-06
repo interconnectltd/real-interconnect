@@ -22,13 +22,13 @@ export function useNotifications(unreadOnly = false) {
 export function useUnreadCount() {
   return useQuery({
     queryKey: queryKeys.notifications.unreadCount(),
-    // TODO: Replace with a dedicated count endpoint (e.g. GET /notifications/count)
-    // to avoid fetching full notification objects just for a count.
+    // 専用 endpoint で count のみ取得 (旧実装は全件 payload 転送で N+payload 肥大)
     queryFn: async ({ signal }) => {
-      const data = await api.get<Notification[]>("/notifications?unread=true", {
-        signal,
-      });
-      return data.length;
+      const data = await api.get<{ unread: number }>(
+        "/notifications/count",
+        { signal },
+      );
+      return data.unread;
     },
     refetchInterval: 60_000,
     refetchIntervalInBackground: false,

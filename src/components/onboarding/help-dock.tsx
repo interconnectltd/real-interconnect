@@ -37,9 +37,6 @@ interface HelpDockProps {
   pageTourLabel?: string;
   /** このページの専用 tour が利用可能か */
   pageTourAvailable?: boolean;
-  /** @deprecated レガシー互換: 過去の単一 tour 用 */
-  onStartTour?: () => void;
-  tourAvailable?: boolean;
 }
 
 /**
@@ -58,13 +55,10 @@ export function HelpDock({
   onStartDashboardTour,
   pageTourLabel,
   pageTourAvailable = false,
-  onStartTour,
-  tourAvailable,
 }: HelpDockProps) {
-  // レガシー互換: onStartTour が渡された場合は dashboard tour として扱う
-  const startDashboard = onStartDashboardTour ?? onStartTour;
+  const startDashboard = onStartDashboardTour;
   const startPage = onStartPageTour;
-  const dashAvailable = onStartDashboardTour != null || (tourAvailable ?? false);
+  const dashAvailable = onStartDashboardTour != null;
   const [open, setOpen] = useState(false);
   const fabRef = useRef<HTMLButtonElement>(null);
   // popover open 中だけ visualViewport.height を CSS var にエクスポート
