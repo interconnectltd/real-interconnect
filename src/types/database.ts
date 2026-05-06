@@ -1013,6 +1013,19 @@ export interface Database {
           analysis_count: number;
         }[];
       };
+      get_unread_counts: {
+        Args: Record<string, never>;
+        Returns: { room_id: string; unread_count: number }[];
+      };
+      check_rate_limit: {
+        Args: {
+          p_user_id: string;
+          p_bucket: string;
+          p_limit: number;
+          p_window_seconds?: number;
+        };
+        Returns: boolean;
+      };
     };
     Enums: {
       notification_type: NotificationType;

@@ -54,18 +54,11 @@ export async function GET() {
 
     const profileMap = new Map(profiles?.map((p) => [p.id, p]) ?? []);
 
-    // unread_count: RLS 配下で自分の room の messages を集計
-    const roomIds = rooms.map((r) => r.id);
-    const { data: unreadRows } = await supabase
-      .from("chat_messages")
-      .select("room_id")
-      .in("room_id", roomIds)
-      .neq("sender_id", user.id)
-      .eq("is_read", false);
-
+    // unread_count: RPC (SECURITY DEFINER + GROUP BY) で N+1 を解消
+    const { data: unreadRows } = await supabase.rpc("get_unread_counts");
     const unreadMap = new Map<string, number>();
     for (const row of unreadRows ?? []) {
-      unreadMap.set(row.room_id, (unreadMap.get(row.room_id) ?? 0) + 1);
+      unreadMap.set(row.room_id, Number(row.unread_count));
     }
 
     const enriched = rooms.map((r) => ({
@@ -93,7 +86,7 @@ export async function GET() {
 
 export async function POST(request: Request) {
   try {
-    const { user, supabase } = await withAuth();
+    const { user, supabase } = await withAuth(request);
     const body = await request.json().catch(() => null);
 
     if (!body || typeof body !== "object") {

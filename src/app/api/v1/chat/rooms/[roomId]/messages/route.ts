@@ -27,9 +27,9 @@ import {
   json,
   jsonError,
   handleApiError,
+  checkDbRateLimit,
 } from "@/lib/api-helpers";
 import { isValidUUID } from "@/lib/sanitize";
-import { checkRateLimit } from "@/lib/rate-limit";
 import { writeAuditLog, extractClientInfo } from "@/lib/audit-log";
 import {
   PostMessageSchema,
@@ -38,27 +38,29 @@ import {
 import type { ChatMessagesResponse, ChatMessage } from "@/types/chat";
 import type { Json } from "@/types/database";
 
-const RATE_LIMIT_GET = { max: 120, windowMs: 60_000 };
-const RATE_LIMIT_POST = { max: 30, windowMs: 60_000 };
+const RL_GET_MAX = 120;
+const RL_POST_MAX = 30;
 
 export async function GET(
   request: Request,
   context: { params: Promise<{ roomId: string }> },
 ) {
   try {
-    const { user, supabase } = await withAuth();
+    const { user, supabase } = await withAuth(request);
     const { roomId } = await context.params;
     if (!isValidUUID(roomId)) {
       return jsonError(400, "BAD_REQUEST", "ルーム ID が不正です");
     }
 
-    // Rate limit
-    const rl = checkRateLimit(
-      `chat.msg.get:${user.id}`,
-      RATE_LIMIT_GET.max,
-      RATE_LIMIT_GET.windowMs,
+    // DB-backed rate limit (multi-instance 分散対応)
+    const allowed = await checkDbRateLimit(
+      supabase,
+      user.id,
+      "chat.msg.get",
+      RL_GET_MAX,
+      60,
     );
-    if (!rl.allowed) {
+    if (!allowed) {
       return jsonError(429, "RATE_LIMITED", "リクエストが多すぎます");
     }
 
@@ -143,19 +145,21 @@ export async function POST(
   context: { params: Promise<{ roomId: string }> },
 ) {
   try {
-    const { user, supabase } = await withAuth();
+    const { user, supabase } = await withAuth(request);
     const { roomId } = await context.params;
     if (!isValidUUID(roomId)) {
       return jsonError(400, "BAD_REQUEST", "ルーム ID が不正です");
     }
 
-    // Rate limit
-    const rl = checkRateLimit(
-      `chat.msg.post:${user.id}`,
-      RATE_LIMIT_POST.max,
-      RATE_LIMIT_POST.windowMs,
+    // DB-backed rate limit (multi-instance 分散対応)
+    const allowed = await checkDbRateLimit(
+      supabase,
+      user.id,
+      "chat.msg.post",
+      RL_POST_MAX,
+      60,
     );
-    if (!rl.allowed) {
+    if (!allowed) {
       return jsonError(429, "RATE_LIMITED", "送信が多すぎます。少し待ってください");
     }
 

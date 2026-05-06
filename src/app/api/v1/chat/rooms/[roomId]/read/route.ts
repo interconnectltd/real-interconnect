@@ -19,31 +19,33 @@ import {
   json,
   jsonError,
   handleApiError,
+  checkDbRateLimit,
 } from "@/lib/api-helpers";
 import { isValidUUID } from "@/lib/sanitize";
-import { checkRateLimit } from "@/lib/rate-limit";
 import { writeAuditLog, extractClientInfo } from "@/lib/audit-log";
 import { ReadSchema } from "@/lib/validators/chat";
 
-const RATE_LIMIT = { max: 60, windowMs: 60_000 };
+const RL_MAX = 60;
 
 export async function POST(
   request: Request,
   context: { params: Promise<{ roomId: string }> },
 ) {
   try {
-    const { user, supabase } = await withAuth();
+    const { user, supabase } = await withAuth(request);
     const { roomId } = await context.params;
     if (!isValidUUID(roomId)) {
       return jsonError(400, "BAD_REQUEST", "ルーム ID が不正です");
     }
 
-    const rl = checkRateLimit(
-      `chat.msg.read:${user.id}`,
-      RATE_LIMIT.max,
-      RATE_LIMIT.windowMs,
+    const allowed = await checkDbRateLimit(
+      supabase,
+      user.id,
+      "chat.msg.read",
+      RL_MAX,
+      60,
     );
-    if (!rl.allowed) {
+    if (!allowed) {
       return jsonError(429, "RATE_LIMITED", "リクエストが多すぎます");
     }
 
