@@ -10,25 +10,46 @@ import type { Database } from "@/types/database";
  * CSRF guard: state-changing requests (POST/PUT/PATCH/DELETE) は Origin を検証。
  * Same-origin / 許可リスト外なら 403。
  *
- * R2 Sec/Arch レビュー指摘:「CSRF Origin/Referer 検証なし」(両者 -3 致命) の解消。
+ * R2 Sec/Arch:「CSRF Origin/Referer 検証なし」解消。
+ * R3 Arch:「allowlist hardcode で preview branch 全 403 化」→ env 由来 + *.netlify.app ワイルドカード対応。
+ *
+ * 環境変数:
+ *   ALLOWED_ORIGIN_HOSTS = "inter-connect.app,www.inter-connect.app"
+ *     (カンマ区切り、未設定時はデフォルト本番 host)
+ *   ALLOW_NETLIFY_PREVIEW = "true" で *.netlify.app を許可 (preview deploy 用)
  */
 const STATE_CHANGING = new Set(["POST", "PUT", "PATCH", "DELETE"]);
-const SAME_ORIGIN_HOSTS = new Set([
-  "inter-connect.app",
-  "www.inter-connect.app",
-  "localhost",
-]);
+
+const DEFAULT_HOSTS = ["inter-connect.app", "www.inter-connect.app"];
+const ENV_HOSTS = (process.env.ALLOWED_ORIGIN_HOSTS ?? "")
+  .split(",")
+  .map((h) => h.trim())
+  .filter(Boolean);
+const SAME_ORIGIN_HOSTS = new Set(
+  ENV_HOSTS.length > 0 ? ENV_HOSTS : DEFAULT_HOSTS,
+);
+const ALLOW_NETLIFY_PREVIEW =
+  (process.env.ALLOW_NETLIFY_PREVIEW ?? "").toLowerCase() === "true";
+const ALLOW_LOCALHOST = process.env.NODE_ENV !== "production";
+
+function isAllowedHost(hostname: string): boolean {
+  if (SAME_ORIGIN_HOSTS.has(hostname)) return true;
+  if (ALLOW_LOCALHOST && (hostname === "localhost" || hostname === "127.0.0.1"))
+    return true;
+  if (ALLOW_NETLIFY_PREVIEW && hostname.endsWith(".netlify.app")) return true;
+  return false;
+}
 
 function ensureSameOrigin(request: Request): void {
   if (!STATE_CHANGING.has(request.method)) return;
 
   const origin = request.headers.get("origin");
   const referer = request.headers.get("referer");
-  // Origin ヘッダ優先 (fetch/XHR は必ず付く)
+
   if (origin) {
     try {
       const u = new URL(origin);
-      if (!SAME_ORIGIN_HOSTS.has(u.hostname)) {
+      if (!isAllowedHost(u.hostname)) {
         throw new ApiError(403, "FORBIDDEN", "Cross-origin request rejected");
       }
       return;
@@ -36,11 +57,10 @@ function ensureSameOrigin(request: Request): void {
       throw new ApiError(403, "FORBIDDEN", "Invalid origin header");
     }
   }
-  // Origin 無の form POST 等は Referer で fallback
   if (referer) {
     try {
       const u = new URL(referer);
-      if (!SAME_ORIGIN_HOSTS.has(u.hostname)) {
+      if (!isAllowedHost(u.hostname)) {
         throw new ApiError(403, "FORBIDDEN", "Cross-origin request rejected");
       }
       return;
@@ -48,7 +68,6 @@ function ensureSameOrigin(request: Request): void {
       // ignore
     }
   }
-  // Origin / Referer どちらも無いのは怪しい (CSRF or programmatic) → 拒否
   throw new ApiError(403, "FORBIDDEN", "Origin header required");
 }
 
@@ -64,7 +83,19 @@ export function jsonError(
   return NextResponse.json({ data: null, error: { code, message } }, { status });
 }
 
-export async function withAuth(request?: Request): Promise<{
+export type WithAuthOptions = {
+  /**
+   * true 時に in-memory checkGeneralRateLimit を skip。
+   * R3 Arch:「withAuth と DB rate-limit 二重評価で偽陽性 429」解消。
+   * chat 系のように route 側で checkDbRateLimit を呼ぶ場合に true。
+   */
+  skipMemoryRl?: boolean;
+};
+
+export async function withAuth(
+  request?: Request,
+  options: WithAuthOptions = {},
+): Promise<{
   user: User;
   supabase: SupabaseClient<Database>;
 }> {
@@ -81,10 +112,17 @@ export async function withAuth(request?: Request): Promise<{
     throw new ApiError(401, "UNAUTHORIZED", "認証が必要です");
   }
 
-  // General API rate limit: 60 req/min per user (in-memory fast path; DB fallback in route 側)
-  const rl = checkGeneralRateLimit(user.id);
-  if (!rl.allowed) {
-    throw new ApiError(429, "RATE_LIMITED", "リクエストが多すぎます。しばらくしてから再試行してください");
+  // General API rate limit (in-memory fast path)
+  // chat 系は DB-backed limiter のみ使うため skip
+  if (!options.skipMemoryRl) {
+    const rl = checkGeneralRateLimit(user.id);
+    if (!rl.allowed) {
+      throw new ApiError(
+        429,
+        "RATE_LIMITED",
+        "リクエストが多すぎます。しばらくしてから再試行してください",
+      );
+    }
   }
 
   return { user, supabase };

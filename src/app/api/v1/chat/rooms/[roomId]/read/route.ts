@@ -32,7 +32,7 @@ export async function POST(
   context: { params: Promise<{ roomId: string }> },
 ) {
   try {
-    const { user, supabase } = await withAuth(request);
+    const { user, supabase } = await withAuth(request, { skipMemoryRl: true });
     const { roomId } = await context.params;
     if (!isValidUUID(roomId)) {
       return jsonError(400, "BAD_REQUEST", "ルーム ID が不正です");
@@ -66,6 +66,7 @@ export async function POST(
       .from("chat_rooms")
       .select("id, user_a_id, user_b_id")
       .eq("id", roomId)
+      .abortSignal(request.signal)
       .maybeSingle();
     if (!room) {
       return jsonError(

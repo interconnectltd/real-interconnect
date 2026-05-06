@@ -840,6 +840,21 @@ export interface Database {
         };
         Relationships: [];
       };
+      chat_message_idempotency_keys: {
+        Row: {
+          user_id: string;
+          idempotency_key: string;
+          message_id: string;
+          created_at: string;
+        };
+        Insert: {
+          user_id: string;
+          idempotency_key: string;
+          message_id: string;
+        };
+        Update: never;
+        Relationships: [];
+      };
       chat_analysis: {
         Row: {
           id: string;

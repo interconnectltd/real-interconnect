@@ -46,13 +46,13 @@ export async function GET(
   context: { params: Promise<{ roomId: string }> },
 ) {
   try {
-    const { user, supabase } = await withAuth(request);
+    const { user, supabase } = await withAuth(request, { skipMemoryRl: true });
     const { roomId } = await context.params;
     if (!isValidUUID(roomId)) {
       return jsonError(400, "BAD_REQUEST", "ルーム ID が不正です");
     }
 
-    // DB-backed rate limit (multi-instance 分散対応)
+    // DB-backed rate limit (multi-instance 分散対応, 真の sliding window)
     const allowed = await checkDbRateLimit(
       supabase,
       user.id,
@@ -80,6 +80,7 @@ export async function GET(
       .from("chat_rooms")
       .select("id, user_a_id, user_b_id")
       .eq("id", roomId)
+      .abortSignal(request.signal)
       .maybeSingle();
     if (!room) {
       return jsonError(
@@ -101,6 +102,7 @@ export async function GET(
       .eq("room_id", roomId)
       .order("created_at", { ascending: false })
       .order("id", { ascending: false })
+      .abortSignal(request.signal)
       .limit(limit + 1);
 
     // cursor: created_at < before_at OR (created_at = before_at AND id < before_id)
@@ -145,13 +147,13 @@ export async function POST(
   context: { params: Promise<{ roomId: string }> },
 ) {
   try {
-    const { user, supabase } = await withAuth(request);
+    const { user, supabase } = await withAuth(request, { skipMemoryRl: true });
     const { roomId } = await context.params;
     if (!isValidUUID(roomId)) {
       return jsonError(400, "BAD_REQUEST", "ルーム ID が不正です");
     }
 
-    // DB-backed rate limit (multi-instance 分散対応)
+    // DB-backed rate limit (multi-instance 分散対応, 真の sliding window)
     const allowed = await checkDbRateLimit(
       supabase,
       user.id,
@@ -161,6 +163,38 @@ export async function POST(
     );
     if (!allowed) {
       return jsonError(429, "RATE_LIMITED", "送信が多すぎます。少し待ってください");
+    }
+
+    // Idempotency-Key (R3 Arch: client retry 二重 INSERT 防止)
+    const idempotencyKey = request.headers.get("idempotency-key");
+    if (idempotencyKey) {
+      if (idempotencyKey.length < 8 || idempotencyKey.length > 128) {
+        return jsonError(
+          400,
+          "BAD_REQUEST",
+          "Idempotency-Key は 8〜128 文字",
+        );
+      }
+      // 既存 key check (2 step: key→message_id→message)
+      const { data: idemRow } = await supabase
+        .from("chat_message_idempotency_keys")
+        .select("message_id")
+        .eq("user_id", user.id)
+        .eq("idempotency_key", idempotencyKey)
+        .maybeSingle();
+      if (idemRow?.message_id) {
+        const { data: prevMsg } = await supabase
+          .from("chat_messages")
+          .select(
+            "id, room_id, sender_id, content, content_type, payload, is_read, created_at",
+          )
+          .eq("id", idemRow.message_id)
+          .maybeSingle();
+        if (prevMsg) {
+          // 同 key の以前の message を返却 (idempotent)
+          return json(prevMsg, 200);
+        }
+      }
     }
 
     // Zod validation で body 全フィールド型保証
@@ -180,6 +214,7 @@ export async function POST(
       .from("chat_rooms")
       .select("id, user_a_id, user_b_id")
       .eq("id", roomId)
+      .abortSignal(request.signal)
       .maybeSingle();
     if (!room) {
       return jsonError(
@@ -212,6 +247,22 @@ export async function POST(
 
     if (error) throw error;
 
+    // Idempotency-Key 記録 (best-effort、既存 key は 23505 で skip)
+    if (idempotencyKey && message) {
+      await supabase
+        .from("chat_message_idempotency_keys")
+        .insert({
+          user_id: user.id,
+          idempotency_key: idempotencyKey,
+          message_id: message.id,
+        })
+        .then(({ error: idemErr }) => {
+          if (idemErr && idemErr.code !== "23505") {
+            console.warn("[idem] insert failed:", idemErr.message);
+          }
+        });
+    }
+
     // audit-log (best-effort)
     const client = extractClientInfo(request);
     void writeAuditLog(supabase, {
@@ -219,7 +270,12 @@ export async function POST(
       action: "chat.message.send",
       target_type: "chat_message",
       target_id: message?.id ?? null,
-      payload: { room_id: roomId, content_type, len: content.length },
+      payload: {
+        room_id: roomId,
+        content_type,
+        len: content.length,
+        idempotent: idempotencyKey ? true : false,
+      },
       ip: client.ip,
       ua: client.ua,
     });
