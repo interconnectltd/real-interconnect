@@ -35,13 +35,27 @@ async function request<T>(
   return json.data as T;
 }
 
+type ExtraOpts = { headers?: Record<string, string> };
+
 export const api = {
   get: <T>(path: string, options?: RequestInit) => request<T>(path, options),
-  post: <T>(path: string, body?: unknown) =>
-    request<T>(path, { method: "POST", body: JSON.stringify(body) }),
-  patch: <T>(path: string, body?: unknown) =>
-    request<T>(path, { method: "PATCH", body: JSON.stringify(body) }),
-  put: <T>(path: string, body?: unknown) =>
-    request<T>(path, { method: "PUT", body: JSON.stringify(body) }),
+  post: <T>(path: string, body?: unknown, opts?: ExtraOpts) =>
+    request<T>(path, {
+      method: "POST",
+      body: JSON.stringify(body),
+      headers: opts?.headers,
+    }),
+  patch: <T>(path: string, body?: unknown, opts?: ExtraOpts) =>
+    request<T>(path, {
+      method: "PATCH",
+      body: JSON.stringify(body),
+      headers: opts?.headers,
+    }),
+  put: <T>(path: string, body?: unknown, opts?: ExtraOpts) =>
+    request<T>(path, {
+      method: "PUT",
+      body: JSON.stringify(body),
+      headers: opts?.headers,
+    }),
   delete: <T>(path: string) => request<T>(path, { method: "DELETE" }),
 };
