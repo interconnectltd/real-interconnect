@@ -15,6 +15,7 @@ import {
   isValidUUID,
   sanitizeFilterValue,
   isValidIsoTimestamp,
+  escapeLikePattern,
 } from "@/lib/sanitize";
 
 export const dynamic = "force-dynamic";
@@ -46,11 +47,16 @@ export async function GET(request: Request) {
       .limit(limit + 1);
 
     if (actor && isValidUUID(actor)) q = q.eq("actor_id", actor);
-    if (action) q = q.ilike("action", `%${action}%`);
+    // ILIKE %_/_ の自動的な全件マッチを防ぐため escape (DoS 防止)
+    if (action) q = q.ilike("action", `%${escapeLikePattern(action)}%`);
     if (targetType) q = q.eq("target_type", targetType);
-    if (targetId) q = q.eq("target_id", targetId);
-    if (from) q = q.gte("created_at", from);
-    if (to) q = q.lte("created_at", to);
+    // target_id は UUID または文字列。空白は trim、不正は無視。
+    if (targetId && targetId.trim().length > 0 && targetId.length <= 200) {
+      q = q.eq("target_id", targetId.trim());
+    }
+    // from/to は ISO 8601 のみ許容 (Postgres parse 失敗で 500 が返る経路を遮断)
+    if (from && isValidIsoTimestamp(from)) q = q.gte("created_at", from);
+    if (to && isValidIsoTimestamp(to)) q = q.lte("created_at", to);
 
     // cursor は `${created_at}|${id}` 形式で tie-break する。
     // 各成分を strict validate して PostgREST or() 句注入を排除。

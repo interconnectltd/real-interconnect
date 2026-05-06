@@ -39,9 +39,10 @@ export async function GET(request: Request) {
 
     let query = supabase
       .from("user_profiles")
+      // count: estimated で 50k+ rows でも seq scan を回避 (HubSpot/Salesforce 標準)
       .select(
         "id, name, email, company, position, industry, is_admin, is_active, onboarding_step, created_at",
-        { count: "exact" },
+        { count: "estimated" },
       );
 
     if (q) {

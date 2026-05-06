@@ -69,14 +69,31 @@ function KpiCard({ label, value, hint, icon: Icon, href, tone = "default" }: Kpi
     </div>
   );
 
-  return href ? <Link href={href}>{inner}</Link> : inner;
+  return href ? (
+    <Link
+      href={href}
+      aria-label={`${label} ${typeof value === "number" ? value.toLocaleString() : value} の詳細を開く`}
+      className="block rounded-lg outline-none focus-visible:ring-[3px] focus-visible:ring-ring/70"
+    >
+      {inner}
+    </Link>
+  ) : (
+    inner
+  );
 }
 
 export default function AdminDashboardPage() {
   const { data, isLoading, isError } = useQuery({
     queryKey: ["admin-dashboard"],
     queryFn: () => api.get<DashboardKpi>("/admin/dashboard"),
-    refetchInterval: 60_000,
+    // tab が hidden / 非アクティブの間は polling を止める
+    // (旧 60s 固定 polling は admin が放置中にも RPC 課金を発生させていた)
+    refetchInterval: (q) =>
+      typeof document !== "undefined" && document.visibilityState === "visible"
+        ? 60_000
+        : false,
+    refetchIntervalInBackground: false,
+    staleTime: 30_000,
   });
 
   return (

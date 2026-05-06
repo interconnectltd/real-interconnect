@@ -104,7 +104,9 @@ export async function GET(
     const profileName = profile?.name?.trim().toLowerCase() ?? "";
     const profileEmail = profile?.email?.trim().toLowerCase() ?? "";
 
-    const meetings = (transcripts ?? []).map((t) => {
+    // 情報スコープ縮小: 申請ユーザーに関係しない会議 (候補ゼロ かつ 既紐付けでもない)
+    // を一覧に含めない。旧版は admin が他社案件のタイトル/参加者数を覗ける状態だった。
+    const allMeetings = (transcripts ?? []).map((t) => {
       const ps = grouped.get(t.id) ?? [];
       const linkedToThisUser = ps.some((p) => p.user_id === req.user_id);
       // speaker_name か email がプロフィールと一致する候補を抽出
@@ -133,6 +135,9 @@ export async function GET(
         candidates,
       };
     });
+    const meetings = allMeetings.filter(
+      (m) => m.linked_to_this_user || m.candidates.length > 0,
+    );
 
     return json({
       request: { id: req.id, user_id: req.user_id, status: req.status },

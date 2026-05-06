@@ -85,8 +85,10 @@ export async function GET(
         .limit(20),
     ]);
 
-    // 閲覧監査ログ (best-effort、失敗してもメイン処理は通す)
-    void supabase
+    // 閲覧監査ログ (法務 R5: 失敗時は閲覧自体を拒否)。
+    // 旧 fire-and-forget は Edge/Serverless で Promise が破棄されるため
+    // INSERT が落ちて法的証跡が空になる事故が起きうる → await + 失敗時 500。
+    const { error: auditErr } = await supabase
       .from("audit_logs")
       .insert({
         actor_id: user.id,
@@ -94,12 +96,15 @@ export async function GET(
         target_type: "user",
         target_id: id,
         payload: { reason } as Json,
-      })
-      .then(({ error }) => {
-        if (error) {
-          console.warn("[admin/users/[id]] audit insert failed:", error.message);
-        }
       });
+    if (auditErr) {
+      console.error("[admin/users/[id]] audit insert failed:", auditErr.message);
+      return jsonError(
+        500,
+        "AUDIT_FAILED",
+        "閲覧記録の保存に失敗したため詳細を表示できません。再試行してください。",
+      );
+    }
 
     return json({
       profile,

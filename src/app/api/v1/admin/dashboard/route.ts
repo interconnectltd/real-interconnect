@@ -12,6 +12,7 @@ import {
   jsonError,
   handleApiError,
 } from "@/lib/api-helpers";
+import { NextResponse } from "next/server";
 
 export const dynamic = "force-dynamic";
 
@@ -32,7 +33,11 @@ export async function GET(request: Request) {
       return jsonError(500, "DB_ERROR", error.message ?? "RPC failed");
     }
 
-    return json(data);
+    // CDN / 中間 proxy で個人情報を含むレスポンスをキャッシュさせない (admin route 必須)
+    const res = json(data);
+    res.headers.set("Cache-Control", "no-store, private");
+    res.headers.set("Vary", "Cookie");
+    return res as unknown as NextResponse;
   } catch (error) {
     return handleApiError(error);
   }

@@ -27,9 +27,12 @@ export async function GET(request: Request) {
     const url = new URL(request.url);
     const status = url.searchParams.get("status");
 
+    // カラム明示 (将来テーブル拡張で機微カラム追加された時の意図せぬ流出を防ぐ)
     let q = supabase
       .from("meeting_data_import_requests")
-      .select("*, user_profiles!meeting_data_import_requests_user_id_fkey(id, name, email, company)")
+      .select(
+        "id, user_id, status, message, source, admin_note, processed_at, processed_by, created_at, updated_at, user_profiles!meeting_data_import_requests_user_id_fkey(id, name, email, company)",
+      )
       .order("created_at", { ascending: false })
       .abortSignal(request.signal);
     if (status) {
