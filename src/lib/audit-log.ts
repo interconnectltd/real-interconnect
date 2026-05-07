@@ -28,8 +28,11 @@ export type AuditAction =
   | "import_request.cancel"
   // admin 操作 (法務 R5 / 個情法 27 条対応の追跡用)
   | "admin.view_user"
-  | "admin.import_request.update"
+  | "admin.user_list.view"
+  | "admin.contact.list_view"
   | "admin.contact.update"
+  | "admin.import_request.list_view"
+  | "admin.import_request.update"
   | "admin.user.suspend"
   | "admin.user.unsuspend"
   | "admin.user.delete"
@@ -83,11 +86,14 @@ export function extractClientInfo(request: Request): {
   ip: string | null;
   ua: string | null;
 } {
+  // Wave1 sec audit: getClientIp と同等の優先順位 (Netlify edge ヘッダ優先)
   const headers = request.headers;
   const ip =
     headers.get("x-nf-client-connection-ip") ??
-    headers.get("x-forwarded-for")?.split(",")[0]?.trim() ??
+    headers.get("cf-connecting-ip") ??
+    headers.get("true-client-ip") ??
     headers.get("x-real-ip") ??
+    headers.get("x-forwarded-for")?.split(",").pop()?.trim() ??
     null;
   const ua = headers.get("user-agent") ?? null;
   return { ip, ua };

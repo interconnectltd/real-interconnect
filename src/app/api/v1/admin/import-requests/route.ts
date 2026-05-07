@@ -22,7 +22,7 @@ const PatchSchema = z.object({
 
 export async function GET(request: Request) {
   try {
-    const { supabase } = await withAdminAuth(request);
+    const { user, supabase } = await withAdminAuth(request);
 
     const url = new URL(request.url);
     const status = url.searchParams.get("status");
@@ -41,7 +41,23 @@ export async function GET(request: Request) {
 
     const { data, error } = await q;
     if (error) throw error;
-    return json(data ?? []);
+
+    // Bulk PII access 証跡 (Wave5 sec audit / 個情法 R5)
+    const client = extractClientInfo(request);
+    void writeAuditLog(supabase, {
+      actor_id: user.id,
+      action: "admin.import_request.list_view",
+      target_type: "import_request",
+      target_id: null,
+      payload: { status: status || null, result_count: data?.length ?? 0 },
+      ip: client.ip,
+      ua: client.ua,
+    });
+
+    const res = json(data ?? []);
+    res.headers.set("Cache-Control", "no-store, private");
+    res.headers.set("Vary", "Cookie");
+    return res;
   } catch (error) {
     return handleApiError(error);
   }

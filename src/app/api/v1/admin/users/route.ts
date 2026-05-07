@@ -12,6 +12,7 @@ import {
   handleApiError,
 } from "@/lib/api-helpers";
 import { sanitizeFilterValue, escapeLikePattern } from "@/lib/sanitize";
+import { writeAuditLog, extractClientInfo } from "@/lib/audit-log";
 
 export const dynamic = "force-dynamic";
 
@@ -19,7 +20,7 @@ const ALLOWED_ORDER = new Set(["created_at", "last_login_at", "name"]);
 
 export async function GET(request: Request) {
   try {
-    const { supabase } = await withAdminAuth(request);
+    const { user, supabase } = await withAdminAuth(request);
     const url = new URL(request.url);
 
     const q = sanitizeFilterValue(url.searchParams.get("q") ?? "");
@@ -72,7 +73,28 @@ export async function GET(request: Request) {
       return jsonError(500, "DB_ERROR", error.message);
     }
 
-    return json({
+    // Bulk PII access の証跡 (Wave5 sec audit / 個情法 R5)。
+    // best-effort で fire-and-forget。失敗時はサービス継続。
+    const client = extractClientInfo(request);
+    void writeAuditLog(supabase, {
+      actor_id: user.id,
+      action: "admin.user_list.view",
+      target_type: "user_profiles",
+      target_id: null,
+      payload: {
+        q: q || null,
+        industry: industry || null,
+        is_active: isActiveParam,
+        is_admin: isAdminParam,
+        page,
+        pageSize,
+        result_count: data?.length ?? 0,
+      },
+      ip: client.ip,
+      ua: client.ua,
+    });
+
+    const res = json({
       users: data ?? [],
       meta: {
         page,
@@ -81,6 +103,9 @@ export async function GET(request: Request) {
         totalPages: Math.ceil((count ?? 0) / pageSize),
       },
     });
+    res.headers.set("Cache-Control", "no-store, private");
+    res.headers.set("Vary", "Cookie");
+    return res;
   } catch (error) {
     return handleApiError(error);
   }
