@@ -339,32 +339,36 @@ export function ChatMessages({
                 >
                   {msg.content_type === "scheduling_card" ? (
                     (() => {
-                      let parsed: { target_user_id?: string } = {};
-                      try { parsed = JSON.parse(msg.content); } catch {}
+                      // Wave11 Y: 旧実装は JSON.parse(msg.content) で payload 読みだったが
+                      // 新仕様 (PostMessageSchema 整合) で content は表示用 string、
+                      // 構造データは msg.payload (jsonb) に格納。 payload 直読に修正。
+                      const p = (msg.payload ?? null) as {
+                        target_user_id?: string;
+                      } | null;
                       return (
                         <SchedulingCard
                           roomId={roomId}
-                          targetUserId={parsed.target_user_id ?? otherUser.id}
+                          targetUserId={p?.target_user_id ?? otherUser.id}
                           currentUserId={currentUserId}
                         />
                       );
                     })()
                   ) : msg.content_type === "meeting_suggestion" ? (
                     (() => {
-                      let parsed: {
+                      // 同上、 payload 直読に統一
+                      const p = (msg.payload ?? null) as {
                         intent?: "confirmed" | "proposed";
                         datetime?: string | null;
                         platform?: "zoom" | "meet" | null;
                         confidence?: number;
-                      } = {};
-                      try { parsed = JSON.parse(msg.content); } catch {}
+                      } | null;
                       return (
                         <MeetingSuggestionCard
                           suggestion={{
-                            intent: parsed.intent ?? "proposed",
-                            datetime: parsed.datetime ?? null,
-                            platform: parsed.platform ?? null,
-                            confidence: parsed.confidence ?? 0,
+                            intent: p?.intent ?? "proposed",
+                            datetime: p?.datetime ?? null,
+                            platform: p?.platform ?? null,
+                            confidence: p?.confidence ?? 0,
                           }}
                           roomId={roomId}
                           currentUserId={currentUserId}

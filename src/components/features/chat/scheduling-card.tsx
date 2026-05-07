@@ -4,16 +4,27 @@ import { useState, useEffect, useCallback } from "react";
 import { Calendar, Check, Loader2 } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
 import { api } from "@/lib/api-client";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
 
-interface TimeSlot {
-  date: string;
-  start: string;
-  end: string;
-  score: number;
+/**
+ * SchedulingCard
+ *
+ * Wave11 Y で API 整合性を全面修復:
+ *   旧実装は /scheduling/suggest を `target_user_id` で叩いていたが API は `other_user_id` 期待 → 400
+ *   旧実装は response `data.suggestions` を期待だが API は `{ slots: [{ start, end }] }` 返却
+ *   旧実装は確定で /meetings/request を叩いていたが正しくは /scheduling/confirm
+ *
+ * 新仕様:
+ *   - send: { other_user_id, duration_min: 30 }
+ *   - recv: { slots: [{ start: ISO, end: ISO }], proposer_has_calendar, target_has_calendar }
+ *   - confirm: POST /scheduling/confirm { other_user_id, room_id, start, end, platform }
+ */
+
+interface ApiSlot {
+  start: string; // ISO 8601
+  end: string;   // ISO 8601
 }
 
 interface SchedulingCardProps {
@@ -24,8 +35,8 @@ interface SchedulingCardProps {
 
 type CardState = "loading" | "selecting" | "manual" | "confirming" | "confirmed" | "error";
 
-function formatSlotDate(dateStr: string): string {
-  const d = new Date(dateStr + "T00:00:00");
+function formatDate(iso: string): string {
+  const d = new Date(iso);
   return d.toLocaleDateString("ja-JP", {
     month: "numeric",
     day: "numeric",
@@ -33,70 +44,96 @@ function formatSlotDate(dateStr: string): string {
   });
 }
 
-function formatTimeRange(start: string, end: string): string {
-  return `${start}\u301C${end}`;
+function formatTime(iso: string): string {
+  const d = new Date(iso);
+  return d.toLocaleTimeString("ja-JP", {
+    hour: "2-digit",
+    minute: "2-digit",
+    hour12: false,
+  });
+}
+
+function formatRange(slot: ApiSlot): string {
+  return `${formatTime(slot.start)}〜${formatTime(slot.end)}`;
 }
 
 export function SchedulingCard({
   roomId,
   targetUserId,
-  currentUserId,
+  currentUserId: _currentUserId,
 }: SchedulingCardProps) {
+  void _currentUserId; // 将来 self-message 判定用、現状未使用
   const [state, setState] = useState<CardState>("loading");
-  const [suggestions, setSuggestions] = useState<TimeSlot[]>([]);
+  const [slots, setSlots] = useState<ApiSlot[]>([]);
   const [selectedIndex, setSelectedIndex] = useState<number>(0);
-  const [confirmedSlot, setConfirmedSlot] = useState<TimeSlot | null>(null);
+  const [confirmedSlot, setConfirmedSlot] = useState<ApiSlot | null>(null);
   const [manualDate, setManualDate] = useState("");
   const [manualTime, setManualTime] = useState("");
 
   const fetchSuggestions = useCallback(async () => {
     setState("loading");
     try {
-      const data = await api.post<{ suggestions: TimeSlot[] }>(
-        "/scheduling/suggest",
-        { target_user_id: targetUserId, duration_min: 30 },
-      );
-      if (data.suggestions.length === 0) {
+      // ★ field 名を API 仕様に整合 (旧 target_user_id → other_user_id)
+      const data = await api.post<{
+        slots: ApiSlot[];
+        proposer_has_calendar: boolean;
+        target_has_calendar: boolean;
+      }>("/scheduling/suggest", {
+        other_user_id: targetUserId,
+        duration_min: 30,
+      });
+      // ★ response 形 (旧 suggestions → slots)
+      if (!data.slots || data.slots.length === 0) {
         setState("error");
       } else {
-        setSuggestions(data.suggestions);
+        setSlots(data.slots);
         setState("selecting");
       }
-    } catch {
+    } catch (e) {
+      console.error("[scheduling-card] suggest failed", e);
       setState("error");
     }
   }, [targetUserId]);
 
   useEffect(() => {
-    // 外部 API 同期 (state→外部、外部→state は callback 経由のため許容)
     // eslint-disable-next-line react-hooks/set-state-in-effect
     fetchSuggestions();
   }, [fetchSuggestions]);
 
-  const handleConfirm = async (slot: TimeSlot) => {
+  const handleConfirm = async (slot: ApiSlot) => {
     setState("confirming");
     try {
-      const proposedTime = `${slot.date} ${slot.start}`;
-      await api.post("/meetings/request", {
-        target_id: targetUserId,
-        proposed_times: [proposedTime],
-        message: `${formatSlotDate(slot.date)} ${slot.start}に会議を設定しました`,
+      // ★ /meetings/request → /scheduling/confirm (Google Meet event 自動生成 + chat に
+      //   meeting_confirmed メッセージが流れる)
+      await api.post("/scheduling/confirm", {
+        other_user_id: targetUserId,
+        room_id: roomId,
+        start: slot.start,
+        end: slot.end,
+        platform: "google_meet",
       });
       setConfirmedSlot(slot);
       setState("confirmed");
-    } catch {
-      toast.error("リクエストに失敗しました");
+    } catch (e) {
+      console.error("[scheduling-card] confirm failed", e);
+      toast.error("会議の確定に失敗しました。Google カレンダーが連携されているかご確認ください。");
       setState("selecting");
     }
   };
 
   const handleManualConfirm = async () => {
     if (!manualDate || !manualTime) return;
-    const slot: TimeSlot = {
-      date: manualDate,
-      start: manualTime,
-      end: manualTime, // end is approximate; server handles duration
-      score: 0,
+    // local datetime を ISO + local offset で確定 (Asia/Tokyo 想定)
+    // browser の Date constructor は local time として解釈するので OK
+    const startLocal = new Date(`${manualDate}T${manualTime}`);
+    if (Number.isNaN(startLocal.getTime())) {
+      toast.error("日時の形式が不正です");
+      return;
+    }
+    const endLocal = new Date(startLocal.getTime() + 30 * 60_000); // 30 min default
+    const slot: ApiSlot = {
+      start: startLocal.toISOString(),
+      end: endLocal.toISOString(),
     };
     await handleConfirm(slot);
   };
@@ -108,7 +145,7 @@ export function SchedulingCard({
         <CardContent className="flex items-center gap-2 pt-0">
           <Check className="h-4 w-4 text-green-600" />
           <span className="text-sm font-medium text-green-800 dark:text-green-200">
-            確定済み: {formatSlotDate(confirmedSlot.date)} {confirmedSlot.start}
+            確定済み: {formatDate(confirmedSlot.start)} {formatTime(confirmedSlot.start)}
           </span>
         </CardContent>
       </Card>
@@ -124,7 +161,6 @@ export function SchedulingCard({
         </CardTitle>
       </CardHeader>
       <CardContent>
-        {/* Loading */}
         {state === "loading" && (
           <div className="flex items-center justify-center py-4">
             <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />
@@ -132,7 +168,6 @@ export function SchedulingCard({
           </div>
         )}
 
-        {/* Error */}
         {state === "error" && (
           <div className="py-3">
             <p className="text-xs text-muted-foreground">
@@ -149,14 +184,13 @@ export function SchedulingCard({
           </div>
         )}
 
-        {/* Slot selection */}
         {(state === "selecting" || state === "confirming") && (
           <div className="space-y-2">
             <p className="text-xs text-muted-foreground">おすすめの日時:</p>
             <div className="space-y-1.5">
-              {suggestions.map((slot, i) => (
+              {slots.map((slot, i) => (
                 <label
-                  key={`${slot.date}-${slot.start}`}
+                  key={`${slot.start}`}
                   className={cn(
                     "flex cursor-pointer items-center gap-2 rounded-md border px-2.5 py-1.5 text-sm transition-colors",
                     selectedIndex === i
@@ -172,10 +206,8 @@ export function SchedulingCard({
                     disabled={state === "confirming"}
                     className="h-3.5 w-3.5 accent-primary"
                   />
-                  <span className="font-medium">{formatSlotDate(slot.date)}</span>
-                  <span className="text-muted-foreground">
-                    {formatTimeRange(slot.start, slot.end)}
-                  </span>
+                  <span className="font-medium">{formatDate(slot.start)}</span>
+                  <span className="text-muted-foreground">{formatRange(slot)}</span>
                 </label>
               ))}
             </div>
@@ -185,7 +217,7 @@ export function SchedulingCard({
                 className="flex-1"
                 disabled={state === "confirming"}
                 onClick={() => {
-                  const slot = suggestions[selectedIndex];
+                  const slot = slots[selectedIndex];
                   if (slot) handleConfirm(slot);
                 }}
               >
@@ -207,7 +239,6 @@ export function SchedulingCard({
           </div>
         )}
 
-        {/* Manual entry */}
         {state === "manual" && (
           <div className="space-y-2">
             <p className="text-xs text-muted-foreground">希望の日時を入力:</p>
@@ -216,13 +247,13 @@ export function SchedulingCard({
                 type="date"
                 value={manualDate}
                 onChange={(e) => setManualDate(e.target.value)}
-                className="flex-1 rounded-md border border-border bg-background px-2 py-1 text-sm focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
+                className="h-11 flex-1 rounded-md border border-border bg-background px-2 text-base md:text-sm focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
               />
               <input
                 type="time"
                 value={manualTime}
                 onChange={(e) => setManualTime(e.target.value)}
-                className="w-24 rounded-md border border-border bg-background px-2 py-1 text-sm focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
+                className="h-11 w-24 rounded-md border border-border bg-background px-2 text-base md:text-sm focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
               />
             </div>
             <div className="flex gap-2">
@@ -238,7 +269,7 @@ export function SchedulingCard({
                 variant="outline"
                 size="sm"
                 onClick={() => {
-                  if (suggestions.length > 0) {
+                  if (slots.length > 0) {
                     setState("selecting");
                   } else {
                     fetchSuggestions();
