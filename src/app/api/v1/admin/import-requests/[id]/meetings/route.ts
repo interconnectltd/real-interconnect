@@ -55,47 +55,61 @@ export async function GET(
       .select("id, user_id, status")
       .eq("id", id)
       .maybeSingle();
-    if (reqErr) throw reqErr;
+    if (reqErr) {
+      console.error("[admin/import-requests/[id]/meetings] req fetch failed:", reqErr);
+      return jsonError(500, "INTERNAL_ERROR", `request fetch failed: ${reqErr.message ?? reqErr.code ?? "unknown"}`);
+    }
     if (!req) return jsonError(404, "NOT_FOUND", "申請が見つかりません");
 
     // 申請ユーザーの profile (name 比較用)
-    const { data: profile } = await supabase
+    const { data: profile, error: profErr } = await supabase
       .from("user_profiles")
       .select("id, name, email")
       .eq("id", req.user_id)
       .maybeSingle();
+    if (profErr) {
+      console.error("[admin/import-requests/[id]/meetings] profile fetch failed:", profErr);
+    }
 
-    // 全会議 (recent 100 件)
-    const { data: transcripts, error: tErr } = await supabase
-      .from("meeting_transcripts")
-      .select("id, title, meeting_date, status, created_at")
-      .order("meeting_date", { ascending: false, nullsFirst: false })
-      .order("created_at", { ascending: false })
-      .limit(100);
-    if (tErr) throw tErr;
+    // 全会議 (recent 100 件) — テーブル不在 / RLS 拒否でも 500 にせず空配列にフォールバック
+    let transcripts: Array<{ id: string; title: string | null; meeting_date: string | null; status: string; created_at: string }> = [];
+    let transcriptsError: string | null = null;
+    {
+      const { data, error } = await supabase
+        .from("meeting_transcripts")
+        .select("id, title, meeting_date, status, created_at")
+        .order("meeting_date", { ascending: false, nullsFirst: false })
+        .order("created_at", { ascending: false })
+        .limit(100);
+      if (error) {
+        console.error("[admin/import-requests/[id]/meetings] transcripts fetch failed:", error);
+        transcriptsError = `${error.code ?? ""}: ${error.message ?? "unknown"}`.trim();
+      } else {
+        transcripts = (data ?? []) as typeof transcripts;
+      }
+    }
 
-    const transcriptIds = (transcripts ?? []).map((t) => t.id);
+    const transcriptIds = transcripts.map((t) => t.id);
 
     // 各会議の participants (transcript_id IN 一括取得)
-    const { data: participants, error: pErr } = transcriptIds.length
-      ? await supabase
-          .from("meeting_participants")
-          .select("id, transcript_id, speaker_name, email, user_id, is_linked")
-          .in("transcript_id", transcriptIds)
-      : { data: [], error: null };
-    if (pErr) throw pErr;
+    let participants: Array<{ id: string; transcript_id: string; speaker_name: string | null; email: string | null; user_id: string | null; is_linked: boolean | null }> = [];
+    let participantsError: string | null = null;
+    if (transcriptIds.length) {
+      const { data, error } = await supabase
+        .from("meeting_participants")
+        .select("id, transcript_id, speaker_name, email, user_id, is_linked")
+        .in("transcript_id", transcriptIds);
+      if (error) {
+        console.error("[admin/import-requests/[id]/meetings] participants fetch failed:", error);
+        participantsError = `${error.code ?? ""}: ${error.message ?? "unknown"}`.trim();
+      } else {
+        participants = (data ?? []) as typeof participants;
+      }
+    }
 
-    // transcript_id ごとに participants をまとめ、申請ユーザーに紐付け候補があるかフラグ化
-    type Participant = {
-      id: string;
-      transcript_id: string;
-      speaker_name: string | null;
-      email: string | null;
-      user_id: string | null;
-      is_linked: boolean | null;
-    };
-    const grouped = new Map<string, Participant[]>();
-    for (const p of (participants ?? []) as Participant[]) {
+    // transcript_id ごとに participants をまとめる
+    const grouped = new Map<string, typeof participants>();
+    for (const p of participants) {
       const arr = grouped.get(p.transcript_id) ?? [];
       arr.push(p);
       grouped.set(p.transcript_id, arr);
@@ -104,27 +118,20 @@ export async function GET(
     const profileName = profile?.name?.trim().toLowerCase() ?? "";
     const profileEmail = profile?.email?.trim().toLowerCase() ?? "";
 
-    // 情報スコープ縮小: 申請ユーザーに関係しない会議 (候補ゼロ かつ 既紐付けでもない)
-    // を一覧に含めない。旧版は admin が他社案件のタイトル/参加者数を覗ける状態だった。
-    const allMeetings = (transcripts ?? []).map((t) => {
+    // 全会議を返す (admin が participant 単位で選べるように candidates も all_participants も両方)
+    const meetings = transcripts.map((t) => {
       const ps = grouped.get(t.id) ?? [];
       const linkedToThisUser = ps.some((p) => p.user_id === req.user_id);
-      // speaker_name か email がプロフィールと一致する候補を抽出
-      const candidates = ps
-        .filter((p) => {
-          const sn = (p.speaker_name ?? "").trim().toLowerCase();
-          const em = (p.email ?? "").trim().toLowerCase();
-          return (
-            (profileName && sn && sn.includes(profileName)) ||
-            (profileEmail && em && em === profileEmail)
-          );
-        })
-        .map((p) => ({
-          participant_id: p.id,
-          speaker_name: p.speaker_name,
-          email: p.email,
-          already_linked_other: p.user_id !== null && p.user_id !== req.user_id,
-        }));
+      const allParticipants = ps.map((p) => ({
+        participant_id: p.id,
+        speaker_name: p.speaker_name,
+        email: p.email,
+        already_linked_other: p.user_id !== null && p.user_id !== req.user_id,
+        is_match:
+          (profileName && (p.speaker_name ?? "").trim().toLowerCase().includes(profileName)) ||
+          (profileEmail && (p.email ?? "").trim().toLowerCase() === profileEmail),
+      }));
+      const candidates = allParticipants.filter((p) => p.is_match);
       return {
         transcript_id: t.id,
         title: t.title,
@@ -133,18 +140,24 @@ export async function GET(
         participants_count: ps.length,
         linked_to_this_user: linkedToThisUser,
         candidates,
+        all_participants: allParticipants,
       };
     });
-    const meetings = allMeetings.filter(
-      (m) => m.linked_to_this_user || m.candidates.length > 0,
-    );
 
     return json({
       request: { id: req.id, user_id: req.user_id, status: req.status },
       profile: profile ?? null,
       meetings,
+      // admin debug: テーブル不在 / RLS 拒否時にも何が起こったか露出 (admin only)
+      _debug: {
+        transcripts_error: transcriptsError,
+        participants_error: participantsError,
+        transcripts_count: transcripts.length,
+        participants_count: participants.length,
+      },
     });
   } catch (error) {
+    console.error("[admin/import-requests/[id]/meetings] unhandled:", error);
     return handleApiError(error);
   }
 }
