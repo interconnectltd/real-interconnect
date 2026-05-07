@@ -87,6 +87,52 @@ export async function POST(request: Request) {
       return jsonError(403, "FORBIDDEN", "相手とルームが一致しません");
     }
 
+    // ★Wave13 #1: connection 成立確認 (suggest と権限非対称だった)
+    //   chat_room はマッチング受諾で生成されるが、その後 connection が解除/ブロックされた
+    //   room でも以前は Meet event 作成可能 → ブロック後の Meet 強制送付経路が空いていた。
+    const { data: connection } = await supabase
+      .from("connections")
+      .select("id, status")
+      .or(
+        `and(user_id.eq.${user.id},connected_user_id.eq.${data.other_user_id}),and(user_id.eq.${data.other_user_id},connected_user_id.eq.${user.id})`,
+      )
+      .in("status", ["accepted", "reaccepted"])
+      .maybeSingle();
+    if (!connection) {
+      return jsonError(403, "FORBIDDEN", "未接続のユーザーです");
+    }
+
+    // ★Wave13 #8/B: Idempotency (二重 Meet event / 二重 chat 投稿防止)
+    //   SchedulingCard は confirmedSlot を local state のみで持つので reload で消える
+    //   → 再度「この日程で決定」を押すと同 (room, start, end, organizer) で 2 回叩かれて
+    //     Calendar に二重予定 + 相手にスパム通知。
+    //   過去 5 分以内に同 (room_id, sender_id, start, end) の meeting_confirmed が
+    //   既に存在すれば、そのレコードを 200 で返却 (idempotent)。
+    const fiveMinAgo = new Date(Date.now() - 5 * 60_000).toISOString();
+    const { data: dupMsg } = await supabase
+      .from("chat_messages")
+      .select(
+        "id, room_id, sender_id, content, content_type, payload, is_read, created_at",
+      )
+      .eq("room_id", data.room_id)
+      .eq("sender_id", user.id)
+      .eq("content_type", "meeting_confirmed")
+      .gte("created_at", fiveMinAgo)
+      .filter("payload->>start", "eq", data.start)
+      .filter("payload->>end", "eq", data.end)
+      .maybeSingle();
+    if (dupMsg) {
+      const dupPayload = (dupMsg.payload as unknown as MeetingConfirmedPayload | null) ?? null;
+      return json(
+        {
+          message: dupMsg,
+          meeting_url: dupPayload?.meeting_url ?? "",
+          idempotent: true,
+        },
+        200,
+      );
+    }
+
     // 相手プロフィール取得 (招待 attendee email 用)
     const { data: otherProfile } = await supabase
       .from("user_profiles")

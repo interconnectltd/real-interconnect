@@ -214,6 +214,29 @@ export function ChatMessages({
         }
         queryClient.invalidateQueries({ queryKey: ["chat-rooms"] });
       })
+      // ★Wave13 #6/#9: 既読 realtime UPDATE 反映
+      //   migration 00053 で chat_messages.is_read=true 更新を broadcast する trigger
+      //   を追加。 UPDATE event は old/new の record 両方を含むので、 該当 ID の
+      //   キャッシュ行を is_read=true に部分更新する。
+      .on("broadcast", { event: "UPDATE" }, (payload) => {
+        const updated = (payload.payload as { record?: ChatMessage }).record;
+        if (!updated || !updated.id) return;
+        queryClient.setQueryData<MessagesResponse>(
+          ["chat-messages", roomId],
+          (old) => {
+            if (!old) return old;
+            let changed = false;
+            const next = old.messages.map((m) => {
+              if (m.id !== updated.id) return m;
+              if (m.is_read === updated.is_read) return m;
+              changed = true;
+              return { ...m, is_read: updated.is_read };
+            });
+            if (!changed) return old;
+            return { ...old, messages: next };
+          },
+        );
+      })
       // postgres_changes ブランチは撤去 (Sec audit Critical):
       // publication 単独では RLS を尊重せず、別 room の INSERT を漏洩する
       // 潜在経路があった。broadcast 一本化で room 単位の権限境界に揃える。
