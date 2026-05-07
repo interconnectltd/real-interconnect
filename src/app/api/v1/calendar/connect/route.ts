@@ -12,6 +12,7 @@
 import { NextResponse } from "next/server";
 import {
   withAuth,
+  json,
   jsonError,
   handleApiError,
 } from "@/lib/api-helpers";
@@ -54,6 +55,53 @@ export async function GET(request: Request) {
     });
 
     return NextResponse.redirect(buildAuthUrl(state), { status: 302 });
+  } catch (error) {
+    return handleApiError(error);
+  }
+}
+
+/**
+ * POST /api/v1/calendar/connect?provider=google
+ *
+ * Wave12 BUG-9: Settings page が POST で叩いて { url } JSON を期待してたが
+ * 旧実装は GET only で 405 → Calendar 連携自体が UI から不可能だった。
+ *
+ * 同じ consent ガード + state 発行を経て authorize URL を JSON で返却。
+ * クライアント側は data.url を `window.location.href` で開く。
+ */
+export async function POST(request: Request) {
+  try {
+    const { user, supabase } = await withAuth(request);
+    const url = new URL(request.url);
+    const provider = url.searchParams.get("provider");
+
+    if (provider !== "google") {
+      return jsonError(400, "BAD_REQUEST", "provider は google のみ対応");
+    }
+
+    const { data: consent } = await supabase
+      .from("meeting_consents")
+      .select("id, revoked_at")
+      .eq("user_id", user.id)
+      .eq("scope", "google_us_transfer_v1")
+      .is("revoked_at", null)
+      .maybeSingle();
+    if (!consent) {
+      return jsonError(
+        403,
+        "CONSENT_REQUIRED",
+        "Google 連携には越境送信同意が必要です",
+      );
+    }
+
+    const state = await signOAuthState({
+      user_id: user.id,
+      provider: "google",
+      nonce: crypto.randomUUID(),
+      exp: Math.floor(Date.now() / 1000) + STATE_TTL_SEC,
+    });
+
+    return json({ url: buildAuthUrl(state) });
   } catch (error) {
     return handleApiError(error);
   }

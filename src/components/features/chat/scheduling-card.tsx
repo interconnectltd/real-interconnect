@@ -103,8 +103,7 @@ export function SchedulingCard({
   const handleConfirm = async (slot: ApiSlot) => {
     setState("confirming");
     try {
-      // ★ /meetings/request → /scheduling/confirm (Google Meet event 自動生成 + chat に
-      //   meeting_confirmed メッセージが流れる)
+      // 1) まず Google Meet 連携で確定試行 (Calendar 連携済 user は自動 Meet event 生成)
       await api.post("/scheduling/confirm", {
         other_user_id: targetUserId,
         room_id: roomId,
@@ -115,8 +114,32 @@ export function SchedulingCard({
       setConfirmedSlot(slot);
       setState("confirmed");
     } catch (e) {
+      // 2) Calendar 未連携時 (400 CALENDAR_NOT_CONNECTED) は manual platform で fallback
+      //    → 日時のみ確定、 meeting URL は user が後で共有する設計 (Wave12)
+      const errCode = (e as { code?: string } | null)?.code;
+      if (errCode === "CALENDAR_NOT_CONNECTED") {
+        try {
+          await api.post("/scheduling/confirm", {
+            other_user_id: targetUserId,
+            room_id: roomId,
+            start: slot.start,
+            end: slot.end,
+            platform: "manual",
+          });
+          setConfirmedSlot(slot);
+          setState("confirmed");
+          toast.info(
+            "日程を確定しました。Google Calendar 未連携のため Meet URL は後で共有してください。",
+          );
+          return;
+        } catch (e2) {
+          console.error("[scheduling-card] manual fallback failed", e2);
+        }
+      }
       console.error("[scheduling-card] confirm failed", e);
-      toast.error("会議の確定に失敗しました。Google カレンダーが連携されているかご確認ください。");
+      toast.error(
+        "会議の確定に失敗しました。時間を置いて再試行してください。",
+      );
       setState("selecting");
     }
   };

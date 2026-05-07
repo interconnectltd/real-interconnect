@@ -32,8 +32,11 @@ const ConfirmSchema = z.object({
   end: z.string().datetime({ offset: true }),
   summary: z.string().max(200).optional(),
   description: z.string().max(2000).optional(),
-  platform: z.enum(["google_meet", "zoom_pmi"]),
+  // "manual" は Calendar 連携不要 path (Wave12: Calendar 未連携 user の dead-end 解消)
+  // meeting_url は manual_url 経由で user 提供、 もしくは未設定で URL 後共有
+  platform: z.enum(["google_meet", "zoom_pmi", "manual"]),
   zoom_pmi_url: z.url().optional(),
+  manual_url: z.string().max(500).optional(),
 });
 
 export async function POST(request: Request) {
@@ -65,6 +68,7 @@ export async function POST(request: Request) {
     if (data.platform === "zoom_pmi" && !data.zoom_pmi_url) {
       return jsonError(400, "BAD_REQUEST", "zoom_pmi_url が必須");
     }
+    // "manual" は manual_url が optional で OK (URL 後共有 / 対面 ケース)
 
     // Room メンバー確認
     const { data: room } = await supabase
@@ -116,9 +120,14 @@ export async function POST(request: Request) {
       });
       meetingUrl = event.hangoutLink ?? event.htmlLink;
       calendarEventId = event.id;
-    } else {
+    } else if (data.platform === "zoom_pmi") {
       // zoom_pmi: 既存 PMI URL を使用
       meetingUrl = data.zoom_pmi_url!;
+    } else {
+      // manual: Calendar 連携なし、 URL は user が後で共有 / 対面 / 既存 Meet 等
+      // meeting_confirmed メッセージは投稿するが calendar event は作らない
+      meetingUrl = data.manual_url ?? "";
+      calendarEventId = "";
     }
 
     // chat に meeting_confirmed 投稿
@@ -130,12 +139,18 @@ export async function POST(request: Request) {
       start: data.start,
       end: data.end,
     };
+    const platformLabel =
+      data.platform === "google_meet"
+        ? "Google Meet"
+        : data.platform === "zoom_pmi"
+        ? "Zoom"
+        : "URL は後で共有";
     const { data: msg, error: msgErr } = await supabase
       .from("chat_messages")
       .insert({
         room_id: data.room_id,
         sender_id: user.id,
-        content: `${formatJa(data.start)} 〜 ${formatJa(data.end)} に確定 (${data.platform === "google_meet" ? "Google Meet" : "Zoom"})`,
+        content: `${formatJa(data.start)} 〜 ${formatJa(data.end)} に確定 (${platformLabel})`,
         content_type: "meeting_confirmed",
         payload: payload as unknown as Json,
       })
@@ -168,10 +183,19 @@ export async function POST(request: Request) {
 }
 
 function formatJa(iso: string): string {
+  // ★Wave12 MED-1: 旧実装は server timezone 依存 (Vercel/Netlify は UTC) で
+  // 9 時間ズレた chat 文言を投稿していた。Asia/Tokyo 明示で根治。
   const d = new Date(iso);
-  const m = String(d.getMonth() + 1).padStart(2, "0");
-  const day = String(d.getDate()).padStart(2, "0");
-  const hh = String(d.getHours()).padStart(2, "0");
-  const mm = String(d.getMinutes()).padStart(2, "0");
-  return `${m}/${day} ${hh}:${mm}`;
+  const fmt = new Intl.DateTimeFormat("ja-JP", {
+    timeZone: "Asia/Tokyo",
+    month: "2-digit",
+    day: "2-digit",
+    hour: "2-digit",
+    minute: "2-digit",
+    hour12: false,
+  });
+  const parts = Object.fromEntries(
+    fmt.formatToParts(d).map((p) => [p.type, p.value]),
+  );
+  return `${parts.month}/${parts.day} ${parts.hour}:${parts.minute}`;
 }

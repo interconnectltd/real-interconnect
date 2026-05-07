@@ -392,14 +392,30 @@ export function ChatMessages({
                       </p>
                       <p
                         className={cn(
-                          "mt-1 text-right text-[10px]",
+                          "mt-1 flex items-center justify-end gap-1 text-[10px]",
                           isOwn
                             ? "text-primary-foreground/60"
                             : "text-muted-foreground",
                         )}
-                        aria-label={`送信時刻 ${formatMessageTime(msg.created_at)}`}
                       >
-                        {formatMessageTime(msg.created_at)}
+                        <span aria-label={`送信時刻 ${formatMessageTime(msg.created_at)}`}>
+                          {formatMessageTime(msg.created_at)}
+                        </span>
+                        {/* 既読インジケータ: 自分の送信メッセージのみ表示
+                            ✓ = 送信済 (未読) / ✓✓ = 既読 (相手が見た) */}
+                        {isOwn && (
+                          <span
+                            aria-label={msg.is_read ? "既読" : "送信済 (未読)"}
+                            className={cn(
+                              "inline-flex items-center font-medium tabular-nums",
+                              msg.is_read
+                                ? "text-primary-foreground"
+                                : "text-primary-foreground/40",
+                            )}
+                          >
+                            {msg.is_read ? "✓✓" : "✓"}
+                          </span>
+                        )}
                       </p>
                     </div>
                   )}

@@ -76,15 +76,23 @@ export function MeetingSuggestionCard({
     if (!suggestion.datetime) return;
     setState("creating");
     try {
+      // ★Wave12: /scheduling/confirm の正規 schema は { other_user_id, room_id, start, end, platform }
+      // 旧 { target_user_id, scheduled_at, duration_min, chat_room_id } では 100% 400
+      // platform は AI 推測なので manual 固定 (Calendar event 自動生成は SchedulingCard 側のみ)
+      const start = suggestion.datetime;
+      const end = new Date(
+        new Date(suggestion.datetime).getTime() + 30 * 60_000,
+      ).toISOString();
       await api.post("/scheduling/confirm", {
-        target_user_id: otherUserId,
-        scheduled_at: suggestion.datetime,
-        duration_min: 30,
-        platform: suggestion.platform === "meet" ? "google_meet" : suggestion.platform,
-        chat_room_id: roomId,
+        other_user_id: otherUserId,
+        room_id: roomId,
+        start,
+        end,
+        platform: "manual",
       });
       setState("confirmed");
-    } catch {
+    } catch (e) {
+      console.error("[meeting-suggestion-card] confirm failed", e);
       toast.error("操作に失敗しました");
       setState("idle");
     }
