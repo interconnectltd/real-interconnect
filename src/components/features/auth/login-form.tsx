@@ -91,8 +91,10 @@ export function LoginForm() {
 
     // ?redirect=<path> があればそちらへ (open redirect / backslash bypass を safeInternalPath で遮断)
     const target = safeInternalPath(searchParams.get("redirect"), "/dashboard");
-    router.refresh();
+    // push が refresh の RSC 取得 race に潰される事故 (Next.js 16) を回避するため
+    // 先に push してから refresh する。
     router.push(target);
+    router.refresh();
   }
 
   async function handleResendConfirmation() {
@@ -123,39 +125,36 @@ export function LoginForm() {
       {error && (
         <div
           role="alert"
-          className="flex items-start gap-2.5 rounded-lg border border-destructive/30 bg-destructive/10 px-3.5 py-3 text-sm text-destructive"
+          className="scroll-mt-20 flex items-start gap-2.5 rounded-lg border border-destructive/30 bg-destructive/10 px-3.5 py-3 text-sm text-destructive"
         >
           <AlertCircle className="mt-0.5 h-4 w-4 shrink-0" aria-hidden="true" />
-          <div className="space-y-1">
+          <div className="min-w-0 flex-1 space-y-2">
             <span>{error.message}</span>
-            <p className="text-xs">
+            {/* 3 連 inline link を縦並び化 (Wave6 D / M-2: モバイル誤タップ防止 / 各 44px hit) */}
+            <div className="flex flex-col gap-1">
               {error.showResend && (
-                <>
-                  <button
-                    type="button"
-                    onClick={handleResendConfirmation}
-                    disabled={resending}
-                    className="font-medium text-destructive underline underline-offset-2 hover:opacity-80 disabled:opacity-50"
-                  >
-                    {resending ? "再送中..." : "確認メールを再送する"}
-                  </button>
-                  {" / "}
-                </>
+                <button
+                  type="button"
+                  onClick={handleResendConfirmation}
+                  disabled={resending}
+                  className="inline-flex min-h-[44px] items-center text-left font-medium text-destructive underline underline-offset-2 hover:opacity-80 disabled:opacity-50"
+                >
+                  {resending ? "再送中..." : "確認メールを再送する"}
+                </button>
               )}
               <Link
                 href="/forgot-password"
-                className="font-medium text-destructive underline underline-offset-2 hover:opacity-80"
+                className="inline-flex min-h-[44px] items-center font-medium text-destructive underline underline-offset-2 hover:opacity-80"
               >
                 パスワードを再設定
               </Link>
-              {" / "}
               <Link
                 href="/register"
-                className="font-medium text-destructive underline underline-offset-2 hover:opacity-80"
+                className="inline-flex min-h-[44px] items-center font-medium text-destructive underline underline-offset-2 hover:opacity-80"
               >
                 新規登録
               </Link>
-            </p>
+            </div>
           </div>
         </div>
       )}
@@ -213,7 +212,13 @@ export function LoginForm() {
         )}
       </div>
 
-      <Button type="submit" size="lg" className="w-full" disabled={loading}>
+      <Button
+        type="submit"
+        size="lg"
+        className="w-full"
+        disabled={loading}
+        aria-busy={loading}
+      >
         {loading ? (
           <>
             <Loader2 className="h-4 w-4 animate-spin" aria-hidden="true" />

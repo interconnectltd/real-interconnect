@@ -38,8 +38,8 @@ export default async function LoginPage({
         />
       </aside>
 
-      {/* 右 form pane */}
-      <div className="flex items-center justify-center px-4 py-12 sm:py-16">
+      {/* 右 form pane (mobile は alert 表示時に Submit が画面外に行かないよう py を縮小) */}
+      <div className="flex items-center justify-center px-4 py-6 sm:py-16">
         <div className="w-full max-w-[420px]">
         <div className="rounded-lg border border-border bg-card px-6 py-8 shadow-lg sm:px-8 sm:py-10">
           <div className="flex flex-col items-center text-center">
