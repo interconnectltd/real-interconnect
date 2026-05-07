@@ -1,5 +1,5 @@
 import { updateSession } from "@/lib/supabase/middleware";
-import { NextResponse, type NextRequest } from "next/server";
+import { type NextRequest } from "next/server";
 
 /**
  * Next.js 16 proxy (旧 middleware)。
@@ -56,52 +56,27 @@ function buildCsp(nonce: string): string {
 export async function proxy(request: NextRequest) {
   const nonce = generateNonce();
 
-  // Supabase auth gate を先に通す (redirect される場合はそのまま返す)
-  const sessionResponse = await updateSession(request);
+  // request 側 headers に nonce を載せ、updateSession に渡して Server Component
+  // (layout.tsx の headers().get('x-nonce')) で読めるようにする。
+  // 旧実装では proxy.ts 側で別の NextResponse.next() を作って後から cookie/header
+  // を転写していたが、`Headers.forEach` が set-cookie をカンマ結合 1 文字列で
+  // 返す仕様の都合で、`set('set-cookie', concat)` により Supabase の chunk cookie
+  // (sb-<ref>-auth-token.0/.1) が破壊され browser に届かず → /login redirect ループ
+  // → ユーザー視点で「ログインしても画面が変わらない」になっていた。
+  // 修正: updateSession に request headers を渡し、その中で `NextResponse.next({ request })`
+  // を 1 度だけ作る。proxy.ts ではそこに nonce/CSP の response header を足すだけにする。
+  const reqHeaders = new Headers(request.headers);
+  reqHeaders.set("x-nonce", nonce);
 
-  // updateSession が redirect を返した場合は header だけ載せて返す
-  // (NextResponse.redirect / new NextResponse の status で識別)
-  const status = sessionResponse.status;
-  const isRedirect = status >= 300 && status < 400;
+  // Supabase auth gate を通す (redirect の場合はそのまま返す)
+  const sessionResponse = await updateSession(request, reqHeaders);
 
+  // CSP / nonce を response header に注入 (redirect でも次画面で使われる)
   const csp = buildCsp(nonce);
   sessionResponse.headers.set("Content-Security-Policy", csp);
   sessionResponse.headers.set("x-nonce", nonce);
 
-  if (isRedirect) return sessionResponse;
-
-  // request 側 headers にも nonce を載せて Server Component が参照可能にする
-  // (sessionResponse は updateSession 内で `NextResponse.next({ request })` で
-  //  作られるため request の cloned headers が反映済み。ここで再度 next() を
-  //  呼ぶと set-cookie を含む全 header が握りつぶされ Supabase の chunk cookie
-  //  (sb-<ref>-auth-token.0/.1 等) がブラウザに届かない → /login redirect ループ)。
-  // 解決: proxied を新規作成せず、sessionResponse に nonce request header を載せて返す。
-  //  - request header 注入: NextResponse.next({ request: { headers } }) を返す事で
-  //    Next.js は request 側の x-nonce を Server Component の `headers()` に伝搬する
-  //  - cookie はそのまま (二重 set による Set-Cookie 上書きを回避)
-  const reqHeaders = new Headers(request.headers);
-  reqHeaders.set("x-nonce", nonce);
-
-  // sessionResponse から既に書かれた cookie を保持しつつ、新しい request headers を
-  // 反映するために手動で merge する。
-  const merged = NextResponse.next({ request: { headers: reqHeaders } });
-  // 1) 旧 response の cookie を append (Set-Cookie は ResponseCookies.set 経由で
-  //    正しく serialize されるため `getAll`+`set` で attribute も保持される)
-  for (const c of sessionResponse.cookies.getAll()) {
-    merged.cookies.set(c.name, c.value, c);
-  }
-  // 2) 旧 response の non-cookie header のみ転写 (set-cookie は除外!!!)
-  //    Headers.forEach は set-cookie をカンマ結合 1 文字列で返すため、
-  //    set で上書きすると Supabase の chunk cookie が壊れる。
-  sessionResponse.headers.forEach((v, k) => {
-    if (k.toLowerCase() === "set-cookie") return;
-    merged.headers.set(k, v);
-  });
-  // 3) CSP / nonce は merged に再度書く (上の forEach で sessionResponse 側のを写したが
-  //    sessionResponse には書いてあるはずなので冗長だが安全側に)
-  merged.headers.set("Content-Security-Policy", csp);
-  merged.headers.set("x-nonce", nonce);
-  return merged;
+  return sessionResponse;
 }
 
 export const config = {

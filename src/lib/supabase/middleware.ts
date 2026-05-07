@@ -9,8 +9,22 @@ import { NextResponse, type NextRequest } from "next/server";
  *   - consent gate の startsWith bypass を `=== p || startsWith(p + "/")` に修正
  *   - prefix path bypass (例: /onboarding/consent.evil) を遮断
  */
-export async function updateSession(request: NextRequest) {
-  let supabaseResponse = NextResponse.next({ request });
+export async function updateSession(
+  request: NextRequest,
+  /**
+   * proxy.ts から request 側に注入したい header (例: x-nonce) を受け取る。
+   * 省略時は request.headers をそのまま使う。
+   * NextResponse.next({ request: { headers } }) で渡すと、Server Component の
+   * `headers()` から参照できるようになる。
+   */
+  injectedRequestHeaders?: Headers,
+) {
+  const requestForResponse = injectedRequestHeaders
+    ? { headers: injectedRequestHeaders }
+    : undefined;
+  let supabaseResponse = requestForResponse
+    ? NextResponse.next({ request: requestForResponse })
+    : NextResponse.next({ request });
 
   const isProd = process.env.NODE_ENV === "production";
 
@@ -43,7 +57,11 @@ export async function updateSession(request: NextRequest) {
           cookiesToSet.forEach(({ name, value }) =>
             request.cookies.set(name, value),
           );
-          supabaseResponse = NextResponse.next({ request });
+          // 重要: token refresh で setAll が再実行された時、injectedRequestHeaders
+          // (x-nonce など) を保持しないと layout.tsx 側で nonce が空になる。
+          supabaseResponse = requestForResponse
+            ? NextResponse.next({ request: requestForResponse })
+            : NextResponse.next({ request });
           cookiesToSet.forEach(({ name, value, options }) =>
             supabaseResponse.cookies.set(name, value, hardenCookie(options)),
           );
