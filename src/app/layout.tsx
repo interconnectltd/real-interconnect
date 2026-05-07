@@ -61,7 +61,14 @@ export default async function RootLayout({
   // CSP nonce: src/proxy.ts が per-request で発行し x-nonce header に詰める
   const nonce = (await headers()).get("x-nonce") ?? "";
   return (
-    <html lang="ja" className={`${inter.variable} ${notoSansJP.variable}`} suppressHydrationWarning>
+    <html
+      lang="ja"
+      className={`${inter.variable} ${notoSansJP.variable}`}
+      // color-scheme: light を明示して scrollbar / native picker / form 内蔵 UI も
+      // OS dark に引っ張られず light で統一 (B2B 方針)。
+      style={{ colorScheme: "light" }}
+      suppressHydrationWarning
+    >
       <head>
         {/* Supabase Storage への preconnect で avatar 画像 LCP を短縮 */}
         {SUPABASE_HOST && (
@@ -70,12 +77,9 @@ export default async function RootLayout({
             <link rel="dns-prefetch" href={`https://${SUPABASE_HOST}`} />
           </>
         )}
-        {/* prefers-color-scheme の初回判定のみ inline (FOUC 防止)、listener 登録は client component で
-            CSP nonce 付きで script-src 'strict-dynamic' 下でも実行可。 */}
-        <script
-          nonce={nonce}
-          dangerouslySetInnerHTML={{ __html: `try{if(window.matchMedia('(prefers-color-scheme:dark)').matches)document.documentElement.classList.add('dark')}catch(e){}` }}
-        />
+        {/* light モード固定 (B2B SaaS は OS dark 設定に追従しない方針)。
+            ユーザー報告「背景が黒くなる」事象 = 旧 prefers-color-scheme:dark 自動検出が原因のため撤廃。
+            将来 dark mode toggle UI を実装する場合は localStorage 駆動で復活させる。 */}
       </head>
       <body className="min-h-dvh bg-background text-foreground antialiased">
         {/* Provider を root に配置: route group 横断時に QueryClient cache が維持される */}
