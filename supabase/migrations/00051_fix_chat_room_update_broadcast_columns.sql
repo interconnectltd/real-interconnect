@@ -61,11 +61,16 @@ BEGIN
 EXCEPTION
   -- realtime.send が古い Supabase で未定義 / extension 不在等の場合に
   -- chat 本体機能を巻き込まないよう no-op fallback
+  -- PostgreSQL spec: invalid_schema_name (3F000) / undefined_function (42883)
   WHEN undefined_function THEN
     RAISE NOTICE 'realtime.send unavailable, skip broadcast';
     RETURN NEW;
-  WHEN undefined_schema THEN
+  WHEN invalid_schema_name THEN
     RAISE NOTICE 'realtime schema unavailable, skip broadcast';
+    RETURN NEW;
+  WHEN OTHERS THEN
+    -- 想定外のエラーで chat 本体を巻き込まない (broadcast は best-effort)
+    RAISE NOTICE 'broadcast_chat_room_update failed: %', SQLERRM;
     RETURN NEW;
 END;
 $$;
