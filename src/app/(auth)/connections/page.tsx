@@ -2,7 +2,8 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { UserCheck, Clock, Send, Star, MessageCircle } from "lucide-react";
+import { UserCheck, Clock, Send, Star, MessageCircle, CalendarPlus } from "lucide-react";
+import { useUIStore } from "@/stores/ui-store";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -38,6 +39,7 @@ export default function ConnectionsPage() {
   const router = useRouter();
   const { user } = useSupabase();
   const { connectionTab, setConnectionTab } = useFilterStore();
+  const { openProfileModal } = useUIStore();
   const [feedbackTarget, setFeedbackTarget] = useState<{
     id: string;
     name: string;
@@ -178,6 +180,19 @@ export default function ConnectionsPage() {
                       >
                         <MessageCircle className="mr-1 h-3.5 w-3.5" />
                         チャットを開始
+                      </Button>
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        onClick={() => {
+                          const targetId = conn.user_id === user?.id
+                            ? conn.connected_user_id
+                            : conn.user_id;
+                          openProfileModal(targetId);
+                        }}
+                      >
+                        <CalendarPlus className="mr-1 h-3.5 w-3.5" />
+                        日程を調整
                       </Button>
                       {conn.status === "accepted" &&
                         !feedbackMap?.[conn.user_id === user?.id ? conn.connected_user_id : conn.user_id] && (

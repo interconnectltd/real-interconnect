@@ -27,6 +27,8 @@ import { useBookmarks } from "@/hooks/queries/use-bookmarks";
 import { useToggleBookmark } from "@/hooks/mutations/use-toggle-bookmark";
 import { useRequestConnection } from "@/hooks/mutations/use-request-connection";
 import { useConnections } from "@/hooks/queries/use-connections";
+import { useMyProfile } from "@/hooks/queries/use-profile";
+import { ConnectedActions } from "@/components/shared/connected-actions";
 import { useFilterStore } from "@/stores/filter-store";
 import { useUIStore } from "@/stores/ui-store";
 import { useDebouncedValue } from "@/hooks/use-debounced-value";
@@ -65,6 +67,8 @@ export default function MembersPage() {
   });
   const { data: bookmarksData } = useBookmarks();
   const { data: connections } = useConnections();
+  const { data: myProfile } = useMyProfile();
+  const myId = myProfile?.id;
   const toggleBookmark = useToggleBookmark();
   const requestConnection = useRequestConnection();
   const { openProfileModal } = useUIStore();
@@ -79,7 +83,7 @@ export default function MembersPage() {
     [bookmarksData],
   );
 
-  const { connectedIds, pendingIds } = useMemo(() => {
+  const { connectedIds, pendingIds, connectionIdByPeerId } = useMemo(() => {
     const conns = connections as Connection[] | undefined;
     const connected = new Set(
       conns
@@ -91,8 +95,17 @@ export default function MembersPage() {
         ?.filter((c) => c.status === "pending")
         .flatMap((c) => [c.user_id, c.connected_user_id]) ?? [],
     );
-    return { connectedIds: connected, pendingIds: pending };
-  }, [connections]);
+    const idMap = new Map<string, string>();
+    if (myId) {
+      conns
+        ?.filter((c) => c.status === "accepted" || c.status === "reaccepted")
+        .forEach((c) => {
+          const peerId = c.user_id === myId ? c.connected_user_id : c.user_id;
+          if (peerId) idMap.set(peerId, c.id);
+        });
+    }
+    return { connectedIds: connected, pendingIds: pending, connectionIdByPeerId: idMap };
+  }, [connections, myId]);
 
   const members = data?.members;
   const meta = data?.meta;
@@ -226,6 +239,7 @@ export default function MembersPage() {
                 member={member}
                 bookmarked={bookmarkedIds.has(member.id)}
                 connected={connectedIds.has(member.id)}
+                connectionId={connectionIdByPeerId.get(member.id)}
                 pending={pendingIds.has(member.id)}
                 connectPending={requestConnection.isPending}
                 bookmarkPending={toggleBookmark.isPending}
@@ -357,6 +371,7 @@ function MemberCard({
   pending,
   connectPending,
   bookmarkPending,
+  connectionId,
   onOpen,
   onToggleBookmark,
   onConnect,
@@ -367,6 +382,8 @@ function MemberCard({
   pending: boolean;
   connectPending: boolean;
   bookmarkPending: boolean;
+  /** accepted 状態の connection.id (ConnectedActions 用) */
+  connectionId?: string;
   onOpen: () => void;
   onToggleBookmark: () => void;
   onConnect: () => void;
@@ -435,7 +452,15 @@ function MemberCard({
           )}
 
           <div className="flex items-center justify-end pt-1">
-            {connected ? (
+            {connected && connectionId ? (
+              <ConnectedActions
+                connectionId={connectionId}
+                targetUserId={member.id}
+                variant="card"
+                onOpenProfile={onOpen}
+                onRequestMeeting={onOpen}
+              />
+            ) : connected ? (
               <Badge variant="outline" className="badge-success-soft px-2 text-xs font-medium">
                 <CheckCircle2 className="h-3 w-3" aria-hidden="true" />
                 接続済み

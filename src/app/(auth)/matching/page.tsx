@@ -2,6 +2,7 @@
 
 import { useMemo } from "react";
 import Image from "next/image";
+import { ConnectedActions } from "@/components/shared/connected-actions";
 import {
   Heart,
   UserPlus,
@@ -148,7 +149,7 @@ export default function MatchingPage() {
     );
   }, [bookmarks]);
 
-  const { connectedIds, pendingIds } = useMemo(() => {
+  const { connectedIds, pendingIds, connectionIdByPeerId } = useMemo(() => {
     const conns = connections as Connection[] | undefined;
     const connected = new Set(
       conns
@@ -160,8 +161,18 @@ export default function MatchingPage() {
         ?.filter((c) => c.status === "pending")
         .flatMap((c) => [c.user_id, c.connected_user_id]) ?? [],
     );
-    return { connectedIds: connected, pendingIds: pending };
-  }, [connections]);
+    // peer user_id → connection.id (accepted のみ) で ConnectedActions に渡す
+    const idMap = new Map<string, string>();
+    if (myId) {
+      conns
+        ?.filter((c) => c.status === "accepted" || c.status === "reaccepted")
+        .forEach((c) => {
+          const peerId = c.user_id === myId ? c.connected_user_id : c.user_id;
+          if (peerId) idMap.set(peerId, c.id);
+        });
+    }
+    return { connectedIds: connected, pendingIds: pending, connectionIdByPeerId: idMap };
+  }, [connections, myId]);
 
   function handleDismiss(id: string) {
     dismiss(id);
@@ -238,6 +249,7 @@ export default function MatchingPage() {
                   bookmarkPending={toggleBookmark.isPending}
                   isSelf={isSelf}
                   dupCount={m.__dupCount ?? 0}
+                  connectionId={connectionIdByPeerId.get(m.user_id)}
                   onOpen={() => {
                     if (isSelf) return;
                     openProfileModal(m.user_id);
@@ -287,6 +299,7 @@ export default function MatchingPage() {
                   bookmarkPending={toggleBookmark.isPending}
                   isSelf={isSelf}
                   dupCount={score.__dupCount ?? 0}
+                  connectionId={connectionIdByPeerId.get(score.target_id)}
                   onOpen={() => {
                     if (isSelf) return;
                     openProfileModal(score.target_id);
@@ -397,6 +410,7 @@ function MutualCard({
   bookmarkPending,
   isSelf = false,
   dupCount = 0,
+  connectionId,
   onOpen,
   onConnect,
   onToggleBookmark,
@@ -410,6 +424,8 @@ function MutualCard({
   bookmarkPending: boolean;
   isSelf?: boolean;
   dupCount?: number;
+  /** accepted 状態の connection.id (ConnectedActions 用) */
+  connectionId?: string;
   onOpen: () => void;
   onConnect: () => void;
   onToggleBookmark: () => void;
@@ -506,13 +522,23 @@ function MutualCard({
                 <Sparkles className="h-3 w-3" aria-hidden="true" />
                 相互おすすめ
               </Badge>
-              <ConnectControl
-                connected={connected}
-                pending={pending}
-                disabled={connectPending}
-                onConnect={onConnect}
-                size="sm"
-              />
+              {connected && connectionId ? (
+                <ConnectedActions
+                  connectionId={connectionId}
+                  targetUserId={match.user_id}
+                  variant="card"
+                  onOpenProfile={onOpen}
+                  onRequestMeeting={onOpen}
+                />
+              ) : (
+                <ConnectControl
+                  connected={connected}
+                  pending={pending}
+                  disabled={connectPending}
+                  onConnect={onConnect}
+                  size="sm"
+                />
+              )}
             </div>
           </CardContent>
         </Card>
@@ -538,6 +564,7 @@ function ScoreCard({
   bookmarkPending,
   isSelf = false,
   dupCount = 0,
+  connectionId,
   onOpen,
   onConnect,
   onToggleBookmark,
@@ -551,6 +578,8 @@ function ScoreCard({
   bookmarkPending: boolean;
   isSelf?: boolean;
   dupCount?: number;
+  /** accepted 状態の connection.id (ConnectedActions 用) */
+  connectionId?: string;
   onOpen: () => void;
   onConnect: () => void;
   onToggleBookmark: () => void;
@@ -636,13 +665,23 @@ function ScoreCard({
                 </p>
               </div>
               {!isSelf && (
-                <ConnectControl
-                  connected={connected}
-                  pending={pending}
-                  disabled={connectPending}
-                  onConnect={onConnect}
-                  size="sm"
-                />
+                connected && connectionId ? (
+                  <ConnectedActions
+                    connectionId={connectionId}
+                    targetUserId={score.target_id}
+                    variant="card"
+                    onOpenProfile={onOpen}
+                    onRequestMeeting={onOpen}
+                  />
+                ) : (
+                  <ConnectControl
+                    connected={connected}
+                    pending={pending}
+                    disabled={connectPending}
+                    onConnect={onConnect}
+                    size="sm"
+                  />
+                )
               )}
             </div>
 
