@@ -85,8 +85,14 @@ export function LoginForm() {
       }
       setError(display);
       setLoading(false);
-      // a11y: エラー後はメール入力にフォーカスを戻す
-      requestAnimationFrame(() => emailRef.current?.focus());
+      // a11y / UX: エラー alert を必ず viewport center に寄せ、エラー後はメール入力にフォーカス
+      // (mobile キーボード残置で alert が画面外に行く事故を遮断 / Wave8 X 指摘)
+      requestAnimationFrame(() => {
+        document
+          .querySelector('[role="alert"]')
+          ?.scrollIntoView({ behavior: "smooth", block: "center" });
+        emailRef.current?.focus();
+      });
       return;
     }
 
