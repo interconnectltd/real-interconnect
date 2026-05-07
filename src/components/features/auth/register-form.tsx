@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { useForm } from "react-hook-form";
+import { useForm, useWatch } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
@@ -88,7 +88,7 @@ export function RegisterForm() {
     register,
     handleSubmit,
     setValue,
-    watch,
+    control,
     formState: { errors },
   } = useForm<RegisterInput>({
     resolver: zodResolver(registerSchema),
@@ -107,9 +107,11 @@ export function RegisterForm() {
     }
   }, [error]);
 
-  const agreeToTerms = watch("agreeToTerms");
-  const agreeToPrivacy = watch("agreeToPrivacy");
-  const agreeToTokushoho = watch("agreeToTokushoho");
+  // useWatch は subscription ベースで React Compiler の memoization と互換。
+  // watch() の stale closure を避け、Checkbox の controlled checked を frame 落ち無く同期する。
+  const agreeToTerms = useWatch({ control, name: "agreeToTerms" });
+  const agreeToPrivacy = useWatch({ control, name: "agreeToPrivacy" });
+  const agreeToTokushoho = useWatch({ control, name: "agreeToTokushoho" });
 
   async function onSubmit(data: RegisterInput) {
     setLoading(true);
@@ -262,14 +264,20 @@ export function RegisterForm() {
         log.warn("[register] zod validation blocked submit", {
           fields: Object.keys(validationErrors),
         });
-        // 最初のエラーフィールドにフォーカス (a11y / UX)
         const firstKey = Object.keys(validationErrors)[0];
         if (firstKey) {
           requestAnimationFrame(() => {
-            const el = document.querySelector<HTMLElement>(
-              `[name="${firstKey}"]`,
-            );
-            el?.focus({ preventScroll: false });
+            // RHF の register() 経由でない Checkbox 系 (agreeTo*) は name 属性が無いため
+            // [name=] では取れない → id (例: agree-terms) も fallback で探索する。
+            const idGuess = `agree-${firstKey.replace(/^agreeTo/, "").toLowerCase()}`;
+            const el =
+              document.querySelector<HTMLElement>(`[name="${firstKey}"]`) ??
+              document.getElementById(idGuess) ??
+              document.querySelector<HTMLElement>(`[id="${firstKey}"]`);
+            if (el) {
+              el.focus({ preventScroll: true });
+              el.scrollIntoView({ behavior: "smooth", block: "center" });
+            }
           });
         }
       })}
@@ -283,7 +291,7 @@ export function RegisterForm() {
           tabIndex={-1}
           role="alert"
           aria-live="assertive"
-          className="flex items-start gap-2.5 rounded-lg border border-destructive/30 bg-destructive/10 px-3.5 py-3 text-sm text-destructive outline-none focus-visible:ring-[3px] focus-visible:ring-destructive/30"
+          className="scroll-mt-20 flex items-start gap-2.5 rounded-lg border border-destructive/30 bg-destructive/10 px-3.5 py-3 text-sm text-destructive outline-none focus-visible:ring-[3px] focus-visible:ring-destructive/30"
         >
           <AlertCircle className="mt-0.5 h-4 w-4 shrink-0" aria-hidden="true" />
           <span>{error}</span>
@@ -480,7 +488,7 @@ export function RegisterForm() {
         accentIcon={<ShieldCheck className="h-3.5 w-3.5" aria-hidden="true" />}
         isLast
       >
-        <fieldset className="space-y-3 rounded-lg border border-border bg-muted/40 p-4">
+        <fieldset className="space-y-4 rounded-lg border border-border bg-muted/40 p-4">
           <legend className="sr-only">法務文書への同意</legend>
           <p className="text-xs leading-relaxed text-muted-foreground">
             下記リンクは全てモーダルで開きます。入力中のフォーム内容は失われません。
@@ -489,7 +497,8 @@ export function RegisterForm() {
             trigger={
               <button
                 type="button"
-                className="inline-flex min-h-[28px] items-center text-xs font-medium text-accent underline-offset-4 hover:underline"
+                aria-haspopup="dialog"
+                className="inline-flex min-h-[44px] items-center px-1 text-sm font-medium text-accent underline underline-offset-4"
               >
                 3文書をまとめて読む（モーダル）
               </button>
@@ -502,17 +511,25 @@ export function RegisterForm() {
             onChange={(v) => setValue("agreeToTerms", v, { shouldValidate: true })}
             error={errors.agreeToTerms?.message}
           >
-            <LegalDialog
-              defaultTab="terms"
-              trigger={
-                <button type="button" className="font-medium text-accent underline-offset-4 hover:underline">
-                  利用規約
-                </button>
-              }
-            />
-            （AI分析・米国への越境移転を含む）に
-            <Label htmlFor="agree-terms" className="cursor-pointer font-medium">
-              同意します
+            <div className="flex flex-wrap items-center gap-x-1">
+              <LegalDialog
+                defaultTab="terms"
+                trigger={
+                  <button
+                    type="button"
+                    aria-haspopup="dialog"
+                    className="inline-flex min-h-[44px] items-center px-1 font-medium text-accent underline underline-offset-2"
+                  >
+                    利用規約を読む
+                  </button>
+                }
+              />
+              <span className="text-xs text-muted-foreground">
+                （AI分析・米国への越境移転を含む）
+              </span>
+            </div>
+            <Label htmlFor="agree-terms" className="mt-1 block cursor-pointer font-medium">
+              上記内容に同意します
             </Label>
           </ConsentRow>
 
@@ -522,17 +539,25 @@ export function RegisterForm() {
             onChange={(v) => setValue("agreeToPrivacy", v, { shouldValidate: true })}
             error={errors.agreeToPrivacy?.message}
           >
-            <LegalDialog
-              defaultTab="privacy"
-              trigger={
-                <button type="button" className="font-medium text-accent underline-offset-4 hover:underline">
-                  プライバシーポリシー
-                </button>
-              }
-            />
-            （越境移転・委託先への提供を含む）に
-            <Label htmlFor="agree-privacy" className="cursor-pointer font-medium">
-              同意します
+            <div className="flex flex-wrap items-center gap-x-1">
+              <LegalDialog
+                defaultTab="privacy"
+                trigger={
+                  <button
+                    type="button"
+                    aria-haspopup="dialog"
+                    className="inline-flex min-h-[44px] items-center px-1 font-medium text-accent underline underline-offset-2"
+                  >
+                    プライバシーポリシーを読む
+                  </button>
+                }
+              />
+              <span className="text-xs text-muted-foreground">
+                （越境移転・委託先への提供を含む）
+              </span>
+            </div>
+            <Label htmlFor="agree-privacy" className="mt-1 block cursor-pointer font-medium">
+              上記内容に同意します
             </Label>
           </ConsentRow>
 
@@ -545,20 +570,29 @@ export function RegisterForm() {
             <LegalDialog
               defaultTab="tokushoho"
               trigger={
-                <button type="button" className="font-medium text-accent underline-offset-4 hover:underline">
-                  特定商取引法に基づく表記
+                <button
+                  type="button"
+                  aria-haspopup="dialog"
+                  className="inline-flex min-h-[44px] items-center px-1 font-medium text-accent underline underline-offset-2"
+                >
+                  特定商取引法に基づく表記を読む
                 </button>
               }
             />
-            の内容を
-            <Label htmlFor="agree-tokushoho" className="cursor-pointer font-medium">
-              確認しました
+            <Label htmlFor="agree-tokushoho" className="mt-1 block cursor-pointer font-medium">
+              内容を確認しました
             </Label>
           </ConsentRow>
         </fieldset>
       </Step>
 
-      <Button type="submit" size="lg" className="w-full" disabled={loading}>
+      <Button
+        type="submit"
+        size="lg"
+        className="w-full"
+        disabled={loading}
+        aria-busy={loading}
+      >
         {loading ? (
           <>
             <Loader2 className="h-4 w-4 animate-spin" aria-hidden="true" />
@@ -568,6 +602,18 @@ export function RegisterForm() {
           "アカウント作成"
         )}
       </Button>
+
+      {/* Zod バリデーション失敗時の summary alert (フィールド単独の inline エラーが
+          スクロール外で見えない事故を防ぐ) */}
+      {Object.keys(errors).length > 0 && (
+        <p
+          role="alert"
+          aria-live="polite"
+          className="text-center text-xs text-destructive"
+        >
+          入力に不備があります。赤字の項目をご確認ください。
+        </p>
+      )}
 
       <p className="text-center text-sm text-muted-foreground">
         すでにアカウントをお持ちですか？{" "}
@@ -653,11 +699,12 @@ function Step({
 }) {
   return (
     <section className="relative" data-step={number}>
-      {/* 縦connector線 (最後のStep以外) */}
+      {/* 縦connector線 (最後のStep以外)。
+          pointer-events-none 必須: Mobile で 1px 帯がタップ吸収する ghost click を回避。 */}
       {!isLast && (
         <span
           aria-hidden="true"
-          className="absolute left-[13px] top-7 -bottom-3 w-px bg-border"
+          className="pointer-events-none absolute left-[13px] top-7 -bottom-3 w-px bg-border"
         />
       )}
       <header className="relative z-[1] flex items-start gap-3">
@@ -689,17 +736,34 @@ function ConsentRow({
   error?: string;
   children: React.ReactNode;
 }) {
+  // 行全体をタップ可能にして「タップしてもチェックが入らない」を根絶。
+  // 内側の <button type="button"> (LegalDialog trigger) と <label htmlFor> は
+  // それぞれ独立 click 経路を持つため、delegation で重複呼び出しを除外する。
   return (
     <div className="space-y-1">
-      <div className="flex items-start gap-2.5">
+      <div
+        role="presentation"
+        onClick={(e) => {
+          const target = e.target as HTMLElement;
+          if (target.closest("button[type='button']")) return; // LegalDialog trigger
+          if (target.closest("a")) return; // 補助リンク
+          if (target.closest("[data-slot='checkbox']")) return; // Base UI Checkbox 自身
+          if (target.closest("label[for]")) return; // Label htmlFor の native 経路
+          onChange(!checked);
+        }}
+        className="-mx-2 -my-1 flex cursor-pointer items-start gap-2.5 rounded-md p-2 transition-colors hover:bg-accent/5 active:bg-accent/10"
+      >
         <Checkbox
           id={id}
+          name={id}
           checked={checked}
           onCheckedChange={(v) => onChange(v === true)}
           className="mt-0.5"
           aria-invalid={Boolean(error) || undefined}
         />
-        <div className="text-sm leading-relaxed text-foreground">{children}</div>
+        <div className="text-sm leading-relaxed text-foreground select-none">
+          {children}
+        </div>
       </div>
       {error && <p className={`pl-[26px] ${fieldHelpClass}`}>{error}</p>}
     </div>
