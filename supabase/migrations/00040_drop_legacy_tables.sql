@@ -34,6 +34,8 @@ DROP TABLE IF EXISTS public.transcript_raw CASCADE;
 DROP TABLE IF EXISTS public.normalized_transcripts CASCADE;
 DROP TABLE IF EXISTS public.group_matches CASCADE;
 DROP TABLE IF EXISTS public.group_match_members CASCADE;
-DROP TABLE IF EXISTS public.meeting_participants_v2 CASCADE;
+-- meeting_participants_v2 の DROP は撤回 (00044 で復活)。
+-- 監査結果: src 内 7 ファイル 13 箇所で参照中で、本コメント執筆時は誤っていた。
+-- 旧 DROP 行: DROP TABLE IF EXISTS public.meeting_participants_v2 CASCADE;
 
 NOTIFY pgrst, 'reload schema';

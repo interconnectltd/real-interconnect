@@ -33,19 +33,25 @@ export async function GET(request: Request) {
     const url = new URL(request.url);
     const status = url.searchParams.get("status");
 
+    // SLA 超過先頭表示: 旧版の status alphabet sort では new が awaiting_user 下に
+    // 沈む問題があった → SLA 期限早い順 (超過 = 先頭) に変更。
+    // status 未指定時は resolved/rejected を除外 (運営は別タブ確認に統一)。
     let q = supabase
       .from("contact_messages")
       .select(
         "id, sender_name, sender_email, sender_user_id, kind, subject, body, status, assignee_id, sla_due_at, resolved_at, created_at, updated_at",
       )
-      .order("status", { ascending: true })
       .order("sla_due_at", { ascending: true })
       .limit(200);
-    if (status) {
+    if (status === "all") {
+      // 明示的「すべて」指定 → 何もフィルタしない
+    } else if (status) {
       q = q.eq(
         "status",
         status as "new" | "assigned" | "in_progress" | "awaiting_user" | "resolved" | "rejected",
       );
+    } else {
+      q = q.not("status", "in", "(resolved,rejected)");
     }
 
     const { data, error } = await q;
@@ -79,18 +85,37 @@ export async function PATCH(request: Request) {
       }
     }
     if (parsed.data.assignee_id !== undefined) {
+      // 担当者は admin かつ active のみ許可 (任意 UUID で非 admin / 退会済を入れる
+      // 攻撃を防ぐ)。null は担当解除なので素通り。
+      if (parsed.data.assignee_id !== null) {
+        const { data: candidate } = await supabase
+          .from("user_profiles")
+          .select("id, is_admin, is_active")
+          .eq("id", parsed.data.assignee_id)
+          .maybeSingle();
+        if (!candidate || !candidate.is_admin || !candidate.is_active) {
+          return jsonError(
+            422,
+            "INVALID_ASSIGNEE",
+            "担当者は active な admin ユーザーのみ指定できます",
+          );
+        }
+      }
       update.assignee_id = parsed.data.assignee_id;
     }
 
     // contact_messages は migration 00043 で追加 (database.ts 未反映) のため loose cast
+    // 状態遷移 race 防止: resolved/rejected の最終状態に対する更新は拒否 (CAS 風)。
     type LooseTable = {
       update: (v: Record<string, unknown>) => {
         eq: (col: string, val: string) => {
-          select: () => {
-            single: () => Promise<{
-              data: Record<string, unknown> | null;
-              error: { message?: string } | null;
-            }>;
+          not: (col: string, op: string, val: string) => {
+            select: () => {
+              single: () => Promise<{
+                data: Record<string, unknown> | null;
+                error: { message?: string; code?: string } | null;
+              }>;
+            };
           };
         };
       };
@@ -99,9 +124,19 @@ export async function PATCH(request: Request) {
     const { data, error } = await table
       .update(update)
       .eq("id", id)
+      .not("status", "in", "(resolved,rejected)")
       .select()
       .single();
-    if (error) throw error;
+    if (error) {
+      if (error.code === "PGRST116") {
+        return jsonError(
+          409,
+          "CONFLICT",
+          "既に最終状態の問い合わせは変更できません",
+        );
+      }
+      throw error;
+    }
 
     const client = extractClientInfo(request);
     void writeAuditLog(supabase, {

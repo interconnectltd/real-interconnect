@@ -177,18 +177,29 @@ Month 3+:
 
 ---
 
-## 9. 着手済 (2026-05-06)
+## 9. 着手済 (2026-05-06 〜 2026-05-07)
 
 - [x] `withAdminAuth` helper 抽出 (Tier1 前提条件)
-- [x] `/admin/dashboard` 実装
-- [x] `/admin/users` 一覧
-- [x] `/admin/users/[id]` 詳細 (Overview / Audit Trail / Meetings tab)
-- [x] `/admin/audit-logs` 検索
+- [x] `/admin/dashboard` 実装 (KPI 12 枚 + visibility-gated polling + Cache-Control)
+- [x] `/admin/users` 一覧 (estimated count, debounce 検索)
+- [x] `/admin/users/[id]` 詳細 (Overview / Audit Trail / Meetings の **3 タブ** 部分実装)
+  - 残: Matches / Chats / Reports / Consent / Danger zone (5 タブ未実装)
+  - 残: 停止 / BAN / 匿名化 RPC
+- [x] `/admin/audit-logs` 検索 + cursor pagination + payload 折畳
+  - 残: CSV export / 期間 picker / IntersectionObserver 自動 pagination
+- [x] `/admin/import-requests` 取込申請 + 会議選択ダイアログ + Dialog 化
+- [x] **`/admin/contacts` 受付 inbox** (migration 00043 + 公開フォーム + SLA 24h/4h)
+- [x] migration 00033-00044 (audit_logs 統一 / RLS 補強 / WORM trigger / 楽観ロック)
 
 ## 10. 未着手 (今後の予定)
 
-- [ ] `/admin/data-rights` (新規テーブル + state machine 必要)
-- [ ] `/admin/contacts` (新規テーブル + /contact DB 化必要)
-- [ ] `/admin/transcripts` (AI 抽出レビュー workflow)
-- [ ] Tier 2 全機能
-- [ ] Tier 3 全機能
+### Tier1 残
+- [ ] `/admin/data-rights` (個情法 27 条 30 日 SLA / 新規テーブル + state machine 必要)
+- [ ] `/admin/transcripts` (AI 抽出レビュー workflow / confidence < 0.8 公開 block)
+- [ ] `/admin/users/[id]` の残 5 タブ (Matches / Chats / Reports / Consent / Danger zone)
+- [ ] `audit_log_seals` (SHA-256 ハッシュチェーン WORM / 7 年保持)
+- [ ] admin 操作 middleware で reason 必須化 (現状は users/[id] のみ)
+
+### Tier2 全機能 (詳細は §2)
+
+### Tier3 全機能 (詳細は §3)

@@ -130,11 +130,14 @@ export function useUploadAvatar() {
         );
       }
 
-      console.log(
-        `[avatar] uploaded ${uploadResults.length} variants, total ${(
-          variants.reduce((s, v) => s + v.bytes, 0) / 1024
-        ).toFixed(1)}KB (was ${(file.size / 1024 / 1024).toFixed(1)}MB)`,
-      );
+      if (process.env.NODE_ENV !== "production") {
+        // dev のみログ (本番はノイズ + プライバシー観点で抑止)
+        console.info(
+          `[avatar] uploaded ${uploadResults.length} variants, total ${(
+            variants.reduce((s, v) => s + v.bytes, 0) / 1024
+          ).toFixed(1)}KB (was ${(file.size / 1024 / 1024).toFixed(1)}MB)`,
+        );
+      }
 
       return profile as Profile;
     },

@@ -75,9 +75,8 @@ export default function AdminContactsPage() {
   const { data, isLoading, isError } = useQuery({
     queryKey: ["admin-contacts", filterStatus],
     queryFn: () =>
-      api.get<ContactMessage[]>(
-        `/admin/contacts${filterStatus === "all" ? "" : `?status=${filterStatus}`}`,
-      ),
+      // route 側: status 未指定時は resolved/rejected 除外、明示「all」で全件
+      api.get<ContactMessage[]>(`/admin/contacts?status=${filterStatus}`),
   });
 
   const updateMutation = useMutation({

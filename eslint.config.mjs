@@ -12,6 +12,16 @@ const eslintConfig = defineConfig([
     "out/**",
     "build/**",
     "next-env.d.ts",
+    // 旧 LP の minified bundle (4944 件の偽エラーを生成していた)
+    "public/lp/**",
+    "public/**/*.min.js",
+    // worker の build 成果物
+    "worker/dist/**",
+    "worker/.next/**",
+    // coverage / supabase generated
+    "coverage/**",
+    "supabase/.temp/**",
+    "supabase/_apply/**",
   ]),
 ]);
 

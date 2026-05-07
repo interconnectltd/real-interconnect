@@ -187,7 +187,11 @@ export default function AdminUserDetailPage({
         <div className="rounded-md border border-destructive/40 bg-destructive/5 px-4 py-3 text-sm text-destructive">
           {error instanceof ApiError && error.code === "REASON_REQUIRED"
             ? "閲覧理由が無効です。再入力してください。"
-            : "読み込みに失敗しました。"}
+            : error instanceof ApiError && error.code === "AUDIT_FAILED"
+              ? "閲覧記録の保存に失敗したため詳細を表示できません。少し時間をおいてから再試行してください (連続失敗時は運営に連絡してください)。"
+              : error instanceof ApiError && error.code === "FORBIDDEN"
+                ? "admin 権限が確認できません。再ログインを試してください。"
+                : "読み込みに失敗しました。"}
         </div>
       )}
 
