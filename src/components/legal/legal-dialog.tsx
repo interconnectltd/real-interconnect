@@ -42,6 +42,14 @@ export function LegalDialog({
   tab = "terms",
   onTabChange,
 }: LegalDialogProps) {
+  // 防御パッチ (Wave9 A 指摘):
+  //   open=false の間は Dialog ツリー自体を未マウントにする。
+  //   - Wave7 で Backdrop に追加した data-closed:pointer-events-none と
+  //     Base UI の useTransitionStatus / floatingRootContext の sync 競合を
+  //     物理的に排除
+  //   - controlled で open を切り替える際の「初回 click → state true → Portal mount」
+  //     3 step 間のレンダーロスを防ぐ
+  if (!open) return null;
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent

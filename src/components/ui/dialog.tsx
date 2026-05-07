@@ -31,9 +31,11 @@ function DialogOverlay({
     <DialogPrimitive.Backdrop
       data-slot="dialog-overlay"
       className={cn(
-        // close アニメ中 (100ms) に backdrop が click を吸収して
-        // メインフォームの Checkbox 等が押せなくなる「死に窓」を遮断
-        "fixed inset-0 isolate z-50 bg-black/10 duration-100 supports-backdrop-filter:backdrop-blur-xs data-open:animate-in data-open:fade-in-0 data-closed:animate-out data-closed:fade-out-0 data-closed:pointer-events-none",
+        // close アニメ中 (100ms) + open transition の最初の frame で
+        // backdrop が click を吸収して「死に窓」になる事故を遮断。
+        // data-closed (close ing) と data-[starting-style] (open 直前 frame) の
+        // 双方で pointer-events: none を強制。
+        "fixed inset-0 isolate z-50 bg-black/10 duration-100 supports-backdrop-filter:backdrop-blur-xs data-open:animate-in data-open:fade-in-0 data-closed:animate-out data-closed:fade-out-0 data-closed:pointer-events-none data-[starting-style]:pointer-events-none",
         className
       )}
       {...props}

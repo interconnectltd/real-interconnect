@@ -763,6 +763,9 @@ function ConsentRow({
       <div
         role="presentation"
         onClick={(e) => {
+          // synthetic event の bubbling 上、内側 button onClick は既に発火済。
+          // 念のため defaultPrevented も短絡条件に追加して二重発火を完全防止。
+          if (e.defaultPrevented) return;
           const target = e.target as HTMLElement;
           if (target.closest("button[type='button']")) return; // LegalDialog trigger
           if (target.closest("a")) return; // 補助リンク
