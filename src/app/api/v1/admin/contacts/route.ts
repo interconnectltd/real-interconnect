@@ -32,10 +32,16 @@ export async function GET(request: Request) {
     const { supabase } = await withAdminAuth(request);
     const url = new URL(request.url);
     const status = url.searchParams.get("status");
+    // kinds: カンマ区切りで複数 kind フィルタ
+    //   /admin/data-rights 画面が kinds=data_disclosure,data_deletion,tokushoho,urgent_removal で叩く
+    const kindsParam = url.searchParams.get("kinds");
+    const kinds = kindsParam
+      ? kindsParam
+          .split(",")
+          .map((k) => k.trim())
+          .filter(Boolean)
+      : null;
 
-    // SLA 超過先頭表示: 旧版の status alphabet sort では new が awaiting_user 下に
-    // 沈む問題があった → SLA 期限早い順 (超過 = 先頭) に変更。
-    // status 未指定時は resolved/rejected を除外 (運営は別タブ確認に統一)。
     let q = supabase
       .from("contact_messages")
       .select(
@@ -52,6 +58,10 @@ export async function GET(request: Request) {
       );
     } else {
       q = q.not("status", "in", "(resolved,rejected)");
+    }
+    if (kinds && kinds.length > 0) {
+      // PostgREST IN フィルタ — 数値・文字列どちらも `(a,b,c)` 形式
+      q = q.in("kind", kinds);
     }
 
     const { data, error } = await q;

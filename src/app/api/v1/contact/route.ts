@@ -58,11 +58,27 @@ export async function POST(request: Request) {
       null;
     const ua = headersList.get("user-agent") ?? null;
 
-    // 緊急削除 / 開示請求は SLA を 4h に短縮
-    const sla =
-      parsed.data.kind === "urgent_removal"
-        ? new Date(Date.now() + 4 * 60 * 60 * 1000)
-        : new Date(Date.now() + 24 * 60 * 60 * 1000);
+    // SLA 設定:
+    //   urgent_removal       = 4h     (緊急削除、名誉毀損コンテンツ等の即時対応)
+    //   data_disclosure      = 30 日  (個情法 27 条 — 本人開示請求の法定上限)
+    //   data_deletion        = 30 日  (個情法 27 条 — 削除請求)
+    //   tokushoho            = 30 日  (特商法 11 条 — 開示請求)
+    //   その他 (general 等)  = 24h
+    const HOUR = 60 * 60 * 1000;
+    const DAY = 24 * HOUR;
+    let slaMs: number;
+    if (parsed.data.kind === "urgent_removal") {
+      slaMs = 4 * HOUR;
+    } else if (
+      parsed.data.kind === "data_disclosure" ||
+      parsed.data.kind === "data_deletion" ||
+      parsed.data.kind === "tokushoho"
+    ) {
+      slaMs = 30 * DAY;
+    } else {
+      slaMs = 24 * HOUR;
+    }
+    const sla = new Date(Date.now() + slaMs);
 
     // contact_messages は migration 00043 で新規追加されたため database.ts 型に
     // 未反映。`supabase gen types typescript` で再生成されるまで loose cast。

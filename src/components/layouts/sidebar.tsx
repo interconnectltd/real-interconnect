@@ -22,6 +22,7 @@ import {
   LayoutGrid,
   ScrollText,
   Bookmark,
+  ShieldAlert,
   type LucideIcon,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
@@ -92,6 +93,7 @@ const adminGroup: NavGroup = {
     { href: "/admin/dashboard", label: "ダッシュボード", icon: LayoutGrid },
     { href: "/admin/users", label: "ユーザー", icon: Users },
     { href: "/admin/contacts", label: "お問い合わせ", icon: MessageCircle },
+    { href: "/admin/data-rights", label: "データ権利請求", icon: ShieldAlert },
     { href: "/admin/import-requests", label: "取込申請", icon: Inbox },
     { href: "/admin/audit-logs", label: "監査ログ", icon: ScrollText },
   ],
