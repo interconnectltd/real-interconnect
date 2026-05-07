@@ -20,6 +20,7 @@ import {
   ChevronRight,
 } from "lucide-react";
 import Link from "next/link";
+import Image from "next/image";
 import { toast } from "sonner";
 import dynamic from "next/dynamic";
 
@@ -429,8 +430,18 @@ export default function ProfilePage() {
           /onboarding にジャンプして既存 goals/offerings を再選択・detail 編集できる。
           再同意は /onboarding/consent (prospect 経由ユーザー向け、通常ユーザーは
           onboarding 完了時に取得済 → 再表示用)。 */}
-      <Card>
-        <CardContent className="space-y-3">
+      <Card className="overflow-hidden">
+        {/* マッチング項目編集帯 — want vs offer の関係性を視覚化 */}
+        <Image
+          src="/illustrations/profile-edit-banner.png"
+          alt=""
+          width={1200}
+          height={180}
+          className="h-auto w-full"
+          aria-hidden="true"
+          priority={false}
+        />
+        <CardContent className="space-y-3 pt-4">
           <div className="flex items-center justify-between gap-2">
             <p className="ds-kpi-label">マッチング項目を編集</p>
             <span className="text-xs text-muted-foreground">

@@ -206,6 +206,16 @@ export default function MatchingPage() {
       {/* Mutual matches */}
       {filteredMutual && filteredMutual.length > 0 && (
         <section data-tour="matching-mutual" className="space-y-4">
+          {/* Mutual section の意味を可視化する hero (3 cards parallax) */}
+          <Image
+            src="/illustrations/hero-matching-discovery.png"
+            alt=""
+            width={1200}
+            height={240}
+            className="h-auto w-full"
+            aria-hidden="true"
+            priority={false}
+          />
           <header>
             <p className="ds-eyebrow">Mutual</p>
             <span className="ds-eyebrow-rule" aria-hidden="true" />
@@ -443,7 +453,17 @@ function MutualCard({
           isSelf ? "pointer-events-none opacity-60" : ""
         }`}
       >
-        <Card className="ds-card-interactive h-full border-accent/25 bg-[color:color-mix(in_oklab,var(--accent)_4%,var(--card))]">
+        <Card className="ds-card-interactive h-full overflow-hidden border-accent/25 bg-[color:color-mix(in_oklab,var(--accent)_4%,var(--card))]">
+          {/* Mutual の特別感を出す上端 accent 帯 */}
+          <Image
+            src="/illustrations/mutual-match-accent.png"
+            alt=""
+            width={800}
+            height={120}
+            className="-mt-px h-6 w-full object-cover object-center"
+            aria-hidden="true"
+            priority={false}
+          />
           <CardContent className="space-y-3 pr-24">
             <div className="flex items-start gap-3">
               <UserAvatar name={p?.name} avatarUrl={p?.avatar_url} size="md" />
