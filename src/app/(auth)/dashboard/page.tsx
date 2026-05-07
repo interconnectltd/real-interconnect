@@ -116,48 +116,60 @@ export default function DashboardPage() {
 
   return (
     <div className="mx-auto max-w-6xl space-y-8">
-      <div className="flex items-start justify-between gap-3">
-        <div className="min-w-0 flex-1">
-          <p className="ds-eyebrow">Dashboard</p>
-          <h1 className="ds-h1 mt-1 tracking-tight text-foreground">{greeting}</h1>
-          <p className="mt-1 text-sm text-muted-foreground">
-            あなたのネットワーク状況の概要
-          </p>
-        </div>
-        <Image
-          src="/illustrations/spot-dashboard-hero.png"
-          alt=""
-          width={320}
-          height={180}
-          className="hidden h-auto w-40 shrink-0 self-start sm:block lg:w-56"
+      {/* Hero — 右半分にイラストを背景レイヤーとして大きく配置、
+          左→右の background gradient mask で text を保護。Bento 風 */}
+      <section className="relative isolate overflow-hidden">
+        {/* 背景イラスト (md 以上で表示、SP は省略) */}
+        <div
           aria-hidden="true"
-          priority={false}
-        />
-        <Button
-          variant="outline"
-          size="icon-lg"
-          onClick={() => {
-            // 全 query 無差別 invalidate は N+1 と rate limit を誘発するため、
-            // ダッシュボード関連の代表 queryKey に絞る (refetchType: active)
-            queryClient.invalidateQueries({
-              predicate: (q) => {
-                const k = q.queryKey[0];
-                return (
-                  k === "connections" ||
-                  k === "notifications" ||
-                  k === "matching" ||
-                  k === "members" ||
-                  k === "ai-profile"
-                );
-              },
-              refetchType: "active",
-            });
-          }}
-          aria-label="データを更新"
+          className="pointer-events-none absolute inset-y-0 right-0 -z-10 hidden md:block md:w-3/5 lg:w-1/2"
         >
-          <RefreshCw className="h-4 w-4" />
-        </Button>
-      </div>
+          <Image
+            src="/illustrations/spot-dashboard-hero.png"
+            alt=""
+            fill
+            sizes="(max-width: 1024px) 60vw, 600px"
+            className="object-cover object-center opacity-90"
+            priority
+          />
+          {/* 左→右の background fade で text 領域を保護 */}
+          <div className="absolute inset-0 bg-gradient-to-r from-background via-background/85 to-transparent md:via-background/70" />
+        </div>
+
+        <div className="relative flex items-start justify-between gap-3 py-2 md:min-h-[160px]">
+          <div className="min-w-0 flex-1">
+            <p className="ds-eyebrow">Dashboard</p>
+            <h1 className="ds-h1 mt-1 tracking-tight text-foreground">{greeting}</h1>
+            <p className="mt-1 text-sm text-muted-foreground">
+              あなたのネットワーク状況の概要
+            </p>
+          </div>
+          <Button
+            variant="outline"
+            size="icon-lg"
+            onClick={() => {
+              // 全 query 無差別 invalidate は N+1 と rate limit を誘発するため、
+              // ダッシュボード関連の代表 queryKey に絞る (refetchType: active)
+              queryClient.invalidateQueries({
+                predicate: (q) => {
+                  const k = q.queryKey[0];
+                  return (
+                    k === "connections" ||
+                    k === "notifications" ||
+                    k === "matching" ||
+                    k === "members" ||
+                    k === "ai-profile"
+                  );
+                },
+                refetchType: "active",
+              });
+            }}
+            aria-label="データを更新"
+        >
+            <RefreshCw className="h-4 w-4" />
+          </Button>
+        </div>
+      </section>
 
       {/* Lv1: 最重要CTAを最上段に */}
       {isLv1 && (
