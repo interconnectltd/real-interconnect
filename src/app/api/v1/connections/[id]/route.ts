@@ -36,6 +36,11 @@ export async function PATCH(
       return jsonError(403, "FORBIDDEN", "このコネクションを操作する権限がありません");
     }
 
+    // Idempotent: same status は no-op success (古い通知から重複タップした時の 400 を回避)
+    if (connection.status === newStatus) {
+      return json(connection);
+    }
+
     // Direction check: accept/reject can only be done by the RECIPIENT
     if (
       (newStatus === "accepted" || newStatus === "declined") &&
