@@ -93,12 +93,16 @@ export function MeetingSuggestionCard({
   const handleStartScheduling = async () => {
     setState("creating");
     try {
+      // Wave11 Y: PostMessageSchema は scheduling_card で payload 必須。
+      // 旧実装は content に JSON.stringify した object を入れて payload 不在 → 400。
       await api.post(`/chat/rooms/${roomId}/messages`, {
-        content: JSON.stringify({ target_user_id: otherUserId }),
+        content: "日程調整カードを送信しました",
         content_type: "scheduling_card",
+        payload: { target_user_id: otherUserId },
       });
       setState("dismissed");
-    } catch {
+    } catch (e) {
+      console.error("[meeting-suggestion-card] scheduling_card send failed", e);
       toast.error("操作に失敗しました");
       setState("idle");
     }
