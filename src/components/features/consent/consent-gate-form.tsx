@@ -99,7 +99,7 @@ export function ConsentGateForm() {
         </div>
       )}
 
-      <fieldset className="space-y-3 rounded-md border border-border/60 p-4">
+      <fieldset className="space-y-5 rounded-md border border-border/60 p-4">
         <legend className="px-1 text-sm font-medium">
           ご同意 (5項目すべて必須)
         </legend>

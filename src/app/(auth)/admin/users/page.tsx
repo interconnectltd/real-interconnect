@@ -84,8 +84,8 @@ export default function AdminUsersPage() {
         </div>
       )}
 
-      {/* 検索バー: SP で sticky */}
-      <div className="sticky top-0 z-30 -mx-4 mb-4 bg-background/95 px-4 py-2 backdrop-blur supports-[backdrop-filter]:bg-background/80">
+      {/* 検索バー: SP で sticky (Header h-14 の下に固定 / landscape は h-12) */}
+      <div className="sticky top-14 z-30 -mx-4 mb-4 bg-background/95 px-4 py-2 backdrop-blur landscape:top-12 supports-[backdrop-filter]:bg-background/80">
         <div className="relative">
           <Search
             className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground"

@@ -152,7 +152,7 @@ export default function ConnectionsPage() {
                     </Badge>
                   </div>
                   {conn.status === "pending" && isReceived && (
-                    <div className="flex flex-wrap gap-2">
+                    <div className="flex flex-wrap gap-2 gap-y-3">
                       <Button
                         size="sm"
                         disabled={updateConnection.isPending}
@@ -171,7 +171,7 @@ export default function ConnectionsPage() {
                     </div>
                   )}
                   {(conn.status === "accepted" || conn.status === "reaccepted") && (
-                    <div className="flex flex-wrap gap-2">
+                    <div className="flex flex-wrap gap-2 gap-y-3">
                       <Button
                         size="sm"
                         variant="outline"

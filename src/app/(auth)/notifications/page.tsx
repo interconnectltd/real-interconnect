@@ -80,50 +80,36 @@ export default function NotificationsPage() {
       ) : notifications && notifications.length > 0 ? (
         <div className="space-y-1">
           {notifications.map((n: Notification) => (
+            // Wave M3 E-1 fix: WAI-ARIA 1.2「button widget MUST NOT contain interactive children」違反を解消。
+            // 親は単なる div + relative、行全体タップは absolute inset-0 の hidden overlay button が担う。
+            // 内側の accept/decline / ConnectedActions は z-10 で overlay の上に来るため、独立 click 経路。
             <div
               key={n.id}
-              role="button"
-              tabIndex={0}
               className={cn(
-                "flex w-full items-start gap-3 rounded-lg px-4 py-3 text-left transition-colors hover:bg-muted cursor-pointer",
+                "relative flex w-full items-start gap-3 rounded-lg px-4 py-3 transition-colors hover:bg-muted",
                 !n.is_read && "bg-primary/10",
               )}
-              onClick={(e) => {
-                // 内側 button (action / context expand) のクリックでは親遷移しない
-                const target = e.target as HTMLElement;
-                if (target.closest("button")) return;
-                // mutation 進行中も通知行クリックを止める (二重実行 / 遷移レース防止)
-                if (updateConnection.isPending || updateMeeting.isPending) return;
-                if (!n.is_read) markRead.mutate([n.id]);
-                if (n.link && n.link.startsWith("/")) router.push(n.link);
-              }}
-              onKeyDown={(e) => {
-                if (e.target !== e.currentTarget) return;
-                if (updateConnection.isPending || updateMeeting.isPending) return;
-                if (e.key === "Enter") {
-                  if (!n.is_read) markRead.mutate([n.id]);
-                  if (n.link && n.link.startsWith("/")) router.push(n.link);
-                } else if (e.key === " ") {
-                  // Space でスクロール抑止 + Enter と同等動作 (ARIA APG 推奨)
-                  e.preventDefault();
-                }
-              }}
-              onKeyUp={(e) => {
-                if (e.target !== e.currentTarget) return;
-                if (e.key === " ") {
-                  e.preventDefault();
-                  if (!n.is_read) markRead.mutate([n.id]);
-                  if (n.link && n.link.startsWith("/")) router.push(n.link);
-                }
-              }}
             >
+              <button
+                type="button"
+                aria-label={`${n.title} を開く`}
+                className="absolute inset-0 z-0 cursor-pointer rounded-lg text-left outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50"
+                onClick={() => {
+                  if (updateConnection.isPending || updateMeeting.isPending) return;
+                  if (!n.is_read) markRead.mutate([n.id]);
+                  if (n.link && n.link.startsWith("/")) router.push(n.link);
+                }}
+              />
+              {/* Bell は装飾 (overlay button が click を取るので pointer-events 不要) */}
               <Bell
                 className={cn(
-                  "mt-0.5 h-4 w-4 shrink-0",
+                  "pointer-events-none relative z-10 mt-0.5 h-4 w-4 shrink-0",
                   n.is_read ? "text-muted-foreground" : "text-primary",
                 )}
               />
-              <div className="min-w-0 flex-1">
+              {/* 内部の interactive 子要素 (ConnectionRequestContext / ConnectedActions / accept/decline button)
+                  は z-10 で overlay button より前面 → 独立 click が成立 */}
+              <div className="relative z-10 min-w-0 flex-1">
                 <p className={cn("text-sm", !n.is_read && "font-medium")}>
                   {n.title}
                 </p>
@@ -144,7 +130,7 @@ export default function NotificationsPage() {
 
                 {/* Action buttons — show regardless of read status */}
                 {n.actions && Array.isArray(n.actions) && n.actions.length > 0 && (
-                  <div className="mt-2 flex flex-wrap gap-2">
+                  <div className="mt-2 flex flex-wrap gap-2 gap-y-3">
                     {(n.actions as NotificationAction[])
                       .filter((a) => NOTIFICATION_ACTION_WHITELIST.has(a.type))
                       .map((action) => (

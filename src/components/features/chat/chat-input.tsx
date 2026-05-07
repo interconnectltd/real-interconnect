@@ -143,7 +143,12 @@ export function ChatInput({
         sendMessage();
       }}
       className="flex items-end gap-1.5 border-t p-2 sm:gap-2 sm:p-3"
-      style={{ paddingBottom: "max(0.5rem, env(safe-area-inset-bottom))" }}
+      style={{
+        paddingBottom: "max(0.5rem, env(safe-area-inset-bottom))",
+        // iPhone landscape で home indicator が左右に回る時 send button が notch 裏に入らないよう左右 safe-area
+        paddingLeft: "max(0.5rem, env(safe-area-inset-left))",
+        paddingRight: "max(0.5rem, env(safe-area-inset-right))",
+      }}
     >
       <label htmlFor="chat-input-textarea" className="sr-only">
         メッセージ本文

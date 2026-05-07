@@ -25,6 +25,17 @@ export function GlobalHelpDock() {
   // 現在ページの tour open 状態
   const [pageTourOpen, setPageTourOpen] = useState(false);
 
+  // FAB の z-index 40 が下記ページの全幅 CTA button (w-full / 最終配置) と物理 overlap して
+  // 押せない事故 (Wave M2 audit Critical)。これらのページでは HelpDock 自体を出さない。
+  // /chat は send button + visualViewport 補正と FAB が複合干渉するため除外 (Wave M4 D-2)。
+  if (
+    pathname === "/onboarding/consent" ||
+    pathname === "/onboarding" ||
+    pathname?.startsWith("/chat")
+  ) {
+    return null;
+  }
+
   function handleStartPageTour() {
     if (onDashboard) {
       // Dashboard は専用 tour なので registry の空 steps を使わず、別経路で起動

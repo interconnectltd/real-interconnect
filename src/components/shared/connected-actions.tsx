@@ -60,7 +60,7 @@ export function ConnectedActions({
   if (variant === "card") {
     return (
       <div
-        className={`flex items-center gap-1 ${className}`}
+        className={`flex items-center gap-2.5 ${className}`}
         onClick={(e) => e.stopPropagation()}
       >
         <Button
