@@ -1,5 +1,9 @@
 "use client";
 
+// 意図的 <img> 利用: variant URL 切替 + onError 時の retry fallback を必要とするため。
+// next/image だと変動 src + retry pattern が壊れる。
+/* eslint-disable @next/next/no-img-element */
+
 import { useEffect, useState } from "react";
 import { findPreset, isPresetAvatarUrl, presetSvgViewBox } from "@/lib/avatar-presets";
 import { variantAvatarUrl, type AvatarVariantKey } from "@/lib/avatar-resize";

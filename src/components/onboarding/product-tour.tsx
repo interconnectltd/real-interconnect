@@ -566,14 +566,11 @@ export function useProductTour(storageKey: string) {
       }
       const parsed = JSON.parse(raw) as { status?: string };
       if (parsed.status === "done" || parsed.status === "dismissed") {
-        // eslint-disable-next-line react-hooks/set-state-in-effect
         setState({ status: "idle" });
       } else {
-        // eslint-disable-next-line react-hooks/set-state-in-effect
         setState({ status: "open" });
       }
     } catch {
-      // eslint-disable-next-line react-hooks/set-state-in-effect
       setState({ status: "open" });
     }
   }, [storageKey]);

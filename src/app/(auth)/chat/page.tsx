@@ -168,6 +168,7 @@ function ChatPageInner() {
                     <ArrowLeft className="h-4 w-4" />
                   </Button>
                   {selectedRoom.other_user.avatar_url ? (
+                    // eslint-disable-next-line @next/next/no-img-element
                     <img
                       src={selectedRoom.other_user.avatar_url}
                       alt={selectedRoom.other_user.name ?? ""}

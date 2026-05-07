@@ -103,8 +103,9 @@ export function ChatRoomList({
             )}
             onClick={() => onSelectRoom(room)}
           >
-            {/* Avatar */}
+            {/* Avatar (variant URL + onError fallback の都合で <img>) */}
             {user.avatar_url ? (
+              // eslint-disable-next-line @next/next/no-img-element
               <img
                 src={user.avatar_url}
                 alt={user.name ?? ""}

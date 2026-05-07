@@ -21,7 +21,6 @@ export function TldvConnectCta() {
       return;
     }
     const elapsed = Date.now() - Number(at);
-    // eslint-disable-next-line react-hooks/set-state-in-effect
     setDismissed(Number.isFinite(elapsed) && elapsed < SNOOZE_MS);
   }, []);
 

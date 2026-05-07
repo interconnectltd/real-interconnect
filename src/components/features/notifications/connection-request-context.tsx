@@ -140,17 +140,29 @@ export function ConnectionRequestContext({
 
           {data?.profile && (
             <div className="space-y-3">
-              {/* プロフィール基本情報 */}
+              {/* プロフィール基本情報 (アバター・名前タップで詳細モーダル) */}
               <div className="flex items-start gap-3">
-                <UserAvatar
-                  name={data.profile.name}
-                  avatarUrl={data.profile.avatar_url}
-                  size="md"
-                />
+                <button
+                  type="button"
+                  onClick={() => data.profile && openProfileModal(data.profile.id)}
+                  className="shrink-0 rounded-full transition focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/70 hover:opacity-90 active:opacity-75"
+                  aria-label={`${data.profile.name} の詳細プロフィールを開く`}
+                >
+                  <UserAvatar
+                    name={data.profile.name}
+                    avatarUrl={data.profile.avatar_url}
+                    size="md"
+                  />
+                </button>
                 <div className="min-w-0 flex-1">
-                  <p className="text-sm font-semibold text-foreground">
+                  <button
+                    type="button"
+                    onClick={() => data.profile && openProfileModal(data.profile.id)}
+                    className="block text-left text-sm font-semibold text-foreground underline-offset-2 transition hover:text-accent-strong hover:underline focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/70"
+                    aria-label={`${data.profile.name} の詳細プロフィールを開く`}
+                  >
                     {data.profile.name}
-                  </p>
+                  </button>
                   {(data.profile.company || data.profile.position) && (
                     <p className="mt-0.5 text-xs text-muted-foreground">
                       {[data.profile.company, data.profile.position]

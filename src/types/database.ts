@@ -799,9 +799,11 @@ export interface Database {
         Relationships: [];
       };
       audit_logs: {
+        // 旧カラム (user_id/entity_type/entity_id/metadata/ip_address) は migration 00045 で物理削除済
         Row: {
-          id: number;
-          actor_id: string;
+          // 00027 で uuid に統一 (旧 number は誤った型定義)
+          id: string;
+          actor_id: string | null;
           action: string;
           target_type: string | null;
           target_id: string | null;
@@ -819,7 +821,7 @@ export interface Database {
           ip?: string | null;
           ua?: string | null;
         };
-        Update: never;
+        Update: never; // WORM trigger で UPDATE/DELETE 拒否
         Relationships: [];
       };
       rate_limits: {
