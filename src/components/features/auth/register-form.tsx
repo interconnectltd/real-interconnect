@@ -528,72 +528,90 @@ export function RegisterForm() {
             3文書をまとめて読む（モーダル）
           </button>
 
-          <ConsentRow
-            id="agree-terms"
-            checked={agreeToTerms}
-            onChange={(v) => setValue("agreeToTerms", v, { shouldValidate: true })}
-            error={errors.agreeToTerms?.message}
-          >
-            <div className="flex flex-wrap items-center gap-x-1">
-              <button
-                type="button"
-                onClick={() => openLegal("terms")}
-                aria-haspopup="dialog"
-                className="inline-flex min-h-[44px] items-center px-1 font-medium text-accent underline underline-offset-2"
+          {/* === 1. 利用規約 ===
+              旧: ConsentRow children に button + 説明 + Label を全部詰めて Checkbox が
+                  content stack の TOP に貼り付き、Label が遠く離れて見える致命事故。
+              新: button + 説明を ConsentRow の **外側** に出し、Checkbox と Label を
+                  真横に並べる (Checkbox = 「上記内容に同意します」 の隣) */}
+          <div className="space-y-2">
+            <button
+              type="button"
+              onClick={() => openLegal("terms")}
+              aria-haspopup="dialog"
+              className="inline-flex min-h-[44px] items-center px-1 text-sm font-medium text-accent underline underline-offset-2"
+            >
+              利用規約を読む
+            </button>
+            <p className="text-xs text-muted-foreground">
+              （AI分析・米国への越境移転を含む）
+            </p>
+            <ConsentRow
+              id="agree-terms"
+              checked={agreeToTerms}
+              onChange={(v) => setValue("agreeToTerms", v, { shouldValidate: true })}
+              error={errors.agreeToTerms?.message}
+            >
+              <Label
+                htmlFor="agree-terms"
+                className="cursor-pointer font-medium"
               >
-                利用規約を読む
-              </button>
-              <span className="text-xs text-muted-foreground">
-                （AI分析・米国への越境移転を含む）
-              </span>
-            </div>
-            <Label htmlFor="agree-terms" className="mt-1 block cursor-pointer font-medium">
-              上記内容に同意します
-            </Label>
-          </ConsentRow>
+                上記内容に同意します
+              </Label>
+            </ConsentRow>
+          </div>
 
-          <ConsentRow
-            id="agree-privacy"
-            checked={agreeToPrivacy}
-            onChange={(v) => setValue("agreeToPrivacy", v, { shouldValidate: true })}
-            error={errors.agreeToPrivacy?.message}
-          >
-            <div className="flex flex-wrap items-center gap-x-1">
-              <button
-                type="button"
-                onClick={() => openLegal("privacy")}
-                aria-haspopup="dialog"
-                className="inline-flex min-h-[44px] items-center px-1 font-medium text-accent underline underline-offset-2"
+          {/* === 2. プライバシーポリシー === */}
+          <div className="space-y-2">
+            <button
+              type="button"
+              onClick={() => openLegal("privacy")}
+              aria-haspopup="dialog"
+              className="inline-flex min-h-[44px] items-center px-1 text-sm font-medium text-accent underline underline-offset-2"
+            >
+              プライバシーポリシーを読む
+            </button>
+            <p className="text-xs text-muted-foreground">
+              （越境移転・委託先への提供を含む）
+            </p>
+            <ConsentRow
+              id="agree-privacy"
+              checked={agreeToPrivacy}
+              onChange={(v) => setValue("agreeToPrivacy", v, { shouldValidate: true })}
+              error={errors.agreeToPrivacy?.message}
+            >
+              <Label
+                htmlFor="agree-privacy"
+                className="cursor-pointer font-medium"
               >
-                プライバシーポリシーを読む
-              </button>
-              <span className="text-xs text-muted-foreground">
-                （越境移転・委託先への提供を含む）
-              </span>
-            </div>
-            <Label htmlFor="agree-privacy" className="mt-1 block cursor-pointer font-medium">
-              上記内容に同意します
-            </Label>
-          </ConsentRow>
+                上記内容に同意します
+              </Label>
+            </ConsentRow>
+          </div>
 
-          <ConsentRow
-            id="agree-tokushoho"
-            checked={agreeToTokushoho}
-            onChange={(v) => setValue("agreeToTokushoho", v, { shouldValidate: true })}
-            error={errors.agreeToTokushoho?.message}
-          >
+          {/* === 3. 特定商取引法 === */}
+          <div className="space-y-2">
             <button
               type="button"
               onClick={() => openLegal("tokushoho")}
               aria-haspopup="dialog"
-              className="inline-flex min-h-[44px] items-center px-1 font-medium text-accent underline underline-offset-2"
+              className="inline-flex min-h-[44px] items-center px-1 text-sm font-medium text-accent underline underline-offset-2"
             >
               特定商取引法に基づく表記を読む
             </button>
-            <Label htmlFor="agree-tokushoho" className="mt-1 block cursor-pointer font-medium">
-              内容を確認しました
-            </Label>
-          </ConsentRow>
+            <ConsentRow
+              id="agree-tokushoho"
+              checked={agreeToTokushoho}
+              onChange={(v) => setValue("agreeToTokushoho", v, { shouldValidate: true })}
+              error={errors.agreeToTokushoho?.message}
+            >
+              <Label
+                htmlFor="agree-tokushoho"
+                className="cursor-pointer font-medium"
+              >
+                内容を確認しました
+              </Label>
+            </ConsentRow>
+          </div>
         </fieldset>
       </Step>
 
