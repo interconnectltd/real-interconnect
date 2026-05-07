@@ -1,6 +1,7 @@
 import { json, jsonError, handleApiError } from "@/lib/api-helpers";
 import { createClient, createServiceClient } from "@/lib/supabase/server";
 import { headers } from "next/headers";
+import { getClientIp } from "@/lib/client-ip";
 
 /**
  * POST /api/v1/legal/reject
@@ -78,10 +79,9 @@ export async function POST(request: Request) {
 
     // reject 操作の証跡を bulk_invite_log.metadata に追記
     const headersList = await headers();
-    const ip =
-      headersList.get("x-forwarded-for")?.split(",")[0]?.trim() ??
-      headersList.get("x-real-ip")?.trim() ??
-      null;
+    // Wave1 sec audit: x-forwarded-for[0] 信用は IP 詐称容易。Netlify は
+    // x-nf-client-connection-ip / cf-connecting-ip / true-client-ip を信頼可。
+    const ip = getClientIp(headersList);
     const userAgent = headersList.get("user-agent") ?? null;
 
     // 既存 metadata を保持しつつ reject 情報を merge。

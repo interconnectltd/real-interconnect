@@ -399,6 +399,15 @@ export default function OnboardingPage() {
   async function handleComplete() {
     setSaving(true);
     try {
+      // 入力 sanitize: 制御文字 + BiDi override を削除 (admin UI / log 表示崩し防止 / Wave3 sec audit)
+      const stripCtrl = (s: string) =>
+        s.replace(/[\x00-\x1f\x7f‪-‮⁦-⁩]/g, "").slice(0, 500);
+      const stripField = (s: string, max: number) =>
+        s
+          .replace(/[\x00-\x1f\x7f‪-‮⁦-⁩]/g, "")
+          .trim()
+          .slice(0, max);
+
       // RPC は v2 シグネチャ (連絡先・第三者提供同意の引数を撤去済 / mig 00034)。
       // 単一トランザクションで profile + goals/offerings + onboarding_step を更新し、
       // partial failure による「永久ロック」状態を防ぐ。
@@ -412,16 +421,16 @@ export default function OnboardingPage() {
         supabase as unknown as RpcLoose
       ).rpc("complete_onboarding", {
         p_user_id: user!.id,
-        p_name: profile.name,
-        p_company: profile.company,
-        p_position: profile.position,
+        p_name: stripField(profile.name, 100),
+        p_company: stripField(profile.company, 200),
+        p_position: stripField(profile.position, 100),
         p_goals: [...selectedGoals].map((type) => ({
           type,
-          detail: goalDetails[type] ?? "",
+          detail: stripCtrl(goalDetails[type] ?? ""),
         })),
         p_offerings: [...selectedOfferings].map((type) => ({
           type,
-          detail: offeringDetails[type] ?? "",
+          detail: stripCtrl(offeringDetails[type] ?? ""),
         })),
       });
       if (rpcError) throw new Error(rpcError.message ?? "RPC failed");
