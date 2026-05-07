@@ -12,18 +12,13 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { createClient } from "@/lib/supabase/client";
 import { loginSchema, type LoginInput } from "@/validations/auth";
+import { safeInternalPath } from "@/lib/safe-redirect";
+import { enforceMinimumDelay, nowMs } from "@/lib/timing";
 
 interface LoginErrorState {
   message: string;
   /** "Email not confirmed" 時に確認メール再送ボタンを表示するか */
   showResend: boolean;
-}
-
-/** 同一サイト内 path のみ許可 (open redirect 防止) */
-function safeRedirect(path: string | null): string {
-  if (!path) return "/dashboard";
-  if (path.startsWith("/") && !path.startsWith("//")) return path;
-  return "/dashboard";
 }
 
 export function LoginForm() {
@@ -49,12 +44,15 @@ export function LoginForm() {
     setError(null);
 
     const supabase = createClient();
+    const startedAt = nowMs();
     const { error: authError } = await supabase.auth.signInWithPassword({
       email: data.email,
       password: data.password,
     });
 
     if (authError) {
+      // タイミング side-channel での email enumeration 対策 (Wave1 audit)
+      await enforceMinimumDelay(startedAt, 700, 300);
       const status = (authError as { status?: number }).status ?? 0;
       const msg = authError.message ?? "";
       // 文言を 401 / 429 / 500 / Email not confirmed で分岐
@@ -91,8 +89,8 @@ export function LoginForm() {
       return;
     }
 
-    // ?redirect=<path> があればそちらへ (open redirect は safeRedirect で遮断)
-    const target = safeRedirect(searchParams.get("redirect"));
+    // ?redirect=<path> があればそちらへ (open redirect / backslash bypass を safeInternalPath で遮断)
+    const target = safeInternalPath(searchParams.get("redirect"), "/dashboard");
     router.refresh();
     router.push(target);
   }

@@ -1,8 +1,35 @@
 import { createServerClient } from "@supabase/ssr";
 import { NextResponse, type NextRequest } from "next/server";
 
+/**
+ * Supabase auth gate (proxy.ts から呼ばれる)。
+ *
+ * Wave1 sec audit (2026-05-07) で以下を強化:
+ *   - cookie set 時に httpOnly/secure/sameSite を明示 (ライブラリ default に依存しない)
+ *   - consent gate の startsWith bypass を `=== p || startsWith(p + "/")` に修正
+ *   - prefix path bypass (例: /onboarding/consent.evil) を遮断
+ */
 export async function updateSession(request: NextRequest) {
   let supabaseResponse = NextResponse.next({ request });
+
+  const isProd = process.env.NODE_ENV === "production";
+
+  function hardenCookie(
+    options: Parameters<typeof supabaseResponse.cookies.set>[2] | undefined,
+  ): Parameters<typeof supabaseResponse.cookies.set>[2] {
+    // 注意: @supabase/ssr の DEFAULT_COOKIE_OPTIONS は意図的に
+    //   `httpOnly: false` を渡してくる (browser client が PKCE code-verifier を
+    //   document.cookie 経由で読む必要があるため)。
+    //   `??` は null/undefined のみ fallback するので false を尊重 = 強制しない。
+    //   仮に強制すると PKCE / token refresh が壊れるためそうしてはならない。
+    //   secure / sameSite は Supabase default が undefined なので確実に上書き可能。
+    return {
+      ...(options ?? {}),
+      sameSite: options?.sameSite ?? "lax",
+      httpOnly: options?.httpOnly ?? true,
+      secure: options?.secure ?? isProd,
+    };
+  }
 
   const supabase = createServerClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -13,12 +40,12 @@ export async function updateSession(request: NextRequest) {
           return request.cookies.getAll();
         },
         setAll(cookiesToSet) {
-          cookiesToSet.forEach(({ name, value, options }) =>
+          cookiesToSet.forEach(({ name, value }) =>
             request.cookies.set(name, value),
           );
           supabaseResponse = NextResponse.next({ request });
           cookiesToSet.forEach(({ name, value, options }) =>
-            supabaseResponse.cookies.set(name, value, options),
+            supabaseResponse.cookies.set(name, value, hardenCookie(options)),
           );
         },
       },
@@ -31,8 +58,8 @@ export async function updateSession(request: NextRequest) {
 
   const { pathname } = request.nextUrl;
 
-  // Public paths that don't require auth
-  const publicPaths = [
+  // Public paths that don't require auth (exact match のみを基本とする)
+  const publicPaths = new Set([
     "/",
     "/login",
     "/register",
@@ -46,21 +73,18 @@ export async function updateSession(request: NextRequest) {
     "/api/v1/health",
     "/api/v1/invitation",
     "/api/v1/legal/accept",
-  ];
+  ]);
 
-  // publicPaths は exact match のみ + 限定的な startsWith。
-  // /api/v1/legal/ 全部 startsWith は危険なため exact match に制限。
-  // tl;dv からの webhook は ?secret= 検証のため未認証で叩く必要があり public 扱い。
+  // /api/v1/health/* / /api/v1/webhooks/* / /lp/* は startsWith 許可
   const isPublicPath =
-    publicPaths.includes(pathname) ||
-    pathname.startsWith("/api/v1/health") ||
-    pathname === "/api/v1/invitation" ||
-    pathname === "/api/v1/legal/accept" ||
+    publicPaths.has(pathname) ||
+    pathname.startsWith("/api/v1/health/") ||
     pathname === "/api/v1/transcripts/webhook" ||
-    pathname.startsWith("/lp") ||
-    pathname.startsWith("/api/v1/webhooks");
+    pathname.startsWith("/lp/") ||
+    pathname.startsWith("/api/v1/webhooks/") ||
+    // ICS feed は token 認証で公開
+    pathname.startsWith("/api/v1/calendar/feed/");
 
-  // Redirect unauthenticated users to login
   if (!user && !isPublicPath) {
     const url = request.nextUrl.clone();
     url.pathname = "/login";
@@ -71,16 +95,14 @@ export async function updateSession(request: NextRequest) {
     return NextResponse.redirect(url);
   }
 
-  // Redirect authenticated users away from auth pages
   if (user && (pathname === "/login" || pathname === "/register")) {
     const url = request.nextUrl.clone();
     url.pathname = "/dashboard";
     return NextResponse.redirect(url);
   }
 
-  // Consent gate: prospect招待経由ユーザー (prospect_invite_at が設定されている) で、
-  // user_terms_acceptances にレコードがない場合は /onboarding/consent 強制 + APIアクセスは403。
-  // /api/v1/legal/* と / (LP) と /onboarding/* は consent gate前でも到達可能。
+  // consent gate の path 判定 (prefix bypass 修正)
+  // 例: "/onboarding/consent" は許可、"/onboarding/consent.evil" は遮断
   const consentBypassPaths = [
     "/onboarding/consent",
     "/api/v1/legal/accept",
@@ -88,7 +110,7 @@ export async function updateSession(request: NextRequest) {
     "/api/v1/health",
   ];
   const isConsentBypass = consentBypassPaths.some(
-    (p) => pathname === p || pathname.startsWith(p),
+    (p) => pathname === p || pathname.startsWith(p + "/"),
   );
 
   if (user && !isPublicPath && !isConsentBypass) {
@@ -99,7 +121,8 @@ export async function updateSession(request: NextRequest) {
       .maybeSingle();
 
     const isProspectInvite = Boolean(
-      (profile as { prospect_invite_at?: string | null } | null)?.prospect_invite_at,
+      (profile as { prospect_invite_at?: string | null } | null)
+        ?.prospect_invite_at,
     );
 
     if (isProspectInvite) {
@@ -109,14 +132,14 @@ export async function updateSession(request: NextRequest) {
         .eq("user_id", user.id);
 
       if ((count ?? 0) === 0) {
-        // API ルートは 403 JSON、UI は redirect
         if (pathname.startsWith("/api/")) {
           return new NextResponse(
             JSON.stringify({
               data: null,
               error: {
                 code: "CONSENT_REQUIRED",
-                message: "規約・プライバシー・特商法・AI越境移転への同意が必要です",
+                message:
+                  "規約・プライバシー・特商法・AI越境移転への同意が必要です",
               },
             }),
             {
@@ -131,7 +154,6 @@ export async function updateSession(request: NextRequest) {
       }
     }
 
-    // 通常signUpユーザー向けonboarding step guard (API以外)
     if (
       !pathname.startsWith("/onboarding") &&
       !pathname.startsWith("/api/") &&

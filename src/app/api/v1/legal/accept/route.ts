@@ -2,6 +2,7 @@ import { json, jsonError, handleApiError } from "@/lib/api-helpers";
 import { createClient, createServiceClient } from "@/lib/supabase/server";
 import { headers } from "next/headers";
 import { LEGAL_VERSIONS, type LegalDocKind } from "@/lib/legal/versions";
+import { getClientIp } from "@/lib/client-ip";
 
 const KINDS: LegalDocKind[] = ["terms", "privacy", "tokushoho", "ai_cross_border"];
 
@@ -48,10 +49,9 @@ export async function POST(request: Request) {
     }
 
     const headersList = await headers();
-    const ip =
-      headersList.get("x-forwarded-for")?.split(",")[0]?.trim() ??
-      headersList.get("x-real-ip")?.trim() ??
-      null;
+    // Wave1 sec audit: x-forwarded-for[0] 信用は IP 詐称容易。Netlify は
+    // x-nf-client-connection-ip / cf-connecting-ip / true-client-ip を信頼可。
+    const ip = getClientIp(headersList);
     const userAgent = headersList.get("user-agent") ?? null;
 
     type AcceptanceRow = {

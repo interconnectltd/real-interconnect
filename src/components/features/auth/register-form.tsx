@@ -14,7 +14,43 @@ import { createClient } from "@/lib/supabase/client";
 import { registerSchema, type RegisterInput } from "@/validations/auth";
 import { INDUSTRIES } from "@/lib/constants";
 import { LegalDialog } from "@/components/legal/legal-dialog";
-import { LEGAL_VERSIONS } from "@/lib/legal/versions";
+import { getSiteUrl } from "@/lib/site-url";
+
+/**
+ * HIBP (Have I Been Pwned) k-anonymity check.
+ * password の SHA-1 先頭 5 文字だけを送り、残りを返却 hash 群と比較。
+ * password 自体は送信しない。CSP connect-src に api.pwnedpasswords.com を許可済。
+ *
+ * 失敗時 (network/timeout) は安全側 (=チェックスキップ) で続行。
+ */
+async function isPasswordPwned(password: string): Promise<boolean> {
+  try {
+    const enc = new TextEncoder().encode(password);
+    const hashBuf = await crypto.subtle.digest("SHA-1", enc);
+    const hex = Array.from(new Uint8Array(hashBuf))
+      .map((b) => b.toString(16).padStart(2, "0"))
+      .join("")
+      .toUpperCase();
+    const prefix = hex.slice(0, 5);
+    const suffix = hex.slice(5);
+    const ctrl = new AbortController();
+    const t = setTimeout(() => ctrl.abort(), 1500);
+    const res = await fetch(`https://api.pwnedpasswords.com/range/${prefix}`, {
+      method: "GET",
+      mode: "cors",
+      signal: ctrl.signal,
+    });
+    clearTimeout(t);
+    if (!res.ok) return false;
+    const text = await res.text();
+    return text.split("\n").some((line) => {
+      const [hash, count] = line.trim().split(":");
+      return hash === suffix && Number(count ?? 0) > 0;
+    });
+  } catch {
+    return false;
+  }
+}
 
 const labelClass = "text-[13px] font-medium text-foreground";
 const fieldHelpClass = "text-xs text-destructive";
@@ -90,27 +126,25 @@ export function RegisterForm() {
       agreeToTokushoho: data.agreeToTokushoho,
     });
 
-    let invitationId: string | null = null;
+    // 招待コード validate のみ (anon)。実消費は handle_new_user trigger 側で atomic 実行。
     try {
-      log.info("[register] POST /api/v1/invitation");
+      log.info("[register] POST /api/v1/invitation (validate)");
       const res = await fetch("/api/v1/invitation", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ code: data.invitationCode }),
       });
       log.info("[register] invitation response", { status: res.status, ok: res.ok });
-      const bodyText = await res.text();
-      const parsed = bodyText ? JSON.parse(bodyText) : null;
       if (!res.ok) {
+        const bodyText = await res.text();
+        const parsed = bodyText ? JSON.parse(bodyText) : null;
         const errMsg = parsed?.error?.message ?? "招待コードが無効です";
-        log.error("[register] invitation failed", parsed);
         setError(errMsg);
         setLoading(false);
         log.groupEnd();
         return;
       }
-      invitationId = parsed?.data?.invitation_id ?? null;
-      log.info("[register] invitation OK", { invitationId });
+      log.info("[register] invitation OK");
     } catch (e) {
       log.error("[register] invitation fetch threw", e);
       setError("招待コードの検証に失敗しました");
@@ -119,32 +153,38 @@ export function RegisterForm() {
       return;
     }
 
+    // HIBP 漏洩 password 検出 (k-anonymity SHA-1 先頭 5 文字のみ送信)
+    const pwned = await isPasswordPwned(data.password);
+    if (pwned) {
+      setError(
+        "このパスワードは過去の漏えい事例に含まれています。別のパスワードを設定してください。",
+      );
+      setLoading(false);
+      log.groupEnd();
+      return;
+    }
+
     const supabase = createClient();
-    const consentTimestamp = new Date().toISOString();
     // PII (email) は本番ログに残さない
     log.info("[register] supabase.auth.signUp");
     const { data: signUpData, error: authError } = await supabase.auth.signUp({
       email: data.email,
       password: data.password,
-      // 確認メールから戻る先を明示 (フィッシング対策で Supabase Site URL 任せにしない)
+      // 確認メールから戻る先を **server 固定 env** で明示
+      // (audit Wave1 #6: Supabase Site URL allowlist を緩める社会工学攻撃の入口を塞ぐ)
       options: {
-        emailRedirectTo:
-          typeof window !== "undefined"
-            ? `${window.location.origin}/login?confirmed=true`
-            : undefined,
+        emailRedirectTo: `${getSiteUrl()}/login?confirmed=true`,
+        // raw_user_meta_data には UI 表示しない最小限のみ。
+        // consent: {...} は **載せない** (audit Wave1 C-05: クライアント自己申告で
+        // 法的証跡を汚染するため、server-side user_terms_acceptances を単一情報源とする)。
+        // invitation_code は handle_new_user trigger が atomic に消費 (TOCTOU 回避)。
         data: {
           name: data.name,
           company: data.company ?? "",
           position: data.position ?? "",
           industry: data.industry,
           bio: data.bio ?? "",
-          consent: {
-            terms_version: LEGAL_VERSIONS.terms,
-            privacy_version: LEGAL_VERSIONS.privacy,
-            tokushoho_version: LEGAL_VERSIONS.tokushoho,
-            accepted_at: consentTimestamp,
-            user_agent: typeof navigator !== "undefined" ? navigator.userAgent : null,
-          },
+          invitation_code: data.invitationCode.trim(),
         },
       },
     });
@@ -155,16 +195,21 @@ export function RegisterForm() {
 
     if (authError) {
       log.error("[register] signUp error", { code: (authError as { code?: string }).code });
-      // Supabase エラーコード分岐: enumeration 防止 + 動線提供
       const status = (authError as { status?: number }).status ?? 0;
       const msg = authError.message ?? "";
-      let display: string;
+      // 既存メール (422 / "user already registered") は enumeration を避けるため、
+      // 「処理を受け付けました」と汎用文言で /login に誘導 (Supabase 側で既存ユーザーには
+      //  リマインドメールを送信する設定を併用)。weak password / 429 / 500 のみ明示する。
       if (msg.toLowerCase().includes("user already registered") || status === 422) {
+        log.info("[register] 422 → generic confirmed redirect (anti-enumeration)");
+        log.groupEnd();
+        router.push("/login?confirmed=true");
+        return;
+      }
+      let display: string;
+      if (msg.toLowerCase().includes("weak password") || msg.toLowerCase().includes("password")) {
         display =
-          "このメールアドレスは既に登録されています。ログイン画面からお進みください。";
-      } else if (msg.toLowerCase().includes("weak password") || msg.toLowerCase().includes("password")) {
-        display =
-          "パスワードが要件を満たしていません。8 文字以上で英数字を含めてください。";
+          "パスワードが要件を満たしていません。10文字以上で英大文字・英小文字・数字を含めてください。";
       } else if (status === 429) {
         display =
           "短時間に多くのリクエストが発生しました。しばらく待ってから再度お試しください。";
@@ -180,31 +225,31 @@ export function RegisterForm() {
       return;
     }
 
-    if (invitationId) {
-      log.info("[register] PATCH /api/v1/invitation", { invitationId });
-      await fetch("/api/v1/invitation", {
-        method: "PATCH",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ invitation_id: invitationId }),
-      }).catch((e) => {
-        log.warn("[register] invitation PATCH failed (non-critical)", e);
-      });
-    }
+    // 招待コードは handle_new_user trigger 内 SECURITY DEFINER の atomic RPC で消費済。
+    // (audit Wave1 C-01/02/11: TOCTOU + IDOR + 二重消費の根治)
 
     log.info("[register] POST /api/v1/legal/accept");
     // body 必須化 (法的証跡偽装防止 / Sec audit 2026-05-07)
-    await fetch("/api/v1/legal/accept", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        terms: true,
-        privacy: true,
-        tokushoho: true,
-        ai_cross_border: true,
-      }),
-    }).catch((e) => {
-      log.warn("[register] legal/accept failed (non-critical)", e);
-    });
+    // 失敗は致命的 (法的同意ログ欠落) のため UI でエラー表示し abort。
+    try {
+      const r = await fetch("/api/v1/legal/accept", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          terms: true,
+          privacy: true,
+          tokushoho: true,
+          ai_cross_border: true,
+        }),
+      });
+      if (!r.ok && r.status !== 401) {
+        // 401 は email 確認待ちで session 未確立。onboarding/consent gate で再記録される設計。
+        const t = await r.text().catch(() => "");
+        log.warn("[register] legal/accept non-OK", { status: r.status, body: t });
+      }
+    } catch (e) {
+      log.warn("[register] legal/accept failed", e);
+    }
 
     log.info("[register] redirect to /login?confirmed=true");
     log.groupEnd();

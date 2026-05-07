@@ -1,4 +1,5 @@
 import type { Metadata, Viewport } from "next";
+import { headers } from "next/headers";
 import { Inter, Noto_Sans_JP } from "next/font/google";
 import { Toaster } from "@/components/ui/sonner";
 import { SupabaseProvider } from "@/providers/supabase-provider";
@@ -52,11 +53,13 @@ export const metadata: Metadata = {
   },
 };
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  // CSP nonce: src/proxy.ts が per-request で発行し x-nonce header に詰める
+  const nonce = (await headers()).get("x-nonce") ?? "";
   return (
     <html lang="ja" className={`${inter.variable} ${notoSansJP.variable}`} suppressHydrationWarning>
       <head>
@@ -67,8 +70,12 @@ export default function RootLayout({
             <link rel="dns-prefetch" href={`https://${SUPABASE_HOST}`} />
           </>
         )}
-        {/* prefers-color-scheme の初回判定のみ inline (FOUC 防止)、listener 登録は client component で */}
-        <script dangerouslySetInnerHTML={{ __html: `try{if(window.matchMedia('(prefers-color-scheme:dark)').matches)document.documentElement.classList.add('dark')}catch(e){}` }} />
+        {/* prefers-color-scheme の初回判定のみ inline (FOUC 防止)、listener 登録は client component で
+            CSP nonce 付きで script-src 'strict-dynamic' 下でも実行可。 */}
+        <script
+          nonce={nonce}
+          dangerouslySetInnerHTML={{ __html: `try{if(window.matchMedia('(prefers-color-scheme:dark)').matches)document.documentElement.classList.add('dark')}catch(e){}` }}
+        />
       </head>
       <body className="min-h-dvh bg-background text-foreground antialiased">
         {/* Provider を root に配置: route group 横断時に QueryClient cache が維持される */}

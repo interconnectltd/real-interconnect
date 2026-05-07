@@ -45,6 +45,14 @@ export default function ResetPasswordPage() {
       return;
     }
 
+    // 他端末の session を全削除 (セッション乗っ取り被害の二次拡大防止)
+    // recovery 経由で password 変更後、攻撃者が別 device で残っていた session を奪う事を阻止。
+    try {
+      await supabase.auth.signOut({ scope: "others" } as { scope: "others" });
+    } catch {
+      // signOut(scope: "others") に未対応の SDK 版でも続行
+    }
+
     router.push("/login?password_reset=true");
   }
 

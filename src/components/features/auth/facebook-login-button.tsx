@@ -26,7 +26,11 @@ export function LinkedInLoginButton({ label }: { label?: string }) {
       provider: "linkedin_oidc",
       options: {
         redirectTo: `${getSiteUrl()}/auth/callback`,
-      },
+        // PKCE 明示: implicit fallback を一切許さない (audit Wave1 #4)
+        flowType: "pkce",
+      } as Parameters<
+        ReturnType<typeof createClient>["auth"]["signInWithOAuth"]
+      >[0]["options"],
     });
 
     if (error) {
@@ -72,7 +76,10 @@ export function FacebookLoginButton({ label }: { label?: string }) {
       provider: "facebook",
       options: {
         redirectTo: `${getSiteUrl()}/auth/callback`,
-      },
+        flowType: "pkce",
+      } as Parameters<
+        ReturnType<typeof createClient>["auth"]["signInWithOAuth"]
+      >[0]["options"],
     });
 
     if (error) {

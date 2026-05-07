@@ -1,8 +1,21 @@
-# Video optimization headers
+# LP (静的) はNext.js Runtime を介さないため、Netlify CDN レイヤで security headers を直接付与。
+# next.config.ts の async headers() は LP の static 配信には適用されない (Wave1 sec audit 2026-05-07)。
+
+# 全 LP path 共通 security headers
+/*
+  Strict-Transport-Security: max-age=63072000; includeSubDomains; preload
+  X-Frame-Options: DENY
+  X-Content-Type-Options: nosniff
+  Referrer-Policy: strict-origin-when-cross-origin
+  Permissions-Policy: camera=(), microphone=(), geolocation=(), interest-cohort=(), browsing-topics=(), payment=(), usb=(), accelerometer=(), gyroscope=(), magnetometer=()
+  Cross-Origin-Opener-Policy: same-origin-allow-popups
+  Cross-Origin-Resource-Policy: same-origin
+
+# Video optimization
 /assets/*.mp4
   Cache-Control: public, max-age=31536000, immutable
   X-Content-Type-Options: nosniff
-  
+
 # Preload critical video
 /assets/interconnect-top.mp4
   Link: </assets/interconnect-top.mp4>; rel=preload; as=video
@@ -12,17 +25,17 @@
 # General asset caching
 /assets/*
   Cache-Control: public, max-age=31536000, immutable
-  
+
 # HTML files - no cache
 /*.html
   Cache-Control: no-cache, no-store, must-revalidate
-  
+
 # JavaScript files - no cache for development
 /js/*
   Cache-Control: no-cache, no-store, must-revalidate
   Pragma: no-cache
   Expires: 0
-  
+
 # CSS files - shorter cache for development
 /css/*
   Cache-Control: public, max-age=300, must-revalidate

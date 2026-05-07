@@ -2,13 +2,15 @@
 
 import { useState } from "react";
 import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { createClient } from "@/lib/supabase/client";
 import { getSiteUrl } from "@/lib/site-url";
-import type { ForgotPasswordInput } from "@/validations/auth";
+import { enforceMinimumDelay, nowMs } from "@/lib/timing";
+import { forgotPasswordSchema, type ForgotPasswordInput } from "@/validations/auth";
 
 export default function ForgotPasswordPage() {
   const [sent, setSent] = useState(false);
@@ -17,20 +19,27 @@ export default function ForgotPasswordPage() {
   // 汎用「該当があれば送信」メッセージで成功 (sent=true) として扱う。
   // OWASP ASVS V2.2.3 / 認証情報列挙攻撃の防止。
 
-  const { register, handleSubmit, formState: { errors } } = useForm<ForgotPasswordInput>();
+  const { register, handleSubmit, formState: { errors } } = useForm<ForgotPasswordInput>({
+    resolver: zodResolver(forgotPasswordSchema),
+  });
 
   async function onSubmit(data: ForgotPasswordInput) {
     setLoading(true);
     const supabase = createClient();
-    const { error: resetError } = await supabase.auth.resetPasswordForEmail(data.email, {
-      redirectTo: `${getSiteUrl()}/auth/callback?next=/reset-password`,
-    });
-    if (resetError) {
-      // 内部ログのみ。UI では成功時と同じ汎用メッセージを返す。
+    // email は trim + lowercase で正規化 (USER@x / user@x で 2 通送信防止)
+    const email = data.email.trim().toLowerCase();
+    const startedAt = nowMs();
+    const { error: resetError } = await supabase.auth.resetPasswordForEmail(
+      email,
+      {
+        redirectTo: `${getSiteUrl()}/auth/callback?next=/reset-password`,
+      },
+    );
+    if (resetError && process.env.NODE_ENV !== "production") {
       console.warn("[forgot-password] reset failed:", resetError.message);
     }
-    // 成功/失敗 (rate limit / 存在しない email) どちらでも sent=true で
-    // 「該当があれば送信した」汎用メッセージに統一 (列挙防止)
+    // タイミング side-channel 攻撃対策 (純粋関数化で React Compiler purity 規則を満たす)
+    await enforceMinimumDelay(startedAt, 800, 400);
     setSent(true);
     setLoading(false);
   }

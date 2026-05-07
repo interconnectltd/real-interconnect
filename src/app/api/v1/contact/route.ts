@@ -12,6 +12,8 @@ import { z } from "zod";
 import { headers } from "next/headers";
 import { createClient } from "@/lib/supabase/server";
 import { json, jsonError, handleApiError } from "@/lib/api-helpers";
+import { getClientIp } from "@/lib/client-ip";
+import { enforceAnonRateLimit } from "@/lib/rate-limit-db";
 
 const KINDS = [
   "general",
@@ -52,11 +54,35 @@ export async function POST(request: Request) {
     } = await supabase.auth.getUser();
 
     const headersList = await headers();
-    const ip =
-      headersList.get("x-forwarded-for")?.split(",")[0]?.trim() ??
-      headersList.get("x-real-ip")?.trim() ??
-      null;
+    const ip = getClientIp(headersList);
     const ua = headersList.get("user-agent") ?? null;
+
+    // Wave1 sec audit: rate limit 必須化 (IP & email 軸)
+    //   IP: 1h 5 件 / email: 24h 5 件 (spam / SLA noise / mass urgent_removal 防止)
+    const emailKey = parsed.data.sender_email.toLowerCase();
+    const [okIp, okEmail] = await Promise.all([
+      enforceAnonRateLimit({
+        bucket: "contact:ip",
+        identifier: ip ?? "unknown",
+        limit: 5,
+        windowSec: 3600,
+        strict: true,
+      }),
+      enforceAnonRateLimit({
+        bucket: "contact:email",
+        identifier: emailKey,
+        limit: 5,
+        windowSec: 86_400,
+        strict: false,
+      }),
+    ]);
+    if (!okIp || !okEmail) {
+      return jsonError(
+        429,
+        "RATE_LIMITED",
+        "短時間に大量の送信が確認されました。しばらく時間をおいてからお試しください",
+      );
+    }
 
     // SLA 設定:
     //   urgent_removal       = 4h     (緊急削除、名誉毀損コンテンツ等の即時対応)
