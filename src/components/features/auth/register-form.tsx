@@ -55,7 +55,8 @@ async function isPasswordPwned(password: string): Promise<boolean> {
 const labelClass = "text-[13px] font-medium text-foreground";
 const fieldHelpClass = "text-xs text-destructive";
 const selectClass =
-  "h-11 w-full rounded-lg border border-input bg-card pl-3 pr-10 py-2 text-base sm:text-sm transition-[box-shadow,border-color] outline-none focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/70 aria-invalid:border-destructive aria-invalid:ring-[3px] aria-invalid:ring-destructive/20 appearance-none";
+  // pr-9 で chevron 領域を縮小して長文 option (例: 情報・ソフトウェアサービス) の clip 余地確保
+  "h-11 w-full rounded-lg border border-input bg-card pl-3 pr-9 py-2 text-base sm:text-sm transition-[box-shadow,border-color] outline-none focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/70 aria-invalid:border-destructive aria-invalid:ring-[3px] aria-invalid:ring-destructive/20 appearance-none";
 const textareaClass =
   "w-full rounded-lg border border-input bg-card px-3 py-2 text-sm transition-[box-shadow,border-color] outline-none placeholder:text-muted-foreground focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/70";
 
@@ -92,6 +93,9 @@ export function RegisterForm() {
     formState: { errors },
   } = useForm<RegisterInput>({
     resolver: zodResolver(registerSchema),
+    // 4 ステップフォームで全部埋めてから Submit して初めてエラー出る UX を回避。
+    // フィールド離脱時 (touched) に validate して早期 feedback。
+    mode: "onTouched",
     defaultValues: {
       agreeToTerms: false,
       agreeToPrivacy: false,
@@ -455,7 +459,7 @@ export function RegisterForm() {
                 ))}
               </select>
               <ChevronDown
-                className="pointer-events-none absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground"
+                className="pointer-events-none absolute right-2.5 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground"
                 aria-hidden="true"
               />
             </div>
@@ -488,7 +492,7 @@ export function RegisterForm() {
         accentIcon={<ShieldCheck className="h-3.5 w-3.5" aria-hidden="true" />}
         isLast
       >
-        <fieldset className="space-y-4 rounded-lg border border-border bg-muted/40 p-4">
+        <fieldset className="space-y-5 rounded-lg border border-border bg-muted/40 p-4">
           <legend className="sr-only">法務文書への同意</legend>
           <p className="text-xs leading-relaxed text-muted-foreground">
             下記リンクは全てモーダルで開きます。入力中のフォーム内容は失われません。
@@ -751,7 +755,7 @@ function ConsentRow({
           if (target.closest("label[for]")) return; // Label htmlFor の native 経路
           onChange(!checked);
         }}
-        className="-mx-2 -my-1 flex cursor-pointer items-start gap-2.5 rounded-md p-2 transition-colors hover:bg-accent/5 active:bg-accent/10"
+        className="-mx-2 -my-0.5 flex cursor-pointer items-start gap-2.5 rounded-md p-2 transition-colors hover:bg-accent/5 active:bg-accent/10"
       >
         <Checkbox
           id={id}

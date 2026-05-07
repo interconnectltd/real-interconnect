@@ -53,12 +53,13 @@ export default function PublicLayout({
 
       <footer className="border-t border-border/50 py-6">
         <div className="mx-auto max-w-5xl px-4">
-          <nav className="flex flex-wrap justify-center gap-x-5 gap-y-2 text-xs text-muted-foreground">
-            <Link href="/" className="py-2 hover:text-foreground">トップ</Link>
-            <Link href="/terms" className="py-2 hover:text-foreground">利用規約</Link>
-            <Link href="/privacy" className="py-2 hover:text-foreground">プライバシー</Link>
-            <Link href="/tokushoho" className="py-2 hover:text-foreground">特商法</Link>
-            <Link href="/contact" className="py-2 hover:text-foreground">お問い合わせ</Link>
+          {/* 各 link は AAA 44px hit area 確保 (mobile 誤タップ防止) */}
+          <nav className="flex flex-wrap items-center justify-center gap-x-4 gap-y-1 text-xs text-muted-foreground">
+            <Link href="/" className="inline-flex min-h-[44px] items-center px-2 hover:text-foreground">トップ</Link>
+            <Link href="/terms" className="inline-flex min-h-[44px] items-center px-2 hover:text-foreground">利用規約</Link>
+            <Link href="/privacy" className="inline-flex min-h-[44px] items-center px-2 hover:text-foreground">プライバシー</Link>
+            <Link href="/tokushoho" className="inline-flex min-h-[44px] items-center px-2 hover:text-foreground">特商法</Link>
+            <Link href="/contact" className="inline-flex min-h-[44px] items-center px-2 hover:text-foreground">お問い合わせ</Link>
           </nav>
           <p className="mt-3 text-center text-xs text-muted-foreground/60">
             &copy; {new Date().getFullYear()} INTER CONNECT株式会社

@@ -54,7 +54,10 @@ export function LegalDialog({ trigger, defaultTab = "terms" }: LegalDialogProps)
         }
       />
       <DialogContent
-        className="flex h-[85dvh] max-h-[85dvh] w-full max-w-3xl flex-col gap-3 overflow-hidden p-4 sm:max-w-3xl"
+        // h-[85vh] を fallback (iOS 15.4 未満で dvh 未対応時の squash 防止)。
+        // 後続の dvh が対応 browser で上書き。max-h-[calc(100svh-4rem)] で
+        // status bar / 通知バー領域に被らないよう保証。
+        className="flex h-[85vh] max-h-[calc(100svh-4rem)] w-full max-w-3xl flex-col gap-3 overflow-hidden p-4 sm:max-w-3xl supports-[height:1dvh]:h-[85dvh]"
       >
         <DialogTitle className="text-base font-semibold">
           法務文書
@@ -71,7 +74,12 @@ export function LegalDialog({ trigger, defaultTab = "terms" }: LegalDialogProps)
             <TabsTrigger value="privacy">プライバシー</TabsTrigger>
             <TabsTrigger value="tokushoho">特商法</TabsTrigger>
           </TabsList>
-          <div className="-mx-4 flex-1 overflow-y-auto px-4 pt-4">
+          {/* iOS Safari の rubber-band scroll chain で backdrop がめくれる事故を遮断
+              (overscroll-contain) + Webkit momentum scroll 確保 */}
+          <div
+            className="-mx-4 flex-1 overflow-y-auto overscroll-contain px-4 pt-4"
+            style={{ WebkitOverflowScrolling: "touch" }}
+          >
             <TabsContent value="terms" className="focus-visible:outline-none">
               <TermsContent />
             </TabsContent>

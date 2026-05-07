@@ -5,7 +5,7 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
-import { AlertCircle, Loader2 } from "lucide-react";
+import { AlertCircle, Eye, EyeOff, Loader2 } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -27,6 +27,7 @@ export function LoginForm() {
   const [error, setError] = useState<LoginErrorState | null>(null);
   const [loading, setLoading] = useState(false);
   const [resending, setResending] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
   const emailRef = useRef<HTMLInputElement | null>(null);
 
   const {
@@ -91,10 +92,13 @@ export function LoginForm() {
 
     // ?redirect=<path> があればそちらへ (open redirect / backslash bypass を safeInternalPath で遮断)
     const target = safeInternalPath(searchParams.get("redirect"), "/dashboard");
-    // push が refresh の RSC 取得 race に潰される事故 (Next.js 16) を回避するため
-    // 先に push してから refresh する。
-    router.push(target);
-    router.refresh();
+    // Chrome の "パスワード保存" prompt と router.push の race を回避するため
+    // full nav で確定遷移 (prompt はオリジン (=同一) なので確実に出る)。
+    if (typeof window !== "undefined") {
+      window.location.assign(target);
+    } else {
+      router.push(target);
+    }
   }
 
   async function handleResendConfirmation() {
@@ -185,26 +189,43 @@ export function LoginForm() {
       </div>
 
       <div className="space-y-1.5">
-        <div className="flex items-center justify-between">
+        <div className="flex flex-wrap items-center justify-between gap-x-2">
           <Label htmlFor="password" className="text-[13px] font-medium text-foreground">
             パスワード
           </Label>
           <Link
             href="/forgot-password"
-            className="-my-2 inline-flex min-h-[44px] items-center text-xs font-medium text-accent underline-offset-4 hover:underline"
+            className="inline-flex min-h-[44px] items-center px-1 text-xs font-medium text-accent underline underline-offset-4"
           >
             お忘れですか？
           </Link>
         </div>
-        <Input
-          id="password"
-          type="password"
-          autoComplete="current-password"
-          enterKeyHint="go"
-          aria-invalid={Boolean(errors.password) || undefined}
-          aria-describedby={errors.password ? "password-error" : undefined}
-          {...register("password")}
-        />
+        <div className="relative">
+          <Input
+            id="password"
+            type={showPassword ? "text" : "password"}
+            autoComplete="current-password"
+            enterKeyHint="go"
+            aria-invalid={Boolean(errors.password) || undefined}
+            aria-describedby={errors.password ? "password-error" : undefined}
+            className="pr-12"
+            {...register("password")}
+          />
+          {/* 表示 toggle: 盲目タイピングで 429 lockout に陥る前に確認可能 */}
+          <button
+            type="button"
+            onClick={() => setShowPassword((v) => !v)}
+            aria-label={showPassword ? "パスワードを隠す" : "パスワードを表示"}
+            aria-pressed={showPassword}
+            className="absolute right-1 top-1/2 inline-flex h-9 w-10 -translate-y-1/2 items-center justify-center rounded-md text-muted-foreground hover:text-foreground focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50"
+          >
+            {showPassword ? (
+              <EyeOff className="h-4 w-4" aria-hidden="true" />
+            ) : (
+              <Eye className="h-4 w-4" aria-hidden="true" />
+            )}
+          </button>
+        </div>
         {errors.password && (
           <p id="password-error" className="text-xs text-destructive">
             {errors.password.message}

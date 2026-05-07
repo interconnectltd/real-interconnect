@@ -10,7 +10,7 @@ export const metadata: Metadata = { title: "新規登録" };
 
 export default function RegisterPage() {
   return (
-    <div className="relative isolate min-h-[calc(100dvh-4rem)] lg:grid lg:grid-cols-2">
+    <div className="relative isolate min-h-[calc(100svh-4rem)] lg:grid lg:grid-cols-2">
       <div
         aria-hidden="true"
         className="pointer-events-none absolute inset-x-0 top-0 -z-10 h-[60%] bg-gradient-brand-soft opacity-80 [mask-image:linear-gradient(to_bottom,black,transparent)] lg:hidden"

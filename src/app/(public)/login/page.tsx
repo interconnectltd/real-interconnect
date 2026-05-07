@@ -17,7 +17,7 @@ export default async function LoginPage({
   const params = await searchParams;
 
   return (
-    <div className="relative isolate min-h-[calc(100dvh-4rem)] lg:grid lg:grid-cols-2">
+    <div className="relative isolate min-h-[calc(100svh-4rem)] lg:grid lg:grid-cols-2">
       <div
         aria-hidden="true"
         className="pointer-events-none absolute inset-x-0 top-0 -z-10 h-[60%] bg-gradient-brand-soft opacity-80 [mask-image:linear-gradient(to_bottom,black,transparent)] lg:hidden"
@@ -38,8 +38,11 @@ export default async function LoginPage({
         />
       </aside>
 
-      {/* 右 form pane (mobile は alert 表示時に Submit が画面外に行かないよう py を縮小) */}
-      <div className="flex items-center justify-center px-4 py-6 sm:py-16">
+      {/* 右 form pane:
+          - mobile は items-start で keyboard 表示時 form が viewport center に
+            飛んで Submit が画面外に行く事を防ぐ
+          - py-6 で alert 表示時の縦圧迫も最小化 */}
+      <div className="flex items-start justify-center px-4 py-6 lg:items-center sm:py-16">
         <div className="w-full max-w-[420px]">
         <div className="rounded-lg border border-border bg-card px-6 py-8 shadow-lg sm:px-8 sm:py-10">
           <div className="flex flex-col items-center text-center">
@@ -107,11 +110,11 @@ export default async function LoginPage({
           <LoginForm />
         </div>
 
-        <p className="mt-6 text-center text-sm text-muted-foreground">
-          アカウントをお持ちでない方は{" "}
+        <p className="mt-4 flex flex-wrap items-center justify-center gap-x-1 text-center text-sm text-muted-foreground">
+          <span>アカウントをお持ちでない方は</span>
           <a
             href="/register"
-            className="font-medium text-accent underline-offset-4 hover:underline"
+            className="inline-flex min-h-[44px] items-center px-2 font-medium text-accent underline underline-offset-4"
           >
             新規登録
           </a>
