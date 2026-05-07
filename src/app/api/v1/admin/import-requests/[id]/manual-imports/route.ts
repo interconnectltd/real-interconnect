@@ -1,4 +1,7 @@
 /**
+ * GET  /api/v1/admin/import-requests/[id]/manual-imports
+ *   申請ごとの直接貼り付け取込履歴を返す (admin が後で再閲覧)。
+ *
  * POST /api/v1/admin/import-requests/[id]/manual-imports
  *   対面会議や tl;dv 録画なしのケースで、admin が文字起こし/要約を直接貼り付け
  *   することで取り込む。
@@ -33,6 +36,56 @@ const PostSchema = z.object({
   manual_transcript: z.string().min(1).max(200000),
   manual_summary: z.string().max(50000).optional(),
 });
+
+interface ManualImportRow {
+  id: string;
+  title: string | null;
+  meeting_date: string | null;
+  participant_names: string[] | null;
+  manual_transcript: string;
+  manual_summary: string | null;
+  processed_to_transcript_id: string | null;
+  created_at: string;
+}
+
+export async function GET(
+  request: Request,
+  ctx: { params: Promise<{ id: string }> },
+) {
+  try {
+    const { id } = await ctx.params;
+    if (!isValidUUID(id)) {
+      return jsonError(400, "BAD_REQUEST", "id (UUID) 必須");
+    }
+    const { supabase } = await withAdminAuth(request);
+
+    type LooseSelect = {
+      from: (table: string) => {
+        select: (cols: string) => {
+          eq: (col: string, val: unknown) => {
+            order: (col: string, opt: { ascending: boolean }) => Promise<{
+              data: ManualImportRow[] | null;
+              error: { message?: string } | null;
+            }>;
+          };
+        };
+      };
+    };
+    const { data, error } = await (supabase as unknown as LooseSelect)
+      .from("meeting_manual_imports")
+      .select(
+        "id, title, meeting_date, participant_names, manual_transcript, manual_summary, processed_to_transcript_id, created_at",
+      )
+      .eq("request_id", id)
+      .order("created_at", { ascending: false });
+    if (error) {
+      return jsonError(500, "DB_ERROR", error.message ?? "fetch failed");
+    }
+    return json({ data: data ?? [] });
+  } catch (error) {
+    return handleApiError(error);
+  }
+}
 
 export async function POST(
   request: Request,

@@ -10,7 +10,15 @@
 
 import { useState } from "react";
 import { useQuery, useQueryClient, useMutation } from "@tanstack/react-query";
-import { Loader2, Check, X, FolderInput } from "lucide-react";
+import {
+  Loader2,
+  Check,
+  X,
+  FolderInput,
+  ChevronDown,
+  ChevronUp,
+  FileText,
+} from "lucide-react";
 import { toast } from "sonner";
 import { api } from "@/lib/api-client";
 import { Button } from "@/components/ui/button";
@@ -196,6 +204,9 @@ export default function AdminImportRequestsPage() {
                     Note: {req.admin_note}
                   </p>
                 )}
+
+                {/* 直接貼り付けで取り込んだ manual_imports を折りたたみで再閲覧 */}
+                <ManualImportsAccordion requestId={req.id} />
               </div>
 
               {/* 状態変更ボタン: SP では行下段に flex-row 配置、md 以上で右側縦並び。
@@ -333,6 +344,123 @@ export default function AdminImportRequestsPage() {
           )}
         </DialogContent>
       </Dialog>
+    </div>
+  );
+}
+
+interface ManualImport {
+  id: string;
+  title: string | null;
+  meeting_date: string | null;
+  participant_names: string[] | null;
+  manual_transcript: string;
+  manual_summary: string | null;
+  processed_to_transcript_id: string | null;
+  created_at: string;
+}
+
+/**
+ * 申請ごとの直接貼り付け取込履歴を折りたたみ表示。
+ * 開いた瞬間に lazy fetch (空なら何も表示せず)。
+ */
+function ManualImportsAccordion({ requestId }: { requestId: string }) {
+  const [open, setOpen] = useState(false);
+  const { data, isLoading, isError } = useQuery({
+    queryKey: ["admin-manual-imports", requestId],
+    queryFn: () =>
+      api.get<{ data: ManualImport[] }>(
+        `/admin/import-requests/${requestId}/manual-imports`,
+      ),
+    enabled: open,
+    staleTime: 30_000,
+  });
+
+  const items = data?.data ?? [];
+
+  return (
+    <div className="mt-2 rounded border border-border/60 bg-muted/20">
+      <button
+        type="button"
+        onClick={() => setOpen((v) => !v)}
+        aria-expanded={open}
+        className="flex w-full items-center justify-between gap-2 px-3 py-1.5 text-xs font-medium text-foreground transition-colors hover:bg-muted/40 focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/70"
+      >
+        <span className="inline-flex items-center gap-1.5">
+          <FileText className="h-3.5 w-3.5" aria-hidden="true" />
+          直接貼り付け取込履歴 {open && data ? `(${items.length})` : ""}
+        </span>
+        {open ? (
+          <ChevronUp className="h-3.5 w-3.5" aria-hidden="true" />
+        ) : (
+          <ChevronDown className="h-3.5 w-3.5" aria-hidden="true" />
+        )}
+      </button>
+      {open && (
+        <div className="border-t border-border/60 p-2">
+          {isLoading && (
+            <div className="flex items-center gap-2 px-2 py-3 text-xs text-muted-foreground">
+              <Loader2 className="h-3.5 w-3.5 animate-spin" />
+              読み込み中...
+            </div>
+          )}
+          {isError && (
+            <p className="px-2 py-3 text-xs text-destructive">
+              取得に失敗しました
+            </p>
+          )}
+          {!isLoading && !isError && items.length === 0 && (
+            <p className="px-2 py-3 text-xs text-muted-foreground">
+              直接貼り付け取込はまだありません。
+            </p>
+          )}
+          <ul className="space-y-2 list-none p-0">
+            {items.map((m) => (
+              <li
+                key={m.id}
+                className="rounded border bg-card p-2 text-xs"
+              >
+                <div className="flex flex-wrap items-center gap-2">
+                  <p className="font-semibold">
+                    {m.title ?? "(タイトルなし)"}
+                  </p>
+                  {m.meeting_date && (
+                    <span className="text-muted-foreground">
+                      {new Date(m.meeting_date).toLocaleDateString("ja-JP")}
+                    </span>
+                  )}
+                  <Badge variant="outline" className="text-[10px]">
+                    取込: {new Date(m.created_at).toLocaleString("ja-JP")}
+                  </Badge>
+                  <Badge variant="outline" className="text-[10px]">
+                    {m.manual_transcript.length.toLocaleString()} 文字
+                  </Badge>
+                  {m.processed_to_transcript_id && (
+                    <Badge className="text-[10px]">transcript 昇格済</Badge>
+                  )}
+                </div>
+                {m.participant_names && m.participant_names.length > 0 && (
+                  <p className="mt-1 text-muted-foreground">
+                    参加者: {m.participant_names.join(", ")}
+                  </p>
+                )}
+                {m.manual_summary && (
+                  <p className="mt-1 line-clamp-2 rounded bg-muted/40 px-2 py-1 leading-relaxed">
+                    {m.manual_summary}
+                  </p>
+                )}
+                <details className="mt-1">
+                  <summary className="cursor-pointer text-muted-foreground hover:text-foreground">
+                    文字起こしを表示
+                  </summary>
+                  <pre className="mt-1 max-h-60 overflow-y-auto rounded bg-muted/30 p-2 text-[11px] leading-relaxed whitespace-pre-wrap">
+                    {m.manual_transcript}
+                  </pre>
+                </details>
+              </li>
+            ))}
+          </ul>
+        </div>
+      )}
     </div>
   );
 }
