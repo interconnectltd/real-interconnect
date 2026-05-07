@@ -1,0 +1,19 @@
+# Netlify _redirects (LP 配下)
+#
+# Wave9 修正 (2026-05-07):
+#   旧 LP002 系には lp/{terms,privacy,login,register,forgot-password,reset-password}.html が
+#   物理ファイルとして残っており、SEO 検索や旧ブックマーク経由で古い静的版に到達する事故があった。
+#   法務文書 (terms/privacy) は改定追従の唯一正本を Next.js の /terms /privacy に統一する方針のため、
+#   旧 LP html は 301 で **強制的に Next ルートへ転送** し、二重管理による内容齟齬を遮断する。
+#   認証 page (login/register/forgot/reset) も同様 — 旧静的版は Supabase 連携を持たないので
+#   そもそも誤操作の温床になる。
+
+# 法務 (個情法32条 / 特商法11条 同期維持)
+/lp/terms.html              /terms              301!
+/lp/privacy.html            /privacy            301!
+
+# 認証 (旧静的版は Supabase 連携なし → Next route へ強制移送)
+/lp/login.html              /login              301!
+/lp/register.html           /register           301!
+/lp/forgot-password.html    /forgot-password    301!
+/lp/reset-password.html     /reset-password    301!
