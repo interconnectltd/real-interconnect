@@ -385,6 +385,30 @@ button, [role="button"], a {
   }
 }
 
+/* Chrome / Safari Autofill が黄色背景に上書きする問題の遮断:
+ *   - box-shadow inset で card 背景色を再描画 (黄色を隠す)
+ *   - text-fill-color で文字色を foreground に固定
+ *   - transition 5000s で autofill アニメ無効化 (再 fill 時の点滅防止)
+ * Wave7 sec audit (2026-05-07): mobile autofill 後の React onChange 取りこぼしと
+ *   黄色背景の二重事故を CSS 単発で根治。 */
+input:-webkit-autofill,
+input:-webkit-autofill:hover,
+input:-webkit-autofill:focus,
+input:-webkit-autofill:active,
+textarea:-webkit-autofill,
+select:-webkit-autofill {
+  -webkit-box-shadow: 0 0 0 1000px var(--card) inset !important;
+  -webkit-text-fill-color: var(--foreground) !important;
+  caret-color: var(--foreground);
+  transition: background-color 5000s ease-in-out 0s, color 5000s ease-in-out 0s;
+}
+.dark input:-webkit-autofill,
+.dark input:-webkit-autofill:hover,
+.dark input:-webkit-autofill:focus,
+.dark input:-webkit-autofill:active {
+  -webkit-box-shadow: 0 0 0 1000px var(--card) inset !important;
+}
+
 @layer base {
   * {
     @apply border-border outline-ring/50;

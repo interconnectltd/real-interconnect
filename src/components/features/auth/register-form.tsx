@@ -15,6 +15,7 @@ import { registerSchema, type RegisterInput } from "@/validations/auth";
 import { INDUSTRIES } from "@/lib/constants";
 import { LegalDialog } from "@/components/legal/legal-dialog";
 import { getSiteUrl } from "@/lib/site-url";
+import { PasswordStrength } from "@/components/features/auth/password-strength";
 
 /**
  * HIBP (Have I Been Pwned) k-anonymity check.
@@ -116,6 +117,7 @@ export function RegisterForm() {
   const agreeToTerms = useWatch({ control, name: "agreeToTerms" });
   const agreeToPrivacy = useWatch({ control, name: "agreeToPrivacy" });
   const agreeToTokushoho = useWatch({ control, name: "agreeToTokushoho" });
+  const passwordValue = useWatch({ control, name: "password" }) ?? "";
 
   async function onSubmit(data: RegisterInput) {
     setLoading(true);
@@ -395,12 +397,25 @@ export function RegisterForm() {
               id="reg-password"
               type="password"
               autoComplete="new-password"
-              placeholder="8文字以上"
+              placeholder="10文字以上 (英大小文字 + 数字)"
               enterKeyHint="next"
               aria-invalid={Boolean(errors.password) || undefined}
-              aria-describedby={errors.password ? "reg-password-error" : undefined}
+              aria-describedby={
+                errors.password
+                  ? "reg-password-error reg-password-strength"
+                  : "reg-password-strength"
+              }
+              // iOS Strong Password サジェスチョンが zod ルールと合致するよう制約を申告
+              {...({
+                passwordrules:
+                  "minlength: 10; required: lower; required: upper; required: digit;",
+              } as Record<string, string>)}
               {...register("password")}
             />
+            {/* リアルタイム強度メーター (Wave7 sec audit V-2) */}
+            <div id="reg-password-strength">
+              <PasswordStrength password={passwordValue} />
+            </div>
             {errors.password && (
               <p id="reg-password-error" className={fieldHelpClass}>
                 {errors.password.message}

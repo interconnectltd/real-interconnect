@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { createClient } from "@/lib/supabase/client";
 import { getSiteUrl } from "@/lib/site-url";
 import { safeInternalPath } from "@/lib/safe-redirect";
+import { isInAppBrowser } from "@/lib/client-env";
 import { toast } from "sonner";
 
 /**
@@ -58,6 +59,14 @@ export function LinkedInLoginButton({ label }: { label?: string }) {
   }, []);
 
   async function handleClick() {
+    // In-app ブラウザ (LINE/FB/Instagram/X 等) では OAuth が intent 経由で
+    // 外部アプリに飛べず失敗するため、事前ガードして外部ブラウザに誘導する。
+    if (isInAppBrowser()) {
+      toast.error(
+        "アプリ内ブラウザではログインできません。SafariまたはChromeで開いてください。",
+      );
+      return;
+    }
     setLoading(true);
     // 8 秒経っても遷移しない場合は強制解除 (loading 張り付き防御)
     safetyRef.current = setTimeout(() => setLoading(false), 8000);
