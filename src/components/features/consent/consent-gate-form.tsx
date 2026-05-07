@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
-import { LegalDialog } from "@/components/legal/legal-dialog";
+import { LegalDialog, type LegalTab } from "@/components/legal/legal-dialog";
 
 /**
  * 招待経由ユーザー向け 同意ゲートフォーム。
@@ -27,6 +27,12 @@ export function ConsentGateForm() {
   const [error, setError] = useState<string | null>(null);
   const [showRejectConfirm, setShowRejectConfirm] = useState(false);
   const [rejectInput, setRejectInput] = useState("");
+  // LegalDialog single instance (Wave9: tap反応性根治 + backdrop残留事故防止)
+  const [legalDialog, setLegalDialog] = useState<{ open: boolean; tab: LegalTab }>({
+    open: false,
+    tab: "terms",
+  });
+  const openLegal = (tab: LegalTab) => setLegalDialog({ open: true, tab });
 
   const allAgreed = agreeTerms && agreePrivacy && agreeTokushoho && agreeAi && agreeAge;
 
@@ -101,13 +107,14 @@ export function ConsentGateForm() {
           各リンクはモーダルで開きます (ページ遷移しません)。
         </p>
 
-        <LegalDialog
-          trigger={
-            <button type="button" className="text-xs text-primary underline-offset-4 hover:underline">
-              3文書 (利用規約・プライバシー・特商法) をまとめて読む
-            </button>
-          }
-        />
+        <button
+          type="button"
+          onClick={() => openLegal("terms")}
+          aria-haspopup="dialog"
+          className="inline-flex min-h-[44px] items-center px-1 text-xs text-primary underline underline-offset-4"
+        >
+          3文書 (利用規約・プライバシー・特商法) をまとめて読む
+        </button>
 
         <div className="flex items-start gap-2 pt-1">
           <Checkbox
@@ -117,14 +124,14 @@ export function ConsentGateForm() {
             aria-describedby="cg-terms-desc"
           />
           <div className="text-sm leading-relaxed" id="cg-terms-desc">
-            <LegalDialog
-              defaultTab="terms"
-              trigger={
-                <button type="button" className="text-primary underline-offset-4 hover:underline">
-                  利用規約
-                </button>
-              }
-            />
+            <button
+              type="button"
+              onClick={() => openLegal("terms")}
+              aria-haspopup="dialog"
+              className="inline-flex min-h-[44px] items-center px-1 text-primary underline underline-offset-4"
+            >
+              利用規約
+            </button>
             に
             <Label htmlFor="cg-terms" className="cursor-pointer">同意します</Label>
           </div>
@@ -138,14 +145,14 @@ export function ConsentGateForm() {
             aria-describedby="cg-privacy-desc"
           />
           <div className="text-sm leading-relaxed" id="cg-privacy-desc">
-            <LegalDialog
-              defaultTab="privacy"
-              trigger={
-                <button type="button" className="text-primary underline-offset-4 hover:underline">
-                  プライバシーポリシー
-                </button>
-              }
-            />
+            <button
+              type="button"
+              onClick={() => openLegal("privacy")}
+              aria-haspopup="dialog"
+              className="inline-flex min-h-[44px] items-center px-1 text-primary underline underline-offset-4"
+            >
+              プライバシーポリシー
+            </button>
             に
             <Label htmlFor="cg-privacy" className="cursor-pointer">同意します</Label>
           </div>
@@ -159,14 +166,14 @@ export function ConsentGateForm() {
             aria-describedby="cg-tokushoho-desc"
           />
           <div className="text-sm leading-relaxed" id="cg-tokushoho-desc">
-            <LegalDialog
-              defaultTab="tokushoho"
-              trigger={
-                <button type="button" className="text-primary underline-offset-4 hover:underline">
-                  特定商取引法に基づく表記
-                </button>
-              }
-            />
+            <button
+              type="button"
+              onClick={() => openLegal("tokushoho")}
+              aria-haspopup="dialog"
+              className="inline-flex min-h-[44px] items-center px-1 text-primary underline underline-offset-4"
+            >
+              特定商取引法に基づく表記
+            </button>
             の内容を
             <Label htmlFor="cg-tokushoho" className="cursor-pointer">確認しました</Label>
           </div>
@@ -278,6 +285,14 @@ export function ConsentGateForm() {
           )}
         </div>
       </details>
+
+      {/* シングルインスタンス LegalDialog */}
+      <LegalDialog
+        open={legalDialog.open}
+        onOpenChange={(open) => setLegalDialog((s) => ({ ...s, open }))}
+        tab={legalDialog.tab}
+        onTabChange={(tab) => setLegalDialog((s) => ({ ...s, tab }))}
+      />
     </div>
   );
 }

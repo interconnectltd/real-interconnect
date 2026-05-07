@@ -13,7 +13,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { createClient } from "@/lib/supabase/client";
 import { registerSchema, type RegisterInput } from "@/validations/auth";
 import { INDUSTRIES } from "@/lib/constants";
-import { LegalDialog } from "@/components/legal/legal-dialog";
+import { LegalDialog, type LegalTab } from "@/components/legal/legal-dialog";
 import { getSiteUrl } from "@/lib/site-url";
 import { PasswordStrength } from "@/components/features/auth/password-strength";
 
@@ -77,6 +77,12 @@ export function RegisterForm() {
   const [loading, setLoading] = useState(false);
   const [activeStep, setActiveStep] = useState<1 | 2 | 3 | 4>(1);
   const errorRef = useRef<HTMLDivElement | null>(null);
+  // LegalDialog はシングルインスタンス (Wave7 G C-1: 4 inst 同居 backdrop 残留事故 + Wave9: tap 反応性根治)
+  const [legalDialog, setLegalDialog] = useState<{ open: boolean; tab: LegalTab }>({
+    open: false,
+    tab: "terms",
+  });
+  const openLegal = (tab: LegalTab) => setLegalDialog({ open: true, tab });
 
   // form内 focus イベントから現在 active Step を割り出す
   function handleFocus(e: React.FocusEvent<HTMLFormElement>) {
@@ -512,17 +518,15 @@ export function RegisterForm() {
           <p className="text-xs leading-relaxed text-muted-foreground">
             下記リンクは全てモーダルで開きます。入力中のフォーム内容は失われません。
           </p>
-          <LegalDialog
-            trigger={
-              <button
-                type="button"
-                aria-haspopup="dialog"
-                className="inline-flex min-h-[44px] items-center px-1 text-sm font-medium text-accent underline underline-offset-4"
-              >
-                3文書をまとめて読む（モーダル）
-              </button>
-            }
-          />
+          {/* 3 文書をまとめて (terms tab で開く) */}
+          <button
+            type="button"
+            onClick={() => openLegal("terms")}
+            aria-haspopup="dialog"
+            className="inline-flex min-h-[44px] items-center px-1 text-sm font-medium text-accent underline underline-offset-4"
+          >
+            3文書をまとめて読む（モーダル）
+          </button>
 
           <ConsentRow
             id="agree-terms"
@@ -531,18 +535,14 @@ export function RegisterForm() {
             error={errors.agreeToTerms?.message}
           >
             <div className="flex flex-wrap items-center gap-x-1">
-              <LegalDialog
-                defaultTab="terms"
-                trigger={
-                  <button
-                    type="button"
-                    aria-haspopup="dialog"
-                    className="inline-flex min-h-[44px] items-center px-1 font-medium text-accent underline underline-offset-2"
-                  >
-                    利用規約を読む
-                  </button>
-                }
-              />
+              <button
+                type="button"
+                onClick={() => openLegal("terms")}
+                aria-haspopup="dialog"
+                className="inline-flex min-h-[44px] items-center px-1 font-medium text-accent underline underline-offset-2"
+              >
+                利用規約を読む
+              </button>
               <span className="text-xs text-muted-foreground">
                 （AI分析・米国への越境移転を含む）
               </span>
@@ -559,18 +559,14 @@ export function RegisterForm() {
             error={errors.agreeToPrivacy?.message}
           >
             <div className="flex flex-wrap items-center gap-x-1">
-              <LegalDialog
-                defaultTab="privacy"
-                trigger={
-                  <button
-                    type="button"
-                    aria-haspopup="dialog"
-                    className="inline-flex min-h-[44px] items-center px-1 font-medium text-accent underline underline-offset-2"
-                  >
-                    プライバシーポリシーを読む
-                  </button>
-                }
-              />
+              <button
+                type="button"
+                onClick={() => openLegal("privacy")}
+                aria-haspopup="dialog"
+                className="inline-flex min-h-[44px] items-center px-1 font-medium text-accent underline underline-offset-2"
+              >
+                プライバシーポリシーを読む
+              </button>
               <span className="text-xs text-muted-foreground">
                 （越境移転・委託先への提供を含む）
               </span>
@@ -586,18 +582,14 @@ export function RegisterForm() {
             onChange={(v) => setValue("agreeToTokushoho", v, { shouldValidate: true })}
             error={errors.agreeToTokushoho?.message}
           >
-            <LegalDialog
-              defaultTab="tokushoho"
-              trigger={
-                <button
-                  type="button"
-                  aria-haspopup="dialog"
-                  className="inline-flex min-h-[44px] items-center px-1 font-medium text-accent underline underline-offset-2"
-                >
-                  特定商取引法に基づく表記を読む
-                </button>
-              }
-            />
+            <button
+              type="button"
+              onClick={() => openLegal("tokushoho")}
+              aria-haspopup="dialog"
+              className="inline-flex min-h-[44px] items-center px-1 font-medium text-accent underline underline-offset-2"
+            >
+              特定商取引法に基づく表記を読む
+            </button>
             <Label htmlFor="agree-tokushoho" className="mt-1 block cursor-pointer font-medium">
               内容を確認しました
             </Label>
@@ -640,6 +632,14 @@ export function RegisterForm() {
           ログイン
         </Link>
       </p>
+
+      {/* シングルインスタンス LegalDialog (タブ切替で 3 文書を表示) */}
+      <LegalDialog
+        open={legalDialog.open}
+        onOpenChange={(open) => setLegalDialog((s) => ({ ...s, open }))}
+        tab={legalDialog.tab}
+        onTabChange={(tab) => setLegalDialog((s) => ({ ...s, tab }))}
+      />
     </form>
   );
 }

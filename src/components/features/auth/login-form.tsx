@@ -260,16 +260,22 @@ export function LoginForm() {
         )}
       </Button>
 
-      <p className="text-center text-[11px] leading-relaxed text-muted-foreground">
-        ログインすることで{" "}
-        <Link href="/terms" className="underline underline-offset-2">
+      <p className="flex flex-wrap items-center justify-center gap-x-1 text-center text-[11px] leading-relaxed text-muted-foreground">
+        <span>ログインすることで</span>
+        <Link
+          href="/terms"
+          className="inline-flex min-h-[44px] items-center px-1 underline underline-offset-2"
+        >
           利用規約
         </Link>
-        {" / "}
-        <Link href="/privacy" className="underline underline-offset-2">
+        <span>/</span>
+        <Link
+          href="/privacy"
+          className="inline-flex min-h-[44px] items-center px-1 underline underline-offset-2"
+        >
           プライバシーポリシー
         </Link>
-        に同意したものとみなされます。
+        <span>に同意したものとみなされます。</span>
       </p>
     </form>
   );

@@ -2183,6 +2183,15 @@ setTimeout(function() {
 				</ul>
 			</div>
 		</div>
+		<!-- 法務リンク (個情法32条・特商法11条の表示義務 / 同意経路の最低保証)。
+		     Next.js の /terms /privacy /tokushoho /contact が改定追従の唯一正本。
+		     旧 lp/*.html には飛ばさない (同期漏れによるバージョン乖離防止)。 -->
+		<nav class="f_legal" aria-label="法務情報" style="padding:16px 24px 8px;display:flex;flex-wrap:wrap;justify-content:center;gap:8px 20px;font-size:12px;line-height:1.5;">
+			<a href="/terms" style="color:inherit;display:inline-flex;align-items:center;min-height:44px;padding:0 4px;">利用規約</a>
+			<a href="/privacy" style="color:inherit;display:inline-flex;align-items:center;min-height:44px;padding:0 4px;">プライバシーポリシー</a>
+			<a href="/tokushoho" style="color:inherit;display:inline-flex;align-items:center;min-height:44px;padding:0 4px;">特定商取引法に基づく表記</a>
+			<a href="/contact" style="color:inherit;display:inline-flex;align-items:center;min-height:44px;padding:0 4px;">お問い合わせ</a>
+		</nav>
 		<small class="copyright">© 2026 INTER CONNECT All Rights Reserved</small>
 	</div>
 </footer>
