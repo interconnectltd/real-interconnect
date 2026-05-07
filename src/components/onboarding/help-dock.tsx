@@ -238,7 +238,7 @@ export function HelpDock({
         aria-haspopup="menu"
         aria-expanded={open}
         aria-label="ヘルプメニューを開く"
-        className="inline-flex h-14 w-14 cursor-pointer items-center justify-center rounded-lg bg-primary text-primary-foreground shadow-lg transition-[transform,brightness] duration-75 hover:brightness-110 active:scale-95 focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/70"
+        className="inline-flex h-14 w-14 cursor-pointer items-center justify-center rounded-full bg-primary text-primary-foreground shadow-lg transition-[transform,brightness] duration-75 hover:brightness-110 active:scale-95 focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/70"
       >
         <HelpCircle className="h-5 w-5" aria-hidden="true" />
       </button>
