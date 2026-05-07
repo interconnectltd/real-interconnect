@@ -314,13 +314,23 @@ export default function ProfilePage() {
       <ProfileCompleteness profile={profile} hideLink />
 
       {/* Hero card */}
-      <Card data-tour="profile-completeness">
-        <CardContent className="space-y-5">
+      <Card data-tour="profile-completeness" className="overflow-hidden">
+        {/* Hero cover band — avatar 配置領域として中央 30% は静か (生成側で対応済) */}
+        <Image
+          src="/illustrations/profile-cover.png"
+          alt=""
+          width={1200}
+          height={200}
+          className="h-auto w-full"
+          aria-hidden="true"
+          priority
+        />
+        <CardContent className="-mt-10 space-y-5 pt-0">
           <div className="flex items-start gap-4">
             <button
               type="button"
               data-tour="profile-avatar"
-              className="group relative shrink-0 outline-none focus-visible:ring-[3px] focus-visible:ring-ring/70 rounded-full"
+              className="group relative shrink-0 rounded-full ring-4 ring-card outline-none focus-visible:ring-[3px] focus-visible:ring-ring/70"
               onClick={() => setPickerOpen((v) => !v)}
               disabled={uploadAvatar.isPending || updateProfile.isPending}
               aria-label="プロフィール画像を変更"

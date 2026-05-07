@@ -10,13 +10,30 @@ export const metadata: Metadata = { title: "新規登録" };
 
 export default function RegisterPage() {
   return (
-    <div className="relative isolate flex min-h-[calc(100dvh-4rem)] items-start justify-center px-4 py-10 sm:py-14">
+    <div className="relative isolate min-h-[calc(100dvh-4rem)] lg:grid lg:grid-cols-2">
       <div
         aria-hidden="true"
-        className="pointer-events-none absolute inset-x-0 top-0 -z-10 h-[60%] bg-gradient-brand-soft opacity-80 [mask-image:linear-gradient(to_bottom,black,transparent)]"
+        className="pointer-events-none absolute inset-x-0 top-0 -z-10 h-[60%] bg-gradient-brand-soft opacity-80 [mask-image:linear-gradient(to_bottom,black,transparent)] lg:hidden"
       />
 
-      <div className="w-full max-w-[480px]">
+      {/* 左 brand pane (lg+ のみ) — "starting a journey" portrait */}
+      <aside
+        aria-hidden="true"
+        className="relative hidden overflow-hidden bg-[color:color-mix(in_oklab,var(--accent)_4%,var(--background))] lg:block"
+      >
+        <Image
+          src="/illustrations/auth-hero-register.png"
+          alt=""
+          fill
+          sizes="50vw"
+          className="object-cover object-center"
+          priority
+        />
+      </aside>
+
+      {/* 右 form pane */}
+      <div className="flex items-start justify-center px-4 py-10 sm:py-14">
+        <div className="w-full max-w-[480px]">
         <div className="rounded-lg border border-border bg-card px-6 py-8 shadow-lg sm:px-8 sm:py-10">
           <div className="flex flex-col items-center text-center">
             <Image
@@ -62,6 +79,7 @@ export default function RegisterPage() {
             ログイン
           </a>
         </p>
+        </div>
       </div>
     </div>
   );

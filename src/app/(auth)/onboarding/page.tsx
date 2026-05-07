@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
+import Image from "next/image";
 import {
   Handshake, MessageCircle, TrendingUp, Users, RefreshCw, GraduationCap,
   ChevronRight, ChevronLeft, Check, Briefcase, Globe2, Wallet, Sprout,
@@ -457,6 +458,15 @@ export default function OnboardingPage() {
       {/* Step 0: 基本情報確認 */}
       {step === 0 && (
         <div className="space-y-6">
+          <Image
+            src="/illustrations/onboarding-step-0.png"
+            alt=""
+            width={240}
+            height={180}
+            className="mx-auto h-auto w-full max-w-[200px]"
+            aria-hidden="true"
+            priority
+          />
           <div className="text-center">
             <h1 className="text-2xl font-bold">基本情報の確認</h1>
             <p className="mt-1 text-sm text-muted-foreground">
@@ -613,6 +623,15 @@ export default function OnboardingPage() {
       {/* Step 1: Goals & Offerings (16カテゴリ4グループ + タブ切替) */}
       {step === 1 && (
         <div className="space-y-6">
+          <Image
+            src="/illustrations/onboarding-step-1.png"
+            alt=""
+            width={240}
+            height={180}
+            className="mx-auto h-auto w-full max-w-[200px]"
+            aria-hidden="true"
+            priority
+          />
           <div className="text-center">
             <h1 className="text-2xl font-bold">あなたの目的と提供できること</h1>
             <p className="mt-1 text-sm text-muted-foreground">
@@ -824,6 +843,15 @@ export default function OnboardingPage() {
       {/* Step 2: 完了 */}
       {step === 2 && (
         <div className="space-y-6">
+          <Image
+            src="/illustrations/onboarding-step-2.png"
+            alt=""
+            width={240}
+            height={180}
+            className="mx-auto h-auto w-full max-w-[200px]"
+            aria-hidden="true"
+            priority
+          />
           <div className="text-center">
             <h1 className="text-2xl font-bold">準備完了です</h1>
             <p className="mt-1 text-sm text-muted-foreground">

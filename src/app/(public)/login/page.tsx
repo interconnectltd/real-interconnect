@@ -17,13 +17,30 @@ export default async function LoginPage({
   const params = await searchParams;
 
   return (
-    <div className="relative isolate flex min-h-[calc(100dvh-4rem)] items-center justify-center px-4 py-12 sm:py-16">
+    <div className="relative isolate min-h-[calc(100dvh-4rem)] lg:grid lg:grid-cols-2">
       <div
         aria-hidden="true"
-        className="pointer-events-none absolute inset-x-0 top-0 -z-10 h-[60%] bg-gradient-brand-soft opacity-80 [mask-image:linear-gradient(to_bottom,black,transparent)]"
+        className="pointer-events-none absolute inset-x-0 top-0 -z-10 h-[60%] bg-gradient-brand-soft opacity-80 [mask-image:linear-gradient(to_bottom,black,transparent)] lg:hidden"
       />
 
-      <div className="w-full max-w-[420px]">
+      {/* 左 brand pane (lg+ のみ) — 縦長 portrait */}
+      <aside
+        aria-hidden="true"
+        className="relative hidden overflow-hidden bg-[color:color-mix(in_oklab,var(--accent)_4%,var(--background))] lg:block"
+      >
+        <Image
+          src="/illustrations/auth-hero-login.png"
+          alt=""
+          fill
+          sizes="50vw"
+          className="object-cover object-center"
+          priority
+        />
+      </aside>
+
+      {/* 右 form pane */}
+      <div className="flex items-center justify-center px-4 py-12 sm:py-16">
+        <div className="w-full max-w-[420px]">
         <div className="rounded-lg border border-border bg-card px-6 py-8 shadow-lg sm:px-8 sm:py-10">
           <div className="flex flex-col items-center text-center">
             <Image
@@ -99,6 +116,7 @@ export default async function LoginPage({
             新規登録
           </a>
         </p>
+        </div>
       </div>
     </div>
   );

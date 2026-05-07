@@ -3,6 +3,22 @@
 import { useState, useEffect, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
+import Image from "next/image";
+
+/** Settings 各セクション用 spot icon (48×48) — CardTitle 左に共通配置 */
+function SectionIcon({ name }: { name: string }) {
+  return (
+    <Image
+      src={`/illustrations/settings-icon-${name}.png`}
+      alt=""
+      width={48}
+      height={48}
+      className="h-8 w-8 shrink-0"
+      aria-hidden="true"
+      priority={false}
+    />
+  );
+}
 import {
   Video,
   LogOut,
@@ -630,7 +646,10 @@ export default function SettingsPage() {
       {/* Account */}
       <Card>
         <CardHeader>
-          <CardTitle className="text-base">アカウント</CardTitle>
+          <CardTitle className="flex items-center gap-2 text-base">
+            <SectionIcon name="account" />
+            アカウント
+          </CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="space-y-1">
@@ -730,7 +749,7 @@ export default function SettingsPage() {
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center gap-2 text-base">
-            <Bell className="h-4 w-4" />
+            <SectionIcon name="notifications" />
             通知設定
           </CardTitle>
         </CardHeader>
@@ -780,7 +799,7 @@ export default function SettingsPage() {
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center gap-2 text-base">
-            <Brain className="h-4 w-4" />
+            <SectionIcon name="ai-profile" />
             AIプロフィール管理
           </CardTitle>
         </CardHeader>
@@ -813,7 +832,10 @@ export default function SettingsPage() {
         */}
       <Card id="tldv-connect">
         <CardHeader>
-          <CardTitle className="text-base">ミーティング分析 (tl;dv 連携)</CardTitle>
+          <CardTitle className="flex items-center gap-2 text-base">
+            <SectionIcon name="tldv" />
+            ミーティング分析 (tl;dv 連携)
+          </CardTitle>
         </CardHeader>
         <CardContent>
           <div className="space-y-3">
@@ -919,7 +941,10 @@ export default function SettingsPage() {
       {/* Calendar connection */}
       <Card>
         <CardHeader>
-          <CardTitle className="text-base">カレンダー連携</CardTitle>
+          <CardTitle className="flex items-center gap-2 text-base">
+            <SectionIcon name="calendar" />
+            カレンダー連携
+          </CardTitle>
         </CardHeader>
         <CardContent>
           <div className="space-y-3">
@@ -1097,7 +1122,7 @@ export default function SettingsPage() {
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center gap-2 text-base">
-            <Rss className="h-4 w-4" />
+            <SectionIcon name="ics-feed" />
             カレンダーフィード
           </CardTitle>
         </CardHeader>
@@ -1150,7 +1175,7 @@ export default function SettingsPage() {
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center gap-2 text-base">
-            <Clock className="h-4 w-4" />
+            <SectionIcon name="availability" />
             空き時間の設定
           </CardTitle>
         </CardHeader>
@@ -1347,7 +1372,8 @@ export default function SettingsPage() {
       {/* Danger zone */}
       <Card className="border-destructive/30">
         <CardHeader>
-          <CardTitle className="text-base text-destructive">
+          <CardTitle className="flex items-center gap-2 text-base text-destructive">
+            <SectionIcon name="danger" />
             危険な操作
           </CardTitle>
         </CardHeader>
