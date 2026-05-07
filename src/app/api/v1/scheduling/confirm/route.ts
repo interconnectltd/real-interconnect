@@ -96,36 +96,39 @@ export async function POST(request: Request) {
 
     let meetingUrl: string;
     let calendarEventId = "";
+    // 実際に確定された platform (google_meet を要求しても calendar 未連携で manual に
+    // silent fallback した場合、 chat 表示は manual ラベルにする)
+    let resolvedPlatform: "google_meet" | "zoom_pmi" | "manual" = data.platform;
 
     if (data.platform === "google_meet") {
       // proposer (=user) の Google calendar で event 作成
       const sb = await createServiceClient();
       const tok = await getValidGoogleAccessToken(sb, user.id);
       if (!tok) {
-        return jsonError(
-          400,
-          "CALENDAR_NOT_CONNECTED",
-          "Google Calendar が未連携です",
-        );
+        // ★Wave12: Calendar 未連携でも 400 で死なせない silent fallback
+        //   旧実装は CALENDAR_NOT_CONNECTED で 400 → frontend で再 POST → 400 1 件残る UX
+        //   新実装: server 側で manual 相当に内部 fallback、 chat には「URL は後で共有」表示
+        meetingUrl = data.manual_url ?? "";
+        calendarEventId = "";
+        resolvedPlatform = "manual";
+      } else {
+        const event = await createMeetEvent({
+          accessToken: tok.accessToken,
+          summary: data.summary ?? `1on1: ${otherProfile?.name ?? "相手"}`,
+          description: data.description,
+          start: data.start,
+          end: data.end,
+          attendees: otherProfile?.email
+            ? [{ email: otherProfile.email, displayName: otherProfile.name ?? undefined }]
+            : [],
+        });
+        meetingUrl = event.hangoutLink ?? event.htmlLink;
+        calendarEventId = event.id;
       }
-      const event = await createMeetEvent({
-        accessToken: tok.accessToken,
-        summary: data.summary ?? `1on1: ${otherProfile?.name ?? "相手"}`,
-        description: data.description,
-        start: data.start,
-        end: data.end,
-        attendees: otherProfile?.email
-          ? [{ email: otherProfile.email, displayName: otherProfile.name ?? undefined }]
-          : [],
-      });
-      meetingUrl = event.hangoutLink ?? event.htmlLink;
-      calendarEventId = event.id;
     } else if (data.platform === "zoom_pmi") {
-      // zoom_pmi: 既存 PMI URL を使用
       meetingUrl = data.zoom_pmi_url!;
     } else {
-      // manual: Calendar 連携なし、 URL は user が後で共有 / 対面 / 既存 Meet 等
-      // meeting_confirmed メッセージは投稿するが calendar event は作らない
+      // manual: 直接 manual で来たケース
       meetingUrl = data.manual_url ?? "";
       calendarEventId = "";
     }
@@ -139,10 +142,12 @@ export async function POST(request: Request) {
       start: data.start,
       end: data.end,
     };
+    // resolvedPlatform を見て chat の文言切替 (silent fallback 時に「Google Meet」と
+    // 嘘表記しない)
     const platformLabel =
-      data.platform === "google_meet"
+      resolvedPlatform === "google_meet"
         ? "Google Meet"
-        : data.platform === "zoom_pmi"
+        : resolvedPlatform === "zoom_pmi"
         ? "Zoom"
         : "URL は後で共有";
     const { data: msg, error: msgErr } = await supabase
