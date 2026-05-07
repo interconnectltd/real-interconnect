@@ -38,7 +38,8 @@ function buildCsp(nonce: string): string {
   const items: Array<string | null> = [
     `default-src 'self'`,
     `script-src ${scriptSrc}`,
-    `style-src 'self' 'unsafe-inline'`,
+    // style-src に Google Fonts ホスト追加 (third-party CSS 経由の Web フォント等)
+    `style-src 'self' 'unsafe-inline' https://fonts.googleapis.com`,
     `img-src 'self' data: blob: ${SUPABASE_HTTPS}`,
     `font-src 'self' data: https://fonts.gstatic.com`,
     `connect-src 'self' ${SUPABASE_HTTPS} ${SUPABASE_WSS} https://api.pwnedpasswords.com`,
@@ -65,14 +66,22 @@ export async function proxy(request: NextRequest) {
   // → ユーザー視点で「ログインしても画面が変わらない」になっていた。
   // 修正: updateSession に request headers を渡し、その中で `NextResponse.next({ request })`
   // を 1 度だけ作る。proxy.ts ではそこに nonce/CSP の response header を足すだけにする。
+  const csp = buildCsp(nonce);
+
+  // request headers に nonce + CSP を載せて updateSession に渡す。
+  // ★重要: Next.js 16 は **request 側の Content-Security-Policy header から nonce を抽出**
+  //   して内部 inline script (RSC bootstrap / hydration / next/script) に nonce 属性を
+  //   付与する。 これを設定しないと strict-dynamic 下で全 inline が CSP block される。
+  //   (Next.js 公式 docs: docs/02-app/01-building-your-application/07-configuring/
+  //    16-content-security-policy.mdx 参照)
   const reqHeaders = new Headers(request.headers);
   reqHeaders.set("x-nonce", nonce);
+  reqHeaders.set("Content-Security-Policy", csp);
 
   // Supabase auth gate を通す (redirect の場合はそのまま返す)
   const sessionResponse = await updateSession(request, reqHeaders);
 
-  // CSP / nonce を response header に注入 (redirect でも次画面で使われる)
-  const csp = buildCsp(nonce);
+  // CSP / nonce を response header にも注入 (browser に CSP を伝える)
   sessionResponse.headers.set("Content-Security-Policy", csp);
   sessionResponse.headers.set("x-nonce", nonce);
 
