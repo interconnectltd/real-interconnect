@@ -43,9 +43,11 @@ function ChatPageInner() {
 
   // Auto-select room from URL param ?room=xxx
   useEffect(() => {
+    // URL ?room=xxx から initial 選択 (rooms 取得後 1 回のみ、cascading render なし)
     const roomId = searchParams.get("room");
     if (roomId && rooms && !selectedRoom) {
       const found = rooms.find((r) => r.id === roomId);
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       if (found) setSelectedRoom(found);
     }
   }, [searchParams, rooms, selectedRoom]);

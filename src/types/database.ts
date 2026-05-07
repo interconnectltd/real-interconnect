@@ -43,7 +43,7 @@ export type TranscriptStatus =
   | "analyzed"
   | "error";
 
-// eslint-disable-next-line @typescript-eslint/no-empty-object-type
+ 
 type R = { Relationships: [] };
 
 export interface Database {

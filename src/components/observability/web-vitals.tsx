@@ -24,7 +24,7 @@ export function WebVitalsReporter() {
     // 開発環境では console、本番では navigator.sendBeacon で集約 endpoint へ
     if (process.env.NODE_ENV !== "production") {
       // dev は info で見える化
-      // eslint-disable-next-line no-console
+       
       console.info(
         `[web-vitals] ${m.name}=${Math.round(m.value)} (${m.rating ?? "n/a"})`,
       );

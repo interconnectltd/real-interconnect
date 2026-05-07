@@ -50,8 +50,9 @@ export default function MembersPage() {
   // 検索 input は即時反映、API クエリは 250ms デバウンス
   const debouncedSearch = useDebouncedValue(memberSearch, 250);
 
-  // フィルタ/ソート/検索が変わったら必ず page=1 にリセット
+  // フィルタ/ソート/検索が変わったら必ず page=1 にリセット (意図的)
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setPage(1);
   }, [debouncedSearch, memberIndustryFilter, memberPositionFilter, memberSortBy]);
 

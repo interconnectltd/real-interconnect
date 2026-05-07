@@ -56,7 +56,9 @@ export function UserAvatar({
 }: UserAvatarProps) {
   const [imgError, setImgError] = useState(false);
 
+  // avatarUrl 変更時に img エラー状態をリセット (意図的)
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setImgError(false);
   }, [avatarUrl]);
 

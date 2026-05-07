@@ -12,13 +12,16 @@ const SNOOZE_MS = 7 * 24 * 60 * 60 * 1000;
 export function TldvConnectCta() {
   const [dismissed, setDismissed] = useState(true);
 
+  // localStorage から hydrate (mount 時 1 回、cascading render なし)
   useEffect(() => {
     const at = localStorage.getItem(STORAGE_KEY);
     if (!at) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setDismissed(false);
       return;
     }
     const elapsed = Date.now() - Number(at);
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setDismissed(Number.isFinite(elapsed) && elapsed < SNOOZE_MS);
   }, []);
 

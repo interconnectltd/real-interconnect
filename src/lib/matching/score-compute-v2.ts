@@ -334,7 +334,7 @@ export function computeScoreV2(input: ScoreV2Input): ScoreV2Result {
   // 「属性のみ」と表示しつつ Haiku 由来の値を返すと整合性が崩れる。
   const minAnalysis = Math.min(viewer.analysisCount, target.analysisCount);
   const partialAnalysis = viewer.analysisCount > 0 || target.analysisCount > 0;
-  let haikuReasons: string[] = [];
+  const haikuReasons: string[] = [];
 
   if (minAnalysis > 0 || partialAnalysis) {
     // Haiku LLM 判定の上書き (§3「+10 score core」、片方向 API)

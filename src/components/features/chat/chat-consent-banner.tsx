@@ -11,8 +11,10 @@ export function ChatConsentBanner() {
   const [visible, setVisible] = useState(false);
 
   useEffect(() => {
+    // localStorage から hydrate (mount 時 1 回のみ)
     const consented = localStorage.getItem(STORAGE_KEY);
     if (!consented) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setVisible(true);
     }
   }, []);

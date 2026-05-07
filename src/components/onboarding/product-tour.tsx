@@ -555,22 +555,25 @@ interface TourState {
 export function useProductTour(storageKey: string) {
   const [state, setState] = useState<TourState>({ status: "idle" });
 
-  // 初回マウント時に localStorage を読む (SSR-safe)
+  // 初回マウント時に localStorage から hydrate (SSR-safe / mount 時 1 回のみ)
   useEffect(() => {
     try {
       const raw = localStorage.getItem(storageKey);
       if (!raw) {
-        // 未操作 → 自動オープン
+        // eslint-disable-next-line react-hooks/set-state-in-effect
         setState({ status: "open" });
         return;
       }
       const parsed = JSON.parse(raw) as { status?: string };
       if (parsed.status === "done" || parsed.status === "dismissed") {
+        // eslint-disable-next-line react-hooks/set-state-in-effect
         setState({ status: "idle" });
       } else {
+        // eslint-disable-next-line react-hooks/set-state-in-effect
         setState({ status: "open" });
       }
     } catch {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setState({ status: "open" });
     }
   }, [storageKey]);

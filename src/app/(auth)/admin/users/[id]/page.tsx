@@ -85,7 +85,9 @@ export default function AdminUserDetailPage({
   const [reasonError, setReasonError] = useState<string | null>(null);
 
   useEffect(() => {
+    // sessionStorage から hydrate (initial mount 時 1 回のみ、cascading render なし)
     const cached = loadReason(id);
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     if (cached) setReason(cached);
   }, [id]);
 

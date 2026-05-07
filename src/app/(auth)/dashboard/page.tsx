@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useRef } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import {
   Heart,
   Users,
@@ -493,11 +493,14 @@ function NewMembersSection({
   members: Profile[] | undefined;
   onViewProfile: (id: string) => void;
 }) {
+  // useState lazy initializer で mount 時 1 度だけ Date.now() 評価
+  // React 19 rules-of-react: render 中の impure function call を回避
+  const [mountedAt] = useState(() => Date.now());
   const newMembers = useMemo(() => {
     if (!members?.length) return null;
-    const sevenDaysAgo = Date.now() - 7 * 24 * 60 * 60 * 1000;
+    const sevenDaysAgo = mountedAt - 7 * 24 * 60 * 60 * 1000;
     return members.filter((m) => new Date(m.created_at).getTime() > sevenDaysAgo);
-  }, [members]);
+  }, [members, mountedAt]);
 
   if (!newMembers?.length) return null;
 

@@ -68,6 +68,8 @@ export function SchedulingCard({
   }, [targetUserId]);
 
   useEffect(() => {
+    // 外部 API 同期 (state→外部、外部→state は callback 経由のため許容)
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     fetchSuggestions();
   }, [fetchSuggestions]);
 
