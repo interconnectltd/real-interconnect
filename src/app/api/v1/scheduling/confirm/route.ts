@@ -36,7 +36,24 @@ const ConfirmSchema = z.object({
   // meeting_url は manual_url 経由で user 提供、 もしくは未設定で URL 後共有
   platform: z.enum(["google_meet", "zoom_pmi", "manual"]),
   zoom_pmi_url: z.url().optional(),
-  manual_url: z.string().max(500).optional(),
+  // ★Wave13 #6: manual_url は将来 href 化される (MeetingConfirmedCard) ので
+  //   javascript:/data:/vbscript: 等の XSS protocol を validation 段階で弾く。
+  //   z.url() は最低限の URL 形式チェック、 refine で http/https のみ許可。
+  manual_url: z
+    .url()
+    .max(500)
+    .refine(
+      (v) => {
+        try {
+          const u = new URL(v);
+          return u.protocol === "http:" || u.protocol === "https:";
+        } catch {
+          return false;
+        }
+      },
+      { message: "manual_url は http/https のみ許可" },
+    )
+    .optional(),
 });
 
 export async function POST(request: Request) {
@@ -102,12 +119,13 @@ export async function POST(request: Request) {
       return jsonError(403, "FORBIDDEN", "未接続のユーザーです");
     }
 
-    // ★Wave13 #8/B: Idempotency (二重 Meet event / 二重 chat 投稿防止)
-    //   SchedulingCard は confirmedSlot を local state のみで持つので reload で消える
-    //   → 再度「この日程で決定」を押すと同 (room, start, end, organizer) で 2 回叩かれて
-    //     Calendar に二重予定 + 相手にスパム通知。
-    //   過去 5 分以内に同 (room_id, sender_id, start, end) の meeting_confirmed が
-    //   既に存在すれば、そのレコードを 200 で返却 (idempotent)。
+    // ★Wave13 R2 #1: Idempotency (二重 Meet event / 二重 chat 投稿防止)
+    //   旧実装は (room_id, sender_id, payload->>start, payload->>end) 完全一致で hit
+    //   判定していたが、 reload→再 suggest で start の秒/ミリ秒が前回と異なるため
+    //   主要な「reload→再決定」ユースケースで idempotency が外れていた。
+    //   1on1 room では 5 分以内の (room_id, sender_id, content_type=meeting_confirmed) が
+    //   1 件でもあれば「重複確定」とみなしても誤判定リスクは無い (同 user が同 room で
+    //   5 分以内に異なる日程を 2 件確定する想定は無い)。 粗い判定で実効性を最大化。
     const fiveMinAgo = new Date(Date.now() - 5 * 60_000).toISOString();
     const { data: dupMsg } = await supabase
       .from("chat_messages")
@@ -118,11 +136,27 @@ export async function POST(request: Request) {
       .eq("sender_id", user.id)
       .eq("content_type", "meeting_confirmed")
       .gte("created_at", fiveMinAgo)
-      .filter("payload->>start", "eq", data.start)
-      .filter("payload->>end", "eq", data.end)
+      .order("created_at", { ascending: false })
+      .limit(1)
       .maybeSingle();
     if (dupMsg) {
       const dupPayload = (dupMsg.payload as unknown as MeetingConfirmedPayload | null) ?? null;
+      // R2: idempotent fall-through も audit に記録 (旧実装は audit 抜け)
+      const client = extractClientInfo(request);
+      void writeAuditLog(supabase, {
+        actor_id: user.id,
+        action: "calendar.event.create",
+        target_type: "calendar_event",
+        target_id: dupPayload?.calendar_event_id_organizer || null,
+        payload: {
+          platform: data.platform,
+          room_id: data.room_id,
+          start: data.start,
+          idempotent: true,
+        },
+        ip: client.ip,
+        ua: client.ua,
+      });
       return json(
         {
           message: dupMsg,

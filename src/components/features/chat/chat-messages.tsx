@@ -7,6 +7,7 @@ import { useSupabase } from "@/providers/supabase-provider";
 import { cn } from "@/lib/utils";
 import { SchedulingCard } from "./scheduling-card";
 import { MeetingSuggestionCard, MeetingConfirmedCard } from "./meeting-suggestion-card";
+import type { MeetingConfirmedPayload } from "@/types/calendar";
 
 export interface ChatMessage {
   id: string;
@@ -214,23 +215,25 @@ export function ChatMessages({
         }
         queryClient.invalidateQueries({ queryKey: ["chat-rooms"] });
       })
-      // ★Wave13 #6/#9: 既読 realtime UPDATE 反映
-      //   migration 00053 で chat_messages.is_read=true 更新を broadcast する trigger
-      //   を追加。 UPDATE event は old/new の record 両方を含むので、 該当 ID の
-      //   キャッシュ行を is_read=true に部分更新する。
-      .on("broadcast", { event: "UPDATE" }, (payload) => {
-        const updated = (payload.payload as { record?: ChatMessage }).record;
-        if (!updated || !updated.id) return;
+      // ★Wave13 R2 #2: 既読 bulk UPDATE 集約 broadcast
+      //   migration 00054 で AFTER UPDATE OF is_read FOR EACH STATEMENT trigger
+      //   に切替済。 100 件 unread の bulk UPDATE → 1 broadcast UPDATE_BULK で受信、
+      //   ids 配列を Set に変換して O(N) で一括キャッシュ更新 → 1 re-render に圧縮。
+      .on("broadcast", { event: "UPDATE_BULK" }, (payload) => {
+        const body = payload.payload as { ids?: string[]; is_read?: boolean };
+        if (!body?.ids || !Array.isArray(body.ids) || body.ids.length === 0) return;
+        const targetRead = body.is_read === true;
+        const idSet = new Set(body.ids);
         queryClient.setQueryData<MessagesResponse>(
           ["chat-messages", roomId],
           (old) => {
             if (!old) return old;
             let changed = false;
             const next = old.messages.map((m) => {
-              if (m.id !== updated.id) return m;
-              if (m.is_read === updated.is_read) return m;
+              if (!idSet.has(m.id)) return m;
+              if (m.is_read === targetRead) return m;
               changed = true;
-              return { ...m, is_read: updated.is_read };
+              return { ...m, is_read: targetRead };
             });
             if (!changed) return old;
             return { ...old, messages: next };
@@ -400,7 +403,10 @@ export function ChatMessages({
                       );
                     })()
                   ) : msg.content_type === "meeting_confirmed" ? (
-                    <MeetingConfirmedCard content={msg.content} />
+                    <MeetingConfirmedCard
+                      content={msg.content}
+                      payload={msg.payload as MeetingConfirmedPayload | null}
+                    />
                   ) : (
                     <div
                       className={cn(

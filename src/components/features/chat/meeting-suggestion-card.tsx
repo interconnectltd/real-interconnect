@@ -197,11 +197,34 @@ export function MeetingSuggestionCard({
   );
 }
 
-/** Simple confirmed meeting display card */
-export function MeetingConfirmedCard({ content }: { content: string }) {
-  // content from the API contains lines like:
-  // "日時: 2026年4月29日(火) 14:00\n時間: 30分\nプラットフォーム: Zoom"
+/** Confirmed meeting display card with optional Meet/Zoom URL action */
+import type { MeetingConfirmedPayload } from "@/types/calendar";
+
+export function MeetingConfirmedCard({
+  content,
+  payload,
+}: {
+  content: string;
+  payload?: MeetingConfirmedPayload | null;
+}) {
   const lines = content.split("\n").filter(Boolean);
+
+  // ★Wave13 R2 #5: Calendar 自動 Meet event 生成済の場合、 chat 上に「会議に参加」
+  //   ボタンを出す。 旧実装は payload.meeting_url を全く使っておらず、 ユーザーは
+  //   chat 確定通知を見ても Calendar アプリを別途開く動線になっていた。
+  //   #6 サニタイズ: javascript:/data: 等の XSS 経路を防ぐため http/https のみ許可、
+  //   manual_url 側 (server) でも validation 済だが描画層も多重防御。
+  const safeMeetingUrl = (() => {
+    const raw = payload?.meeting_url;
+    if (!raw) return null;
+    try {
+      const u = new URL(raw);
+      if (u.protocol !== "http:" && u.protocol !== "https:") return null;
+      return u.toString();
+    } catch {
+      return null;
+    }
+  })();
 
   return (
     <Card
@@ -210,7 +233,7 @@ export function MeetingConfirmedCard({ content }: { content: string }) {
     >
       <CardContent className="flex items-start gap-2 pt-0">
         <Check className="mt-0.5 h-4 w-4 shrink-0 text-green-600" />
-        <div className="space-y-0.5">
+        <div className="flex-1 space-y-0.5">
           <p className="text-sm font-medium text-green-800 dark:text-green-200">
             ミーティングが確定しました
           </p>
@@ -222,6 +245,17 @@ export function MeetingConfirmedCard({ content }: { content: string }) {
               {line}
             </p>
           ))}
+          {safeMeetingUrl && (
+            <a
+              href={safeMeetingUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="mt-1.5 inline-flex h-8 min-h-[44px] items-center gap-1.5 rounded-md bg-green-600 px-3 text-xs font-semibold text-white shadow-sm transition-colors hover:bg-green-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-green-500 focus-visible:ring-offset-2 sm:min-h-0"
+            >
+              <Video className="h-3.5 w-3.5" aria-hidden="true" />
+              会議に参加
+            </a>
+          )}
         </div>
       </CardContent>
     </Card>
