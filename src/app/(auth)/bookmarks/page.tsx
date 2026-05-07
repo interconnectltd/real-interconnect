@@ -14,7 +14,10 @@ import { Bookmark, Loader2 } from "lucide-react";
 import { toast } from "sonner";
 import { useBookmarks } from "@/hooks/queries/use-bookmarks";
 import { useToggleBookmark } from "@/hooks/mutations/use-toggle-bookmark";
+import { useConnections } from "@/hooks/queries/use-connections";
+import { useMyProfile } from "@/hooks/queries/use-profile";
 import { useUIStore } from "@/stores/ui-store";
+import { ConnectedActions } from "@/components/shared/connected-actions";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -40,11 +43,30 @@ export default function BookmarksPage() {
   const { data, isLoading, isError } = useBookmarks({ enabled: true });
   const toggle = useToggleBookmark();
   const { openProfileModal } = useUIStore();
+  const { data: connections } = useConnections();
+  const { data: myProfile } = useMyProfile();
 
   const items = useMemo(() => {
     if (!Array.isArray(data)) return [] as BookmarkRow[];
     return (data as BookmarkRow[]).filter((b) => b.profile);
   }, [data]);
+
+  const connectionIdByPeerId = useMemo(() => {
+    const m = new Map<string, string>();
+    if (!myProfile?.id || !Array.isArray(connections)) return m;
+    for (const c of connections as Array<{
+      id: string;
+      user_id: string;
+      connected_user_id: string;
+      status: string;
+    }>) {
+      if (c.status !== "accepted" && c.status !== "reaccepted") continue;
+      const peerId =
+        c.user_id === myProfile.id ? c.connected_user_id : c.user_id;
+      if (peerId) m.set(peerId, c.id);
+    }
+    return m;
+  }, [connections, myProfile?.id]);
 
   return (
     <div className="mx-auto max-w-6xl space-y-6">
@@ -166,6 +188,15 @@ export default function BookmarksPage() {
                         <p className="text-[10px] text-muted-foreground/70">
                           {new Date(b.created_at).toLocaleDateString("ja-JP")} に保存
                         </p>
+                        {connectionIdByPeerId.get(p.id) && (
+                          <ConnectedActions
+                            connectionId={connectionIdByPeerId.get(p.id)!}
+                            targetUserId={p.id}
+                            variant="card"
+                            onOpenProfile={() => openProfileModal(p.id)}
+                            onRequestMeeting={() => openProfileModal(p.id)}
+                          />
+                        )}
                       </CardContent>
                     </Card>
                   </div>

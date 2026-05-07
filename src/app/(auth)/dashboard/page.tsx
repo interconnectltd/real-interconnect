@@ -22,6 +22,7 @@ import { Badge } from "@/components/ui/badge";
 import { UserAvatar } from "@/components/shared/user-avatar";
 import { useSupabase } from "@/providers/supabase-provider";
 import { useConnections } from "@/hooks/queries/use-connections";
+import { ConnectedActions } from "@/components/shared/connected-actions";
 import { useUnreadCount } from "@/hooks/queries/use-notifications";
 import { useMatchingScores, useMutualMatches } from "@/hooks/queries/use-matching-scores";
 import { useMembers } from "@/hooks/queries/use-members";
@@ -84,6 +85,24 @@ export default function DashboardPage() {
   const acceptedCount = connections?.filter(
     (c: { status: string }) => c.status === "accepted",
   ).length ?? 0;
+
+  // peer user_id → connection.id (accepted のみ) で MemberCard に渡す
+  const connectionIdByPeerId = useMemo(() => {
+    const m = new Map<string, string>();
+    if (!myProfile?.id || !Array.isArray(connections)) return m;
+    for (const c of connections as Array<{
+      id: string;
+      user_id: string;
+      connected_user_id: string;
+      status: string;
+    }>) {
+      if (c.status !== "accepted" && c.status !== "reaccepted") continue;
+      const peerId =
+        c.user_id === myProfile.id ? c.connected_user_id : c.user_id;
+      if (peerId) m.set(peerId, c.id);
+    }
+    return m;
+  }, [connections, myProfile?.id]);
   const memberCount =
     (membersData as { members: unknown[]; meta: { totalCount: number } } | undefined)
       ?.meta?.totalCount ?? 0;
@@ -289,6 +308,8 @@ export default function DashboardPage() {
             return (
               <MemberCard
                 key={score.target_id}
+                userId={score.target_id}
+                connectionId={connectionIdByPeerId.get(score.target_id)}
                 onOpen={() => openProfileModal(score.target_id)}
                 name={p?.name ?? "ユーザー"}
                 avatarUrl={p?.avatar_url}
@@ -339,6 +360,8 @@ export default function DashboardPage() {
             {mutualMatches.slice(0, 3).map((m) => (
               <MemberCard
                 key={m.user_id}
+                userId={m.user_id}
+                connectionId={connectionIdByPeerId.get(m.user_id)}
                 onOpen={() => openProfileModal(m.user_id)}
                 name={m.profile?.name ?? "ユーザー"}
                 avatarUrl={m.profile?.avatar_url}
@@ -417,26 +440,49 @@ function SectionHeader({
 }
 
 function MemberCard({
+  userId,
   name,
   avatarUrl,
   role,
   summary,
   onOpen,
   accent,
+  connectionId,
 }: {
+  userId?: string;
   name: string;
   avatarUrl?: string | null;
   role?: string;
   summary?: string | null;
   onOpen: () => void;
   accent?: boolean;
+  /** accepted の場合のみ ConnectedActions を出す */
+  connectionId?: string;
 }) {
+  // button-in-button を避けるため div role="button" 化
   return (
-    <button
-      type="button"
+    <div
+      role="button"
+      tabIndex={0}
       onClick={onOpen}
+      onKeyDown={(e) => {
+        if (e.target !== e.currentTarget) return;
+        if (e.key === "Enter") {
+          e.preventDefault();
+          onOpen();
+        } else if (e.key === " ") {
+          e.preventDefault();
+        }
+      }}
+      onKeyUp={(e) => {
+        if (e.target !== e.currentTarget) return;
+        if (e.key === " ") {
+          e.preventDefault();
+          onOpen();
+        }
+      }}
       aria-label={`${name} のプロフィールを開く`}
-      className="group block w-full text-left outline-none focus-visible:ring-[3px] focus-visible:ring-ring/70 rounded-lg"
+      className="group block w-full cursor-pointer text-left outline-none focus-visible:ring-[3px] focus-visible:ring-ring/70 rounded-lg"
     >
       <Card
         className={`ds-card-interactive h-full ${accent ? "border-accent/25 bg-[color:color-mix(in_oklab,var(--accent)_4%,var(--card))]" : ""}`}
@@ -464,9 +510,20 @@ function MemberCard({
               {summary}
             </p>
           )}
+          {connectionId && userId && (
+            <div className="pt-1">
+              <ConnectedActions
+                connectionId={connectionId}
+                targetUserId={userId}
+                variant="card"
+                onOpenProfile={onOpen}
+                onRequestMeeting={onOpen}
+              />
+            </div>
+          )}
         </CardContent>
       </Card>
-    </button>
+    </div>
   );
 }
 

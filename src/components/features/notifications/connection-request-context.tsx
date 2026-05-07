@@ -25,6 +25,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { UserAvatar } from "@/components/shared/user-avatar";
 import { ScoreBar, ReasonList } from "@/components/shared/score-bar";
+import { ConnectedActions } from "@/components/shared/connected-actions";
 import { useUIStore } from "@/stores/ui-store";
 import { api } from "@/lib/api-client";
 
@@ -218,7 +219,20 @@ export function ConnectionRequestContext({
                 </p>
               )}
 
-              {/* 詳細プロフィールへのリンク */}
+              {/* accepted/reaccepted ならその場でチャット/日程動線を提供 */}
+              {data.connection &&
+                (data.connection.status === "accepted" ||
+                  data.connection.status === "reaccepted") &&
+                data.profile && (
+                  <ConnectedActions
+                    connectionId={data.connection.id}
+                    targetUserId={data.profile.id}
+                    variant="modal"
+                    onRequestMeeting={(id) => openProfileModal(id)}
+                  />
+                )}
+
+              {/* 詳細プロフィールへのリンク (常設) */}
               <div className="flex justify-end">
                 <Button
                   size="sm"
