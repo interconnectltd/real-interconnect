@@ -19,6 +19,7 @@ import { useConnections } from "@/hooks/queries/use-connections";
 import { useRequestConnection } from "@/hooks/mutations/use-request-connection";
 import { useToggleBookmark } from "@/hooks/mutations/use-toggle-bookmark";
 import { useRequestMeeting } from "@/hooks/mutations/use-request-meeting";
+import { ConnectedActions } from "@/components/shared/connected-actions";
 import { api } from "@/lib/api-client";
 // V2: SCORE_AXIS_LABELS 不要（おすすめ度のみ表示）
 import { ScoreBar, ReasonList } from "@/components/shared/score-bar";
@@ -358,16 +359,15 @@ export function ProfileModal() {
               )}
 
               {/* Actions */}
-              <div className="flex gap-2 pt-2">
+              <div className="flex flex-wrap items-center gap-2 pt-2">
                 {isConnected ? (
-                  <Button
+                  <ConnectedActions
+                    connectionId={connectionWithUser?.id ?? ""}
+                    targetUserId={profileModalUserId ?? ""}
+                    variant="modal"
+                    onRequestMeeting={() => setShowMeetingForm((v) => !v)}
                     className="flex-1"
-                    variant="outline"
-                    onClick={() => setShowMeetingForm((v) => !v)}
-                  >
-                    <Calendar className="mr-1.5 h-4 w-4" />
-                    会議をリクエスト
-                  </Button>
+                  />
                 ) : isPending ? (
                   <Button className="flex-1" variant="outline" disabled>
                     申請中

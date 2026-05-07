@@ -141,12 +141,47 @@ export function useUploadAvatar() {
 
       return profile as Profile;
     },
+    onMutate: async (file: File) => {
+      // ローカル URL で即時 avatar 表示 → upload 完走後に正式 URL に置換
+      // 旧アバターが 200-500ms 残る問題 (UX 違和感) を解消
+      await queryClient.cancelQueries({ queryKey: queryKeys.profile.all });
+      const previousMap = new Map<readonly unknown[], unknown>();
+      const localUrl = URL.createObjectURL(file);
+      queryClient
+        .getQueriesData<{ avatar_url?: string | null }>({
+          queryKey: queryKeys.profile.all,
+        })
+        .forEach(([key, old]) => {
+          previousMap.set(key, old);
+          if (old && typeof old === "object" && !Array.isArray(old)) {
+            queryClient.setQueryData(key, { ...old, avatar_url: localUrl });
+          }
+        });
+      return { previousMap, localUrl };
+    },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: queryKeys.profile.all });
       queryClient.invalidateQueries({ queryKey: ["profile-completeness-extras"] });
       toast.success("アバターを更新しました");
     },
-    onError: showErrorToast,
+    onError: (err, _vars, context) => {
+      context?.previousMap.forEach((data, key) => {
+        queryClient.setQueryData(key, data);
+      });
+      showErrorToast(err);
+    },
+    onSettled: (_d, _e, _vars, context) => {
+      // 失敗/成功いずれも localUrl は revoke (メモリリーク防止)
+      // 成功時は invalidateQueries で再 fetch → 正式 avatar_url で再描画され
+      // localUrl 参照はもう無いので revoke 安全
+      if (context?.localUrl) {
+        try {
+          URL.revokeObjectURL(context.localUrl);
+        } catch {
+          // ignore
+        }
+      }
+    },
   });
 }
 

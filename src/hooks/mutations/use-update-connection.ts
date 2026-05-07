@@ -6,6 +6,12 @@ import { queryKeys } from "@/hooks/queries/keys";
 import { showErrorToast } from "@/lib/errors-client";
 import { toast } from "sonner";
 
+interface ConnectionRow {
+  id: string;
+  status: string;
+  [k: string]: unknown;
+}
+
 export function useUpdateConnection() {
   const queryClient = useQueryClient();
 
@@ -14,19 +20,34 @@ export function useUpdateConnection() {
       api.patch(`/connections/${id}`, { status }),
     onMutate: async ({ id, status }) => {
       await queryClient.cancelQueries({ queryKey: queryKeys.connections.all });
-      const previous = queryClient.getQueryData(queryKeys.connections.all);
-      queryClient.setQueryData(queryKeys.connections.all, (old: unknown) => {
-        if (!Array.isArray(old)) return old;
-        return old.map((conn: Record<string, unknown>) =>
-          conn.id === id ? { ...conn, status } : conn,
-        );
-      });
-      return { previous };
+
+      // prefix match で ["connections", *] 全キャッシュ更新
+      // 旧: setQueryData(connections.all=["connections"]) → useConnections() は
+      //     connections.list({status})=["connections","list",{status}] を読む
+      //     キー不一致で楽観更新ゼロ反映だった
+      const previousMap = new Map<readonly unknown[], unknown>();
+      queryClient
+        .getQueriesData<ConnectionRow[]>({ queryKey: queryKeys.connections.all })
+        .forEach(([key, old]) => {
+          previousMap.set(key, old);
+          if (!Array.isArray(old)) return;
+          // タブ key の status filter 引数を取り出す (例: ["connections","list",{status:"pending"}])
+          const filterStatus =
+            (key[2] as { status?: string } | undefined)?.status;
+          const updated = old.map((c) => (c.id === id ? { ...c, status } : c));
+          // 「pending → accepted」遷移時に pending タブからは消し、
+          // accepted タブには表示する (filter 不一致なら除外、一致なら残置)
+          const next = filterStatus
+            ? updated.filter((c) => c.status === filterStatus)
+            : updated;
+          queryClient.setQueryData(key, next);
+        });
+      return { previousMap };
     },
     onError: (err, _vars, context) => {
-      if (context?.previous) {
-        queryClient.setQueryData(queryKeys.connections.all, context.previous);
-      }
+      context?.previousMap.forEach((data, key) => {
+        queryClient.setQueryData(key, data);
+      });
       showErrorToast(err);
     },
     onSuccess: (_data, { status }) => {
