@@ -24,16 +24,20 @@ import { writeAuditLog, extractClientInfo } from "@/lib/audit-log";
 
 export const dynamic = "force-dynamic";
 
+// participant_id 直接指定 (推奨、表記揺れ・spoofing 排除) または speaker_name (旧) を受付
+const MeetingItemSchema = z
+  .object({
+    transcript_id: z.string().uuid(),
+    participant_id: z.string().uuid().optional(),
+    speaker_name: z.string().min(1).max(200).optional(),
+  })
+  .refine(
+    (v) => Boolean(v.participant_id) || Boolean(v.speaker_name),
+    { message: "participant_id か speaker_name のどちらかが必要" },
+  );
+
 const PostSchema = z.object({
-  meetings: z
-    .array(
-      z.object({
-        transcript_id: z.string().uuid(),
-        speaker_name: z.string().min(1).max(200),
-      }),
-    )
-    .min(1)
-    .max(100),
+  meetings: z.array(MeetingItemSchema).min(1).max(100),
   /** 既に他ユーザーに紐付け済の participant も上書きするか (誤紐付けの修正用) */
   force: z.boolean().default(false),
 });
@@ -183,20 +187,38 @@ export async function POST(
       );
     }
 
-    // RPC で 1 SQL 完結 (idempotent + transactional + speaker_name は exact 一致)
     type RpcLoose = {
       rpc: (
         fn: string,
         args: Record<string, unknown>,
       ) => Promise<{ data: unknown; error: { message?: string } | null }>;
     };
-    const { data: rpcData, error: rpcErr } = await (
-      supabase as unknown as RpcLoose
-    ).rpc("link_import_request_meetings", {
-      p_request_id: id,
-      p_meetings: parsed.data.meetings,
-      p_force: parsed.data.force,
-    });
+
+    // participant_id 指定が 1 件でもあれば v2 RPC (UUID 配列) を使う。
+    // 全件 speaker_name のみなら旧 RPC (後方互換) で speaker_name 一致 UPDATE。
+    const useV2 = parsed.data.meetings.some((m) => m.participant_id);
+    const { data: rpcData, error: rpcErr } = useV2
+      ? await (supabase as unknown as RpcLoose).rpc(
+          "link_import_request_meetings_v2",
+          {
+            p_request_id: id,
+            p_participant_ids: parsed.data.meetings
+              .map((m) => m.participant_id)
+              .filter((v): v is string => Boolean(v)),
+            p_force: parsed.data.force,
+          },
+        )
+      : await (supabase as unknown as RpcLoose).rpc(
+          "link_import_request_meetings",
+          {
+            p_request_id: id,
+            p_meetings: parsed.data.meetings.map((m) => ({
+              transcript_id: m.transcript_id,
+              speaker_name: m.speaker_name,
+            })),
+            p_force: parsed.data.force,
+          },
+        );
     if (rpcErr) {
       return jsonError(500, "DB_ERROR", rpcErr.message ?? "RPC failed");
     }
