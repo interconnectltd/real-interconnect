@@ -114,9 +114,17 @@ export function SchedulingCard({
       setConfirmedSlot(slot);
       setState("confirmed");
     } catch (e) {
+      const errCode = (e as { code?: string } | null)?.code;
+      const errMsg = (e as { message?: string } | null)?.message ?? "";
+      // ★Wave13 R3 #5: 直近 5 分以内に別日程確定済 → 409 ALREADY_CONFIRMED
+      //   ユーザーは「やり直し」操作の dead-end に陥らないよう専用メッセージで誘導。
+      if (errCode === "ALREADY_CONFIRMED") {
+        toast.error(errMsg || "直近で別の日程が確定済みです");
+        setState("selecting");
+        return;
+      }
       // 2) Calendar 未連携時 (400 CALENDAR_NOT_CONNECTED) は manual platform で fallback
       //    → 日時のみ確定、 meeting URL は user が後で共有する設計 (Wave12)
-      const errCode = (e as { code?: string } | null)?.code;
       if (errCode === "CALENDAR_NOT_CONNECTED") {
         try {
           await api.post("/scheduling/confirm", {

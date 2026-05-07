@@ -141,6 +141,21 @@ export async function POST(request: Request) {
       .maybeSingle();
     if (dupMsg) {
       const dupPayload = (dupMsg.payload as unknown as MeetingConfirmedPayload | null) ?? null;
+      // ★Wave13 R3 #5: 5 分以内に「同じ日程」を再 POST → idempotent return (二重防止)
+      //   5 分以内に「異なる日程」を再 POST → 409 (やり直し直前で混乱防止)
+      //   分単位 (秒以下無視) で start/end を比較。 suggest 側 slot は 15 分境界なので
+      //   reload→再 suggest による秒のブレも吸収しつつ別日程は弾ける。
+      const dupStartMin = (dupPayload?.start ?? "").slice(0, 16);
+      const dupEndMin = (dupPayload?.end ?? "").slice(0, 16);
+      const sameStart = dupStartMin === data.start.slice(0, 16);
+      const sameEnd = dupEndMin === data.end.slice(0, 16);
+      if (!sameStart || !sameEnd) {
+        return jsonError(
+          409,
+          "ALREADY_CONFIRMED",
+          `直近 5 分以内に別の日程 (${formatJa(dupPayload?.start ?? data.start)} 〜 ${formatJa(dupPayload?.end ?? data.end)}) が確定済みです。変更する場合は確定済カードを取消してから再操作してください。`,
+        );
+      }
       // R2: idempotent fall-through も audit に記録 (旧実装は audit 抜け)
       const client = extractClientInfo(request);
       void writeAuditLog(supabase, {

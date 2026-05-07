@@ -240,6 +240,13 @@ export function ChatMessages({
           },
         );
       })
+      // ★Wave13 R3 #9: 500 件超 bulk UPDATE は ids 含まない overflow event で来る
+      //   (256 KB payload 上限を超えないため)。 client は invalidateQueries で
+      //   サーバから最新状態を再 fetch する fallback で正準化。
+      .on("broadcast", { event: "UPDATE_BULK_OVERFLOW" }, () => {
+        queryClient.invalidateQueries({ queryKey: ["chat-messages", roomId] });
+        queryClient.invalidateQueries({ queryKey: ["chat-rooms"] });
+      })
       // postgres_changes ブランチは撤去 (Sec audit Critical):
       // publication 単独では RLS を尊重せず、別 room の INSERT を漏洩する
       // 潜在経路があった。broadcast 一本化で room 単位の権限境界に揃える。

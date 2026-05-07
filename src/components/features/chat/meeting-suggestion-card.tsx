@@ -214,7 +214,18 @@ export function MeetingConfirmedCard({
   //   chat 確定通知を見ても Calendar アプリを別途開く動線になっていた。
   //   #6 サニタイズ: javascript:/data: 等の XSS 経路を防ぐため http/https のみ許可、
   //   manual_url 側 (server) でも validation 済だが描画層も多重防御。
+  // ★Wave13 R3 #6: 過去 (start + 60s 経過) ミーティングは「会議に参加」非表示
+  //   旧 Meet event は admin 削除 / Calendar 連携解除等で 404 / 権限エラーになり、
+  //   chat 履歴にずっとボタンが残ると dead link を踏ませる UX 劣化。
+  //   start +60s 後はボタンを出さない (グレースは時計ズレ吸収)。
+  const isPast = (() => {
+    if (!payload?.start) return false;
+    const ms = new Date(payload.start).getTime();
+    if (Number.isNaN(ms)) return false;
+    return ms + 60_000 < Date.now();
+  })();
   const safeMeetingUrl = (() => {
+    if (isPast) return null;
     const raw = payload?.meeting_url;
     if (!raw) return null;
     try {
