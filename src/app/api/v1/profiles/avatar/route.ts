@@ -1,23 +1,69 @@
 import { withAuth, json, jsonError, handleApiError } from "@/lib/api-helpers";
 
 // Route Handler を Node.js runtime で実行 (Edge は body 4.5MB 上限)
-// + maxDuration を 60s に拡張 (50MB アップロードのタイムアウト回避)
 export const runtime = "nodejs";
 export const maxDuration = 60;
 
 const ALLOWED_TYPES = ["image/jpeg", "image/png", "image/webp", "image/gif"];
-const MAX_SIZE = 50 * 1024 * 1024; // 50MB (Supabase Storage 上限と揃える)
+// 主経路は client-side で 4-variant WebP 化済 (use-upload-avatar)。
+// fallback 経由は raw アップロードのため 10MB に制限 (Wave4 sec audit: 50MB は DoS / Storage 過剰)
+const MAX_SIZE = 10 * 1024 * 1024;
+
+/**
+ * 画像 magic bytes 検証 (MIME spoofing 防御)。
+ * file.type はクライアント送信値で改竄可能なため、先頭バイト列で実体検証する。
+ */
+function detectImageMime(buf: Uint8Array): string | null {
+  if (buf.length < 12) return null;
+  // JPEG: FF D8 FF
+  if (buf[0] === 0xff && buf[1] === 0xd8 && buf[2] === 0xff) return "image/jpeg";
+  // PNG: 89 50 4E 47 0D 0A 1A 0A
+  if (
+    buf[0] === 0x89 &&
+    buf[1] === 0x50 &&
+    buf[2] === 0x4e &&
+    buf[3] === 0x47 &&
+    buf[4] === 0x0d &&
+    buf[5] === 0x0a &&
+    buf[6] === 0x1a &&
+    buf[7] === 0x0a
+  )
+    return "image/png";
+  // WebP: "RIFF" .... "WEBP"
+  if (
+    buf[0] === 0x52 &&
+    buf[1] === 0x49 &&
+    buf[2] === 0x46 &&
+    buf[3] === 0x46 &&
+    buf[8] === 0x57 &&
+    buf[9] === 0x45 &&
+    buf[10] === 0x42 &&
+    buf[11] === 0x50
+  )
+    return "image/webp";
+  // GIF: "GIF87a" or "GIF89a"
+  if (
+    buf[0] === 0x47 &&
+    buf[1] === 0x49 &&
+    buf[2] === 0x46 &&
+    buf[3] === 0x38 &&
+    (buf[4] === 0x37 || buf[4] === 0x39) &&
+    buf[5] === 0x61
+  )
+    return "image/gif";
+  return null;
+}
 
 /**
  * POST /api/v1/profiles/avatar (legacy fallback)
  *
  * 主経路は use-upload-avatar.ts のクライアント直送 + 4-variant WebP 生成。
  * このエンドポイントは古いクライアントや Canvas 不可環境のフォールバック用。
- * Netlify Functions の body 制限 (sync 6MB) を超える場合は 413 が返る。
  *
- * 重要な実装注意:
- *   - storage.objects RLS は (storage.foldername(name))[1] = auth.uid()
- *     つまり `<user.id>/<filename>` のフォルダパスでないと upload 拒否される。
+ * Wave4 sec audit:
+ *   - 50MB → 10MB に縮小
+ *   - magic bytes 検証で MIME spoofing 拒否
+ *   - storage パス `<user.id>/avatar.<ext>` は **検出 mime** 由来 (file.name 不使用、path traversal 不可)
  */
 export async function POST(request: Request) {
   try {
@@ -35,13 +81,29 @@ export async function POST(request: Request) {
     }
 
     if (file.size > MAX_SIZE) {
-      return jsonError(400, "BAD_REQUEST", "ファイルサイズは50MB以下にしてください");
+      return jsonError(400, "BAD_REQUEST", "ファイルサイズは10MB以下にしてください");
     }
 
-    const ext = (file.name.split(".").pop() ?? "jpg").toLowerCase();
-    const safeExt = ALLOWED_TYPES.find((t) => t.endsWith(ext))
-      ? ext
-      : (file.type.split("/")[1] ?? "jpg");
+    // magic bytes 検証 (file.type は client 改竄可能、実体で再検証)
+    const ab = await file.arrayBuffer();
+    const buf = new Uint8Array(ab.slice(0, 12));
+    const realMime = detectImageMime(buf);
+    if (!realMime || !ALLOWED_TYPES.includes(realMime)) {
+      return jsonError(
+        400,
+        "BAD_REQUEST",
+        "画像ファイルとして認識できません (拡張子と中身が一致していません)",
+      );
+    }
+
+    // file.name 不使用: 検出 mime から ext を決定 → path traversal 不可
+    const extByMime: Record<string, string> = {
+      "image/jpeg": "jpg",
+      "image/png": "png",
+      "image/webp": "webp",
+      "image/gif": "gif",
+    };
+    const safeExt = extByMime[realMime] ?? "jpg";
     const filePath = `${user.id}/avatar.${safeExt}`;
 
     // 既存 avatar (異なる ext を含む) を削除して storage orphan を防止
@@ -61,9 +123,9 @@ export async function POST(request: Request) {
     // Upload to Supabase Storage (avatars bucket)
     const { error: uploadError } = await supabase.storage
       .from("avatars")
-      .upload(filePath, file, {
+      .upload(filePath, ab, {
         upsert: true,
-        contentType: file.type,
+        contentType: realMime,
       });
 
     if (uploadError) {

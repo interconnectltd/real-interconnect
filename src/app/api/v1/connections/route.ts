@@ -1,4 +1,10 @@
-import { withAuth, json, jsonError, handleApiError } from "@/lib/api-helpers";
+import {
+  withAuth,
+  json,
+  jsonError,
+  handleApiError,
+  checkDbRateLimit,
+} from "@/lib/api-helpers";
 import { isValidUUID } from "@/lib/sanitize";
 import { createServiceClient } from "@/lib/supabase/server";
 import type { Database } from "@/types/database";
@@ -52,6 +58,22 @@ export async function GET(request: Request) {
 export async function POST(request: Request) {
   try {
     const { user, supabase } = await withAuth(request);
+
+    // Notification spam 防御 (Wave4 sec audit):
+    //   1 user で 1h 30 件、24h 100 件まで。
+    //   harassment / mass-pending 攻撃の抑止。
+    const [okHour, okDay] = await Promise.all([
+      checkDbRateLimit(supabase, user.id, "conn.req.h", 30, 3600, true),
+      checkDbRateLimit(supabase, user.id, "conn.req.d", 100, 86400, true),
+    ]);
+    if (!okHour || !okDay) {
+      return jsonError(
+        429,
+        "RATE_LIMITED",
+        "短時間にコネクション申請を多く送りすぎました。時間をおいてから再度お試しください",
+      );
+    }
+
     const body = await request.json().catch(() => null);
 
     if (!body || typeof body !== "object") {
