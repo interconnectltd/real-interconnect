@@ -14,6 +14,11 @@ import { LegalDialog, type LegalTab } from "@/components/legal/legal-dialog";
  * - 18歳以上の事業従事者 表明保証 (5点目)
  * - 同意 → /api/v1/legal/accept (4種user_terms_acceptances記録 + pending_consent transcript昇格)
  * - 拒否 → /api/v1/legal/reject (DELETE文字列タイプ確認 + アカウント削除 + データREDACT)
+ *
+ * Wave10 modile fix:
+ *   旧設計は `<div flex items-start>` 内で `<Checkbox size-4>` と `<button min-h-[44px]>` を inline 混在で
+ *   並べていたため、行高 44px の中で Checkbox center 8px と button center 22px が 14px 縦ずれする計算上必発の事故。
+ *   → register-form と同一の「規約 button を別行 + 下に Checkbox + Label」パターンに統一。
  */
 export function ConsentGateForm() {
   const router = useRouter();
@@ -27,7 +32,6 @@ export function ConsentGateForm() {
   const [error, setError] = useState<string | null>(null);
   const [showRejectConfirm, setShowRejectConfirm] = useState(false);
   const [rejectInput, setRejectInput] = useState("");
-  // LegalDialog single instance (Wave9: tap反応性根治 + backdrop残留事故防止)
   const [legalDialog, setLegalDialog] = useState<{ open: boolean; tab: LegalTab }>({
     open: false,
     tab: "terms",
@@ -94,7 +98,10 @@ export function ConsentGateForm() {
   return (
     <div className="space-y-6">
       {error && (
-        <div role="alert" className="rounded-md bg-destructive/10 p-3 text-sm text-destructive">
+        <div
+          role="alert"
+          className="scroll-mt-20 rounded-md bg-destructive/10 p-3 text-sm text-destructive"
+        >
           {error}
         </div>
       )}
@@ -111,112 +118,105 @@ export function ConsentGateForm() {
           type="button"
           onClick={() => openLegal("terms")}
           aria-haspopup="dialog"
-          className="inline-flex min-h-[44px] items-center px-1 text-xs text-primary underline underline-offset-4"
+          className="inline-flex min-h-[44px] items-center px-1 text-sm font-medium text-primary underline underline-offset-4"
         >
           3文書 (利用規約・プライバシー・特商法) をまとめて読む
         </button>
 
-        <div className="flex items-start gap-2 pt-1">
-          <Checkbox
+        {/* === 1. 利用規約 === */}
+        <ConsentBlock>
+          <button
+            type="button"
+            onClick={() => openLegal("terms")}
+            aria-haspopup="dialog"
+            className="inline-flex min-h-[44px] items-center px-1 font-medium text-primary underline underline-offset-4"
+          >
+            利用規約を読む
+          </button>
+          <CheckboxRow
             id="cg-terms"
             checked={agreeTerms}
-            onCheckedChange={(v) => setAgreeTerms(v === true)}
-            aria-describedby="cg-terms-desc"
+            onChange={setAgreeTerms}
+            label="上記内容に同意します"
           />
-          <div className="text-sm leading-relaxed" id="cg-terms-desc">
-            <button
-              type="button"
-              onClick={() => openLegal("terms")}
-              aria-haspopup="dialog"
-              className="inline-flex min-h-[44px] items-center px-1 text-primary underline underline-offset-4"
-            >
-              利用規約
-            </button>
-            に
-            <Label htmlFor="cg-terms" className="cursor-pointer">同意します</Label>
-          </div>
-        </div>
+        </ConsentBlock>
 
-        <div className="flex items-start gap-2">
-          <Checkbox
+        {/* === 2. プライバシーポリシー === */}
+        <ConsentBlock>
+          <button
+            type="button"
+            onClick={() => openLegal("privacy")}
+            aria-haspopup="dialog"
+            className="inline-flex min-h-[44px] items-center px-1 font-medium text-primary underline underline-offset-4"
+          >
+            プライバシーポリシーを読む
+          </button>
+          <CheckboxRow
             id="cg-privacy"
             checked={agreePrivacy}
-            onCheckedChange={(v) => setAgreePrivacy(v === true)}
-            aria-describedby="cg-privacy-desc"
+            onChange={setAgreePrivacy}
+            label="上記内容に同意します"
           />
-          <div className="text-sm leading-relaxed" id="cg-privacy-desc">
-            <button
-              type="button"
-              onClick={() => openLegal("privacy")}
-              aria-haspopup="dialog"
-              className="inline-flex min-h-[44px] items-center px-1 text-primary underline underline-offset-4"
-            >
-              プライバシーポリシー
-            </button>
-            に
-            <Label htmlFor="cg-privacy" className="cursor-pointer">同意します</Label>
-          </div>
-        </div>
+        </ConsentBlock>
 
-        <div className="flex items-start gap-2">
-          <Checkbox
+        {/* === 3. 特定商取引法 === */}
+        <ConsentBlock>
+          <button
+            type="button"
+            onClick={() => openLegal("tokushoho")}
+            aria-haspopup="dialog"
+            className="inline-flex min-h-[44px] items-center px-1 font-medium text-primary underline underline-offset-4"
+          >
+            特定商取引法に基づく表記を読む
+          </button>
+          <CheckboxRow
             id="cg-tokushoho"
             checked={agreeTokushoho}
-            onCheckedChange={(v) => setAgreeTokushoho(v === true)}
-            aria-describedby="cg-tokushoho-desc"
+            onChange={setAgreeTokushoho}
+            label="内容を確認しました"
           />
-          <div className="text-sm leading-relaxed" id="cg-tokushoho-desc">
-            <button
-              type="button"
-              onClick={() => openLegal("tokushoho")}
-              aria-haspopup="dialog"
-              className="inline-flex min-h-[44px] items-center px-1 text-primary underline underline-offset-4"
-            >
-              特定商取引法に基づく表記
-            </button>
-            の内容を
-            <Label htmlFor="cg-tokushoho" className="cursor-pointer">確認しました</Label>
-          </div>
-        </div>
+        </ConsentBlock>
 
+        {/* === 4. AI 越境移転 (重要警告) === */}
         <div
-          className="flex items-start gap-2 rounded-md border border-amber-300 bg-amber-50 p-2 dark:border-amber-700 dark:bg-amber-950"
+          className="space-y-3 rounded-md border border-amber-300 bg-amber-50 p-3 dark:border-amber-700 dark:bg-amber-950"
           role="region"
           aria-label="AI分析・越境移転に関する重要な同意"
         >
-          <Checkbox
+          <p className="text-sm leading-relaxed text-amber-900 dark:text-amber-200">
+            過去のビジネスミーティングのトランスクリプトを
+            <strong className="font-bold">米国 Anthropic PBC</strong>
+            の Claude Opus 等の AI サービスに送信し、スキル・ニーズ等の構造化情報を抽出します
+            (越境移転・委託先処理を含む)。
+          </p>
+          <CheckboxRow
             id="cg-ai"
             checked={agreeAi}
-            onCheckedChange={(v) => setAgreeAi(v === true)}
-            aria-describedby="cg-ai-desc"
+            onChange={setAgreeAi}
+            label="上記内容に同意します"
+            tone="amber"
           />
-          {/* shadcn Label の base flex が rich content を縦割り化するので
-              plain <label> を使用 (consent 同意文は long-form のため) */}
-          <label
-            htmlFor="cg-ai"
-            id="cg-ai-desc"
-            className="block min-w-0 flex-1 cursor-pointer text-xs leading-relaxed text-amber-900 dark:text-amber-200"
-          >
-            過去のビジネスミーティングのトランスクリプトを<strong>米国Anthropic PBC</strong>のClaude Opus等のAIサービスに送信し、
-            スキル・ニーズ等の構造化情報を抽出することに同意します (越境移転・委託先処理を含む)。
-          </label>
         </div>
 
-        <div className="flex items-start gap-2">
-          <Checkbox
-            id="cg-age"
-            checked={agreeAge}
-            onCheckedChange={(v) => setAgreeAge(v === true)}
-          />
-          <label htmlFor="cg-age" className="block min-w-0 flex-1 cursor-pointer text-sm leading-relaxed">
-            私は<strong>18歳以上</strong>であり、本サービスを<strong>事業の用に供する目的</strong>で利用する事業従事者であることを表明します。
-          </label>
-        </div>
+        {/* === 5. 18歳以上 + 事業従事者 表明保証 === */}
+        <CheckboxRow
+          id="cg-age"
+          checked={agreeAge}
+          onChange={setAgreeAge}
+          label={
+            <>
+              私は<strong className="font-bold">18歳以上</strong>であり、本サービスを
+              <strong className="font-bold">事業の用に供する目的</strong>
+              で利用する事業従事者であることを表明します
+            </>
+          }
+        />
 
         <Button
           type="button"
           onClick={handleAccept}
           disabled={!allAgreed || loading || rejecting}
+          aria-busy={loading}
           className="w-full"
         >
           {loading ? "記録中..." : "同意してサービスを利用開始"}
@@ -224,15 +224,16 @@ export function ConsentGateForm() {
       </fieldset>
 
       {/* 削除セクション (誤クリック防止: 別ブロック + DELETE typed confirmation) */}
-      <details className="rounded-md border border-border/60 p-3 text-sm">
-        <summary className="cursor-pointer text-muted-foreground hover:text-foreground">
+      <details className="rounded-md border border-border/60">
+        <summary className="flex min-h-[44px] cursor-pointer items-center px-3 py-2 text-sm text-muted-foreground hover:text-foreground">
           同意せずアカウントとデータを完全削除する (取り消し不可)
         </summary>
-        <div className="mt-3 space-y-3">
-          <p className="text-xs text-muted-foreground leading-relaxed">
+        <div className="space-y-3 px-3 pb-3">
+          <p className="text-xs leading-relaxed text-muted-foreground">
             このボタンを押すと、あなたのアカウント、招待時の事前分析データ、過去ミーティングに含まれる
             あなたの発言部分(REDACT処理)、同意履歴(仮名化スナップショットは法令上の保管義務により5年間保持)
-            が削除されます。<strong>この操作は取り消せません。</strong>
+            が削除されます。
+            <strong className="font-semibold text-foreground">この操作は取り消せません。</strong>
           </p>
           {!showRejectConfirm ? (
             <Button
@@ -245,7 +246,7 @@ export function ConsentGateForm() {
               削除手続きを開始
             </Button>
           ) : (
-            <div className="space-y-2 rounded-md border border-destructive/40 bg-destructive/5 p-3">
+            <div className="space-y-3 rounded-md border border-destructive/40 bg-destructive/5 p-3">
               <Label htmlFor="reject-confirm" className="text-xs font-medium">
                 削除を確定するには、下記に半角大文字で「DELETE」と入力してください
               </Label>
@@ -257,7 +258,8 @@ export function ConsentGateForm() {
                 autoComplete="off"
                 className="font-mono"
               />
-              <div className="flex gap-2">
+              {/* mobile では Cancel/削除を縦並び (button 文字長で wrap して col 揃わない事故防止) */}
+              <div className="flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">
                 <Button
                   type="button"
                   variant="outline"
@@ -276,6 +278,7 @@ export function ConsentGateForm() {
                   size="sm"
                   onClick={handleReject}
                   disabled={rejecting || rejectInput !== "DELETE"}
+                  aria-busy={rejecting}
                   className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
                 >
                   {rejecting ? "削除中..." : "アカウントとデータを完全削除"}
@@ -294,5 +297,62 @@ export function ConsentGateForm() {
         onTabChange={(tab) => setLegalDialog((s) => ({ ...s, tab }))}
       />
     </div>
+  );
+}
+
+/* ───────── Subcomponents ───────── */
+
+function ConsentBlock({ children }: { children: React.ReactNode }) {
+  return <div className="space-y-1">{children}</div>;
+}
+
+/**
+ * Checkbox + Label を **同行で縦中央揃え**するコア row。
+ *
+ * 設計:
+ *   - `<label>` で全体を wrap → row 全幅クリック可能 (Native control 連動)
+ *   - 内側は `flex items-center gap-3` で Checkbox center と Label center を揃える
+ *   - hover/active で背景色微変 → タップフィードバック視認性
+ *   - `min-h-[44px]` で AAA hit area 保証
+ *   - amber tone (AI 同意) で警告色維持
+ */
+function CheckboxRow({
+  id,
+  checked,
+  onChange,
+  label,
+  tone,
+}: {
+  id: string;
+  checked: boolean;
+  onChange: (v: boolean) => void;
+  label: React.ReactNode;
+  tone?: "amber";
+}) {
+  return (
+    <label
+      htmlFor={id}
+      className={
+        tone === "amber"
+          ? "flex min-h-[44px] cursor-pointer items-center gap-3 rounded-md border border-amber-400 bg-amber-100/60 px-2 py-2 transition-colors hover:bg-amber-100 dark:border-amber-600 dark:bg-amber-900/40 dark:hover:bg-amber-900/60"
+          : "flex min-h-[44px] cursor-pointer items-center gap-3 rounded-md px-2 py-2 transition-colors hover:bg-muted/50 active:bg-muted"
+      }
+    >
+      <Checkbox
+        id={id}
+        checked={checked}
+        onCheckedChange={(v) => onChange(v === true)}
+        className="shrink-0"
+      />
+      <span
+        className={
+          tone === "amber"
+            ? "text-sm font-medium leading-snug text-amber-900 dark:text-amber-100"
+            : "text-sm font-medium leading-snug text-foreground"
+        }
+      >
+        {label}
+      </span>
+    </label>
   );
 }
