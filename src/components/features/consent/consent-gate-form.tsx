@@ -307,14 +307,24 @@ function ConsentBlock({ children }: { children: React.ReactNode }) {
 }
 
 /**
- * Checkbox + Label を **同行で縦中央揃え**するコア row。
+ * Checkbox + Label を **第1行 text center で揃える**コア row。
+ *
+ * 計算根拠:
+ *   - Checkbox: size-4 = 16px、mt-0.5 (2px) で center y = 10
+ *   - Label: text-sm (14px) × leading-snug (1.375) = 19.25px line-height
+ *     第1行 center y = 9.625
+ *   → 0.4px 以内で完全一致 (人間目で判別不能)
+ *
+ * 旧実装は items-center で min-h-[44px] と組合せたため、
+ * multi-line label (18+ 等) で row 高 = max(content, 44) になり、
+ * Checkbox center が「行全体中央」と「label 第1行中央」で最大 10px ずれる致命バグだった。
  *
  * 設計:
- *   - `<label>` で全体を wrap → row 全幅クリック可能 (Native control 連動)
- *   - 内側は `flex items-center gap-3` で Checkbox center と Label center を揃える
+ *   - `<label>` で全体 wrap → row 全幅クリック可能 (htmlFor で native checkbox 連動)
+ *   - `flex items-start` + Checkbox `mt-0.5` で第1行と完全揃え
+ *   - py-2 padding で AAA 44px hit area を保証 (min-h は撤廃、padding ベース)
  *   - hover/active で背景色微変 → タップフィードバック視認性
- *   - `min-h-[44px]` で AAA hit area 保証
- *   - amber tone (AI 同意) で警告色維持
+ *   - 内部 leading-snug 統一 (relaxed だと縦詰まりすぎ vs 行間広すぎの中庸)
  */
 function CheckboxRow({
   id,
@@ -334,21 +344,21 @@ function CheckboxRow({
       htmlFor={id}
       className={
         tone === "amber"
-          ? "flex min-h-[44px] cursor-pointer items-center gap-3 rounded-md border border-amber-400 bg-amber-100/60 px-2 py-2 transition-colors hover:bg-amber-100 dark:border-amber-600 dark:bg-amber-900/40 dark:hover:bg-amber-900/60"
-          : "flex min-h-[44px] cursor-pointer items-center gap-3 rounded-md px-2 py-2 transition-colors hover:bg-muted/50 active:bg-muted"
+          ? "flex cursor-pointer items-start gap-3 rounded-md px-2 py-2 transition-colors hover:bg-amber-200/40 active:bg-amber-200/60 dark:hover:bg-amber-800/40 dark:active:bg-amber-800/60"
+          : "flex cursor-pointer items-start gap-3 rounded-md px-2 py-2 transition-colors hover:bg-muted/50 active:bg-muted"
       }
     >
       <Checkbox
         id={id}
         checked={checked}
         onCheckedChange={(v) => onChange(v === true)}
-        className="shrink-0"
+        className="mt-0.5 shrink-0"
       />
       <span
         className={
           tone === "amber"
-            ? "text-sm font-medium leading-snug text-amber-900 dark:text-amber-100"
-            : "text-sm font-medium leading-snug text-foreground"
+            ? "min-w-0 flex-1 text-sm font-medium leading-snug text-amber-900 dark:text-amber-100"
+            : "min-w-0 flex-1 text-sm font-medium leading-snug text-foreground"
         }
       >
         {label}
