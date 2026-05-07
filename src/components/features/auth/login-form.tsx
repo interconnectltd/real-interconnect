@@ -90,10 +90,20 @@ export function LoginForm() {
       return;
     }
 
+    // signInWithPassword の Promise resolve 直後では cookie 同期が完了していない場合がある。
+    // 明示的に getSession() を待って sb-* cookie が browser に書き込まれた事を保証してから navigate。
+    // (Wave8: 「ログイン押しても変わらない」事故 = cookie 未設定で middleware が /login redirect する root cause)
+    try {
+      await supabase.auth.getSession();
+    } catch {
+      // 失敗しても続行 (signInWithPassword 成功時点で cookie はほぼ確実に存在)
+    }
+
     // ?redirect=<path> があればそちらへ (open redirect / backslash bypass を safeInternalPath で遮断)
     const target = safeInternalPath(searchParams.get("redirect"), "/dashboard");
-    // Chrome の "パスワード保存" prompt と router.push の race を回避するため
-    // full nav で確定遷移 (prompt はオリジン (=同一) なので確実に出る)。
+    // window.location.assign は full nav で cookie / RSC キャッシュをリセット → middleware が
+    // 確実に新しい session で auth 判定する。router.push (client nav) では稀に古い RSC が残って
+    // /dashboard を /login へ再 redirect させる事故が出るため full nav を選択。
     if (typeof window !== "undefined") {
       window.location.assign(target);
     } else {
