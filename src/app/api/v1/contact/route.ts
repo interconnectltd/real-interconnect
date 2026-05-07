@@ -2,10 +2,11 @@
  * POST /api/v1/contact
  *
  * 公開フォームからお問い合わせを受付。anon でも投稿可能。
- * 認証済ユーザーは sender_user_id を紐付け。SLA 24h で計算。
+ * 認証済ユーザーは sender_user_id を紐付け。SLA は kind に応じ計算。
  *
- * rate limit (Tier3): IP 別 + email 別で 1h 5 件まで等の上限を予定。
- * 本実装は zod 検証 + sanitize + DB INSERT のみ (CAPTCHA は別途)。
+ * Wave1: IP 軸 5/h + email 軸 5/24h DB rate-limit、getClientIp で IP 詐称遮断。
+ * Wave2: CSRF Origin guard、honeypot/timing 検査、制御文字 / BiDi reject、
+ *        zod エラー文言の汎化。
  */
 
 import { z } from "zod";
@@ -26,25 +27,89 @@ const KINDS = [
   "partnership",
 ] as const;
 
+// 制御文字 (0x00-0x1F, 0x7F) + BiDi override (U+202A-U+202E, U+2066-U+2069) を拒否。
+// admin UI での表示崩し / log injection 防止 (Wave2 sec audit Low-3)。
+const NO_CTRL = /^[^\x00-\x1f\x7f‪-‮⁦-⁩]+$/;
+
 const ContactSchema = z.object({
-  sender_name: z.string().trim().min(1).max(100),
+  sender_name: z
+    .string()
+    .trim()
+    .min(1)
+    .max(100)
+    .regex(NO_CTRL, "制御文字は使用できません"),
   sender_email: z.string().email().max(254),
   kind: z.enum(KINDS).default("general"),
-  subject: z.string().trim().min(1).max(200),
+  subject: z
+    .string()
+    .trim()
+    .min(1)
+    .max(200)
+    .regex(NO_CTRL, "制御文字は使用できません"),
   body: z.string().trim().min(10).max(5000),
+  // anti-spam fields (Wave2 sec audit)
+  hp_company: z.string().max(0).optional().default(""),
+  ts_render: z.number().int().nonnegative().optional().default(0),
 });
 
 export const dynamic = "force-dynamic";
 
 export async function POST(request: Request) {
   try {
+    // CSRF Origin guard (anon endpoint なので明示的に呼ぶ)
+    const origin = request.headers.get("origin");
+    const allowedHosts = new Set(
+      (process.env.ALLOWED_ORIGIN_HOSTS ?? "inter-connect.app,www.inter-connect.app")
+        .split(",")
+        .map((s) => s.trim())
+        .filter(Boolean),
+    );
+    if (origin) {
+      try {
+        const u = new URL(origin);
+        const isLocalhost =
+          process.env.NODE_ENV !== "production" &&
+          (u.hostname === "localhost" || u.hostname === "127.0.0.1");
+        const isNetlifyPreview =
+          (process.env.ALLOW_NETLIFY_PREVIEW ?? "").toLowerCase() === "true" &&
+          u.hostname.endsWith(".netlify.app");
+        if (!allowedHosts.has(u.hostname) && !isLocalhost && !isNetlifyPreview) {
+          return jsonError(403, "FORBIDDEN", "オリジン不正");
+        }
+      } catch {
+        return jsonError(403, "FORBIDDEN", "オリジン不正");
+      }
+    }
+
     const raw: unknown = await request.json().catch(() => null);
     const parsed = ContactSchema.safeParse(raw);
     if (!parsed.success) {
+      // 文言は汎化 (zod schema 内部詳細を漏らさない)
       return jsonError(
         400,
         "BAD_REQUEST",
-        parsed.error.issues[0]?.message ?? "ボディ不正",
+        "入力内容に不備があります。各項目をご確認ください。",
+      );
+    }
+
+    // bot 防御: honeypot or 描画から 2 秒未満で送信は silent drop
+    // (200 を返して bot に学習機会を与えない)
+    const elapsed = parsed.data.ts_render
+      ? Date.now() - parsed.data.ts_render
+      : Number.POSITIVE_INFINITY;
+    if (
+      (parsed.data.hp_company ?? "").length > 0 ||
+      (parsed.data.ts_render && elapsed < 2000) ||
+      (parsed.data.ts_render && elapsed > 6 * 3600_000)
+    ) {
+      return json(
+        {
+          id: "ok",
+          kind: parsed.data.kind,
+          sla_due_at: new Date(Date.now() + 24 * 3600_000).toISOString(),
+          message: "お問い合わせを受け付けました。担当より追ってご連絡いたします。",
+        },
+        201,
       );
     }
 
@@ -86,8 +151,8 @@ export async function POST(request: Request) {
 
     // SLA 設定:
     //   urgent_removal       = 4h     (緊急削除、名誉毀損コンテンツ等の即時対応)
-    //   data_disclosure      = 30 日  (個情法 27 条 — 本人開示請求の法定上限)
-    //   data_deletion        = 30 日  (個情法 27 条 — 削除請求)
+    //   data_disclosure      = 30 日  (個情法 33 条 本人開示 — 法定上限)
+    //   data_deletion        = 30 日  (個情法 35 条 利用停止 — 法定上限)
     //   tokushoho            = 30 日  (特商法 11 条 — 開示請求)
     //   その他 (general 等)  = 24h
     const HOUR = 60 * 60 * 1000;

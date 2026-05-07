@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
@@ -10,6 +10,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { api } from "@/lib/api-client";
 import { ApiError } from "@/lib/errors";
+import { nowMs } from "@/lib/timing";
 
 const KIND_OPTIONS = [
   { value: "general", label: "一般のお問い合わせ" },
@@ -40,6 +41,10 @@ const FormSchema = z.object({
   ]),
   subject: z.string().trim().min(1, "件名を入力してください").max(200),
   body: z.string().trim().min(10, "10 文字以上で本文を入力してください").max(5000),
+  // Honeypot: bot は label を見ずに全 input に値を入れがちなので空必須。
+  hp_company: z.string().max(0),
+  // 描画から送信までの ms (人間は 2 秒以上、bot は瞬時)。fast-fail で silent drop。
+  ts_render: z.number().int().nonnegative(),
 });
 
 type FormValues = z.infer<typeof FormSchema>;
@@ -51,11 +56,17 @@ export function ContactForm() {
   const {
     register,
     handleSubmit,
+    setValue,
     formState: { errors, isSubmitting },
   } = useForm<FormValues>({
     resolver: zodResolver(FormSchema),
-    defaultValues: { kind: "general" },
+    defaultValues: { kind: "general", hp_company: "", ts_render: 0 },
   });
+
+  // bot 防御: 描画から submit までの ms を form state にセット (mount 直後に固定)
+  useEffect(() => {
+    setValue("ts_render", nowMs());
+  }, [setValue]);
 
   async function onSubmit(values: FormValues) {
     setErrorMsg(null);
@@ -184,6 +195,17 @@ export function ContactForm() {
           </p>
         )}
       </div>
+
+      {/* Honeypot: 視覚的に隠す + tabIndex=-1 で人間は触らない。bot 防御。 */}
+      <input
+        type="text"
+        tabIndex={-1}
+        autoComplete="off"
+        aria-hidden="true"
+        style={{ position: "absolute", left: "-9999px", width: 1, height: 1, opacity: 0 }}
+        {...register("hp_company")}
+      />
+      <input type="hidden" {...register("ts_render", { valueAsNumber: true })} />
 
       <p className="text-[11px] leading-relaxed text-muted-foreground">
         送信内容は「INTER CONNECT株式会社」が個人情報保護方針に従って取り扱います。

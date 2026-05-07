@@ -86,9 +86,10 @@ const nextConfig: NextConfig = {
         source: "/:path*",
         headers: COMMON_HEADERS,
       },
-      // 認証関連 path は Cache-Control no-store を強制 (back/forward でフォーム残留禁止)
+      // 認証関連 + /contact は Cache-Control no-store を強制
+      // (back/forward で PII フォーム残留禁止 / 個情法 安全管理措置)
       {
-        source: "/(login|register|forgot-password|reset-password)",
+        source: "/(login|register|forgot-password|reset-password|contact)",
         headers: [
           ...COMMON_HEADERS,
           { key: "Cache-Control", value: "no-store, max-age=0" },

@@ -5,7 +5,9 @@ export const metadata: Metadata = {
   title: "お問い合わせ",
   description:
     "INTER CONNECT へのお問い合わせ・サポート・個人情報の開示請求等を受け付けます。原則 2 営業日以内 / 緊急削除は 4 時間以内にご連絡します。",
-  robots: { index: true, follow: true },
+  // 法務上 index 義務はなく、bot による mass-spam 起点になりやすいため noindex 化
+  // (Wave2 sec audit M-5)
+  robots: { index: false, follow: true },
 };
 
 export default function ContactPage() {
@@ -24,7 +26,10 @@ export default function ContactPage() {
         <ul className="list-disc pl-5 text-sm leading-relaxed">
           <li>初回回答: 原則 2 営業日以内 (土日祝・年末年始を除く)</li>
           <li>緊急削除: 受領後 4 時間以内に着手</li>
-          <li>個人情報の開示・削除請求: 原則 2 週間以内 (個情法 33 条)</li>
+          <li>
+            個人情報の開示・利用停止請求: 個情法 33 条「遅滞なく」に基づき、原則
+            2 週間以内に初期回答 / 法定上限 30 日以内に対応完了
+          </li>
           <li>特商法に基づく開示: 原則 5 営業日以内</li>
         </ul>
       </section>
