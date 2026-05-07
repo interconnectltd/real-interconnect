@@ -182,17 +182,23 @@ export function ChatInput({
             if (isSending) return;
             setIsSending(true);
             try {
+              // ★Fix: PostMessageSchema (lib/validators/chat.ts) は scheduling_card で
+              // **payload 必須** + content は説明文 string。
+              // 旧実装は content に JSON.stringify した object を入れて payload 不在で
+              // 400 BAD_REQUEST「scheduling_card には payload が必須です」を踏んでた。
               await api.post(
                 `/chat/rooms/${roomId}/messages`,
                 {
-                  content: JSON.stringify({ target_user_id: otherUserId }),
+                  content: "日程調整カードを送信しました",
                   content_type: "scheduling_card",
+                  payload: { target_user_id: otherUserId },
                 },
                 { headers: { "Idempotency-Key": newIdempotencyKey() } },
               );
               onMessageSent?.();
-            } catch {
-              toast.error("メッセージの送信に失敗しました");
+            } catch (err) {
+              console.error("[chat] scheduling_card send failed", err);
+              toast.error("日程調整カードの送信に失敗しました");
             } finally {
               setIsSending(false);
             }
