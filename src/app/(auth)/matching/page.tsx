@@ -722,7 +722,7 @@ function DismissButton({ onClick }: { onClick: () => void }) {
         onClick();
       }}
       aria-label="この推薦を非表示にする"
-      className="absolute right-1.5 top-1.5 z-10 inline-flex h-11 w-11 items-center justify-center rounded-full text-muted-foreground/60 transition-colors hover:bg-muted hover:text-foreground focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/70"
+      className="absolute right-1.5 top-1.5 z-10 inline-flex h-11 w-11 items-center justify-center rounded-md text-muted-foreground/60 transition-colors hover:bg-muted hover:text-foreground focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/70"
     >
       <X className="h-3.5 w-3.5" aria-hidden="true" />
     </button>
@@ -748,7 +748,7 @@ function BookmarkButton({
       disabled={pending}
       aria-pressed={bookmarked}
       aria-label={bookmarked ? "保存を解除" : "後で見るために保存"}
-      className={`absolute right-14 top-1.5 z-10 inline-flex h-11 w-11 items-center justify-center rounded-full transition-colors focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/70 disabled:opacity-50 ${
+      className={`absolute right-14 top-1.5 z-10 inline-flex h-11 w-11 items-center justify-center rounded-md transition-colors focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/70 disabled:opacity-50 ${
         bookmarked
           ? "text-accent-strong hover:bg-muted"
           : "text-muted-foreground/60 hover:bg-muted hover:text-foreground"

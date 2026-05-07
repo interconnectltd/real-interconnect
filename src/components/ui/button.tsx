@@ -33,16 +33,16 @@ const buttonVariants = cva(
           "h-11 gap-1.5 px-4 has-data-[icon=inline-end]:pr-3 has-data-[icon=inline-start]:pl-3",
         // xs/sm は視覚的に小さく見せたいユースケース向け。視覚高さは保ちつつ、
         // ::after で 44px の不可視ヒットエリアを後乗せして AAA を満たす。
-        xs: "relative h-8 gap-1 rounded-[min(var(--radius-md),6px)] px-2.5 text-xs in-data-[slot=button-group]:rounded-lg has-data-[icon=inline-end]:pr-2 has-data-[icon=inline-start]:pl-2 [&_svg:not([class*='size-'])]:size-3 after:absolute after:inset-x-0 after:top-1/2 after:-translate-y-1/2 after:h-11 after:content-['']",
-        sm: "relative h-9 gap-1 rounded-[min(var(--radius-md),8px)] px-3 text-[0.8rem] in-data-[slot=button-group]:rounded-lg has-data-[icon=inline-end]:pr-2 has-data-[icon=inline-start]:pl-2 [&_svg:not([class*='size-'])]:size-3.5 after:absolute after:inset-x-0 after:top-1/2 after:-translate-y-1/2 after:h-11 after:content-['']",
+        xs: "relative h-8 gap-1 rounded-[min(var(--radius-md),4px)] px-2.5 text-xs in-data-[slot=button-group]:rounded-lg has-data-[icon=inline-end]:pr-2 has-data-[icon=inline-start]:pl-2 [&_svg:not([class*='size-'])]:size-3 after:absolute after:inset-x-0 after:top-1/2 after:-translate-y-1/2 after:h-11 after:content-['']",
+        sm: "relative h-9 gap-1 rounded-[min(var(--radius-md),4px)] px-3 text-[0.8rem] in-data-[slot=button-group]:rounded-lg has-data-[icon=inline-end]:pr-2 has-data-[icon=inline-start]:pl-2 [&_svg:not([class*='size-'])]:size-3.5 after:absolute after:inset-x-0 after:top-1/2 after:-translate-y-1/2 after:h-11 after:content-['']",
         lg: "h-12 gap-1.5 px-5 has-data-[icon=inline-end]:pr-3.5 has-data-[icon=inline-start]:pl-3.5",
         // icon サイズは正方形を保ちつつ、最小ヒットエリアを 44×44 に。
         // 視覚的小サイズが必要な場合は ::after で見えないヒットエリアを乗せる。
         icon: "size-11",
         "icon-xs":
-          "relative size-7 rounded-[min(var(--radius-md),6px)] in-data-[slot=button-group]:rounded-lg [&_svg:not([class*='size-'])]:size-3 after:absolute after:left-1/2 after:top-1/2 after:-translate-x-1/2 after:-translate-y-1/2 after:size-11 after:content-['']",
+          "relative size-7 rounded-[min(var(--radius-md),4px)] in-data-[slot=button-group]:rounded-lg [&_svg:not([class*='size-'])]:size-3 after:absolute after:left-1/2 after:top-1/2 after:-translate-x-1/2 after:-translate-y-1/2 after:size-11 after:content-['']",
         "icon-sm":
-          "relative size-8 rounded-[min(var(--radius-md),8px)] in-data-[slot=button-group]:rounded-lg after:absolute after:left-1/2 after:top-1/2 after:-translate-x-1/2 after:-translate-y-1/2 after:size-11 after:content-['']",
+          "relative size-8 rounded-[min(var(--radius-md),4px)] in-data-[slot=button-group]:rounded-lg after:absolute after:left-1/2 after:top-1/2 after:-translate-x-1/2 after:-translate-y-1/2 after:size-11 after:content-['']",
         "icon-lg": "size-11",
       },
     },

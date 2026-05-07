@@ -192,7 +192,7 @@ export default function BookmarksPage() {
                     }}
                     disabled={toggle.isPending}
                     aria-label={`${p.name} の保存を解除`}
-                    className="absolute right-1.5 top-1.5 z-10 inline-flex h-11 w-11 items-center justify-center rounded-full text-accent-strong hover:bg-muted focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/70"
+                    className="absolute right-1.5 top-1.5 z-10 inline-flex h-11 w-11 items-center justify-center rounded-md text-accent-strong hover:bg-muted focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/70"
                   >
                     <Bookmark
                       className="h-4 w-4"

@@ -98,7 +98,7 @@ export function Header() {
         {/* User menu — render prop merges DropdownMenuTrigger onto Button */}
         <DropdownMenu>
           <DropdownMenuTrigger
-            render={<Button variant="ghost" size="icon-lg" className="rounded-full" aria-label="ユーザーメニュー" />}
+            render={<Button variant="ghost" size="icon-lg" className="rounded-md" aria-label="ユーザーメニュー" />}
           >
             {myProfile?.avatar_url ? (
               <UserAvatar

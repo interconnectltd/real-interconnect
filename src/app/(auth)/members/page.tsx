@@ -334,7 +334,7 @@ function FilterRow({
               role="radio"
               aria-checked={isSelected}
               onClick={() => onSelect(item.value || undefined)}
-              className={`inline-flex min-h-11 shrink-0 items-center rounded-full border px-3 text-xs font-medium transition-colors outline-none focus-visible:ring-[3px] focus-visible:ring-ring/70 ${
+              className={`inline-flex min-h-11 shrink-0 items-center rounded-md border px-3 text-xs font-medium transition-colors outline-none focus-visible:ring-[3px] focus-visible:ring-ring/70 ${
                 isSelected
                   ? "border-accent/40 bg-accent/10 text-accent-strong"
                   : "border-border bg-card text-muted-foreground hover:border-accent/30 hover:text-foreground"
@@ -474,7 +474,7 @@ function MemberCard({
         disabled={bookmarkPending}
         aria-pressed={bookmarked}
         aria-label={bookmarked ? "ブックマークを解除" : "ブックマークに追加"}
-        className={`absolute right-1.5 top-1.5 z-10 inline-flex h-11 w-11 items-center justify-center rounded-full transition-colors focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/70 ${
+        className={`absolute right-1.5 top-1.5 z-10 inline-flex h-11 w-11 items-center justify-center rounded-md transition-colors focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/70 ${
           bookmarked
             ? "text-accent-strong hover:bg-accent/10"
             : "text-muted-foreground/60 hover:bg-muted hover:text-accent-strong"

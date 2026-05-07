@@ -59,7 +59,7 @@ function StepIndicator({
         >
           <div
             className={cn(
-              "flex h-7 w-7 items-center justify-center rounded-full text-xs font-medium",
+              "flex h-7 w-7 items-center justify-center rounded-md text-xs font-medium",
               i < current
                 ? "bg-primary text-primary-foreground"
                 : i === current

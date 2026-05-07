@@ -73,14 +73,14 @@
   --color-warning: var(--warning);
   --color-info: var(--info);
 
-  /* Radius (B2B SaaS = Vercel/Stripe ライン 8px base、経営者向け硬さ重視) */
-  --radius-sm: calc(var(--radius) * 0.5);    /* 4 */
-  --radius-md: calc(var(--radius) * 0.75);   /* 6 */
-  --radius-lg: var(--radius);                /* 8 */
-  --radius-xl: calc(var(--radius) * 1.5);    /* 12 */
-  --radius-2xl: calc(var(--radius) * 2);     /* 16 */
-  --radius-3xl: calc(var(--radius) * 3);     /* 24 */
-  --radius-4xl: calc(var(--radius) * 4);     /* 32 */
+  /* Radius (B2B 角ばらせ徹底 = Linear/Sentry ライン、4px base) */
+  --radius-sm: calc(var(--radius) * 0.5);    /* 2 */
+  --radius-md: calc(var(--radius) * 0.75);   /* 3 */
+  --radius-lg: var(--radius);                /* 4 */
+  --radius-xl: calc(var(--radius) * 1.5);    /* 6 */
+  --radius-2xl: calc(var(--radius) * 2);     /* 8 */
+  --radius-3xl: calc(var(--radius) * 3);     /* 12 */
+  --radius-4xl: calc(var(--radius) * 4);     /* 16 */
 
   /* Elevation (design-system shadow scale) */
   --shadow-xs: 0 1px 2px 0 rgb(15 23 42 / 0.04);
@@ -172,7 +172,7 @@
   --chart-4: var(--brand-navy);
   --chart-5: oklch(0.78 0.13 85);                 /* warm accent (warning/highlight) */
 
-  --radius: 0.5rem;                               /* 8 — Vercel/Stripe ライン (旧 14px から引締め) */
+  --radius: 0.25rem;                              /* 4 — Linear/Sentry ライン (B2B 角ばらせ徹底) */
 
   /* Sidebar — ロゴ hue (215/265) に統一 */
   --sidebar: oklch(0.99 0.005 215);

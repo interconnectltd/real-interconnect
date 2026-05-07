@@ -616,7 +616,7 @@ function Step({
         />
       )}
       <header className="relative z-[1] flex items-start gap-3">
-        <span className="inline-flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-accent/10 text-xs font-semibold text-accent-strong ring-1 ring-accent/30">
+        <span className="inline-flex h-7 w-7 shrink-0 items-center justify-center rounded-md bg-accent/10 text-xs font-semibold text-accent-strong ring-1 ring-accent/30">
           {accentIcon ?? number}
         </span>
         <div className="min-w-0 flex-1">
