@@ -57,7 +57,9 @@ const STATUS_VARIANT: Record<Status, "default" | "secondary" | "destructive" | "
 
 export default function AdminImportRequestsPage() {
   const queryClient = useQueryClient();
-  const [filterStatus, setFilterStatus] = useState<Status | "all">("pending");
+  // 全件取得 → client filter にすることで、各タブの真のカウントが常に出る。
+  // 旧実装: filterStatus 毎に別 fetch → 他タブ count が永久 0 になる致命バグだった。
+  const [filterStatus, setFilterStatus] = useState<Status | "all">("all");
   const [linkingRequest, setLinkingRequest] = useState<ImportRequest | null>(null);
   // 完了 / 却下 メモ入力 Dialog
   const [noteDialog, setNoteDialog] = useState<{
@@ -67,13 +69,16 @@ export default function AdminImportRequestsPage() {
   const [noteInput, setNoteInput] = useState("");
   const [noteError, setNoteError] = useState<string | null>(null);
 
-  const { data, isLoading, isError } = useQuery({
-    queryKey: ["admin-import-requests", filterStatus],
-    queryFn: () =>
-      api.get<ImportRequest[]>(
-        `/admin/import-requests${filterStatus === "all" ? "" : `?status=${filterStatus}`}`,
-      ),
+  // 全件取得 (admin 用、件数高々数百件想定) → タブ切替は client 側で完結
+  const { data: allData, isLoading, isError } = useQuery({
+    queryKey: ["admin-import-requests", "all"],
+    queryFn: () => api.get<ImportRequest[]>("/admin/import-requests"),
   });
+
+  const data =
+    filterStatus === "all"
+      ? allData
+      : allData?.filter((r) => r.status === filterStatus);
 
   const updateMutation = useMutation({
     mutationFn: async ({ id, status, note }: { id: string; status: Status; note?: string }) => {
@@ -89,7 +94,8 @@ export default function AdminImportRequestsPage() {
     onError: () => toast.error("更新に失敗しました"),
   });
 
-  const counts = (data ?? []).reduce(
+  // counts は allData ベース (フィルタ前) — 各タブの真値を表示
+  const counts = (allData ?? []).reduce(
     (acc, r) => {
       acc[r.status] = (acc[r.status] ?? 0) + 1;
       return acc;
@@ -113,7 +119,7 @@ export default function AdminImportRequestsPage() {
       <div className="-mx-4 mb-4 overflow-x-auto px-4 pb-1 sm:mx-0 sm:px-0">
         <div className="flex w-max gap-2 sm:w-auto sm:flex-wrap" role="tablist">
           {(["pending", "processing", "done", "rejected", "all"] as const).map((s) => {
-            const count = s === "all" ? data?.length ?? 0 : counts[s] ?? 0;
+            const count = s === "all" ? allData?.length ?? 0 : counts[s] ?? 0;
             return (
               <Button
                 key={s}
