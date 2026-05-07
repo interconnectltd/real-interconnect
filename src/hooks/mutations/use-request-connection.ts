@@ -24,29 +24,39 @@ export function useRequestConnection() {
     mutationFn: (connectedUserId: string) =>
       api.post("/connections", { connected_user_id: connectedUserId }),
     onMutate: async (connectedUserId) => {
+      // ["connections"] prefix 全キャッシュを cancel (list filter ありなし両対応)
       await queryClient.cancelQueries({ queryKey: queryKeys.connections.all });
-      const previous = queryClient.getQueryData<Connection[]>(queryKeys.connections.all);
-      // 楽観的に "pending" の connection を追加
-      queryClient.setQueryData<Connection[]>(queryKeys.connections.all, (old) => {
-        const optimistic: Connection = {
-          id: `optimistic-${connectedUserId}`,
-          user_id: "self",
-          connected_user_id: connectedUserId,
-          status: "pending",
-        };
-        return old ? [...old, optimistic] : [optimistic];
-      });
-      return { previous };
+
+      // 旧: setQueryData(["connections"], ...) → useConnections() は ["connections","list",...]
+      //     を読んでおり key 不一致で楽観更新が UI に当たらない
+      // 新: setQueriesData で prefix match → ["connections","list",*] 全キャッシュに適用
+      const optimistic: Connection = {
+        id: `optimistic-${connectedUserId}`,
+        user_id: "self",
+        connected_user_id: connectedUserId,
+        status: "pending",
+      };
+      const previousMap = new Map<readonly unknown[], Connection[] | undefined>();
+      queryClient
+        .getQueriesData<Connection[]>({ queryKey: queryKeys.connections.all })
+        .forEach(([key, data]) => {
+          previousMap.set(key, data);
+          queryClient.setQueryData<Connection[]>(
+            key,
+            data ? [...data, optimistic] : [optimistic],
+          );
+        });
+      return { previousMap };
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: queryKeys.connections.all });
       toast.success("コネクション申請を送信しました");
     },
     onError: (err, _variables, context) => {
-      // 失敗時はロールバック
-      if (context?.previous) {
-        queryClient.setQueryData(queryKeys.connections.all, context.previous);
-      }
+      // 失敗時はロールバック (全キャッシュ)
+      context?.previousMap.forEach((data, key) => {
+        queryClient.setQueryData(key, data);
+      });
       showErrorToast(err);
     },
   });
