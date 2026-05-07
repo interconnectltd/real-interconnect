@@ -133,7 +133,7 @@ export function ConsentGateForm() {
             type="button"
             onClick={() => openLegal("terms")}
             aria-haspopup="dialog"
-            className="inline-flex min-h-[44px] items-center px-1 font-medium text-primary underline underline-offset-4"
+            className="inline-flex min-h-[44px] items-center px-1 text-sm font-medium text-primary underline underline-offset-4"
           >
             利用規約を読む
           </button>
@@ -151,7 +151,7 @@ export function ConsentGateForm() {
             type="button"
             onClick={() => openLegal("privacy")}
             aria-haspopup="dialog"
-            className="inline-flex min-h-[44px] items-center px-1 font-medium text-primary underline underline-offset-4"
+            className="inline-flex min-h-[44px] items-center px-1 text-sm font-medium text-primary underline underline-offset-4"
           >
             プライバシーポリシーを読む
           </button>
@@ -169,7 +169,7 @@ export function ConsentGateForm() {
             type="button"
             onClick={() => openLegal("tokushoho")}
             aria-haspopup="dialog"
-            className="inline-flex min-h-[44px] items-center px-1 font-medium text-primary underline underline-offset-4"
+            className="inline-flex min-h-[44px] items-center px-1 text-sm font-medium text-primary underline underline-offset-4"
           >
             特定商取引法に基づく表記を読む
           </button>
@@ -312,8 +312,18 @@ export function ConsentGateForm() {
 
 /* ───────── Subcomponents ───────── */
 
+/**
+ * 計算根拠 (隣接 hit area 衝突解消):
+ *   - 規約 button 高 44px (min-h)
+ *   - 直下 CheckboxRow label 内側で Checkbox の after:-inset-y-3.5 が
+ *     label 上端より 4px 上に **はみ出す** (label 外側 hit 領域)
+ *   - 旧 space-y-1 (4px gap) では button 下端 (y=44) と Checkbox after 上端 (y=44)
+ *     が **完全接触** → button の下端 1px タップで Checkbox が誤 toggle
+ *   - space-y-3 (12px gap) で Checkbox after 上端 = 52、 button 下端 44 → 8px 余裕
+ *   - 上下 hit area 接触ゼロを保証
+ */
 function ConsentBlock({ children }: { children: React.ReactNode }) {
-  return <div className="space-y-1">{children}</div>;
+  return <div className="space-y-3">{children}</div>;
 }
 
 /**
