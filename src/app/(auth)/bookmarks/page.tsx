@@ -53,7 +53,8 @@ export default function BookmarksPage() {
 
   const connectionIdByPeerId = useMemo(() => {
     const m = new Map<string, string>();
-    if (!myProfile?.id || !Array.isArray(connections)) return m;
+    const myId = myProfile?.id;
+    if (!myId || !Array.isArray(connections)) return m;
     for (const c of connections as Array<{
       id: string;
       user_id: string;
@@ -61,12 +62,11 @@ export default function BookmarksPage() {
       status: string;
     }>) {
       if (c.status !== "accepted" && c.status !== "reaccepted") continue;
-      const peerId =
-        c.user_id === myProfile.id ? c.connected_user_id : c.user_id;
+      const peerId = c.user_id === myId ? c.connected_user_id : c.user_id;
       if (peerId) m.set(peerId, c.id);
     }
     return m;
-  }, [connections, myProfile?.id]);
+  }, [connections, myProfile]);
 
   return (
     <div className="mx-auto max-w-6xl space-y-6">

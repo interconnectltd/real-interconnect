@@ -87,9 +87,11 @@ export default function DashboardPage() {
   ).length ?? 0;
 
   // peer user_id → connection.id (accepted のみ) で MemberCard に渡す
+  // React Compiler 互換のため deps は myProfile 全体 (`?.id` 抽出は推論を狭めて警告)
   const connectionIdByPeerId = useMemo(() => {
     const m = new Map<string, string>();
-    if (!myProfile?.id || !Array.isArray(connections)) return m;
+    const myId = myProfile?.id;
+    if (!myId || !Array.isArray(connections)) return m;
     for (const c of connections as Array<{
       id: string;
       user_id: string;
@@ -97,12 +99,11 @@ export default function DashboardPage() {
       status: string;
     }>) {
       if (c.status !== "accepted" && c.status !== "reaccepted") continue;
-      const peerId =
-        c.user_id === myProfile.id ? c.connected_user_id : c.user_id;
+      const peerId = c.user_id === myId ? c.connected_user_id : c.user_id;
       if (peerId) m.set(peerId, c.id);
     }
     return m;
-  }, [connections, myProfile?.id]);
+  }, [connections, myProfile]);
   const memberCount =
     (membersData as { members: unknown[]; meta: { totalCount: number } } | undefined)
       ?.meta?.totalCount ?? 0;

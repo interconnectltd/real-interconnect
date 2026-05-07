@@ -5,14 +5,25 @@
  *
  * 監査ログ検索 (admin only).
  * cursor pagination で 50万行スケール対応.
+ * + SHA-256 hash chain 整合性検証 (00048 migration)
  */
 
 import { useState, useDeferredValue } from "react";
-import { useInfiniteQuery } from "@tanstack/react-query";
-import { Loader2, Search } from "lucide-react";
+import { useInfiniteQuery, useMutation } from "@tanstack/react-query";
+import { Loader2, Search, ShieldCheck, AlertTriangle } from "lucide-react";
+import { toast } from "sonner";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
 import { api } from "@/lib/api-client";
+
+interface ChainResp {
+  ok: boolean;
+  total_rows: number;
+  first_broken_seq: number | null;
+  first_broken_id: string | null;
+  message: string;
+}
 
 interface AuditLog {
   id: string;
@@ -63,9 +74,13 @@ export default function AdminAuditLogsPage() {
         <p className="text-xs font-bold tracking-widest text-emerald-700 dark:text-emerald-300">
           ADMIN
         </p>
-        <h1 className="mt-1 text-2xl font-bold">監査ログ</h1>
+        <div className="mt-1 flex flex-wrap items-center gap-3">
+          <h1 className="text-2xl font-bold">監査ログ</h1>
+          <ChainVerifyButton />
+        </div>
         <p className="mt-2 text-sm text-muted-foreground">
           システム上の操作履歴。actor・action・対象で絞込できます。
+          各行は SHA-256 hash chain で改竄検知可能。
         </p>
       </header>
 
@@ -172,6 +187,58 @@ export default function AdminAuditLogsPage() {
             {isFetchingNextPage ? "読み込み中..." : "さらに読み込む"}
           </Button>
         </div>
+      )}
+    </div>
+  );
+}
+
+function ChainVerifyButton() {
+  const [result, setResult] = useState<ChainResp | null>(null);
+  const verify = useMutation({
+    mutationFn: () => api.get<ChainResp>("/admin/audit-chain/verify"),
+    onSuccess: (data) => {
+      setResult(data);
+      if (data.ok) {
+        toast.success(`整合性 OK: ${data.total_rows} 行検証`);
+      } else {
+        toast.error(`不整合検出: seq=${data.first_broken_seq}`);
+      }
+    },
+    onError: () => toast.error("検証に失敗しました"),
+  });
+
+  return (
+    <div className="inline-flex items-center gap-2">
+      <Button
+        size="sm"
+        variant="outline"
+        onClick={() => verify.mutate()}
+        disabled={verify.isPending}
+      >
+        {verify.isPending ? (
+          <Loader2 className="mr-1 h-3.5 w-3.5 animate-spin" />
+        ) : (
+          <ShieldCheck className="mr-1 h-3.5 w-3.5" aria-hidden="true" />
+        )}
+        Chain 整合性検証
+      </Button>
+      {result && (
+        <Badge
+          variant={result.ok ? "outline" : "destructive"}
+          className="text-[10px]"
+        >
+          {result.ok ? (
+            <>
+              <ShieldCheck className="mr-1 h-3 w-3" aria-hidden="true" />
+              {result.total_rows} 行 OK
+            </>
+          ) : (
+            <>
+              <AlertTriangle className="mr-1 h-3 w-3" aria-hidden="true" />
+              seq={result.first_broken_seq} 改竄?
+            </>
+          )}
+        </Badge>
       )}
     </div>
   );

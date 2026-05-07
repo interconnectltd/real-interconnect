@@ -1160,9 +1160,39 @@ export default function SettingsPage() {
                 </Button>
               </div>
             ) : (
-              <p className="text-xs text-muted-foreground">
-                フィードURLを取得できませんでした
-              </p>
+              <div className="space-y-2">
+                <Button
+                  size="sm"
+                  variant="outline"
+                  onClick={async () => {
+                    setFeedLoading(true);
+                    try {
+                      const res = await fetch("/api/v1/calendar/feed-token", {
+                        method: "POST",
+                      });
+                      if (res.ok) {
+                        const json = await res.json();
+                        if (json.data?.token) {
+                          const origin = window.location.origin;
+                          setFeedUrl(
+                            `${origin}/api/v1/calendar/feed/${json.data.token}`,
+                          );
+                          toast.success("フィードURLを発行しました");
+                        }
+                      }
+                    } catch {
+                      toast.error("発行に失敗しました");
+                    } finally {
+                      setFeedLoading(false);
+                    }
+                  }}
+                >
+                  フィードURLを発行
+                </Button>
+                <p className="text-xs text-muted-foreground">
+                  「発行」を押すと購読 URL が払い出されます。再発行で旧 URL は失効します。
+                </p>
+              </div>
             )}
             <p className="text-xs text-muted-foreground">
               このURLは秘密情報です。他の人と共有しないでください。
