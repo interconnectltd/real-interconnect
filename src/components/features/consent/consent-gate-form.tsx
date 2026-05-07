@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { ChevronDown } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
@@ -107,20 +108,23 @@ export function ConsentGateForm() {
       )}
 
       <fieldset className="space-y-5 rounded-md border border-border/60 p-4">
-        <legend className="px-1 text-sm font-medium">
+        {/* legend は bg-card で fieldset border の真上を切り抜き、可読性を確保 */}
+        <legend className="rounded-sm bg-card px-2 text-sm font-medium">
           ご同意 (5項目すべて必須)
         </legend>
         <p className="text-xs text-muted-foreground">
           各リンクはモーダルで開きます (ページ遷移しません)。
         </p>
 
+        {/* 旧文言「3文書 (利用規約・プライバシー・特商法) をまとめて読む」は 320px viewport で
+            fieldset 内幅 256px に対して 350px overflow してた → 短縮 */}
         <button
           type="button"
           onClick={() => openLegal("terms")}
           aria-haspopup="dialog"
           className="inline-flex min-h-[44px] items-center px-1 text-sm font-medium text-primary underline underline-offset-4"
         >
-          3文書 (利用規約・プライバシー・特商法) をまとめて読む
+          3文書をまとめて読む
         </button>
 
         {/* === 1. 利用規約 === */}
@@ -223,10 +227,16 @@ export function ConsentGateForm() {
         </Button>
       </fieldset>
 
-      {/* 削除セクション (誤クリック防止: 別ブロック + DELETE typed confirmation) */}
-      <details className="rounded-md border border-border/60">
-        <summary className="flex min-h-[44px] cursor-pointer items-center px-3 py-2 text-sm text-muted-foreground hover:text-foreground">
-          同意せずアカウントとデータを完全削除する (取り消し不可)
+      {/* 削除セクション (誤クリック防止: 別ブロック + DELETE typed confirmation)
+          [&::-webkit-details-marker]:hidden + [&::marker]:hidden で native marker (▼) を撤廃し
+          Chrome/Safari で見た目を統一 */}
+      <details className="group rounded-md border border-border/60 [&::-webkit-details-marker]:hidden">
+        <summary className="flex min-h-[44px] cursor-pointer list-none items-center justify-between gap-2 px-3 py-2 text-sm text-muted-foreground hover:text-foreground [&::-webkit-details-marker]:hidden">
+          <span>同意せずアカウントとデータを完全削除する (取り消し不可)</span>
+          <ChevronDown
+            className="h-4 w-4 shrink-0 transition-transform group-open:rotate-180"
+            aria-hidden="true"
+          />
         </summary>
         <div className="space-y-3 px-3 pb-3">
           <p className="text-xs leading-relaxed text-muted-foreground">
