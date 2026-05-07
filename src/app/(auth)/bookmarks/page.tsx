@@ -9,6 +9,7 @@
 
 import { useMemo } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import { Bookmark, Loader2 } from "lucide-react";
 import { toast } from "sonner";
 import { useBookmarks } from "@/hooks/queries/use-bookmarks";
@@ -73,9 +74,14 @@ export default function BookmarksPage() {
 
       {!isLoading && !isError && items.length === 0 && (
         <div className="rounded-lg border bg-card px-6 py-16 text-center">
-          <Bookmark
-            className="mx-auto h-8 w-8 text-muted-foreground/40"
+          <Image
+            src="/illustrations/empty-bookmarks.png"
+            alt=""
+            width={320}
+            height={240}
+            className="mx-auto h-auto w-full max-w-[280px]"
             aria-hidden="true"
+            priority={false}
           />
           <p className="mt-3 text-sm font-medium text-foreground">
             まだ保存したメンバーはいません

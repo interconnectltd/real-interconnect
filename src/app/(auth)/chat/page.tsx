@@ -3,6 +3,7 @@
 import { Suspense, useState, useCallback, useEffect } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useSearchParams } from "next/navigation";
+import Image from "next/image";
 import { ArrowLeft, MessageCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { api } from "@/lib/api-client";
@@ -213,7 +214,15 @@ function ChatPageInner() {
               </>
             ) : (
               <div className="flex flex-1 flex-col items-center justify-center p-8 text-center">
-                <MessageCircle className="h-10 w-10 text-muted-foreground/30" />
+                <Image
+                  src="/illustrations/empty-chat.png"
+                  alt=""
+                  width={320}
+                  height={240}
+                  className="h-auto w-full max-w-[280px]"
+                  aria-hidden="true"
+                  priority={false}
+                />
                 <p className="mt-3 text-sm text-muted-foreground">
                   チャットを選択してください
                 </p>

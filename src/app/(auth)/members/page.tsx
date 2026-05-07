@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
+import Image from "next/image";
 import {
   Users,
   Search,
@@ -591,7 +592,15 @@ function EmptyState({
 
   return (
     <div role="status" aria-live="polite" className="ds-empty-state">
-      <Users className="mx-auto h-8 w-8 text-muted-foreground/40" aria-hidden="true" />
+      <Image
+        src="/illustrations/empty-members.png"
+        alt=""
+        width={480}
+        height={280}
+        className="mx-auto h-auto w-full max-w-[360px]"
+        aria-hidden="true"
+        priority={false}
+      />
       <p className="mt-3 text-sm font-medium text-foreground">
         {search ? "検索結果が見つかりません" : "メンバーがまだいません"}
       </p>

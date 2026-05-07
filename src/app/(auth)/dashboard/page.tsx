@@ -14,6 +14,7 @@ import {
   UserPlus,
 } from "lucide-react";
 import Link from "next/link";
+import Image from "next/image";
 import { useQueryClient } from "@tanstack/react-query";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -116,13 +117,22 @@ export default function DashboardPage() {
   return (
     <div className="mx-auto max-w-6xl space-y-8">
       <div className="flex items-start justify-between gap-3">
-        <div>
+        <div className="min-w-0 flex-1">
           <p className="ds-eyebrow">Dashboard</p>
           <h1 className="ds-h1 mt-1 tracking-tight text-foreground">{greeting}</h1>
           <p className="mt-1 text-sm text-muted-foreground">
             あなたのネットワーク状況の概要
           </p>
         </div>
+        <Image
+          src="/illustrations/spot-dashboard-hero.png"
+          alt=""
+          width={320}
+          height={180}
+          className="hidden h-auto w-40 shrink-0 self-start sm:block lg:w-56"
+          aria-hidden="true"
+          priority={false}
+        />
         <Button
           variant="outline"
           size="icon-lg"
@@ -282,6 +292,12 @@ export default function DashboardPage() {
           text="ミーティング分析を1回行うと、最適な方をご紹介できます"
           ctaHref="/settings#tldv-connect"
           ctaLabel="tl;dvを接続する"
+          illustration={{
+            src: "/illustrations/empty-dashboard.png",
+            alt: "ミーティング分析を始めると、ここにおすすめが表示されます",
+            width: 480,
+            height: 280,
+          }}
         />
       ) : (
         <EmptyState
@@ -289,6 +305,12 @@ export default function DashboardPage() {
           text="おすすめを準備しています..."
           ctaHref="/profile"
           ctaLabel="プロフィールを充実させる"
+          illustration={{
+            src: "/illustrations/empty-dashboard.png",
+            alt: "おすすめを準備中",
+            width: 480,
+            height: 280,
+          }}
         />
       )}
       </div>
@@ -441,15 +463,29 @@ function EmptyState({
   text,
   ctaHref,
   ctaLabel,
+  illustration,
 }: {
   icon: LucideIcon;
   text: string;
   ctaHref?: string;
   ctaLabel?: string;
+  /** 与えられたら Icon の代わりに画像を表示 (W/H は intrinsic、表示は className で制御) */
+  illustration?: { src: string; alt: string; width: number; height: number };
 }) {
   return (
     <div className="ds-empty-state">
-      <Icon className="mx-auto h-8 w-8 text-muted-foreground/40" aria-hidden="true" />
+      {illustration ? (
+        <Image
+          src={illustration.src}
+          alt={illustration.alt}
+          width={illustration.width}
+          height={illustration.height}
+          className="mx-auto h-auto w-full max-w-[420px]"
+          priority={false}
+        />
+      ) : (
+        <Icon className="mx-auto h-8 w-8 text-muted-foreground/40" aria-hidden="true" />
+      )}
       <p className="mt-3 text-sm text-muted-foreground">{text}</p>
       {ctaHref && ctaLabel && (
         <Button variant="outline" size="sm" className="mt-4" render={<Link href={ctaHref} />}>

@@ -20,6 +20,7 @@ import {
   Download,
 } from "lucide-react";
 import Link from "next/link";
+import Image from "next/image";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -218,7 +219,15 @@ export default function MeetingsPage() {
     const msg = messages[tab];
     return (
       <div className="rounded-lg border border-dashed p-6 sm:p-12 text-center">
-        <Calendar className="mx-auto h-8 w-8 text-muted-foreground/40" />
+        <Image
+          src="/illustrations/empty-meetings.png"
+          alt=""
+          width={280}
+          height={200}
+          className="mx-auto h-auto w-full max-w-[240px]"
+          aria-hidden="true"
+          priority={false}
+        />
         <p className="mt-3 text-sm font-medium">{msg.title}</p>
         <p className="mt-1 text-xs text-muted-foreground">{msg.sub}</p>
       </div>
@@ -489,7 +498,15 @@ export default function MeetingsPage() {
   function renderCalendarNotConnected() {
     return (
       <div className="rounded-lg border border-dashed p-6 sm:p-12 text-center">
-        <CalendarX2 className="mx-auto h-8 w-8 text-muted-foreground/40" />
+        <Image
+          src="/illustrations/empty-meetings-calendar.png"
+          alt=""
+          width={240}
+          height={180}
+          className="mx-auto h-auto w-full max-w-[220px]"
+          aria-hidden="true"
+          priority={false}
+        />
         <p className="mt-3 text-sm font-medium">カレンダー未接続</p>
         <p className="mt-1 text-xs text-muted-foreground">
           Googleカレンダーを接続すると、予定がここに表示されます

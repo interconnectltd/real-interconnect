@@ -1,6 +1,7 @@
 "use client";
 
 import { useRouter } from "next/navigation";
+import Image from "next/image";
 import { Bell, CheckCheck } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useNotifications } from "@/hooks/queries/use-notifications";
@@ -191,7 +192,15 @@ export default function NotificationsPage() {
         </div>
       ) : (
         <div className="rounded-lg border border-dashed p-6 sm:p-12 text-center">
-          <Bell className="mx-auto h-8 w-8 text-muted-foreground/40" />
+          <Image
+            src="/illustrations/empty-notifications.png"
+            alt=""
+            width={280}
+            height={200}
+            className="mx-auto h-auto w-full max-w-[240px]"
+            aria-hidden="true"
+            priority={false}
+          />
           <p className="mt-3 text-sm text-muted-foreground">通知はまだありません</p>
         </div>
       )}

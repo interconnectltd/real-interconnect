@@ -1,6 +1,7 @@
 "use client";
 
 import { useMemo } from "react";
+import Image from "next/image";
 import {
   Heart,
   UserPlus,
@@ -190,6 +191,17 @@ export default function MatchingPage() {
           プロフィールと会話分析をもとに、つながる価値のある方をご紹介します。
         </p>
       </div>
+
+      {/* Promotional banner — header と list の間に常設 */}
+      <Image
+        src="/illustrations/banner-matching-promo.png"
+        alt=""
+        width={1200}
+        height={300}
+        className="h-auto w-full"
+        aria-hidden="true"
+        priority={false}
+      />
 
       {/* Mutual matches */}
       {filteredMutual && filteredMutual.length > 0 && (
@@ -766,7 +778,15 @@ function BookmarkButton({
 function EmptyState({ hasMyProfile = true }: { hasMyProfile?: boolean }) {
   return (
     <div className="ds-empty-state">
-      <Heart className="mx-auto h-8 w-8 text-muted-foreground/40" aria-hidden="true" />
+      <Image
+        src="/illustrations/empty-matching.png"
+        alt=""
+        width={400}
+        height={240}
+        className="mx-auto h-auto w-full max-w-[360px]"
+        aria-hidden="true"
+        priority={false}
+      />
       <p className="mt-3 text-sm font-medium text-foreground">
         {hasMyProfile ? "おすすめを準備しています" : "おすすめはまだありません"}
       </p>
