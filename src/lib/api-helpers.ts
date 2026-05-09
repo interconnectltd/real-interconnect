@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { createClient } from "@/lib/supabase/server";
+import { createClient, createServiceClient } from "@/lib/supabase/server";
 import { ApiError } from "@/lib/errors";
 import { checkGeneralRateLimit, checkRateLimit } from "@/lib/rate-limit";
 import type { ApiResponse } from "@/types";
@@ -212,12 +212,19 @@ export async function sha256Hex(input: string): Promise<string> {
  * - user_profiles.is_admin = true を強制チェック (403)
  * - requireReason: true なら **`?reason=...` query string** (5..500 chars) 必須化 (法務 R5 整合)
  *
+ * 戻り値:
+ *   - supabase: anon key + cookie session (既存後方互換、認可チェック専用)
+ *   - adminSupabase: service_role クライアント。 RLS バイパスで admin 操作 (DB
+ *     読書き) はこちらを使う。 RLS 設計ミスで admin 機能が落ちる事故 (e.g.
+ *     00056 で修正した participants_select 無限再帰) を恒久回避。
+ *
  * 注意: reason は現状 query string 専用。POST/PATCH の body 経由 reason は未対応。
  *       将来の mutation で reason 必須化する場合は header 経由 (`X-Admin-Reason`) への
  *       移行を検討 (URL 履歴・Referer leak 回避)。
  *
  * 使用例:
- *   const { user, supabase, reason } = await withAdminAuth(request, { requireReason: true });
+ *   const { user, supabase, adminSupabase, reason } = await withAdminAuth(request);
+ *   // ↑ adminSupabase で全件 SELECT、 supabase は auth/個人化処理用
  */
 export async function withAdminAuth(
   request: Request,
@@ -225,6 +232,7 @@ export async function withAdminAuth(
 ): Promise<{
   user: User;
   supabase: SupabaseClient<Database>;
+  adminSupabase: SupabaseClient<Database>;
   reason: string | null;
 }> {
   const { user, supabase } = await withAuth(request, options);
@@ -290,7 +298,10 @@ export async function withAdminAuth(
     reason = headerReason;
   }
 
-  return { user, supabase, reason };
+  // service_role クライアントを admin 操作用に同梱 (RLS バイパス)。
+  // 認可は上記 is_admin チェックで完了済 → adminSupabase は安全に使ってよい。
+  const adminSupabase = await createServiceClient();
+  return { user, supabase, adminSupabase, reason };
 }
 
 export function handleApiError(error: unknown): NextResponse {

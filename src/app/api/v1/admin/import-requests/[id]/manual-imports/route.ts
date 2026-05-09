@@ -57,7 +57,7 @@ export async function GET(
     if (!isValidUUID(id)) {
       return jsonError(400, "BAD_REQUEST", "id (UUID) 必須");
     }
-    const { supabase } = await withAdminAuth(request);
+    const { adminSupabase } = await withAdminAuth(request);
 
     type LooseSelect = {
       from: (table: string) => {
@@ -71,7 +71,7 @@ export async function GET(
         };
       };
     };
-    const { data, error } = await (supabase as unknown as LooseSelect)
+    const { data, error } = await (adminSupabase as unknown as LooseSelect)
       .from("meeting_manual_imports")
       .select(
         "id, title, meeting_date, participant_names, manual_transcript, manual_summary, processed_to_transcript_id, created_at",
@@ -96,7 +96,7 @@ export async function POST(
     if (!isValidUUID(id)) {
       return jsonError(400, "BAD_REQUEST", "id (UUID) 必須");
     }
-    const { user, supabase } = await withAdminAuth(request);
+    const { user, supabase, adminSupabase } = await withAdminAuth(request);
 
     const raw: unknown = await request.json().catch(() => null);
     const parsed = PostSchema.safeParse(raw);
@@ -108,8 +108,8 @@ export async function POST(
       );
     }
 
-    // 申請取得 (user_id を引く)
-    const { data: req, error: reqErr } = await supabase
+    // 申請取得 (user_id を引く) — RLS バイパスして他ユーザーの申請も読める
+    const { data: req, error: reqErr } = await adminSupabase
       .from("meeting_data_import_requests")
       .select("id, user_id, status")
       .eq("id", id)
@@ -133,7 +133,7 @@ export async function POST(
       };
     };
     const { data: row, error: insErr } = await (
-      supabase as unknown as LooseInsert
+      adminSupabase as unknown as LooseInsert
     )
       .from("meeting_manual_imports")
       .insert({
@@ -154,7 +154,7 @@ export async function POST(
 
     // 申請を pending → processing に進める (済みなら何もしない)
     if (req.status === "pending") {
-      await supabase
+      await adminSupabase
         .from("meeting_data_import_requests")
         .update({ status: "processing" })
         .eq("id", id);
