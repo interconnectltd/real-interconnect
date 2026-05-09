@@ -217,6 +217,9 @@ export function RegisterForm() {
       if (msg.toLowerCase().includes("user already registered") || status === 422) {
         log.info("[register] 422 → generic confirmed redirect (anti-enumeration)");
         log.groupEnd();
+        // Wave14 fix: router.push の async 遷移中に loading=true のままだと
+        // 「アカウント作成」ボタンが永久 disabled に見える事故を遮断。
+        setLoading(false);
         router.push("/login?confirmed=true");
         return;
       }
@@ -267,6 +270,9 @@ export function RegisterForm() {
 
     log.info("[register] redirect to /login?confirmed=true");
     log.groupEnd();
+    // Wave14 fix: legal/accept catch を warn でフォールスルー後、router.push の
+    // async 遷移中に loading=true で張り付くと「ボタン押しても無反応」体験になる。
+    setLoading(false);
     router.push("/login?confirmed=true");
   }
 
@@ -276,6 +282,27 @@ export function RegisterForm() {
         log.warn("[register] zod validation blocked submit", {
           fields: Object.keys(validationErrors),
         });
+        // Wave14 fix: 本番ビルドでは log.warn が isDev=false で抑制され、
+        // focus 対象が見つからない場合に submit が完全沈黙していた
+        // (「ボタン押しても無反応」の主犯候補)。setError でユーザー可視のアラートを必ず立てる。
+        const fieldLabels: Record<string, string> = {
+          invitationCode: "招待コード",
+          name: "お名前",
+          email: "メールアドレス",
+          password: "パスワード",
+          industry: "業種",
+          agreeToTerms: "利用規約への同意",
+          agreeToPrivacy: "プライバシーポリシーへの同意",
+          agreeToTokushoho: "特定商取引法への同意",
+        };
+        const missing = Object.keys(validationErrors)
+          .map((k) => fieldLabels[k] ?? k)
+          .join(" / ");
+        setError(
+          missing
+            ? `入力に不備があります: ${missing} をご確認ください。`
+            : "入力に不備があります。赤字の項目をご確認ください。",
+        );
         const firstKey = Object.keys(validationErrors)[0];
         if (firstKey) {
           requestAnimationFrame(() => {
@@ -289,6 +316,10 @@ export function RegisterForm() {
             if (el) {
               el.focus({ preventScroll: true });
               el.scrollIntoView({ behavior: "smooth", block: "center" });
+            } else {
+              // focus 対象 DOM 不在のフォールバック: 上部のエラーアラートに誘導。
+              errorRef.current?.scrollIntoView({ behavior: "smooth", block: "center" });
+              errorRef.current?.focus();
             }
           });
         }
@@ -785,10 +816,16 @@ function ConsentRow({
           // 念のため defaultPrevented も短絡条件に追加して二重発火を完全防止。
           if (e.defaultPrevented) return;
           const target = e.target as HTMLElement;
-          if (target.closest("button[type='button']")) return; // LegalDialog trigger
-          if (target.closest("a")) return; // 補助リンク
-          if (target.closest("[data-slot='checkbox']")) return; // Base UI Checkbox 自身
-          if (target.closest("label[for]")) return; // Label htmlFor の native 経路
+          // Wave14 fix: closest の selector を統合し、Label 内の <span> や Checkbox 内の
+          // <svg>/<path> をタップした場合でも子要素から ancestor へ正しく辿って早期 return できる。
+          // 旧実装は selector を 4 回に分けていたが、span tap で全部 miss する可能性があった。
+          if (
+            target.closest(
+              "button[type='button'], a, [data-slot='checkbox'], label[for], svg",
+            )
+          ) {
+            return;
+          }
           onChange(!checked);
         }}
         className="-mx-2 -my-0.5 flex cursor-pointer items-start gap-2.5 rounded-md p-2 transition-colors hover:bg-accent/5 active:bg-accent/10"

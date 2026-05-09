@@ -12,7 +12,13 @@
 export function isInAppBrowser(): boolean {
   if (typeof navigator === "undefined") return false;
   const ua = navigator.userAgent;
-  return /Line\/|FBAN|FBAV|FB_IAB|FBIOS|Instagram|Twitter|TwitterAndroid|Snapchat|MicroMessenger|Pinterest/i.test(
+  // 検出対象を Wave14 で拡充:
+  //   - FB4A: Facebook for Android (FBAN/FBAV は iOS 中心)
+  //   - MusicalLy / musical_ly / BytedanceWebview / TikTok: TikTok 内ブラウザ
+  //   - WeChat (MicroMessenger は中国版だが MiniProgram も含めるよう WeChat も追加)
+  //   - Slack/: Slack iOS in-app
+  // 1 つでも当たれば OAuth が intent:// で外部に飛べず失敗する想定で外部ブラウザ誘導する。
+  return /Line\/|FBAN|FBAV|FB_IAB|FBIOS|FB4A|Instagram|Twitter|TwitterAndroid|Snapchat|MicroMessenger|WeChat|Pinterest|MusicalLy|musical_ly|BytedanceWebview|TikTok|Slack\//i.test(
     ua,
   );
 }

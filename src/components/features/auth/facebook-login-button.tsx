@@ -46,6 +46,30 @@ function buildOAuthCallbackUrl(redirect: string | null): string {
   return `${base}?next=${encodeURIComponent(safe)}`;
 }
 
+/**
+ * Supabase signInWithOAuth が返す error から、ユーザー向けの具体的な toast 文言を組み立てる。
+ * 以前は「ログインに失敗しました」だけでサポート切り分け不能だった (Wave14 B-1):
+ *   - provider_disabled: Supabase Dashboard で provider が無効
+ *   - redirect_uri_mismatch: Provider Console の Redirect URI が Supabase と不一致
+ *   - rate_limited: 短時間多重タップで Supabase が hold
+ *   - その他: 汎用文言
+ * 識別不能な場合でも console.error に code/status/message を残し、サポートで原因特定できる。
+ */
+function describeOAuthError(error: { code?: string; status?: number; message?: string }): string {
+  const code = error?.code ?? "";
+  const msg = (error?.message ?? "").toLowerCase();
+  if (code === "provider_disabled" || msg.includes("provider is not enabled") || msg.includes("provider disabled")) {
+    return "このログイン方法は現在ご利用いただけません。サポートまでご連絡ください。";
+  }
+  if (msg.includes("redirect") && msg.includes("uri")) {
+    return "リダイレクト URL の設定に問題があります。サポートまでご連絡ください。";
+  }
+  if (error?.status === 429 || msg.includes("rate") || msg.includes("too many")) {
+    return "短時間にリクエストが集中しました。しばらく待ってから再度お試しください。";
+  }
+  return "ログインに失敗しました。もう一度お試しください。";
+}
+
 export function LinkedInLoginButton({ label }: { label?: string }) {
   const [loading, setLoading] = useState(false);
   const safetyRef = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -85,7 +109,12 @@ export function LinkedInLoginButton({ label }: { label?: string }) {
 
     if (error) {
       if (safetyRef.current) clearTimeout(safetyRef.current);
-      toast.error("ログインに失敗しました。もう一度お試しください。");
+      console.error("[oauth] linkedin signInWithOAuth error", {
+        code: (error as { code?: string }).code,
+        status: (error as { status?: number }).status,
+        message: error.message,
+      });
+      toast.error(describeOAuthError(error as { code?: string; status?: number; message?: string }));
       setLoading(false);
     }
   }
@@ -120,6 +149,14 @@ export function FacebookLoginButton({ label }: { label?: string }) {
   }, []);
 
   async function handleClick() {
+    // Wave14 fix: LinkedIn ボタンと対称化。In-app ブラウザ (LINE/FB/Instagram/TikTok 等)
+    // では intent:// で外部アプリに渡せず黙って失敗するため、ここで早期 return + toast 誘導。
+    if (isInAppBrowser()) {
+      toast.error(
+        "アプリ内ブラウザではログインできません。SafariまたはChromeで開いてください。",
+      );
+      return;
+    }
     setLoading(true);
     safetyRef.current = setTimeout(() => setLoading(false), 8000);
     const supabase = createClient();
@@ -136,7 +173,12 @@ export function FacebookLoginButton({ label }: { label?: string }) {
 
     if (error) {
       if (safetyRef.current) clearTimeout(safetyRef.current);
-      toast.error("ログインに失敗しました。もう一度お試しください。");
+      console.error("[oauth] facebook signInWithOAuth error", {
+        code: (error as { code?: string }).code,
+        status: (error as { status?: number }).status,
+        message: error.message,
+      });
+      toast.error(describeOAuthError(error as { code?: string; status?: number; message?: string }));
       setLoading(false);
     }
   }
