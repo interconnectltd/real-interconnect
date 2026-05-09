@@ -5,7 +5,7 @@
 
 import Anthropic from "@anthropic-ai/sdk";
 import { z } from "zod/v4";
-import { supabase } from "../queue";
+import { supabase, enqueueJob } from "../queue";
 
 const anthropic = new Anthropic({
   apiKey: process.env.AI_API_KEY!,
@@ -348,4 +348,18 @@ export async function handleAnalyze(payload: {
     .from("meeting_transcripts")
     .update({ status: "analyzed" })
     .eq("id", transcript_id);
+
+  // 分析対象の participant が既に user に紐付け済なら、 aggregate ジョブを
+  // enqueue して member_ai_profiles_v2 / user_conversation_vectors を更新する。
+  // tl;dv 経由の自動分析でも紐付け済 user の AI profile が自動更新されるよう、
+  // link RPC 経由 (00057) と analyze 経由の両ルートで aggregate を起動する。
+  const { data: linkedParticipant } = await supabase
+    .from("meeting_participants")
+    .select("user_id, is_linked")
+    .eq("id", participant_id)
+    .maybeSingle();
+
+  if (linkedParticipant?.user_id && linkedParticipant.is_linked) {
+    await enqueueJob("aggregate", { user_id: linkedParticipant.user_id }, 5);
+  }
 }
