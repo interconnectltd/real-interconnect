@@ -198,11 +198,14 @@ export async function POST(
 
     // participant_id 指定が 1 件でもあれば v2 RPC (UUID 配列) を使う。
     // 全件 speaker_name のみなら旧 RPC (後方互換) で speaker_name 一致 UPDATE。
-    // RPC 自体は SECURITY DEFINER だが、 admin_update_participants_v46 など
-    // RLS 経路に当たる可能性 + 長期的な保守性の点で adminSupabase に統一。
+    //
+    // ⚠️ RPC は anon `supabase` (cookie session 付) で呼ぶ。
+    //    SECURITY DEFINER 関数は内部で `auth.uid()` を見て is_admin を判定するため、
+    //    service_role 経由で呼ぶと `auth.uid()` が NULL → 'admin only' 例外で 500 になる。
+    //    DB 直叩き (SELECT/INSERT/UPDATE) のみ adminSupabase で RLS バイパスする方針。
     const useV2 = parsed.data.meetings.some((m) => m.participant_id);
     const { data: rpcData, error: rpcErr } = useV2
-      ? await (adminSupabase as unknown as RpcLoose).rpc(
+      ? await (supabase as unknown as RpcLoose).rpc(
           "link_import_request_meetings_v2",
           {
             p_request_id: id,
@@ -212,7 +215,7 @@ export async function POST(
             p_force: parsed.data.force,
           },
         )
-      : await (adminSupabase as unknown as RpcLoose).rpc(
+      : await (supabase as unknown as RpcLoose).rpc(
           "link_import_request_meetings",
           {
             p_request_id: id,
