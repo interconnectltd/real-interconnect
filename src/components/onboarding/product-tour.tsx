@@ -351,19 +351,15 @@ export function ProductTour({ steps, storageKey, open, onClose }: ProductTourPro
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [open, current, isLast, isFirst]);
 
-  // 旧: tour 中は body スクロール完全固定 (position:fixed + top:-scrollY) していたが、
-  //   - ユーザーが highlight 中の context を確認するため自由に scroll したい
-  //   - measure() の scroll listener は capture phase で発火するので位置追従可能
-  //   - joyride / driver.js / shepherd / introjs どれも body lock しない (調査済)
-  //   ため scroll を unlock。 横スクロール防止のみ残す。
-  useEffect(() => {
-    if (!open) return;
-    const prevOverflowX = document.body.style.overflowX;
-    document.body.style.overflowX = "hidden";
-    return () => {
-      document.body.style.overflowX = prevOverflowX;
-    };
-  }, [open]);
+  // 旧 tour 中の body スクロール完全固定 (position:fixed + top:-scrollY) は
+  // 撤去。 横スクロール防止用の `body.style.overflowX = "hidden"` 上書きも
+  // 撤去 (iOS Safari で body を scroll container 化してしまい vertical touch
+  // も止まるバグの原因)。globals.css の `body { overflow-x: clip }` が
+  // scroll container を作らずに横はみ出し防止してくれている。
+  //
+  // 一方 dim overlay 4 枚 + 外側 dialog wrapper には `touch-action: pan-y` を
+  // 設定し、 finger pan を underlying body の scroll に転送する。これで iOS
+  // Safari でもツアー中に scroll で context 確認できる。
 
   // visualViewport 高を CSS var (--tour-vh) で公開 (iOS keyboard 連動の max-height 用)
   useEffect(() => {
@@ -436,6 +432,10 @@ export function ProductTour({ steps, storageKey, open, onClose }: ProductTourPro
       aria-labelledby="tour-title"
       aria-describedby="tour-description tour-rationale tour-next"
       className="fixed inset-0 z-[100] motion-safe:transition-opacity"
+      // iOS Safari の touch を underlying body の vertical scroll に通す。
+      // pan-y は vertical pan を browser に解放するため body が scroll し、
+      // 一方 tap (movement 無) は click として onClick (handleDismiss) に届く。
+      style={{ touchAction: "pan-y" }}
     >
       {rect ? (
         <>
@@ -447,6 +447,8 @@ export function ProductTour({ steps, storageKey, open, onClose }: ProductTourPro
                 position: "fixed",
                 background: dimColor,
                 pointerEvents: "auto",
+                // 縦 pan を body の scroll に転送 (iOS Safari)
+                touchAction: "pan-y",
                 ...o,
               }}
               onClick={handleDismiss}
@@ -473,7 +475,7 @@ export function ProductTour({ steps, storageKey, open, onClose }: ProductTourPro
         <div
           aria-hidden="true"
           className="fixed inset-0"
-          style={{ background: dimColor }}
+          style={{ background: dimColor, touchAction: "pan-y" }}
           onClick={handleDismiss}
         />
       )}
