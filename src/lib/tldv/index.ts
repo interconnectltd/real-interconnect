@@ -1,10 +1,5 @@
-export { TldvClient, createTldvClient, TldvApiError } from "./client";
-export type {
-  TldvMeetingSummary,
-  TldvMeetingListResponse,
-  TldvTranscriptSegment,
-  TldvTranscriptResponse,
-} from "./client";
+// tl;dv 統合の公開 API。 webhook / sync route + scripts/run-tldv-sync.ts の 2 つを支える最小バレル。
+// 内部のみで使われるシンボル (TldvClient / TldvApiError / linkSpeakerToUser / 各レスポンス型) は
+// 直接 ./client や ./link-speaker から import するため、再エクスポートしない。
+export { createTldvClient } from "./client";
 export { processTldvMeeting } from "./process-meeting";
-export { linkSpeakerToUser } from "./link-speaker";
-export type { LinkResult } from "./link-speaker";
