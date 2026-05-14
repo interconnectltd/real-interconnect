@@ -53,6 +53,33 @@ async function isPasswordPwned(password: string): Promise<boolean> {
   }
 }
 
+/**
+ * Supabase Auth signup の error_code → 日本語ユーザー向けメッセージ。
+ *
+ * 設計方針:
+ *   - `user_already_exists` は意図的に含めない (anti-enumeration: onSubmit で
+ *     /login?confirmed=true へ silent redirect させる)。
+ *   - その他の code は具体メッセージで UX を上げる。ユーザーが何を直せば
+ *     良いか分かるようにする。
+ *   - Supabase docs: https://supabase.com/docs/reference/javascript/auth-error-codes
+ */
+const SIGNUP_ERROR_MESSAGES: Record<string, string> = {
+  email_address_invalid:
+    "このメールアドレスは利用できません。実在するメールアドレス (例: name@gmail.com) を入力してください。",
+  weak_password:
+    "パスワードが推測されやすいか、流出履歴があります。別の文字列にしてください。",
+  over_email_send_rate_limit:
+    "短時間に多くのメール送信が発生しました。30 分ほど経ってから再度お試しください。",
+  over_signup_request_rate_limit:
+    "短時間に多くの登録試行が発生しました。しばらく待ってから再度お試しください。",
+  signup_disabled:
+    "現在新規登録を受け付けていません。お問い合わせください。",
+  email_provider_disabled:
+    "メールアドレスでの登録は現在無効になっています。",
+  validation_failed:
+    "入力内容に不備があります。各項目をご確認ください。",
+};
+
 const labelClass = "text-[13px] font-medium text-foreground";
 const fieldHelpClass = "text-xs text-destructive";
 const selectClass =
@@ -208,31 +235,52 @@ export function RegisterForm() {
     });
 
     if (authError) {
-      log.error("[register] signUp error", { code: (authError as { code?: string }).code });
+      // Supabase 新版は `code`、旧版は `error_code` フィールド。両方拾う。
+      const errCode =
+        (authError as { code?: string }).code ??
+        (authError as { error_code?: string }).error_code ??
+        "";
+      log.error("[register] signUp error", { code: errCode });
       const status = (authError as { status?: number }).status ?? 0;
-      const msg = authError.message ?? "";
-      // 既存メール (422 / "user already registered") は enumeration を避けるため、
-      // 「処理を受け付けました」と汎用文言で /login に誘導 (Supabase 側で既存ユーザーには
-      //  リマインドメールを送信する設定を併用)。weak password / 429 / 500 のみ明示する。
-      if (msg.toLowerCase().includes("user already registered") || status === 422) {
-        log.info("[register] 422 → generic confirmed redirect (anti-enumeration)");
+      const msg = (authError.message ?? "").toLowerCase();
+
+      // ── ① Anti-enumeration: 既存メールは generic redirect で隠す。
+      //    既存ユーザー判定は本来 error_code === "user_already_exists" だけで十分。
+      //    legacy 互換のため msg 文字列 + (errCode 欠落時のみ 422) も safety-net に追加。
+      if (
+        errCode === "user_already_exists" ||
+        msg.includes("user already registered") ||
+        (!errCode && status === 422)
+      ) {
+        log.info("[register] anti-enumeration: existing email → silent redirect");
         log.groupEnd();
         router.push("/login?confirmed=true");
         return;
       }
-      let display: string;
-      if (msg.toLowerCase().includes("weak password") || msg.toLowerCase().includes("password")) {
-        display =
-          "パスワードが要件を満たしていません。10文字以上で英大文字・英小文字・数字を含めてください。";
-      } else if (status === 429) {
-        display =
-          "短時間に多くのリクエストが発生しました。しばらく待ってから再度お試しください。";
-      } else if (status >= 500) {
-        display =
-          "サーバーで一時的なエラーが発生しています。しばらく待ってから再度お試しください。";
-      } else {
-        display = "登録に失敗しました。入力内容を確認してください。";
+
+      // ── ② Supabase error_code → 具体メッセージ map (UX 改善)
+      //    `user_already_exists` は意図的に含まない (上の anti-enumeration で吸う)。
+      let display = SIGNUP_ERROR_MESSAGES[errCode];
+
+      // ── ③ status / message ベース fallback (errCode が空 / 未知の場合)
+      if (!display) {
+        if (
+          msg.includes("weak password") ||
+          (status === 400 && msg.includes("password"))
+        ) {
+          display = SIGNUP_ERROR_MESSAGES.weak_password!;
+        } else if (status === 400 && msg.includes("email") && msg.includes("invalid")) {
+          display = SIGNUP_ERROR_MESSAGES.email_address_invalid!;
+        } else if (status === 429) {
+          display = SIGNUP_ERROR_MESSAGES.over_email_send_rate_limit!;
+        } else if (status >= 500) {
+          display =
+            "サーバーで一時的なエラーが発生しています。しばらく待ってから再度お試しください。";
+        } else {
+          display = "登録に失敗しました。入力内容を確認してください。";
+        }
       }
+
       setError(display);
       setLoading(false);
       log.groupEnd();
