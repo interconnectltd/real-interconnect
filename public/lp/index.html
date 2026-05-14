@@ -131,7 +131,7 @@ body{--wp--preset--color--black: #000000;--wp--preset--color--cyan-bluish-gray: 
   width: initial;
   min-width: 280px;
 }
-</style><style type="text/css">@import url('https://fonts.googleapis.com/css2?family=Work+Sans:ital,wght@0,100..900;1,100..900&display=swap');</style><style>.tk-source-han-sans-japanese{font-family:"source-han-sans-japanese",sans-serif;}</style>
+</style><style type="text/css">@import url('https://fonts.googleapis.com/css2?family=Work+Sans:ital,wght@0,100..900;1,100..900&family=Noto+Serif+JP:wght@300;400;500;600;700&display=swap');</style><style>.tk-source-han-sans-japanese{font-family:"source-han-sans-japanese",sans-serif;}</style>
 <style type="text/css">
 /* =========================================
    INTER CONNECT カスタムCSS
@@ -319,198 +319,299 @@ footer .bottom_block .img_block img {
   height: 18px;
 }
 
-/* ── Compare: 従来 vs INTER CONNECT ── */
+/* ── Compare: 従来 vs INTER CONNECT (redesigned: 画像 #63/#64 準拠) ── */
 #compare {
+  position: relative;
   color: #fff;
-  padding: 100px 0;
+  padding: 140px 0 120px;
+  overflow: hidden;
 }
+/* 上部の星屑パーティクル */
+#compare::before {
+  content: "";
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 220px;
+  background-image:
+    radial-gradient(1.5px 1.5px at 8% 28%, rgba(56,189,248,0.5) 50%, transparent 100%),
+    radial-gradient(1px 1px at 14% 60%, rgba(255,255,255,0.4) 50%, transparent 100%),
+    radial-gradient(1.5px 1.5px at 92% 26%, rgba(56,189,248,0.55) 50%, transparent 100%),
+    radial-gradient(1px 1px at 95% 50%, rgba(255,255,255,0.4) 50%, transparent 100%),
+    radial-gradient(1px 1px at 4% 80%, rgba(255,255,255,0.3) 50%, transparent 100%),
+    radial-gradient(1px 1px at 88% 78%, rgba(129,140,248,0.35) 50%, transparent 100%);
+  pointer-events: none;
+  z-index: 0;
+}
+/* 上部の "波" (左右に流れるグラデライン) */
+#compare::after {
+  content: "";
+  position: absolute;
+  top: 24px; left: 0; right: 0;
+  height: 200px;
+  background:
+    linear-gradient(94deg, transparent 0%, rgba(56,189,248,0.20) 6%, rgba(56,189,248,0.06) 16%, transparent 28%),
+    linear-gradient(86deg, transparent 72%, rgba(129,140,248,0.10) 84%, rgba(56,189,248,0.20) 94%, transparent 100%);
+  pointer-events: none;
+  z-index: 0;
+  filter: blur(1px);
+}
+#compare .main_inner { position: relative; z-index: 1; }
+
 .compare_ttl {
-  font-size: 30px;
+  font-family: "Noto Serif JP", "Yu Mincho", serif;
+  font-size: 36px;
+  font-weight: 500;
   line-height: 1.7;
+  letter-spacing: 0.04em;
   text-align: center;
-  margin-bottom: 20px;
+  margin-bottom: 24px;
+  color: #fff;
 }
 .compare_sub {
-  font-size: 16px;
-  line-height: 2;
+  font-size: 15px;
+  line-height: 2.1;
   text-align: center;
-  color: rgba(255,255,255,0.6);
-  margin-bottom: 56px;
+  color: rgba(255,255,255,0.65);
+  margin-bottom: 72px;
+  letter-spacing: 0.03em;
 }
+
 .compare_grid {
   display: grid;
   grid-template-columns: 1fr auto 1fr;
   gap: 0;
-  align-items: start;
+  align-items: stretch;
+  max-width: 1200px;
+  margin: 0 auto;
 }
 .compare_col {
-  padding: 40px;
+  position: relative;
+  padding: 56px 48px 56px;
+}
+.compare_new {
+  border: 1px solid rgba(56,189,248,0.55);
+  background: linear-gradient(180deg, rgba(56,189,248,0.04) 0%, rgba(56,189,248,0.012) 100%);
+  box-shadow:
+    0 0 0 1px rgba(56,189,248,0.06),
+    0 0 36px rgba(56,189,248,0.18),
+    inset 0 0 48px rgba(56,189,248,0.05);
 }
 .compare_col_label {
   display: inline-block;
   font-size: 13px;
   font-weight: 600;
-  letter-spacing: 0.05em;
-  padding: 6px 16px;
-  margin-bottom: 32px;
+  letter-spacing: 0.08em;
+  padding: 10px 22px;
+  margin-bottom: 56px;
+  background-color: transparent;
 }
 .compare_old .compare_col_label {
-  border: 1px solid rgba(255,255,255,0.2);
-  color: rgba(255,255,255,0.5);
+  border: 1px solid rgba(255,255,255,0.32);
+  color: rgba(255,255,255,0.78);
 }
 .compare_new .compare_col_label {
-  background-color: rgba(59,130,246,0.15);
-  border: 1px solid rgba(59,130,246,0.4);
-  color: #3b82f6;
+  border: 1.5px solid #38bdf8;
+  color: #38bdf8;
+  letter-spacing: 0.12em;
+  box-shadow: 0 0 12px rgba(56,189,248,0.3);
 }
 .compare_stat {
-  margin-bottom: 32px;
+  margin-bottom: 56px;
+  text-align: center;
 }
 .compare_stat_num {
-  font-size: 72px;
-  font-weight: 700;
-  line-height: 1;
-  letter-spacing: -0.03em;
+  display: inline-block;
+  font-size: 152px;
+  font-weight: 800;
+  line-height: 0.95;
+  letter-spacing: -0.04em;
+  font-family: "Work Sans", "Noto Serif JP", sans-serif;
 }
 .compare_stat_num small {
-  font-size: 36px;
+  font-size: 60px;
+  font-weight: 700;
+  margin-left: 4px;
+  letter-spacing: -0.02em;
 }
 .compare_old .compare_stat_num {
-  color: rgba(255,255,255,0.25);
+  color: rgba(255,255,255,0.32);
 }
 .compare_new .compare_stat_num {
-  color: #3b82f6;
+  background: linear-gradient(180deg, #67e8f9 0%, #38bdf8 50%, #0284c7 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  color: #38bdf8;
+  filter: drop-shadow(0 0 24px rgba(56,189,248,0.4));
 }
 .compare_stat_label {
   font-size: 14px;
-  color: rgba(255,255,255,0.5);
-  margin-top: 8px;
+  color: rgba(255,255,255,0.55);
+  margin-top: 16px;
+  letter-spacing: 0.04em;
 }
 .compare_list {
   list-style: none;
   padding: 0;
+  margin: 0;
 }
 .compare_list li {
   font-size: 14px;
-  line-height: 1.8;
-  padding: 10px 0;
-  padding-left: 20px;
+  line-height: 1.7;
+  padding: 14px 0 14px 24px;
   position: relative;
+  letter-spacing: 0.02em;
 }
 .compare_list li:not(:last-child) {
-  border-bottom: 1px solid rgba(255,255,255,0.06);
+  border-bottom: 1px solid rgba(255,255,255,0.08);
 }
 .compare_list li::before {
   content: "";
   position: absolute;
   left: 0;
-  top: 50%;
-  transform: translateY(-50%);
-  width: 6px;
-  height: 6px;
+  top: 22px;
+  width: 8px;
+  height: 8px;
 }
 .compare_old .compare_list li {
-  color: rgba(255,255,255,0.45);
+  color: rgba(255,255,255,0.55);
 }
 .compare_old .compare_list li::before {
-  background-color: rgba(255,255,255,0.15);
+  background-color: rgba(255,255,255,0.3);
 }
 .compare_new .compare_list li {
-  color: rgba(255,255,255,0.85);
+  color: rgba(255,255,255,0.92);
 }
 .compare_new .compare_list li::before {
-  background-color: #3b82f6;
+  background-color: #38bdf8;
+  box-shadow: 0 0 8px rgba(56,189,248,0.7);
 }
+
 .compare_divider {
   width: 1px;
-  background-color: rgba(255,255,255,0.1);
+  background: linear-gradient(180deg, transparent 0%, rgba(255,255,255,0.18) 50%, transparent 100%);
   align-self: stretch;
   position: relative;
   display: flex;
   align-items: center;
   justify-content: center;
+  min-width: 80px;
 }
 .compare_divider_vs {
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  font-size: 12px;
+  position: relative;
+  top: auto; left: auto;
+  transform: none;
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  border: 1px solid rgba(255,255,255,0.28);
+  background-color: #000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 13px;
   font-weight: 700;
-  color: rgba(255,255,255,0.3);
-  background-color: #0a0a0a;
-  padding: 12px 8px;
-  letter-spacing: 0.1em;
+  color: rgba(255,255,255,0.7);
+  letter-spacing: 0.18em;
+  padding: 0;
+  z-index: 2;
 }
+
+/* 1/15 cost block (kept, restyled to match new visual language) */
 .compare_cost {
   text-align: center;
-  margin-top: 56px;
-  padding: 32px 0;
-  border-top: 1px solid rgba(255,255,255,0.08);
+  margin: 72px auto 0;
+  padding: 40px 32px;
+  max-width: 640px;
+  background: linear-gradient(135deg, rgba(56,189,248,0.05) 0%, rgba(255,255,255,0.01) 100%);
+  border: 1px solid rgba(255,255,255,0.1);
+  border-top: 0;
+  position: relative;
+}
+.compare_cost::before {
+  content: "";
+  position: absolute;
+  top: 0; left: 0;
+  width: 100%; height: 1px;
+  background: linear-gradient(90deg, transparent 0%, rgba(56,189,248,0.5) 50%, transparent 100%);
 }
 .compare_cost_num {
   display: block;
-  font-size: 64px;
+  font-size: 80px;
   font-weight: 700;
-  color: #3b82f6;
   line-height: 1;
   letter-spacing: -0.02em;
+  background: linear-gradient(180deg, #67e8f9 0%, #38bdf8 60%, #0284c7 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  color: #38bdf8;
+  filter: drop-shadow(0 0 18px rgba(56,189,248,0.32));
 }
 .compare_cost_label {
   display: block;
-  font-size: 15px;
-  color: rgba(255,255,255,0.5);
-  margin-top: 12px;
+  font-size: 14px;
+  color: rgba(255,255,255,0.55);
+  margin-top: 14px;
+  letter-spacing: 0.04em;
 }
 .compare_bottom {
   text-align: center;
-  font-size: 16px;
-  color: rgba(255,255,255,0.6);
-  margin-top: 16px;
+  font-size: 15px;
+  color: rgba(255,255,255,0.7);
+  margin-top: 24px;
+  line-height: 2.0;
+  letter-spacing: 0.03em;
 }
 .compare_bottom strong {
   color: #fff;
+  font-weight: 700;
 }
 
-@media screen and (max-width: 960px) {
-  .compare_ttl { font-size: 24px; }
-  .compare_col { padding: 32px 24px; }
-  .compare_stat_num { font-size: 56px; }
-  .compare_stat_num small { font-size: 28px; }
+@media screen and (max-width: 1024px) {
+  #compare { padding: 110px 0 90px; }
+  .compare_ttl { font-size: 30px; }
+  .compare_stat_num { font-size: 120px; }
+  .compare_stat_num small { font-size: 48px; }
+  .compare_col { padding: 40px 32px 44px; }
 }
 
-@media screen and (max-width: 560px) {
-  #compare { padding: 64px 0; }
-  .compare_ttl { font-size: 22px; }
-  .compare_sub {
-    font-size: 14px;
-    text-align: left;
-    margin-bottom: 40px;
-  }
-  .compare_grid {
-    grid-template-columns: 1fr;
-  }
-  .compare_col {
-    padding: 32px 0;
+@media screen and (max-width: 768px) {
+  #compare { padding: 90px 0 72px; }
+  .compare_ttl { font-size: 26px; }
+  .compare_sub { font-size: 14px; line-height: 1.95; margin-bottom: 48px; padding: 0 8px; }
+  .compare_grid { grid-template-columns: 1fr; gap: 24px; max-width: 100%; }
+  .compare_col { padding: 36px 28px 40px; }
+  .compare_old {
+    border: 1px solid rgba(255,255,255,0.1);
+    background: rgba(255,255,255,0.012);
   }
   .compare_divider {
     width: 100%;
-    height: 1px;
+    min-width: 0;
+    height: 56px;
+    background: linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.2) 50%, transparent 100%);
     align-self: auto;
   }
-  .compare_divider_vs {
-    top: 50%;
-    padding: 8px 16px;
-  }
-  .compare_stat_num { font-size: 56px; }
-  .compare_stat_num small { font-size: 28px; }
-  .compare_cost_num { font-size: 48px; }
-  .compare_cost_label { font-size: 13px; }
-  .compare_cost { margin-top: 40px; padding: 24px 0; }
-  .compare_bottom {
-    font-size: 14px;
-    margin-top: 16px;
-  }
+  .compare_stat_num { font-size: 92px; }
+  .compare_stat_num small { font-size: 40px; }
+  .compare_cost { margin-top: 56px; padding: 32px 20px; }
+  .compare_cost_num { font-size: 60px; }
+  .compare_bottom { font-size: 13px; line-height: 1.9; padding: 0 8px; }
+}
+
+@media screen and (max-width: 560px) {
+  #compare { padding: 72px 0 56px; }
+  .compare_ttl { font-size: 22px; }
+  .compare_col { padding: 32px 24px 36px; }
+  .compare_col_label { font-size: 12px; padding: 8px 18px; margin-bottom: 40px; letter-spacing: 0.06em; }
+  .compare_stat_num { font-size: 74px; }
+  .compare_stat_num small { font-size: 30px; }
+  .compare_stat_label { font-size: 13px; }
+  .compare_list li { font-size: 13px; padding: 12px 0 12px 22px; }
+  .compare_cost_num { font-size: 50px; }
+  .compare_cost_label { font-size: 12px; }
+  .compare_bottom { font-size: 12.5px; margin-top: 18px; }
 }
 
 /* ── About動画: モバイルで3D回転無効 ── */
@@ -520,132 +621,292 @@ footer .bottom_block .img_block img {
   }
 }
 
-/* ── Task: エディトリアル・レイアウト ── */
+/* === Task section (redesigned: 画像 #59/#60/#61 準拠) === */
 #task {
-  background-color: rgba(255,255,255,0.025);
+  position: relative;
+  background-color: transparent;
   border-top: 1px solid rgba(255,255,255,0.06);
-  border-bottom: 1px solid rgba(255,255,255,0.06);
-  margin-top: 160px;
+  border-bottom: none;
+  margin-top: 0;
+  padding: 140px 0 120px;
+  overflow: hidden;
 }
+/* 周辺グロー (左下: indigo / 右上: cyan) */
+#task::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(ellipse 60% 50% at 85% 20%, rgba(56,189,248,0.10) 0%, transparent 60%),
+    radial-gradient(ellipse 50% 40% at 15% 85%, rgba(129,140,248,0.07) 0%, transparent 60%);
+  pointer-events: none;
+  z-index: 0;
+}
+/* パーティクル */
+#task::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background-image:
+    radial-gradient(1px 1px at 8% 15%, rgba(56,189,248,0.25) 50%, transparent 100%),
+    radial-gradient(1px 1px at 92% 80%, rgba(255,255,255,0.18) 50%, transparent 100%),
+    radial-gradient(1.2px 1.2px at 45% 25%, rgba(255,255,255,0.12) 50%, transparent 100%),
+    radial-gradient(1px 1px at 55% 92%, rgba(129,140,248,0.20) 50%, transparent 100%);
+  pointer-events: none;
+  z-index: 0;
+}
+#task .main_inner { position: relative; z-index: 1; }
+
+/* --- 記憶 hero: 左テキスト + 右ビジュアル --- */
+.task_hero {
+  display: grid;
+  grid-template-columns: 1.05fr 0.95fr;
+  gap: 56px;
+  align-items: center;
+  margin-bottom: 120px;
+}
+.task_hero_text { min-width: 0; }
 #task .task_ttl {
+  font-family: "Noto Serif JP", "Yu Mincho", "YuMincho", "Hiragino Mincho ProN", serif !important;
   text-align: left !important;
-  font-size: 28px !important;
-  margin-bottom: 32px;
+  font-size: 42px !important;
+  font-weight: 500;
+  line-height: 1.65;
+  letter-spacing: 0.04em;
+  color: #fff;
+  margin-bottom: 28px;
+}
+#task .task_ttl .hl {
+  display: inline-block;
+  background: linear-gradient(180deg, #ffffff 0%, #bae6fd 30%, #38bdf8 90%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  font-weight: 500;
+  text-shadow: 0 0 36px rgba(56, 189, 248, 0.35);
+  color: #67e8f9;
+}
+#task .task_ttl::after {
+  content: "";
+  display: block;
+  width: 90px;
+  height: 2px;
+  background: linear-gradient(90deg, #38bdf8 0%, #ec4899 100%);
+  margin-top: 28px;
 }
 .task_lead {
-  font-size: 16px;
-  line-height: 2.1;
-  color: rgba(255,255,255,0.6);
+  font-size: 15px;
+  line-height: 2.25;
+  color: rgba(255,255,255,0.7);
   text-align: left;
-  margin-bottom: 48px;
+  margin-bottom: 32px;
+  letter-spacing: 0.03em;
 }
 
-/* ── Task 3つの限界: カード化 ── */
+/* --- 右ビジュアル: 脳ネットワーク SVG + Before/After カード --- */
+.task_visual {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 12px;
+}
+.task_visual_svg {
+  width: 100%;
+  max-width: 460px;
+  height: auto;
+  display: block;
+}
+.task_compare {
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  align-items: center;
+  gap: 6px;
+  width: 100%;
+  max-width: 460px;
+  padding: 14px 16px;
+  background: linear-gradient(135deg, rgba(255,255,255,0.025) 0%, rgba(255,255,255,0.01) 100%);
+  border: 1px solid rgba(255,255,255,0.10);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+}
+.task_compare_col { padding: 8px 10px; text-align: center; }
+.task_compare_col_label {
+  display: block;
+  font-size: 9px;
+  font-weight: 600;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: rgba(255,255,255,0.45);
+  margin-bottom: 6px;
+}
+.task_compare_col_text {
+  font-size: 11px;
+  line-height: 1.45;
+  color: rgba(255,255,255,0.78);
+}
+.task_compare_col.is_brand .task_compare_col_label {
+  background: linear-gradient(135deg, #38bdf8 0%, #818cf8 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+.task_compare_col.is_brand .task_compare_col_text {
+  color: rgba(255,255,255,0.92);
+  font-weight: 500;
+}
+.task_compare_arrow {
+  font-size: 16px;
+  color: rgba(255,255,255,0.5);
+  line-height: 1;
+}
+
+/* --- 3つの限界 タイトル --- */
+.task_contents {
+  position: relative;
+  padding: 0;
+}
+.task_head {
+  text-align: center;
+  font-family: "Noto Serif JP", "Yu Mincho", serif;
+  font-size: 28px !important;
+  font-weight: 500 !important;
+  letter-spacing: 0.06em;
+  color: #fff;
+  margin-bottom: 64px !important;
+  position: relative;
+}
+.task_head::after {
+  content: "";
+  display: block;
+  width: 80px;
+  height: 2px;
+  background: linear-gradient(90deg, #38bdf8 0%, #ec4899 100%);
+  margin: 22px auto 0;
+}
+
+/* --- 3カード: アウトライン大型数字 + ガラスカード --- */
 .task_items {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
-  gap: 0;
-  margin-bottom: 24px;
+  gap: 24px;
+  margin-bottom: 56px;
 }
 .task_item {
-  padding: 28px 24px;
   position: relative;
+  padding: 44px 30px 38px;
+  background: linear-gradient(180deg, rgba(255,255,255,0.028) 0%, rgba(255,255,255,0.008) 100%);
+  border: 1px solid rgba(255,255,255,0.10);
+  overflow: hidden;
+  transition: border-color 0.4s ease, transform 0.4s ease, background 0.4s ease;
 }
-.task_item:not(:last-child) {
-  border-right: 1px solid rgba(255,255,255,0.12);
+.task_item::before {
+  content: "";
+  position: absolute;
+  top: 0; left: 0;
+  width: 60px; height: 1px;
+  background: linear-gradient(90deg, #38bdf8 0%, transparent 100%);
 }
+.task_item::after {
+  content: "";
+  position: absolute;
+  bottom: 0; right: 0;
+  width: 60px; height: 1px;
+  background: linear-gradient(270deg, #ec4899 0%, transparent 100%);
+  opacity: 0.7;
+}
+.task_item:hover {
+  border-color: rgba(56,189,248,0.32);
+  transform: translateY(-3px);
+  background: linear-gradient(180deg, rgba(56,189,248,0.04) 0%, rgba(255,255,255,0.012) 100%);
+}
+.task_item:not(:last-child) { border-right: 1px solid rgba(255,255,255,0.10); }
 .task_item_num {
   display: block;
-  font-size: 48px;
-  font-weight: 700;
+  font-family: "Noto Serif JP", "Times New Roman", serif;
+  font-size: 76px;
+  font-weight: 300;
   line-height: 1;
-  color: rgba(255,255,255,0.08);
-  margin-bottom: 16px;
-  letter-spacing: -0.02em;
+  color: transparent;
+  -webkit-text-stroke: 1px rgba(255,255,255,0.22);
+  margin-bottom: 28px;
+  letter-spacing: 0.02em;
 }
 .task_item_title {
-  font-size: 17px;
+  font-size: 20px;
   font-weight: 600;
-  line-height: 1.5;
-  margin-bottom: 12px;
+  line-height: 1.55;
+  margin-bottom: 18px;
   color: #fff;
+  letter-spacing: 0.04em;
 }
 .task_item_desc {
-  font-size: 14px;
-  line-height: 1.9;
-  color: rgba(255,255,255,0.6);
+  font-size: 13px;
+  line-height: 1.95;
+  color: rgba(255,255,255,0.62);
+  letter-spacing: 0.02em;
 }
+
+/* --- クロージング メッセージ --- */
 .task_resolve {
   text-align: center;
-  padding-top: 24px;
-  border-top: 1px solid rgba(255,255,255,0.12);
-  margin-top: 0;
+  padding: 36px 28px;
+  margin: 0;
+  background: linear-gradient(90deg, rgba(56,189,248,0.05) 0%, rgba(129,140,248,0.04) 50%, rgba(236,72,153,0.05) 100%);
+  border: 1px solid rgba(255,255,255,0.08);
+  border-top: 0;
+  font-size: 14px;
+  line-height: 2.0;
+  color: rgba(255,255,255,0.78);
+  letter-spacing: 0.03em;
 }
 
 /* Tablet */
-@media screen and (max-width: 960px) {
-  .task_items {
-    grid-template-columns: repeat(3, 1fr);
-  }
-  .task_item {
-    padding: 20px 16px;
-  }
-  .task_item_num {
-    font-size: 40px;
-    margin-bottom: 12px;
-  }
-  .task_item_title {
-    font-size: 15px;
-  }
-  .task_item_desc {
-    font-size: 13px;
-  }
+@media (max-width: 1024px) {
+  #task { padding: 110px 0 90px; }
+  .task_hero { gap: 40px; margin-bottom: 90px; }
+  #task .task_ttl { font-size: 34px !important; }
+  .task_item_num { font-size: 64px; }
 }
 
-/* Mobile */
-@media screen and (max-width: 560px) {
-  .task_items {
-    grid-template-columns: 1fr;
-    gap: 0;
-  }
+@media (max-width: 768px) {
+  #task { padding: 90px 0 72px; }
+  .task_hero { grid-template-columns: 1fr; gap: 40px; margin-bottom: 80px; }
+  .task_visual { align-items: center; }
+  #task .task_ttl { font-size: 28px !important; }
+  #task .task_ttl::after { width: 70px; margin-top: 22px; }
+  .task_head { font-size: 22px !important; margin-bottom: 48px !important; }
+  .task_head::after { width: 60px; }
+  .task_items { gap: 16px; }
+  .task_item { padding: 32px 22px 28px; }
+  .task_item_num { font-size: 56px; margin-bottom: 20px; }
+  .task_item_title { font-size: 17px; }
+  .task_item_desc { font-size: 12.5px; }
+}
+
+@media (max-width: 560px) {
+  #task { padding: 72px 0 56px; }
+  #task .task_ttl { font-size: 22px !important; line-height: 1.7; }
+  #task .task_ttl::after { width: 56px; }
+  .task_lead { font-size: 13px; line-height: 2.0; margin-bottom: 28px; }
+  .task_visual_svg { max-width: 320px; }
+  .task_compare { max-width: 340px; padding: 12px 14px; }
+  .task_compare_col_label { font-size: 8px; letter-spacing: 0.14em; }
+  .task_compare_col_text { font-size: 10px; }
+  .task_items { grid-template-columns: 1fr; gap: 12px; }
   .task_item {
-    padding: 20px 0;
-    display: grid;
-    grid-template-columns: 48px 1fr;
-    grid-template-rows: auto auto;
-    column-gap: 12px;
+    padding: 28px 24px;
+    display: block;
   }
   .task_item:not(:last-child) {
-    border-right: none;
-    border-bottom: 1px solid rgba(255,255,255,0.08);
+    border-right: 1px solid rgba(255,255,255,0.10);
+    border-bottom: 1px solid rgba(255,255,255,0.10);
   }
-  .task_item_num {
-    font-size: 32px;
-    margin-bottom: 0;
-    grid-row: 1 / 3;
-    align-self: center;
-  }
-  .task_item_title {
-    font-size: 15px;
-    margin-bottom: 6px;
-  }
-  .task_item_desc {
-    font-size: 13px;
-    line-height: 1.7;
-  }
-  .task_resolve {
-    text-align: left;
-    font-size: 13px !important;
-  }
-  #task .task_ttl {
-    font-size: 22px !important;
-  }
-  .task_lead {
-    font-size: 14px;
-    line-height: 1.9;
-    text-align: left;
-    margin-bottom: 32px;
-  }
+  .task_item_num { font-size: 48px; margin-bottom: 16px; letter-spacing: 0.02em; }
+  .task_item_title { font-size: 16px; margin-bottom: 12px; }
+  .task_item_desc { font-size: 12px; line-height: 1.85; }
+  .task_resolve { padding: 26px 20px; font-size: 12.5px; line-height: 1.9; text-align: center; }
+  .task_head { font-size: 18px !important; margin-bottom: 36px !important; }
 }
 
 /* Point画像: 少し小さく + 余白 */
@@ -860,11 +1121,977 @@ footer .bottom_block.fade {
   transition-delay: 0.3s !important;
 }
 
-/* point_list_item のスタガー */
-#point .point_list_item:nth-child(1) { transition-delay: 0s !important; }
-#point .point_list_item:nth-child(2) { transition-delay: 0.15s !important; }
-#point .point_list_item:nth-child(3) { transition-delay: 0.3s !important; }
-#point .point_list_item:nth-child(4) { transition-delay: 0.45s !important; }
+/* point_list_item / point_block のスタガー */
+#point .point_list_item:nth-child(1),
+#point .point_block:nth-child(1) { transition-delay: 0s !important; }
+#point .point_list_item:nth-child(2),
+#point .point_block:nth-child(2) { transition-delay: 0.15s !important; }
+#point .point_list_item:nth-child(3),
+#point .point_block:nth-child(3) { transition-delay: 0.3s !important; }
+#point .point_list_item:nth-child(4),
+#point .point_block:nth-child(4) { transition-delay: 0.45s !important; }
+
+/* ==================================================
+   #point 4 features (redesigned: 画像 #65-#71 準拠)
+   ================================================== */
+#point {
+  position: relative;
+  padding: 80px 0 0;
+  overflow: hidden;
+}
+#point::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(ellipse 50% 30% at 90% 5%, rgba(56,189,248,0.08) 0%, transparent 60%),
+    radial-gradient(ellipse 40% 25% at 10% 95%, rgba(129,140,248,0.06) 0%, transparent 60%);
+  pointer-events: none;
+  z-index: 0;
+}
+#point .main_inner { display: block; position: relative; z-index: 1; }
+#point .main_inner > .point_block { width: 100%; }
+
+/* --- Common block layout --- */
+.point_block {
+  position: relative;
+  padding: 110px 0 100px;
+  border-top: 1px solid rgba(255,255,255,0.06);
+}
+.point_block:first-of-type { border-top: none; padding-top: 60px; }
+.point_block_inner {
+  display: grid;
+  grid-template-columns: minmax(360px, 0.85fr) minmax(420px, 1.3fr);
+  gap: 72px;
+  align-items: center;
+}
+.point_block.layout-stacked .point_block_inner {
+  grid-template-columns: 1fr;
+  text-align: center;
+  gap: 48px;
+}
+.point_block_text { min-width: 0; }
+.point_block_num {
+  display: block;
+  font-family: "Noto Serif JP", "Times New Roman", serif;
+  font-size: 56px;
+  font-weight: 300;
+  line-height: 1;
+  color: rgba(255,255,255,0.32);
+  letter-spacing: 0.04em;
+  margin-bottom: 14px;
+}
+.point_block_num::after {
+  content: "";
+  display: block;
+  width: 64px;
+  height: 1.5px;
+  background: linear-gradient(90deg, #38bdf8 0%, #ec4899 100%);
+  margin-top: 16px;
+}
+.point_block.layout-stacked .point_block_num::after { margin-left: auto; margin-right: auto; }
+.point_block_title {
+  font-family: "Noto Serif JP", "Yu Mincho", serif;
+  font-size: 54px;
+  font-weight: 500;
+  line-height: 1.4;
+  letter-spacing: 0.04em;
+  color: #fff;
+  margin: 28px 0 32px;
+}
+.point_block_desc {
+  font-size: 15px;
+  line-height: 2.15;
+  color: rgba(255,255,255,0.7);
+  letter-spacing: 0.03em;
+  margin-bottom: 36px;
+  max-width: 540px;
+}
+.point_block.layout-stacked .point_block_desc { margin-left: auto; margin-right: auto; }
+.point_block_pills {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-bottom: 0;
+  list-style: none;
+  padding: 0;
+}
+.point_block.layout-stacked .point_block_pills { justify-content: center; }
+.point_block_pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 18px;
+  font-size: 13px;
+  font-weight: 500;
+  color: rgba(255,255,255,0.9);
+  border: 1px solid rgba(56,189,248,0.4);
+  border-radius: 999px;
+  background: rgba(56,189,248,0.04);
+  letter-spacing: 0.04em;
+  white-space: nowrap;
+}
+.point_block_pill svg { width: 14px; height: 14px; flex-shrink: 0; color: #38bdf8; }
+
+/* --- KPI bar at block bottom --- */
+.point_block_kpi {
+  display: grid;
+  grid-template-columns: auto 1px 1fr;
+  align-items: center;
+  gap: 24px;
+  margin-top: 64px;
+  padding: 28px 40px;
+  background: linear-gradient(135deg, rgba(56,189,248,0.04) 0%, rgba(255,255,255,0.012) 100%);
+  border: 1px solid rgba(255,255,255,0.08);
+  position: relative;
+}
+.point_block_kpi::before {
+  content: "";
+  position: absolute;
+  bottom: 0; left: 0; width: 100%; height: 1px;
+  background: linear-gradient(90deg, transparent 0%, rgba(56,189,248,0.4) 50%, transparent 100%);
+}
+.point_block_kpi_label {
+  font-family: "Noto Serif JP", serif;
+  font-size: 22px;
+  font-weight: 500;
+  color: rgba(255,255,255,0.85);
+  letter-spacing: 0.06em;
+}
+.point_block_kpi_sep {
+  background: rgba(255,255,255,0.15);
+  height: 40px;
+  width: 1px;
+}
+.point_block_kpi_value {
+  display: flex;
+  align-items: baseline;
+  font-family: "Work Sans", sans-serif;
+  font-size: 84px;
+  font-weight: 800;
+  line-height: 1;
+  letter-spacing: -0.03em;
+  background: linear-gradient(180deg, #67e8f9 0%, #38bdf8 60%, #0284c7 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  color: #38bdf8;
+  filter: drop-shadow(0 0 20px rgba(56,189,248,0.35));
+}
+.point_block_kpi_value small {
+  font-size: 36px;
+  font-weight: 700;
+  margin-left: 4px;
+}
+.point_block_kpi_value_suffix {
+  font-size: 32px;
+  font-weight: 600;
+  margin-left: 4px;
+}
+
+/* =============================================
+   01: AI Matching — central + 6 satellite cards
+   ============================================= */
+.match_visual {
+  position: relative;
+  width: 100%;
+  max-width: 720px;
+  aspect-ratio: 6 / 5;
+  margin: 0 auto;
+}
+.match_intro {
+  text-align: center;
+  font-size: 14px;
+  letter-spacing: 0.25em;
+  color: rgba(56,189,248,0.8);
+  margin-bottom: 16px;
+  font-weight: 600;
+}
+.match_intro_sub {
+  text-align: center;
+  font-family: "Noto Serif JP", serif;
+  font-size: 22px;
+  color: #fff;
+  margin-bottom: 36px;
+  letter-spacing: 0.04em;
+}
+.match_canvas {
+  position: relative;
+  width: 100%;
+  height: 100%;
+}
+.match_lines {
+  position: absolute;
+  inset: 0;
+  width: 100%; height: 100%;
+  pointer-events: none;
+}
+.match_center {
+  position: absolute;
+  top: 50%; left: 50%;
+  transform: translate(-50%, -50%);
+  width: 200px;
+  padding: 18px 16px 20px;
+  background: linear-gradient(180deg, rgba(56,189,248,0.10) 0%, rgba(56,189,248,0.02) 100%);
+  border: 1.5px solid rgba(56,189,248,0.6);
+  text-align: center;
+  z-index: 3;
+  box-shadow: 0 0 0 6px rgba(56,189,248,0.06), 0 0 32px rgba(56,189,248,0.3);
+}
+.match_center_badge {
+  display: inline-block;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.2em;
+  color: #38bdf8;
+  background: rgba(56,189,248,0.08);
+  border: 1px solid #38bdf8;
+  padding: 4px 12px;
+  margin-bottom: 14px;
+}
+.match_avatar {
+  width: 64px; height: 64px;
+  border-radius: 50%;
+  margin: 0 auto 10px;
+  background: linear-gradient(180deg, #38bdf8 0%, #818cf8 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+}
+.match_avatar svg { width: 32px; height: 32px; color: rgba(255,255,255,0.95); }
+.match_avatar.is_center { width: 78px; height: 78px; }
+.match_avatar.is_center svg { width: 40px; height: 40px; }
+.match_score_ring {
+  position: absolute;
+  bottom: -8px; right: -10px;
+  width: 44px; height: 44px;
+  border-radius: 50%;
+  background: #0a0a0a;
+  border: 1px solid rgba(56,189,248,0.7);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 13px;
+  font-weight: 700;
+  color: #38bdf8;
+}
+.match_score_ring_label {
+  position: absolute;
+  bottom: -22px;
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: 8px;
+  color: rgba(255,255,255,0.6);
+  letter-spacing: 0.1em;
+  white-space: nowrap;
+}
+.match_center_role {
+  font-size: 13px;
+  font-weight: 700;
+  color: #fff;
+  margin-bottom: 4px;
+  letter-spacing: 0.04em;
+}
+.match_center_meta {
+  font-size: 10px;
+  color: rgba(255,255,255,0.55);
+  letter-spacing: 0.04em;
+  margin-bottom: 12px;
+}
+.match_center_tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  justify-content: center;
+}
+.match_center_tags span {
+  font-size: 9px;
+  padding: 3px 8px;
+  border: 1px solid rgba(56,189,248,0.4);
+  color: rgba(56,189,248,0.9);
+  letter-spacing: 0.05em;
+}
+.match_peer {
+  position: absolute;
+  width: 140px;
+  padding: 10px 12px;
+  background: rgba(255,255,255,0.025);
+  border: 1px solid rgba(255,255,255,0.1);
+  z-index: 2;
+}
+.match_peer:hover { border-color: rgba(56,189,248,0.4); }
+.match_peer_inner { display: flex; align-items: center; gap: 10px; }
+.match_peer .match_avatar { width: 36px; height: 36px; margin: 0; flex-shrink: 0; }
+.match_peer .match_avatar svg { width: 18px; height: 18px; }
+.match_peer_text { min-width: 0; flex: 1; }
+.match_peer_role {
+  font-size: 11px;
+  font-weight: 600;
+  color: #fff;
+  margin-bottom: 1px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.match_peer_meta {
+  font-size: 9px;
+  color: rgba(255,255,255,0.5);
+  margin-bottom: 4px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.match_peer_score {
+  font-size: 10px;
+  color: rgba(255,255,255,0.5);
+}
+.match_peer_score b {
+  font-family: "Work Sans", sans-serif;
+  font-weight: 700;
+  color: #38bdf8;
+  font-size: 12px;
+}
+/* hex positions for 6 peers around center */
+.match_peer.p1 { top: 8%; left: 0; }
+.match_peer.p2 { top: 8%; right: 0; }
+.match_peer.p3 { top: 50%; left: -10px; transform: translateY(-50%); }
+.match_peer.p4 { top: 50%; right: -10px; transform: translateY(-50%); }
+.match_peer.p5 { bottom: 8%; left: 0; }
+.match_peer.p6 { bottom: 8%; right: 0; }
+
+/* =============================================
+   02: Direct Message — chat mockup
+   ============================================= */
+.chat_mockup {
+  display: grid;
+  grid-template-columns: 200px 1fr 180px;
+  gap: 0;
+  background: linear-gradient(180deg, rgba(255,255,255,0.04) 0%, rgba(255,255,255,0.01) 100%);
+  border: 1px solid rgba(255,255,255,0.12);
+  overflow: hidden;
+  width: 100%;
+  max-width: 760px;
+  margin: 0 auto;
+}
+.chat_side {
+  padding: 14px 12px;
+  border-right: 1px solid rgba(255,255,255,0.08);
+  background: rgba(0,0,0,0.2);
+}
+.chat_side_search {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 10px;
+  background: rgba(255,255,255,0.04);
+  border-radius: 6px;
+  font-size: 10px;
+  color: rgba(255,255,255,0.5);
+  margin: 8px 0 14px;
+}
+.chat_side_search svg { width: 11px; height: 11px; }
+.chat_side_label {
+  font-size: 10px;
+  font-weight: 600;
+  color: rgba(255,255,255,0.7);
+  letter-spacing: 0.05em;
+  margin-bottom: 6px;
+}
+.chat_side_item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 6px;
+  border-radius: 4px;
+  margin-bottom: 2px;
+}
+.chat_side_item.is_active { background: rgba(56,189,248,0.08); }
+.chat_side_item .match_avatar { width: 28px; height: 28px; margin: 0; flex-shrink: 0; }
+.chat_side_item .match_avatar svg { width: 14px; height: 14px; }
+.chat_side_item_text { flex: 1; min-width: 0; }
+.chat_side_item_name {
+  font-size: 11px;
+  font-weight: 600;
+  color: #fff;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.chat_side_item_company {
+  font-size: 9px;
+  color: rgba(255,255,255,0.45);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.chat_side_item_dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #38bdf8;
+  box-shadow: 0 0 6px rgba(56,189,248,0.7);
+  flex-shrink: 0;
+}
+.chat_main {
+  padding: 14px 16px;
+  display: flex;
+  flex-direction: column;
+  min-height: 360px;
+}
+.chat_main_header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid rgba(255,255,255,0.08);
+  margin-bottom: 14px;
+}
+.chat_main_header .match_avatar { width: 32px; height: 32px; margin: 0; }
+.chat_main_header .match_avatar svg { width: 16px; height: 16px; }
+.chat_main_header_info { flex: 1; min-width: 0; }
+.chat_main_header_name {
+  font-size: 12px;
+  font-weight: 600;
+  color: #fff;
+}
+.chat_main_header_status {
+  font-size: 9px;
+  color: rgba(56,189,248,0.7);
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+.chat_main_header_status::before {
+  content: "";
+  display: inline-block;
+  width: 5px; height: 5px;
+  border-radius: 50%;
+  background: #38bdf8;
+  box-shadow: 0 0 4px rgba(56,189,248,0.7);
+}
+.chat_bubble {
+  display: inline-block;
+  max-width: 80%;
+  padding: 10px 12px;
+  margin-bottom: 10px;
+  font-size: 11px;
+  line-height: 1.55;
+  border-radius: 10px;
+}
+.chat_bubble_incoming {
+  align-self: flex-start;
+  background: rgba(255,255,255,0.06);
+  color: rgba(255,255,255,0.92);
+  border-bottom-left-radius: 4px;
+}
+.chat_bubble_outgoing {
+  align-self: flex-end;
+  background: linear-gradient(135deg, rgba(56,189,248,0.18) 0%, rgba(56,189,248,0.10) 100%);
+  border: 1px solid rgba(56,189,248,0.3);
+  color: #fff;
+  border-bottom-right-radius: 4px;
+}
+.chat_attachment {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 12px;
+  background: rgba(255,255,255,0.05);
+  border: 1px solid rgba(255,255,255,0.08);
+  border-radius: 8px;
+  margin-bottom: 10px;
+  align-self: flex-start;
+  max-width: 80%;
+}
+.chat_attachment svg { width: 16px; height: 16px; color: #38bdf8; flex-shrink: 0; }
+.chat_attachment_text { font-size: 10px; color: rgba(255,255,255,0.85); }
+.chat_attachment_text small { display: block; color: rgba(255,255,255,0.4); font-size: 9px; }
+.chat_meta { font-size: 9px; color: rgba(255,255,255,0.4); align-self: flex-end; margin-bottom: 6px; }
+.chat_input {
+  margin-top: auto;
+  padding: 8px 10px;
+  background: rgba(255,255,255,0.04);
+  border: 1px solid rgba(255,255,255,0.08);
+  border-radius: 999px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 10px;
+  color: rgba(255,255,255,0.4);
+}
+.chat_panel {
+  padding: 14px 12px;
+  border-left: 1px solid rgba(255,255,255,0.08);
+  background: rgba(0,0,0,0.2);
+}
+.chat_panel_label {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 10px;
+  font-weight: 600;
+  color: rgba(255,255,255,0.8);
+  margin-bottom: 10px;
+}
+.chat_panel_label svg { width: 12px; height: 12px; color: #38bdf8; }
+.chat_slot {
+  padding: 8px 10px;
+  border: 1px solid rgba(255,255,255,0.1);
+  background: rgba(255,255,255,0.02);
+  font-size: 10px;
+  color: rgba(255,255,255,0.9);
+  margin-bottom: 6px;
+  text-align: center;
+}
+.chat_slot_add {
+  font-size: 10px;
+  font-weight: 600;
+  color: #38bdf8;
+  padding: 8px 10px;
+  text-align: center;
+  border: 1px dashed rgba(56,189,248,0.5);
+}
+
+/* 4 feature mini-cards for #02 (after chat mockup) */
+.dm_features {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 16px;
+  margin-top: 36px;
+}
+.dm_feature {
+  padding: 22px 24px;
+  background: rgba(255,255,255,0.025);
+  border: 1px solid rgba(255,255,255,0.08);
+  display: flex;
+  gap: 16px;
+  align-items: flex-start;
+}
+.dm_feature_icon {
+  width: 40px; height: 40px;
+  border-radius: 50%;
+  background: rgba(56,189,248,0.08);
+  border: 1px solid rgba(56,189,248,0.3);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+.dm_feature_icon svg { width: 20px; height: 20px; color: #38bdf8; }
+.dm_feature_text { flex: 1; min-width: 0; }
+.dm_feature_title { font-size: 14px; font-weight: 600; color: #fff; margin-bottom: 6px; }
+.dm_feature_desc { font-size: 12px; line-height: 1.7; color: rgba(255,255,255,0.62); }
+
+/* =============================================
+   03: Event & 面談 — event cards + calendar + booking
+   ============================================= */
+.event_visual {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 16px;
+  width: 100%;
+}
+.event_panel {
+  background: linear-gradient(180deg, rgba(255,255,255,0.03) 0%, rgba(255,255,255,0.01) 100%);
+  border: 1px solid rgba(255,255,255,0.1);
+  padding: 16px;
+  position: relative;
+}
+.event_panel_title {
+  font-size: 12px;
+  font-weight: 600;
+  color: #fff;
+  margin-bottom: 14px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.event_panel_title svg { width: 13px; height: 13px; color: #38bdf8; }
+.event_card {
+  padding: 10px;
+  background: rgba(255,255,255,0.025);
+  border: 1px solid rgba(255,255,255,0.08);
+  margin-bottom: 10px;
+  position: relative;
+}
+.event_card:last-child { margin-bottom: 0; }
+.event_card_image {
+  height: 60px;
+  background: linear-gradient(135deg, rgba(56,189,248,0.18) 0%, rgba(129,140,248,0.10) 100%);
+  border-radius: 2px;
+  margin-bottom: 8px;
+  position: relative;
+}
+.event_card_image::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(ellipse at 30% 30%, rgba(56,189,248,0.3) 0%, transparent 50%);
+}
+.event_card_tag {
+  position: absolute;
+  top: 14px; right: 14px;
+  font-size: 8px;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  padding: 3px 8px;
+  border-radius: 999px;
+  border: 1px solid rgba(56,189,248,0.5);
+  color: #38bdf8;
+  background: rgba(0,0,0,0.5);
+}
+.event_card_tag.is_offline {
+  border-color: rgba(34,197,94,0.5);
+  color: #4ade80;
+}
+.event_card_title {
+  font-size: 11px;
+  font-weight: 600;
+  color: #fff;
+  margin-bottom: 4px;
+  line-height: 1.4;
+}
+.event_card_meta {
+  font-size: 9px;
+  color: rgba(255,255,255,0.55);
+  margin-bottom: 4px;
+}
+.event_card_attendees {
+  font-size: 9px;
+  color: rgba(255,255,255,0.6);
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+.cal_widget {
+  font-size: 11px;
+}
+.cal_header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px; }
+.cal_header_arrow { font-size: 12px; color: rgba(255,255,255,0.5); }
+.cal_header_title { font-size: 11px; font-weight: 600; color: #fff; }
+.cal_grid {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 4px;
+  text-align: center;
+  font-size: 10px;
+}
+.cal_grid_dow { font-size: 9px; color: rgba(255,255,255,0.4); padding: 4px 0; }
+.cal_grid_day {
+  padding: 5px 0;
+  color: rgba(255,255,255,0.75);
+  border-radius: 50%;
+}
+.cal_grid_day.is_selected {
+  background: #38bdf8;
+  color: #000;
+  font-weight: 700;
+  box-shadow: 0 0 8px rgba(56,189,248,0.5);
+}
+.cal_grid_day.is_muted { color: rgba(255,255,255,0.25); }
+.cal_apps {
+  display: flex;
+  gap: 6px;
+  margin-top: 14px;
+  padding-top: 10px;
+  border-top: 1px solid rgba(255,255,255,0.06);
+  align-items: center;
+  font-size: 9px;
+  color: rgba(56,189,248,0.8);
+}
+.cal_apps_dot {
+  display: inline-block;
+  width: 14px; height: 14px;
+  border-radius: 4px;
+  background: linear-gradient(135deg, #38bdf8 0%, #818cf8 100%);
+}
+.book_profile { display: flex; gap: 10px; align-items: center; margin-bottom: 12px; }
+.book_profile .match_avatar { width: 34px; height: 34px; margin: 0; flex-shrink: 0; }
+.book_profile .match_avatar svg { width: 17px; height: 17px; }
+.book_profile_text { flex: 1; min-width: 0; }
+.book_profile_role { font-size: 11px; font-weight: 600; color: #fff; }
+.book_profile_meta { font-size: 9px; color: rgba(255,255,255,0.5); }
+.book_format { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; margin-bottom: 10px; }
+.book_format_btn {
+  padding: 8px 8px;
+  text-align: center;
+  font-size: 10px;
+  border: 1px solid rgba(255,255,255,0.1);
+  color: rgba(255,255,255,0.6);
+}
+.book_format_btn.is_active {
+  border-color: #38bdf8;
+  color: #38bdf8;
+  background: rgba(56,189,248,0.06);
+}
+.book_slots { display: grid; gap: 5px; margin-bottom: 12px; font-size: 10px; }
+.book_slot {
+  padding: 7px 10px;
+  border: 1px solid rgba(255,255,255,0.1);
+  text-align: center;
+  color: rgba(255,255,255,0.85);
+}
+.book_slot.is_selected {
+  background: #38bdf8;
+  color: #000;
+  border-color: #38bdf8;
+  font-weight: 600;
+}
+.book_submit {
+  display: block;
+  padding: 10px;
+  background: linear-gradient(135deg, #38bdf8 0%, #0284c7 100%);
+  color: #fff;
+  font-size: 11px;
+  font-weight: 700;
+  text-align: center;
+  letter-spacing: 0.05em;
+  box-shadow: 0 0 16px rgba(56,189,248,0.4);
+}
+
+/* Flow steps under event panel */
+.event_flow {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 12px;
+  margin-top: 24px;
+}
+.event_flow_step {
+  padding: 16px 12px;
+  background: rgba(255,255,255,0.02);
+  border: 1px solid rgba(255,255,255,0.08);
+  text-align: center;
+  position: relative;
+}
+.event_flow_step:not(:last-child)::after {
+  content: "›";
+  position: absolute;
+  right: -12px; top: 50%;
+  transform: translateY(-50%);
+  color: rgba(56,189,248,0.6);
+  font-size: 18px;
+}
+.event_flow_icon {
+  width: 32px; height: 32px;
+  margin: 0 auto 10px;
+  border-radius: 50%;
+  background: rgba(56,189,248,0.08);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.event_flow_icon svg { width: 16px; height: 16px; color: #38bdf8; }
+.event_flow_title { font-size: 11px; font-weight: 600; color: #fff; margin-bottom: 4px; }
+.event_flow_desc { font-size: 9px; line-height: 1.6; color: rgba(255,255,255,0.55); }
+
+/* =============================================
+   04: Referral — chain diagram
+   ============================================= */
+.ref_visual {
+  width: 100%;
+  max-width: 720px;
+  margin: 0 auto;
+}
+.ref_chain {
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  gap: 16px;
+  align-items: center;
+  margin-bottom: 32px;
+}
+.ref_person {
+  padding: 16px;
+  background: rgba(255,255,255,0.025);
+  border: 1px solid rgba(255,255,255,0.1);
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.ref_person .match_avatar { width: 44px; height: 44px; margin: 0; flex-shrink: 0; }
+.ref_person .match_avatar svg { width: 22px; height: 22px; }
+.ref_person_text { flex: 1; min-width: 0; }
+.ref_person_name { font-size: 13px; font-weight: 600; color: #fff; margin-bottom: 2px; }
+.ref_person_role { font-size: 11px; color: rgba(255,255,255,0.55); margin-bottom: 6px; }
+.ref_person_tag {
+  display: inline-block;
+  font-size: 10px;
+  padding: 2px 8px;
+  border-radius: 4px;
+  background: rgba(56,189,248,0.1);
+  color: #38bdf8;
+}
+.ref_person_tag.is_green { background: rgba(34,197,94,0.1); color: #4ade80; }
+.ref_chain_center {
+  width: 80px; height: 80px;
+  border-radius: 50%;
+  background: rgba(56,189,248,0.06);
+  border: 1.5px solid rgba(56,189,248,0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  flex-shrink: 0;
+  box-shadow: 0 0 24px rgba(56,189,248,0.25);
+}
+.ref_chain_center svg { width: 24px; height: 24px; color: #38bdf8; }
+.ref_chain_center_label { font-size: 10px; font-weight: 600; color: #fff; margin-top: 4px; letter-spacing: 0.04em; }
+.ref_chain_arrow { position: relative; }
+.ref_chain_arrow_label {
+  position: absolute;
+  top: -22px;
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: 10px;
+  color: rgba(56,189,248,0.9);
+  white-space: nowrap;
+}
+.ref_flow {
+  display: grid;
+  grid-template-columns: 1fr auto 1fr auto 1fr;
+  gap: 12px;
+  align-items: center;
+  padding: 24px;
+  background: linear-gradient(180deg, rgba(255,255,255,0.025) 0%, rgba(255,255,255,0.008) 100%);
+  border: 1px solid rgba(255,255,255,0.08);
+}
+.ref_flow_box {
+  padding: 14px 12px;
+  text-align: center;
+  font-size: 11px;
+  color: rgba(255,255,255,0.85);
+  background: rgba(56,189,248,0.04);
+  border: 1px solid rgba(56,189,248,0.2);
+}
+.ref_flow_box_label { font-size: 10px; color: rgba(255,255,255,0.55); margin-bottom: 6px; }
+.ref_flow_pt {
+  font-family: "Work Sans", sans-serif;
+  font-size: 22px;
+  font-weight: 800;
+  color: #38bdf8;
+}
+.ref_flow_pt small { font-size: 11px; margin-left: 2px; }
+.ref_flow_arrow { font-size: 16px; color: rgba(56,189,248,0.6); }
+.ref_flow_center {
+  width: 80px; height: 80px;
+  border-radius: 50%;
+  background: rgba(56,189,248,0.06);
+  border: 1.5px solid rgba(56,189,248,0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  flex-shrink: 0;
+  box-shadow: 0 0 24px rgba(56,189,248,0.25);
+}
+.ref_flow_center svg { width: 26px; height: 26px; color: #38bdf8; }
+.ref_flow_center_label { font-size: 9px; font-weight: 600; color: #fff; margin-top: 2px; letter-spacing: 0.04em; }
+.ref_flow_center_sub { font-size: 7px; color: rgba(255,255,255,0.5); }
+
+.ref_benefits {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16px;
+  margin-top: 28px;
+}
+.ref_benefit {
+  padding: 22px 18px;
+  background: rgba(255,255,255,0.02);
+  border: 1px solid rgba(255,255,255,0.08);
+  text-align: center;
+}
+.ref_benefit_icon {
+  width: 36px; height: 36px;
+  margin: 0 auto 12px;
+  border-radius: 50%;
+  background: rgba(56,189,248,0.08);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.ref_benefit_icon svg { width: 18px; height: 18px; color: #38bdf8; }
+.ref_benefit_title { font-size: 13px; font-weight: 600; color: #fff; margin-bottom: 8px; }
+.ref_benefit_desc { font-size: 11px; line-height: 1.7; color: rgba(255,255,255,0.55); }
+
+/* ==================================================
+   #point responsive
+   ================================================== */
+@media screen and (max-width: 1100px) {
+  /* All .point_block become centered single-column when stacked */
+  .point_block_inner {
+    grid-template-columns: 1fr;
+    gap: 48px;
+    text-align: center;
+  }
+  .point_block_text { text-align: center; }
+  .point_block_num::after { margin-left: auto; margin-right: auto; }
+  .point_block_desc { margin-left: auto; margin-right: auto; }
+  .point_block_pills { justify-content: center; }
+  .point_block_visual {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 100%;
+  }
+  .point_block_title { font-size: 44px; }
+  .match_visual { max-width: 600px; margin-left: auto; margin-right: auto; }
+  .event_visual { grid-template-columns: 1fr; gap: 12px; max-width: 760px; margin-left: auto; margin-right: auto; }
+  .chat_mockup { margin-left: auto; margin-right: auto; }
+  .ref_visual { margin-left: auto; margin-right: auto; }
+  .dm_features { width: 100%; max-width: 760px; margin-left: auto; margin-right: auto; }
+  .ref_benefits { width: 100%; max-width: 720px; margin-left: auto; margin-right: auto; }
+  .event_flow { width: 100%; max-width: 1000px; margin-left: auto; margin-right: auto; }
+}
+@media screen and (max-width: 768px) {
+  #point { padding: 56px 0 0; }
+  .point_block { padding: 72px 0 64px; }
+  .point_block:first-of-type { padding-top: 40px; }
+  .point_block_inner { gap: 36px; }
+  .point_block_num { font-size: 42px; }
+  .point_block_title { font-size: 36px; line-height: 1.45; margin: 22px 0 24px; }
+  .point_block_desc { font-size: 14px; line-height: 2.0; margin-bottom: 28px; }
+  .point_block_pill { font-size: 11.5px; padding: 8px 14px; }
+  .point_block_kpi {
+    grid-template-columns: 1fr;
+    gap: 12px;
+    padding: 24px 20px;
+    text-align: center;
+    margin-top: 48px;
+  }
+  .point_block_kpi_label { font-size: 16px; }
+  .point_block_kpi_sep { display: none; }
+  .point_block_kpi_value { font-size: 60px; justify-content: center; }
+  .point_block_kpi_value small { font-size: 26px; }
+  .point_block_kpi_value_suffix { font-size: 22px; }
+  /* 01 */
+  .match_visual { aspect-ratio: auto; padding-top: 20px; }
+  .match_center { position: relative; top: auto; left: auto; transform: none; margin: 0 auto 20px; width: 220px; }
+  .match_canvas { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+  .match_canvas .match_lines { display: none; }
+  .match_peer { position: relative; top: auto !important; left: auto !important; right: auto !important; bottom: auto !important; transform: none !important; width: auto; }
+  /* 02 */
+  .chat_mockup { grid-template-columns: 1fr; }
+  .chat_side, .chat_panel { display: none; }
+  .dm_features { grid-template-columns: 1fr; gap: 12px; }
+  /* 03 */
+  .event_flow { grid-template-columns: 1fr 1fr; gap: 8px; }
+  .event_flow_step:nth-child(2)::after { display: none; }
+  /* 04 */
+  .ref_chain { grid-template-columns: 1fr; gap: 14px; }
+  .ref_flow { grid-template-columns: 1fr; gap: 10px; padding: 18px; }
+  .ref_flow_arrow { transform: rotate(90deg); justify-self: center; }
+  .ref_benefits { grid-template-columns: 1fr; gap: 12px; }
+}
+@media screen and (max-width: 560px) {
+  .point_block { padding: 56px 0 48px; }
+  .point_block_num { font-size: 32px; }
+  .point_block_title { font-size: 26px; margin: 18px 0 20px; }
+  .point_block_desc { font-size: 13px; line-height: 1.95; }
+  .point_block_pill { font-size: 11px; padding: 7px 12px; }
+  .match_center { width: 200px; }
+  .match_canvas { grid-template-columns: 1fr; }
+  .point_block_kpi_value { font-size: 50px; }
+}
 
 /* client_list のスタガー */
 .c_client_list li:nth-child(1) { transition-delay: 0s !important; }
@@ -1102,35 +2329,113 @@ body {
   }
 }
 
-/* --- What is INTER CONNECT --- */
+/* --- What is INTER CONNECT (redesigned: 画像 #57/#58 準拠) --- */
 #whatisic {
-  padding: 72px 0 56px;
+  position: relative;
+  padding: 180px 0 140px;
   text-align: center;
+  overflow: hidden;
+}
+/* 中央の楕円グロー */
+#whatisic::before {
+  content: "";
+  position: absolute;
+  top: 50%; left: 50%;
+  width: min(1100px, 90vw); height: min(1100px, 90vw);
+  transform: translate(-50%, -50%);
+  background: radial-gradient(circle, rgba(56,189,248,0.07) 0%, rgba(56,189,248,0.02) 35%, transparent 70%);
+  pointer-events: none;
+  z-index: 0;
+}
+/* 星屑パーティクル */
+#whatisic::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background-image:
+    radial-gradient(1px 1px at 12% 22%, rgba(255,255,255,0.20) 50%, transparent 100%),
+    radial-gradient(1px 1px at 88% 30%, rgba(255,255,255,0.14) 50%, transparent 100%),
+    radial-gradient(1.2px 1.2px at 25% 75%, rgba(56,189,248,0.30) 50%, transparent 100%),
+    radial-gradient(1px 1px at 75% 80%, rgba(255,255,255,0.18) 50%, transparent 100%),
+    radial-gradient(1px 1px at 50% 12%, rgba(56,189,248,0.22) 50%, transparent 100%),
+    radial-gradient(1px 1px at 60% 60%, rgba(255,255,255,0.12) 50%, transparent 100%),
+    radial-gradient(1px 1px at 35% 35%, rgba(255,255,255,0.10) 50%, transparent 100%),
+    radial-gradient(1px 1px at 92% 60%, rgba(56,189,248,0.18) 50%, transparent 100%);
+  pointer-events: none;
+  z-index: 0;
+}
+#whatisic .main_inner {
+  position: relative;
+  z-index: 1;
 }
 #whatisic .ic-whatisic-lead {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 18px;
+  font-family: "Work Sans", "Noto Serif JP", serif;
   font-size: 14px;
-  letter-spacing: 0.15em;
-  color: rgba(255,255,255,0.4);
-  margin-bottom: 20px;
+  font-weight: 400;
+  letter-spacing: 0.35em;
+  color: rgba(255,255,255,0.55);
+  margin-bottom: 60px;
+}
+#whatisic .ic-whatisic-lead::before,
+#whatisic .ic-whatisic-lead::after {
+  content: "";
+  display: inline-block;
+  width: 56px;
+  height: 1px;
+  background: linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.5) 100%);
+}
+#whatisic .ic-whatisic-lead::after {
+  background: linear-gradient(90deg, rgba(255,255,255,0.5) 0%, transparent 100%);
 }
 #whatisic .ic-whatisic-headline {
-  font-size: 26px;
-  font-weight: 700;
-  line-height: 1.7;
+  font-family: "Noto Serif JP", "Yu Mincho", "YuMincho", "Hiragino Mincho ProN", "ヒラギノ明朝 ProN", serif;
+  font-size: 48px;
+  font-weight: 500;
+  letter-spacing: 0.04em;
+  line-height: 1.65;
   color: #fff;
-  margin-bottom: 28px;
+  margin: 0 auto 56px;
+  max-width: 1100px;
+}
+#whatisic .ic-whatisic-headline .hl {
+  display: inline-block;
+  background: linear-gradient(180deg, #ffffff 0%, #bae6fd 35%, #38bdf8 90%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  font-weight: 500;
+  text-shadow: 0 0 32px rgba(56, 189, 248, 0.32);
+  /* fallback when background-clip:text is unsupported */
+  color: #67e8f9;
 }
 #whatisic .ic-whatisic-desc {
-  max-width: 680px;
+  max-width: 720px;
   margin: 0 auto;
   font-size: 15px;
-  line-height: 2.1;
-  color: rgba(255,255,255,0.55);
+  line-height: 2.25;
+  color: rgba(255,255,255,0.65);
+  letter-spacing: 0.04em;
+}
+@media (max-width: 1024px) {
+  #whatisic { padding: 140px 0 110px; }
+  #whatisic .ic-whatisic-headline { font-size: 36px; }
 }
 @media (max-width: 768px) {
-  #whatisic { padding: 56px 0 40px; }
-  #whatisic .ic-whatisic-headline { font-size: 19px; }
-  #whatisic .ic-whatisic-desc { font-size: 14px; padding: 0 20px; }
+  #whatisic { padding: 110px 0 88px; }
+  #whatisic::before { width: min(700px, 95vw); height: min(700px, 95vw); }
+  #whatisic .ic-whatisic-lead { font-size: 12px; letter-spacing: 0.28em; margin-bottom: 40px; }
+  #whatisic .ic-whatisic-lead::before,
+  #whatisic .ic-whatisic-lead::after { width: 36px; }
+  #whatisic .ic-whatisic-headline { font-size: 24px; line-height: 1.75; padding: 0 16px; margin-bottom: 36px; }
+  #whatisic .ic-whatisic-desc { font-size: 14px; line-height: 2.05; padding: 0 24px; }
+}
+@media (max-width: 560px) {
+  #whatisic { padding: 88px 0 64px; }
+  #whatisic .ic-whatisic-headline { font-size: 22px; }
 }
 
 /* --- How it Works --- */
@@ -1312,6 +2617,14 @@ setTimeout(function() {
 						</div>
 
 						<div id="wrap">
+
+							<!-- Round 9 (2026-05-13): ユーザー要望でハンバーガーメニューのみ表示。
+							     viewport 幅に関わらず h_menu (横並び nav) を隠し hamburger_btn を常時表示。
+							     ログイン/無料で始める ボタンは sp_menu drawer 内に既に存在するため UX 影響なし。 -->
+							<style id="hamburger-only-override">
+								header .h_menu { display: none !important; }
+								header .hamburger_btn { display: block !important; }
+							</style>
 
 							<header>
 								<h1 class="logo"><a href="/"><img src="img/interconnect-logo-header.png" alt="INTER CONNECT | ビジネスコミュニティプラットフォーム" loading="eager" fetchpriority="high"></a></h1>								<nav class="h_menu">
@@ -1495,7 +2808,7 @@ setTimeout(function() {
 		<div class="main_inner">
 			<p class="ic-whatisic-lead eng fade fadeInUp">What is INTER CONNECT?</p>
 			<h2 class="ic-whatisic-headline fade fadeInUp">
-				AIが「会うべき人」を見つけ、<br class="pc">
+				AIが<span class="hl">「会うべき人」</span>を見つけ、<br class="pc">
 				出会いから協業までを一気通貫で支援する<br class="pc">
 				ビジネスマッチングプラットフォーム
 			</h2>
@@ -1509,31 +2822,137 @@ setTimeout(function() {
   
   
   <section id="task">
+    <style>
+      /* design image swap: hide CSS waves on #task since image contains decoration */
+      #task::before, #task::after { display: none !important; }
+      #task { padding: 0 !important; }
+      .design_image {
+        display: block;
+        width: 100%;
+        max-width: 1280px;
+        height: auto;
+        margin: 0 auto;
+      }
+      .design_image img, .design_image source {
+        display: block;
+        width: 100%;
+        height: auto;
+      }
+      .design_image + .design_image { margin-top: 56px; }
+      @media (max-width: 768px) {
+        .design_image + .design_image { margin-top: 32px; }
+      }
+    </style>
+    <div class="main_inner" style="padding: 60px 0;">
+      <picture class="design_image fade fadeInUp">
+        <source media="(max-width: 768px)" srcset="img/designs/task-hero-sp.jpg">
+        <img src="img/designs/task-hero-pc.jpg" alt="紹介の質は、紹介者の『記憶』で決まっている。 経営者コミュニティ、営業顧問、ビジネス交流会──どの紹介も、紹介者の記憶がマッチングの上限になっている。あなたに本当に最適なパートナーは、紹介者の記憶の外にいるかもしれない。" width="1500" height="700" loading="lazy" decoding="async">
+      </picture>
+      <picture class="design_image fade fadeInUp">
+        <source media="(max-width: 768px)" srcset="img/designs/task-limits-sp.jpg">
+        <img src="img/designs/task-limits-pc.jpg" alt="「記憶ベースの紹介」が抱える3つの限界: 01 印象で決まる紹介、02 つないで終わり、03 成果が見えない。INTER CONNECTのAIは、記憶の限界を超えた本来あるべきマッチングを実現する。" width="1500" height="900" loading="lazy" decoding="async">
+      </picture>
+    </div>
+  </section>
+
+  <!-- HIDDEN: original CSS-built task section (replaced by design images above) -->
+  <section id="task_legacy" style="display:none" aria-hidden="true">
     <div class="main_inner">
-      <h2 class="task_ttl fade fadeInUp is_inview">
-        紹介の質は、紹介者の<br class="sp">「記憶」で決まっている
-      </h2>
-      <p class="task_lead fade fadeInUp is_inview">
-        経営者コミュニティ、営業顧問、ビジネス交流会──<br class="pc">どの紹介も、紹介者の「記憶」がマッチングの上限になっている。<br>
-        最近会った人。印象が強かった人。たまたま同じ会にいた人。<br class="pc">つなげられるのは、"覚えている相手" だけだ。<br>
-        あなたに本当に最適なパートナーは、紹介者の記憶の外にいるかもしれない。
-      </p>
-      <div class="task_contents fade fadeInUp is_inview">
+      <div class="task_hero">
+        <div class="task_hero_text">
+          <h2 class="task_ttl fade fadeInUp">
+            紹介の質は、紹介者の<br class="sp"><span class="hl">『記憶』</span>で決まっている
+          </h2>
+          <p class="task_lead fade fadeInUp">
+            経営者コミュニティ、営業顧問、ビジネス交流会──<br class="pc">どの紹介も、紹介者の「記憶」がマッチングの上限になっている。<br>
+            最近会った人。印象が強かった人。たまたま同じ会にいた人。<br class="pc">つなげられるのは、"覚えている相手" だけだ。<br>
+            あなたに本当に最適なパートナーは、紹介者の記憶の外にいるかもしれない。
+          </p>
+        </div>
+        <div class="task_visual fade fadeInUp">
+          <svg class="task_visual_svg" viewBox="0 0 460 340" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+            <defs>
+              <radialGradient id="brainHalo" cx="0.62" cy="0.5" r="0.5">
+                <stop offset="0%" stop-color="#38bdf8" stop-opacity="0.22"/>
+                <stop offset="60%" stop-color="#818cf8" stop-opacity="0.05"/>
+                <stop offset="100%" stop-color="#38bdf8" stop-opacity="0"/>
+              </radialGradient>
+              <linearGradient id="brainNode" x1="0" y1="0" x2="1" y2="1">
+                <stop offset="0%" stop-color="#38bdf8"/>
+                <stop offset="100%" stop-color="#818cf8"/>
+              </linearGradient>
+            </defs>
+            <!-- glow halo -->
+            <ellipse cx="290" cy="170" rx="140" ry="140" fill="url(#brainHalo)"/>
+            <!-- head profile (right-facing silhouette outline) -->
+            <path d="M 230 60 Q 320 50, 370 100 Q 410 150, 395 215 Q 380 275, 310 300 Q 280 305, 268 285 L 258 250 Q 240 220, 222 195 Q 200 165, 218 120 Q 225 85, 230 60 Z"
+                  stroke="rgba(56,189,248,0.45)" stroke-width="1" fill="rgba(56,189,248,0.025)"/>
+            <!-- neural nodes inside head -->
+            <circle cx="278" cy="110" r="3.5" fill="url(#brainNode)"/>
+            <circle cx="318" cy="135" r="2.5" fill="#ffffff"/>
+            <circle cx="345" cy="165" r="3" fill="url(#brainNode)"/>
+            <circle cx="298" cy="180" r="3" fill="#38bdf8"/>
+            <circle cx="330" cy="210" r="2" fill="rgba(255,255,255,0.85)"/>
+            <circle cx="278" cy="225" r="3" fill="#818cf8"/>
+            <circle cx="350" cy="230" r="2" fill="#38bdf8"/>
+            <circle cx="305" cy="260" r="2.5" fill="#ffffff"/>
+            <circle cx="265" cy="195" r="2" fill="rgba(56,189,248,0.7)"/>
+            <!-- connecting lines (synapses) -->
+            <line x1="278" y1="110" x2="318" y2="135" stroke="rgba(56,189,248,0.55)" stroke-width="0.8"/>
+            <line x1="318" y1="135" x2="345" y2="165" stroke="rgba(56,189,248,0.45)" stroke-width="0.8"/>
+            <line x1="318" y1="135" x2="298" y2="180" stroke="rgba(56,189,248,0.35)" stroke-width="0.8"/>
+            <line x1="345" y1="165" x2="298" y2="180" stroke="rgba(56,189,248,0.4)" stroke-width="0.8"/>
+            <line x1="345" y1="165" x2="330" y2="210" stroke="rgba(129,140,248,0.4)" stroke-width="0.8"/>
+            <line x1="298" y1="180" x2="265" y2="195" stroke="rgba(56,189,248,0.35)" stroke-width="0.8"/>
+            <line x1="298" y1="180" x2="278" y2="225" stroke="rgba(56,189,248,0.3)" stroke-width="0.8"/>
+            <line x1="330" y1="210" x2="350" y2="230" stroke="rgba(129,140,248,0.4)" stroke-width="0.8"/>
+            <line x1="330" y1="210" x2="305" y2="260" stroke="rgba(56,189,248,0.35)" stroke-width="0.8"/>
+            <line x1="278" y1="225" x2="305" y2="260" stroke="rgba(56,189,248,0.4)" stroke-width="0.8"/>
+            <line x1="265" y1="195" x2="278" y2="225" stroke="rgba(56,189,248,0.35)" stroke-width="0.8"/>
+            <!-- particles flowing in from the left -->
+            <circle cx="40" cy="90" r="1.5" fill="rgba(255,255,255,0.5)"/>
+            <circle cx="70" cy="160" r="2" fill="#38bdf8" opacity="0.6"/>
+            <circle cx="90" cy="240" r="1.5" fill="rgba(255,255,255,0.4)"/>
+            <circle cx="120" cy="115" r="2.5" fill="#38bdf8" opacity="0.55"/>
+            <circle cx="140" cy="200" r="1.5" fill="rgba(255,255,255,0.5)"/>
+            <circle cx="165" cy="150" r="2" fill="#818cf8" opacity="0.55"/>
+            <circle cx="180" cy="265" r="1.5" fill="rgba(255,255,255,0.4)"/>
+            <!-- flow curves toward the head -->
+            <path d="M 40 90 Q 130 80, 225 110" stroke="rgba(56,189,248,0.20)" stroke-width="0.8" fill="none"/>
+            <path d="M 70 160 Q 145 150, 220 165" stroke="rgba(56,189,248,0.18)" stroke-width="0.8" fill="none"/>
+            <path d="M 120 115 Q 175 125, 222 135" stroke="rgba(56,189,248,0.22)" stroke-width="0.8" fill="none"/>
+            <path d="M 140 200 Q 190 200, 230 200" stroke="rgba(129,140,248,0.20)" stroke-width="0.8" fill="none"/>
+            <path d="M 165 150 Q 195 158, 225 165" stroke="rgba(129,140,248,0.22)" stroke-width="0.8" fill="none"/>
+          </svg>
+          <div class="task_compare">
+            <div class="task_compare_col">
+              <span class="task_compare_col_label">紹介者の記憶</span>
+              <span class="task_compare_col_text">覚えている相手のみ</span>
+            </div>
+            <span class="task_compare_arrow" aria-hidden="true">→</span>
+            <div class="task_compare_col is_brand">
+              <span class="task_compare_col_label">INTER CONNECT</span>
+              <span class="task_compare_col_text">記憶の外にいる<br>最適なパートナー</span>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="task_contents fade fadeInUp">
         <h3 class="task_head">
           「記憶ベースの紹介」が抱える3つの限界
         </h3>
         <div class="task_items">
-          <div class="task_item">
+          <div class="task_item fade fadeInUp">
             <span class="task_item_num">01</span>
             <h4 class="task_item_title">印象で決まる紹介</h4>
             <p class="task_item_desc">「最近会った」「話が面白かった」── 紹介者の印象で相手が決まり、事業シナジーは二の次になる。</p>
           </div>
-          <div class="task_item">
+          <div class="task_item fade fadeInUp">
             <span class="task_item_num">02</span>
             <h4 class="task_item_title">つないで終わり</h4>
             <p class="task_item_desc">紹介後のフォローアップは当事者任せ。関係構築の仕組みがなく、大半が自然消滅する。</p>
           </div>
-          <div class="task_item">
+          <div class="task_item fade fadeInUp">
             <span class="task_item_num">03</span>
             <h4 class="task_item_title">成果が見えない</h4>
             <p class="task_item_desc">何件の紹介が売上や提携につながったのか、誰も把握していない。改善のしようがない。</p>
@@ -1548,6 +2967,20 @@ setTimeout(function() {
   </section>
 
   <section id="compare">
+    <style>
+      #compare::before, #compare::after { display: none !important; }
+      #compare { padding: 0 !important; }
+    </style>
+    <div class="main_inner" style="padding: 60px 0;">
+      <picture class="design_image fade fadeInUp">
+        <source media="(max-width: 768px)" srcset="img/designs/compare-sp.jpg">
+        <img src="img/designs/compare-pc.jpg" alt="100件のアポで、成約はわずか5件。 従来のリファラル営業の平均成約率(CVR) 5% に対し、INTER CONNECTは3ヶ月以内の協業開始率 78%。AIが全メンバーの事業データを完璧に記憶、マッチング〜関係構築〜成果まで一気通貫、成果をリアルタイムで可視化・改善、200以上のパラメータで事業シナジーを分析。" width="1500" height="800" loading="lazy" decoding="async">
+      </picture>
+    </div>
+  </section>
+
+  <!-- HIDDEN: original CSS-built compare section (replaced by design image above) -->
+  <section id="compare_legacy" style="display:none" aria-hidden="true">
     <div class="main_inner">
       <h2 class="compare_ttl fade fadeInUp">
         100件のアポで、<br class="sp">成約はわずか5件
@@ -1624,68 +3057,1745 @@ setTimeout(function() {
 	</section>
 
   <section id="point">
+    <style>
+      #point::before { display: none !important; }
+      #point { padding: 60px 0 !important; }
+      #point .design_image + .design_image { margin-top: 56px; }
+      @media (max-width: 768px) { #point .design_image + .design_image { margin-top: 32px; } }
+    </style>
     <div class="main_inner">
-      <div class="point_img fade fadeInUp is_inview">
-        <img data-src="img/point-hero.jpg" class=" lazyloaded" loading="lazy" alt="INTER CONNECT" src="img/point-hero.jpg">
-      </div>
-      <div class="point_contents">
-        <h2 class="point_ttl fade fadeInUp is_inview">4つのコア機能</h2>
-        <ul class="point_list">
-          <li class="point_list_item fade fadeInUp is_inview">
-            <img src="/illustrations/feature-ai-matching.png" alt="" width="400" height="300" loading="lazy" decoding="async" style="display:block;width:100%;height:auto;max-width:400px;margin:0 auto 16px;" />
-            <span class="point_list_item_num eng">01</span>
-            <h3 class="point_list_item-ttl">AIマッチング</h3>
-            200以上のパラメータで業界・スキル・事業課題・成長フェーズを多角分析。「会うべき人」だけを厳選提案し、マッチング精度92%を実現
-          </li>
-          <li class="point_list_item fade fadeInUp is_inview">
-            <img src="/illustrations/feature-tldv.png" alt="" width="400" height="300" loading="lazy" decoding="async" style="display:block;width:100%;height:auto;max-width:400px;margin:0 auto 16px;" />
-            <span class="point_list_item_num eng">02</span>
-            <h3 class="point_list_item-ttl">ダイレクトメッセージ</h3>
-            マッチング成立と同時に専用チャットが開設。リアルタイム配信・既読確認で、商談準備から日程調整までプラットフォーム内で完結。個人の連絡先を交換せずに、安全な環境でやり取りを始められる
-          </li>
-          <li class="point_list_item fade fadeInUp is_inview">
-            <img src="/illustrations/feature-calendar.png" alt="" width="400" height="300" loading="lazy" decoding="async" style="display:block;width:100%;height:auto;max-width:400px;margin:0 auto 16px;" />
-            <span class="point_list_item_num eng">03</span>
-            <h3 class="point_list_item-ttl">イベント & 面談</h3>
-            業界特化型イベントと1on1面談予約をワンストップで。オンライン・オフライン対応、カレンダー連携で日程調整の手間をゼロに
-          </li>
-          <li class="point_list_item fade fadeInUp is_inview">
-            <img src="/illustrations/feature-privacy.png" alt="" width="400" height="300" loading="lazy" decoding="async" style="display:block;width:100%;height:auto;max-width:400px;margin:0 auto 16px;" />
-            <span class="point_list_item_num eng">04</span>
-            <h3 class="point_list_item-ttl">紹介プログラム</h3>
-            信頼のチェーンが価値を生む。紹介成立で双方にポイント付与、紹介経由のマッチングは成約率が従来比15倍以上
-          </li>
-        </ul>
-      </div>
+      <picture class="design_image fade fadeInUp">
+        <source media="(max-width: 768px)" srcset="img/designs/point-ai-matching-sp.png">
+        <img src="img/designs/point-ai-matching-pc.png" alt="01 AIマッチング: 200以上のパラメータで業界・スキル・事業課題・成長フェーズを多角分析。「会うべき人」だけを厳選提案し、マッチング精度92%を実現。" width="1500" height="900" loading="lazy" decoding="async">
+      </picture>
+      <picture class="design_image fade fadeInUp">
+        <source media="(max-width: 768px)" srcset="img/designs/point-dm-sp.png">
+        <img src="img/designs/point-dm-pc.png" alt="02 ダイレクトメッセージ: マッチング成立と同時に専用チャットが開設。リアルタイム配信・既読確認で、商談準備から日程調整までプラットフォーム内で完結。チャット継続率98%。" width="1500" height="900" loading="lazy" decoding="async">
+      </picture>
+      <picture class="design_image fade fadeInUp">
+        <source media="(max-width: 768px)" srcset="img/designs/point-event-sp.png">
+        <img src="img/designs/point-event-pc.png" alt="03 イベント & 面談: 業界特化型イベントと1on1面談予約をワンストップで。オンライン・オフライン対応、カレンダー連携で日程調整の手間をゼロに。" width="1500" height="900" loading="lazy" decoding="async">
+      </picture>
+      <picture class="design_image fade fadeInUp">
+        <source media="(max-width: 768px)" srcset="img/designs/point-referral-sp.png">
+        <img src="img/designs/point-referral-pc.png" alt="04 紹介プログラム: 信頼のチェーンが価値を生む。紹介成立で双方にポイント付与、紹介経由のマッチングは成約率が従来比15倍以上。" width="1500" height="900" loading="lazy" decoding="async">
+      </picture>
     </div>
   </section>
 
-	<section id="howto">
-		<div class="main_inner">
-			<div class="heading_block">
-				<h3 class="subtitle lh_normal fade fadeInUp eng">How it Works</h3>
-				<h2 class="title lh_normal fade fadeInUp">3ステップで、ビジネスが動き出す</h2>
-				<img src="/illustrations/lp-howto-flow.png" alt="" width="1200" height="400" loading="lazy" decoding="async" class="fade fadeInUp" style="display:block;width:100%;max-width:1100px;height:auto;margin:24px auto 32px;" />
-			</div>
-			<div class="ic-steps fade fadeInUp">
-				<div class="ic-step">
-					<span class="ic-step-num eng">01</span>
-					<h4 class="ic-step-title">無料登録 & プロフィール作成</h4>
-					<p class="ic-step-desc">業界・スキル・事業課題を入力。3分で完了。AIがあなたのビジネスプロフィールを理解し、最適なマッチングの準備を始めます。</p>
-				</div>
-				<div class="ic-step">
-					<span class="ic-step-num eng">02</span>
-					<h4 class="ic-step-title">AIが最適なパートナーを厳選提案</h4>
-					<p class="ic-step-desc">200以上のパラメータで分析し、登録24時間以内にビジネスシナジーの高い相手を厳選してお届け。肩書きではなく、事業の相性で選びます。</p>
-				</div>
-				<div class="ic-step">
-					<span class="ic-step-num eng">03</span>
-					<h4 class="ic-step-title">面談・イベントで関係を深め、成果へ</h4>
-					<p class="ic-step-desc">メッセージ、1on1面談予約、業界特化イベントで関係を構築。プラットフォーム上で協業・取引の実現までサポートします。</p>
-				</div>
-			</div>
-		</div>
-	</section>
+  <!-- HIDDEN: original CSS-built #point section (replaced by design images above) -->
+  <section id="point_legacy" style="display:none" aria-hidden="true">
+    <div class="main_inner">
+
+      <!-- =================== 01 AI Matching =================== -->
+      <article class="point_block fade fadeInUp">
+        <div class="point_block_inner">
+          <div class="point_block_text">
+            <span class="point_block_num">01</span>
+            <h3 class="point_block_title">AIマッチング</h3>
+            <p class="point_block_desc">
+              200以上のパラメータで業界・スキル・事業課題・成長フェーズを多角分析。
+              『会うべき人』だけを厳選提案し、マッチング精度92%を実現
+            </p>
+            <ul class="point_block_pills">
+              <li class="point_block_pill">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="4" y="4" width="16" height="16" rx="2"/><path d="M8 4v-2M12 4v-2M16 4v-2M8 22v-2M12 22v-2M16 22v-2M4 8h-2M4 12h-2M4 16h-2M22 8h2M22 12h2M22 16h2"/></svg>
+                200+ 独自パラメータ
+              </li>
+              <li class="point_block_pill">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M9.5 2A2.5 2.5 0 007 4.5v0A2.5 2.5 0 004.5 7h0A2.5 2.5 0 002 9.5v5A2.5 2.5 0 004.5 17h0A2.5 2.5 0 007 19.5v0A2.5 2.5 0 009.5 22h5a2.5 2.5 0 002.5-2.5v0a2.5 2.5 0 002.5-2.5h0a2.5 2.5 0 002.5-2.5v-5A2.5 2.5 0 0019.5 7h0A2.5 2.5 0 0017 4.5v0A2.5 2.5 0 0014.5 2z"/></svg>
+                AIによる相性予測
+              </li>
+              <li class="point_block_pill">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="5"/><circle cx="12" cy="12" r="1.5" fill="currentColor"/></svg>
+                最適な出会いを創出
+              </li>
+            </ul>
+          </div>
+          <div class="point_block_visual">
+            <div class="match_visual">
+              <div class="match_intro eng">INTER CONNECT AI</div>
+              <div class="match_intro_sub">最適なビジネスパートナーを、AIが厳選</div>
+              <div class="match_canvas">
+                <svg class="match_lines" viewBox="0 0 600 500" preserveAspectRatio="none" aria-hidden="true">
+                  <g stroke="rgba(56,189,248,0.35)" stroke-width="1" fill="none">
+                    <path d="M 80 90  Q 200 180, 300 250"/>
+                    <path d="M 520 90  Q 400 180, 300 250"/>
+                    <path d="M 60 250 L 300 250"/>
+                    <path d="M 540 250 L 300 250"/>
+                    <path d="M 80 410 Q 200 320, 300 250"/>
+                    <path d="M 520 410 Q 400 320, 300 250"/>
+                  </g>
+                  <g fill="#38bdf8">
+                    <circle cx="80" cy="90" r="2.5"/>
+                    <circle cx="520" cy="90" r="2.5"/>
+                    <circle cx="60" cy="250" r="2.5"/>
+                    <circle cx="540" cy="250" r="2.5"/>
+                    <circle cx="80" cy="410" r="2.5"/>
+                    <circle cx="520" cy="410" r="2.5"/>
+                  </g>
+                </svg>
+                <div class="match_center">
+                  <span class="match_center_badge">BEST MATCH</span>
+                  <div class="match_avatar is_center">
+                    <svg viewBox="0 0 24 24" fill="currentColor"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4.4 3.6-8 8-8s8 3.6 8 8z"/></svg>
+                    <span class="match_score_ring">92<small>%</small></span>
+                    <span class="match_score_ring_label">シナジースコア</span>
+                  </div>
+                  <div class="match_center_role">事業開発責任者</div>
+                  <div class="match_center_meta">SaaS / BtoB / DX推進</div>
+                  <div class="match_center_tags">
+                    <span>成長フェーズ一致</span>
+                    <span>事業シナジー高</span>
+                    <span>意思決定スピード◎</span>
+                  </div>
+                </div>
+                <div class="match_peer p1">
+                  <div class="match_peer_inner">
+                    <div class="match_avatar"><svg viewBox="0 0 24 24" fill="currentColor"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4.4 3.6-8 8-8s8 3.6 8 8z"/></svg></div>
+                    <div class="match_peer_text">
+                      <div class="match_peer_role">マーケティング責任者</div>
+                      <div class="match_peer_meta">広告 / BtoC</div>
+                      <div class="match_peer_score">シナジー <b>68%</b></div>
+                    </div>
+                  </div>
+                </div>
+                <div class="match_peer p2">
+                  <div class="match_peer_inner">
+                    <div class="match_avatar"><svg viewBox="0 0 24 24" fill="currentColor"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4.4 3.6-8 8-8s8 3.6 8 8z"/></svg></div>
+                    <div class="match_peer_text">
+                      <div class="match_peer_role">CFO</div>
+                      <div class="match_peer_meta">SaaS / グロース</div>
+                      <div class="match_peer_score">シナジー <b>74%</b></div>
+                    </div>
+                  </div>
+                </div>
+                <div class="match_peer p3">
+                  <div class="match_peer_inner">
+                    <div class="match_avatar"><svg viewBox="0 0 24 24" fill="currentColor"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4.4 3.6-8 8-8s8 3.6 8 8z"/></svg></div>
+                    <div class="match_peer_text">
+                      <div class="match_peer_role">プロダクト責任者</div>
+                      <div class="match_peer_meta">SaaS / BtoB</div>
+                      <div class="match_peer_score">シナジー <b>85%</b></div>
+                    </div>
+                  </div>
+                </div>
+                <div class="match_peer p4">
+                  <div class="match_peer_inner">
+                    <div class="match_avatar"><svg viewBox="0 0 24 24" fill="currentColor"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4.4 3.6-8 8-8s8 3.6 8 8z"/></svg></div>
+                    <div class="match_peer_text">
+                      <div class="match_peer_role">CTO</div>
+                      <div class="match_peer_meta">AI / ディープテック</div>
+                      <div class="match_peer_score">シナジー <b>88%</b></div>
+                    </div>
+                  </div>
+                </div>
+                <div class="match_peer p5">
+                  <div class="match_peer_inner">
+                    <div class="match_avatar"><svg viewBox="0 0 24 24" fill="currentColor"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4.4 3.6-8 8-8s8 3.6 8 8z"/></svg></div>
+                    <div class="match_peer_text">
+                      <div class="match_peer_role">経営企画マネージャー</div>
+                      <div class="match_peer_meta">IT / コンサル</div>
+                      <div class="match_peer_score">シナジー <b>71%</b></div>
+                    </div>
+                  </div>
+                </div>
+                <div class="match_peer p6">
+                  <div class="match_peer_inner">
+                    <div class="match_avatar"><svg viewBox="0 0 24 24" fill="currentColor"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4.4 3.6-8 8-8s8 3.6 8 8z"/></svg></div>
+                    <div class="match_peer_text">
+                      <div class="match_peer_role">事業開発責任者</div>
+                      <div class="match_peer_meta">DX / 金融</div>
+                      <div class="match_peer_score">シナジー <b>69%</b></div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="point_block_kpi">
+          <span class="point_block_kpi_label">マッチング精度</span>
+          <span class="point_block_kpi_sep"></span>
+          <span class="point_block_kpi_value">92<small>%</small></span>
+        </div>
+      </article>
+
+      <!-- =================== 02 Direct Message =================== -->
+      <article class="point_block layout-stacked fade fadeInUp">
+        <div class="point_block_inner">
+          <div class="point_block_text">
+            <span class="point_block_num">02</span>
+            <h3 class="point_block_title">ダイレクトメッセージ</h3>
+            <p class="point_block_desc">
+              マッチング成立と同時に専用チャットが開設。リアルタイム配信・既読確認で、
+              商談準備から日程調整までプラットフォーム内で完結。個人の連絡先を交換せずに、安全な環境でやり取りを始められる
+            </p>
+            <ul class="point_block_pills">
+              <li class="point_block_pill">
+                <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M13 2L3 14h7l-1 8 10-12h-7l1-8z"/></svg>
+                リアルタイム配信
+              </li>
+              <li class="point_block_pill">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M2 12l4 4L14 8M10 16l4 4L22 8"/></svg>
+                既読確認
+              </li>
+              <li class="point_block_pill">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 2l8 4v6c0 5-3.5 9-8 10-4.5-1-8-5-8-10V6z"/></svg>
+                安全な環境
+              </li>
+            </ul>
+          </div>
+          <div class="point_block_visual">
+            <div class="chat_mockup">
+              <aside class="chat_side">
+                <div class="chat_side_label">メッセージ</div>
+                <div class="chat_side_search">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4-4"/></svg>
+                  検索する
+                </div>
+                <div class="chat_side_item is_active">
+                  <div class="match_avatar"><svg viewBox="0 0 24 24" fill="currentColor"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4.4 3.6-8 8-8s8 3.6 8 8z"/></svg></div>
+                  <div class="chat_side_item_text">
+                    <div class="chat_side_item_name">佐藤 大輔</div>
+                    <div class="chat_side_item_company">SaaSイノベーション</div>
+                  </div>
+                  <span class="chat_side_item_dot"></span>
+                </div>
+                <div class="chat_side_item">
+                  <div class="match_avatar"><svg viewBox="0 0 24 24" fill="currentColor"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4.4 3.6-8 8-8s8 3.6 8 8z"/></svg></div>
+                  <div class="chat_side_item_text">
+                    <div class="chat_side_item_name">田中 優一</div>
+                    <div class="chat_side_item_company">BtoBソリューション</div>
+                  </div>
+                </div>
+                <div class="chat_side_item">
+                  <div class="match_avatar"><svg viewBox="0 0 24 24" fill="currentColor"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4.4 3.6-8 8-8s8 3.6 8 8z"/></svg></div>
+                  <div class="chat_side_item_text">
+                    <div class="chat_side_item_name">鈴木 実咲</div>
+                    <div class="chat_side_item_company">AIソリューションズ CTO</div>
+                  </div>
+                </div>
+                <div class="chat_side_item">
+                  <div class="match_avatar"><svg viewBox="0 0 24 24" fill="currentColor"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4.4 3.6-8 8-8s8 3.6 8 8z"/></svg></div>
+                  <div class="chat_side_item_text">
+                    <div class="chat_side_item_name">伊藤 誠</div>
+                    <div class="chat_side_item_company">UX / 事業企画</div>
+                  </div>
+                </div>
+              </aside>
+              <div class="chat_main">
+                <div class="chat_main_header">
+                  <div class="match_avatar"><svg viewBox="0 0 24 24" fill="currentColor"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4.4 3.6-8 8-8s8 3.6 8 8z"/></svg></div>
+                  <div class="chat_main_header_info">
+                    <div class="chat_main_header_name">佐藤 大輔</div>
+                    <div class="chat_main_header_status">オンライン</div>
+                  </div>
+                </div>
+                <span class="chat_bubble chat_bubble_outgoing">はじめまして。先日はマッチングありがとうございます。<br>弊社の事業についてご紹介資料をお送りします。</span>
+                <div class="chat_attachment">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><path d="M14 2v6h6"/></svg>
+                  <div class="chat_attachment_text">事業紹介資料_INTERCONNECT.pdf<small>2.4 MB</small></div>
+                </div>
+                <span class="chat_bubble chat_bubble_incoming">資料共有の件ありがとうございます。<br>内容を拝見し、ぜひ詳しくお話したいです。</span>
+                <span class="chat_bubble chat_bubble_outgoing">ありがとうございます！<br>今週〜来週でお時間いかがでしょうか？</span>
+                <div class="chat_input">
+                  <span>メッセージを入力...</span>
+                </div>
+              </div>
+              <aside class="chat_panel">
+                <div class="chat_panel_label">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 9h18M8 3v4M16 3v4"/></svg>
+                  次回の打ち合わせ候補
+                </div>
+                <div class="chat_slot">5/20 (火) 14:00 - 15:00</div>
+                <div class="chat_slot">5/21 (水) 10:00 - 11:00</div>
+                <div class="chat_slot_add">日程候補を追加</div>
+              </aside>
+            </div>
+            <div class="dm_features">
+              <div class="dm_feature">
+                <div class="dm_feature_icon">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M21 11.5a8.38 8.38 0 01-.9 3.8 8.5 8.5 0 01-7.6 4.7 8.38 8.38 0 01-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 01-.9-3.8 8.5 8.5 0 014.7-7.6 8.38 8.38 0 013.8-.9h.5a8.48 8.48 0 018 8v.5z"/></svg>
+                </div>
+                <div class="dm_feature_text">
+                  <div class="dm_feature_title">専用チャットを即時開設</div>
+                  <div class="dm_feature_desc">マッチング成立と同時に安全な専用ルームを自動生成</div>
+                </div>
+              </div>
+              <div class="dm_feature">
+                <div class="dm_feature_icon">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+                </div>
+                <div class="dm_feature_text">
+                  <div class="dm_feature_title">リアルタイム配信・既読確認</div>
+                  <div class="dm_feature_desc">メッセージは即座に届き、既読状況もひと目で確認</div>
+                </div>
+              </div>
+              <div class="dm_feature">
+                <div class="dm_feature_icon">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 9h18M8 3v4M16 3v4"/></svg>
+                </div>
+                <div class="dm_feature_text">
+                  <div class="dm_feature_title">日程調整まで完結</div>
+                  <div class="dm_feature_desc">カレンダー連携で空き時間を共有し、日程候補をスムーズに調整</div>
+                </div>
+              </div>
+              <div class="dm_feature">
+                <div class="dm_feature_icon">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V7a4 4 0 018 0v4"/></svg>
+                </div>
+                <div class="dm_feature_text">
+                  <div class="dm_feature_title">連絡先の交換は不要</div>
+                  <div class="dm_feature_desc">プラットフォーム内で完結するため、個人の連絡先を開示せずに安心</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="point_block_kpi">
+          <span class="point_block_kpi_label">チャット継続率</span>
+          <span class="point_block_kpi_sep"></span>
+          <span class="point_block_kpi_value">98<small>%</small></span>
+        </div>
+      </article>
+
+      <!-- =================== 03 Event & 1on1 =================== -->
+      <article class="point_block fade fadeInUp">
+        <div class="point_block_inner">
+          <div class="point_block_text">
+            <span class="point_block_num">03</span>
+            <h3 class="point_block_title">イベント &amp; 面談</h3>
+            <p class="point_block_desc">
+              業界特化型イベントと1on1面談予約をワンストップで。
+              オンライン・オフライン対応、カレンダー連携で日程調整の手間をゼロに
+            </p>
+            <ul class="point_block_pills">
+              <li class="point_block_pill">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4.4 3.6-8 8-8s8 3.6 8 8z"/></svg>
+                1on1面談予約
+              </li>
+              <li class="point_block_pill">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="2" y="6" width="14" height="12" rx="2"/><path d="M22 8l-6 4 6 4z"/></svg>
+                オンライン・オフライン対応
+              </li>
+              <li class="point_block_pill">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 9h18M8 3v4M16 3v4"/></svg>
+                カレンダー連携
+              </li>
+            </ul>
+          </div>
+          <div class="point_block_visual">
+            <div class="event_visual">
+              <div class="event_panel">
+                <div class="event_panel_title">注目のイベント</div>
+                <div class="event_card">
+                  <div class="event_card_image"></div>
+                  <span class="event_card_tag">オンライン</span>
+                  <div class="event_card_title">SaaS成長戦略カンファレンス 2025</div>
+                  <div class="event_card_meta">6/18 (水) 13:00 - 17:30 オンライン</div>
+                  <div class="event_card_attendees">
+                    <svg viewBox="0 0 24 24" width="10" height="10" fill="currentColor"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4.4 3.6-8 8-8s8 3.6 8 8z"/></svg>
+                    1,256人が参加予定
+                  </div>
+                </div>
+                <div class="event_card">
+                  <div class="event_card_image"></div>
+                  <span class="event_card_tag is_offline">オフライン</span>
+                  <div class="event_card_title">CxOネットワーキング・ディナー</div>
+                  <div class="event_card_meta">7/03 (木) 19:00 - 21:30 東京・丸の内</div>
+                  <div class="event_card_attendees">
+                    <svg viewBox="0 0 24 24" width="10" height="10" fill="currentColor"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4.4 3.6-8 8-8s8 3.6 8 8z"/></svg>
+                    85人が参加予定
+                  </div>
+                </div>
+                <div class="event_card">
+                  <div class="event_card_image"></div>
+                  <span class="event_card_tag">オンライン</span>
+                  <div class="event_card_title">AI導入事例シェア会</div>
+                  <div class="event_card_meta">7/10 (木) 14:00 - 16:00 オンライン</div>
+                  <div class="event_card_attendees">
+                    <svg viewBox="0 0 24 24" width="10" height="10" fill="currentColor"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4.4 3.6-8 8-8s8 3.6 8 8z"/></svg>
+                    632人が参加予定
+                  </div>
+                </div>
+              </div>
+              <div class="event_panel">
+                <div class="event_panel_title">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 9h18M8 3v4M16 3v4"/></svg>
+                  カレンダー連携
+                </div>
+                <div class="cal_widget">
+                  <div class="cal_header">
+                    <span class="cal_header_arrow">‹</span>
+                    <span class="cal_header_title">2025年6月</span>
+                    <span class="cal_header_arrow">›</span>
+                  </div>
+                  <div class="cal_grid">
+                    <span class="cal_grid_dow">日</span><span class="cal_grid_dow">月</span><span class="cal_grid_dow">火</span><span class="cal_grid_dow">水</span><span class="cal_grid_dow">木</span><span class="cal_grid_dow">金</span><span class="cal_grid_dow">土</span>
+                    <span class="cal_grid_day is_muted">1</span><span class="cal_grid_day is_muted">2</span><span class="cal_grid_day is_muted">3</span><span class="cal_grid_day is_muted">4</span><span class="cal_grid_day is_muted">5</span><span class="cal_grid_day is_muted">6</span><span class="cal_grid_day is_muted">7</span>
+                    <span class="cal_grid_day">8</span><span class="cal_grid_day">9</span><span class="cal_grid_day">10</span><span class="cal_grid_day">11</span><span class="cal_grid_day">12</span><span class="cal_grid_day">13</span><span class="cal_grid_day">14</span>
+                    <span class="cal_grid_day">15</span><span class="cal_grid_day">16</span><span class="cal_grid_day">17</span><span class="cal_grid_day is_selected">18</span><span class="cal_grid_day">19</span><span class="cal_grid_day">20</span><span class="cal_grid_day">21</span>
+                    <span class="cal_grid_day">22</span><span class="cal_grid_day">23</span><span class="cal_grid_day">24</span><span class="cal_grid_day">25</span><span class="cal_grid_day">26</span><span class="cal_grid_day">27</span><span class="cal_grid_day">28</span>
+                    <span class="cal_grid_day">29</span><span class="cal_grid_day">30</span>
+                  </div>
+                  <div class="cal_apps">
+                    <span class="cal_apps_dot"></span><span class="cal_apps_dot"></span><span class="cal_apps_dot"></span>
+                    カレンダーと連携済み
+                  </div>
+                </div>
+              </div>
+              <div class="event_panel">
+                <div class="event_panel_title">1on1面談を予約する</div>
+                <div class="book_profile">
+                  <div class="match_avatar"><svg viewBox="0 0 24 24" fill="currentColor"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4.4 3.6-8 8-8s8 3.6 8 8z"/></svg></div>
+                  <div class="book_profile_text">
+                    <div class="book_profile_role">事業開発責任者</div>
+                    <div class="book_profile_meta">SaaS / DX推進</div>
+                  </div>
+                </div>
+                <div class="book_format">
+                  <span class="book_format_btn is_active">
+                    <svg viewBox="0 0 24 24" width="11" height="11" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="6" width="14" height="12" rx="2"/><path d="M22 8l-6 4 6 4z"/></svg>
+                    オンライン
+                  </span>
+                  <span class="book_format_btn">
+                    <svg viewBox="0 0 24 24" width="11" height="11" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s-7-7-7-13a7 7 0 0114 0c0 6-7 13-7 13z"/><circle cx="12" cy="9" r="2.5"/></svg>
+                    オフライン
+                  </span>
+                </div>
+                <div class="book_slots">
+                  <span class="book_slot is_selected">10:00 - 10:45</span>
+                  <span class="book_slot">11:00 - 11:45</span>
+                  <span class="book_slot">15:00 - 15:45</span>
+                </div>
+                <span class="book_submit">面談を予約する</span>
+              </div>
+            </div>
+            <div class="event_flow">
+              <div class="event_flow_step">
+                <div class="event_flow_icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4-4"/></svg></div>
+                <div class="event_flow_title">01 イベントを探す</div>
+                <div class="event_flow_desc">業界・テーマで検索し、最適なイベントを発見</div>
+              </div>
+              <div class="event_flow_step">
+                <div class="event_flow_icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 9h18M8 3v4M16 3v4"/></svg></div>
+                <div class="event_flow_title">02 日程を調整</div>
+                <div class="event_flow_desc">カレンダー連携で空き時間を自動提案</div>
+              </div>
+              <div class="event_flow_step">
+                <div class="event_flow_icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4.4 3.6-8 8-8s8 3.6 8 8z"/></svg></div>
+                <div class="event_flow_title">03 1on1面談を予約</div>
+                <div class="event_flow_desc">オンライン・オフラインを選んで簡単予約</div>
+              </div>
+              <div class="event_flow_step">
+                <div class="event_flow_icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12l5 5L20 7"/></svg></div>
+                <div class="event_flow_title">04 面談確定・リマインド</div>
+                <div class="event_flow_desc">自動リマインドで当日もスムーズに</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </article>
+
+      <!-- =================== 04 Referral =================== -->
+      <article class="point_block fade fadeInUp">
+        <div class="point_block_inner">
+          <div class="point_block_text">
+            <span class="point_block_num">04</span>
+            <h3 class="point_block_title">紹介プログラム</h3>
+            <p class="point_block_desc">
+              信頼のチェーンが価値を生む。<br>
+              紹介成立で双方にポイント付与、<br>
+              紹介経由のマッチングは成約率が従来比15倍以上
+            </p>
+            <ul class="point_block_pills">
+              <li class="point_block_pill">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="8" width="18" height="13" rx="2"/><path d="M12 8v13M3 12h18M7 8a2 2 0 110-4 4 4 0 014 4M17 8a2 2 0 100-4 4 4 0 00-4 4"/></svg>
+                双方にポイント付与
+              </li>
+              <li class="point_block_pill">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M3 17l6-6 4 4 8-8"/><path d="M17 7h4v4"/></svg>
+                成約率15倍以上
+              </li>
+              <li class="point_block_pill">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 2l8 4v6c0 5-3.5 9-8 10-4.5-1-8-5-8-10V6z"/><path d="M8 12l3 3 5-5"/></svg>
+                信頼のチェーン
+              </li>
+            </ul>
+          </div>
+          <div class="point_block_visual">
+            <div class="ref_visual">
+              <div class="ref_chain">
+                <div class="ref_person">
+                  <div class="match_avatar"><svg viewBox="0 0 24 24" fill="currentColor"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4.4 3.6-8 8-8s8 3.6 8 8z"/></svg></div>
+                  <div class="ref_person_text">
+                    <div class="ref_person_name">あなた</div>
+                    <div class="ref_person_role">メンバー</div>
+                    <span class="ref_person_tag">紹介数 12件</span>
+                  </div>
+                </div>
+                <div class="ref_chain_center">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M16 21v-2a4 4 0 00-4-4H6a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 00-3-3.87M16 3.13a4 4 0 010 7.75"/></svg>
+                  <span class="ref_chain_center_label">紹介</span>
+                </div>
+                <div class="ref_person">
+                  <div class="match_avatar"><svg viewBox="0 0 24 24" fill="currentColor"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4.4 3.6-8 8-8s8 3.6 8 8z"/></svg></div>
+                  <div class="ref_person_text">
+                    <div class="ref_person_name">紹介された方</div>
+                    <div class="ref_person_role">新規メンバー</div>
+                    <span class="ref_person_tag is_green">紹介経由で登録</span>
+                  </div>
+                </div>
+              </div>
+              <div class="ref_flow">
+                <div class="ref_flow_box">
+                  <div class="ref_flow_box_label">あなたにポイント付与</div>
+                  <span class="ref_flow_pt">+1,000<small>pt</small></span>
+                </div>
+                <span class="ref_flow_arrow">→</span>
+                <div class="ref_flow_center">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M14 4l-4 6 4 6 6-4-6-2 2-6zM10 14l4 6M6 18l4 2"/></svg>
+                  <span class="ref_flow_center_label">成約</span>
+                  <span class="ref_flow_center_sub">ビジネス成立</span>
+                </div>
+                <span class="ref_flow_arrow">→</span>
+                <div class="ref_flow_box">
+                  <div class="ref_flow_box_label">紹介された方にも付与</div>
+                  <span class="ref_flow_pt">+1,000<small>pt</small></span>
+                </div>
+              </div>
+            </div>
+            <div class="ref_benefits">
+              <div class="ref_benefit">
+                <div class="ref_benefit_icon">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M16 21v-2a4 4 0 00-4-4H6a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 00-3-3.87M16 3.13a4 4 0 010 7.75"/></svg>
+                </div>
+                <div class="ref_benefit_title">信頼のチェーンが拡大</div>
+                <div class="ref_benefit_desc">紹介が次の紹介を生み、質の高いネットワークが広がります</div>
+              </div>
+              <div class="ref_benefit">
+                <div class="ref_benefit_icon">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 2l8 4v6c0 5-3.5 9-8 10-4.5-1-8-5-8-10V6z"/><path d="M8 12l3 3 5-5"/></svg>
+                </div>
+                <div class="ref_benefit_title">安心のトラスト設計</div>
+                <div class="ref_benefit_desc">本人確認・審査・評価で、安心して紹介できます</div>
+              </div>
+              <div class="ref_benefit">
+                <div class="ref_benefit_icon">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M3 17l6-6 4 4 8-8"/><path d="M17 7h4v4"/></svg>
+                </div>
+                <div class="ref_benefit_title">高い成果につながる</div>
+                <div class="ref_benefit_desc">信頼ベースのマッチングで、成約率が大きく向上します</div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="point_block_kpi">
+          <span class="point_block_kpi_label">成約率</span>
+          <span class="point_block_kpi_sep"></span>
+          <span class="point_block_kpi_value">15<span class="point_block_kpi_value_suffix">倍以上</span></span>
+        </div>
+      </article>
+
+    </div>
+  </section>
+
+<!-- ===========================================================
+     AI Engine (新規追加: 画像 #73-#84 準拠 / 6 sub-blocks)
+=========================================================== -->
+<style>
+#ai_engine {
+  position: relative;
+  padding: 140px 0 80px;
+  overflow: hidden;
+}
+#ai_engine::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(ellipse 50% 30% at 90% 5%, rgba(56,189,248,0.07) 0%, transparent 60%),
+    radial-gradient(ellipse 40% 25% at 10% 95%, rgba(129,140,248,0.05) 0%, transparent 60%);
+  pointer-events: none;
+  z-index: 0;
+}
+#ai_engine .main_inner { position: relative; z-index: 1; }
+
+/* --- Intro --- */
+.engine_intro {
+  text-align: center;
+  margin-bottom: 80px;
+}
+.engine_intro_eyebrow {
+  display: inline-flex;
+  align-items: center;
+  gap: 16px;
+  font-family: "Work Sans", sans-serif;
+  font-size: 13px;
+  font-weight: 500;
+  letter-spacing: 0.35em;
+  color: rgba(56,189,248,0.85);
+  margin-bottom: 28px;
+}
+.engine_intro_eyebrow::before,
+.engine_intro_eyebrow::after {
+  content: "";
+  display: inline-block;
+  width: 48px; height: 1px;
+  background: linear-gradient(90deg, transparent 0%, rgba(56,189,248,0.6) 100%);
+}
+.engine_intro_eyebrow::after {
+  background: linear-gradient(90deg, rgba(56,189,248,0.6) 0%, transparent 100%);
+}
+.engine_intro_title {
+  font-family: "Noto Serif JP", "Yu Mincho", serif;
+  font-size: 44px;
+  font-weight: 500;
+  line-height: 1.55;
+  letter-spacing: 0.04em;
+  color: #fff;
+  margin-bottom: 24px;
+}
+.engine_intro_title .hl {
+  background: linear-gradient(180deg, #fff 25%, #38bdf8 95%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  color: #67e8f9;
+}
+.engine_intro_desc {
+  max-width: 720px;
+  margin: 0 auto;
+  font-size: 15px;
+  line-height: 2.1;
+  color: rgba(255,255,255,0.65);
+  letter-spacing: 0.03em;
+}
+
+/* --- Block stagger --- */
+#ai_engine .engine_block:nth-child(1) { transition-delay: 0s !important; }
+#ai_engine .engine_block:nth-child(2) { transition-delay: 0.1s !important; }
+#ai_engine .engine_block:nth-child(3) { transition-delay: 0.2s !important; }
+#ai_engine .engine_block:nth-child(4) { transition-delay: 0.3s !important; }
+#ai_engine .engine_block:nth-child(5) { transition-delay: 0.4s !important; }
+#ai_engine .engine_block:nth-child(6) { transition-delay: 0.5s !important; }
+
+/* --- Block common --- */
+.engine_block {
+  padding: 110px 0 100px;
+  border-top: 1px solid rgba(255,255,255,0.06);
+}
+.engine_block:first-of-type { border-top: none; padding-top: 40px; }
+.engine_head { position: static; text-align: center; max-width: 920px; margin: 0 auto 56px; padding: 0; background: transparent; height: auto; width: auto; }
+.engine_num {
+  display: block;
+  font-family: "Noto Serif JP", "Times New Roman", serif;
+  font-size: 22px;
+  font-weight: 400;
+  color: rgba(255,255,255,0.55);
+  letter-spacing: 0.16em;
+}
+.engine_num::after {
+  content: "";
+  display: block;
+  width: 56px; height: 2px;
+  background: linear-gradient(90deg, #38bdf8 0%, #ec4899 100%);
+  margin: 14px auto 22px;
+}
+.engine_title {
+  font-family: "Noto Serif JP", "Yu Mincho", serif;
+  font-size: 48px;
+  font-weight: 500;
+  line-height: 1.55;
+  letter-spacing: 0.05em;
+  color: #fff;
+  margin-bottom: 28px;
+}
+.engine_sub {
+  max-width: 760px;
+  margin: 0 auto;
+  font-size: 15px;
+  line-height: 2.0;
+  color: rgba(255,255,255,0.7);
+  letter-spacing: 0.03em;
+}
+.engine_visual {
+  margin: 0 auto 56px;
+  max-width: 1100px;
+}
+.engine_features {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16px;
+  margin-top: 8px;
+}
+.engine_feature {
+  padding: 22px 26px;
+  background: linear-gradient(180deg, rgba(255,255,255,0.025) 0%, rgba(255,255,255,0.008) 100%);
+  border: 1px solid rgba(255,255,255,0.08);
+  display: flex;
+  gap: 16px;
+  align-items: center;
+}
+.engine_feature_icon {
+  width: 40px; height: 40px;
+  border-radius: 50%;
+  background: rgba(56,189,248,0.08);
+  border: 1px solid rgba(56,189,248,0.32);
+  display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0;
+}
+.engine_feature_icon svg { width: 20px; height: 20px; color: #38bdf8; }
+.engine_feature_text { flex: 1; min-width: 0; }
+.engine_feature_title { font-size: 14px; font-weight: 600; color: #fff; margin-bottom: 4px; }
+.engine_feature_desc { font-size: 12px; line-height: 1.7; color: rgba(255,255,255,0.6); }
+
+/* ====== 01: 5次元スコアリング (Pentagon Radar) ====== */
+.radar_wrap {
+  position: relative;
+  width: 100%;
+  max-width: 680px;
+  margin: 0 auto;
+  aspect-ratio: 6 / 5;
+}
+.radar_svg { width: 100%; height: 100%; display: block; }
+.radar_label {
+  position: absolute;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 14px;
+  color: #fff;
+  font-family: "Work Sans", "Noto Serif JP", serif;
+  font-weight: 500;
+  letter-spacing: 0.04em;
+  white-space: nowrap;
+}
+.radar_label small {
+  display: block;
+  font-size: 10.5px;
+  font-weight: 400;
+  color: rgba(255,255,255,0.55);
+  letter-spacing: 0.02em;
+  margin-top: 2px;
+}
+.radar_label_text { display: inline-block; }
+.radar_label svg { width: 18px; height: 18px; color: #38bdf8; flex-shrink: 0; }
+.radar_label.top { top: -10px; left: 50%; transform: translateX(-50%); flex-direction: column; align-items: center; text-align: center; }
+.radar_label.tr { top: 28%; right: -2%; transform: translateY(-50%); }
+.radar_label.br { bottom: 5%; right: 8%; }
+.radar_label.bl { bottom: 5%; left: 8%; }
+.radar_label.bl > .radar_label_text,
+.radar_label.br > .radar_label_text { order: -1; }
+.radar_label.tl { top: 28%; left: -2%; transform: translateY(-50%); }
+.radar_label.tl > .radar_label_text { order: -1; }
+
+/* ====== 02: 重みは状況で変わる (HIGH/MID/LOW) ====== */
+.weight_grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 20px;
+  max-width: 1080px;
+  margin: 0 auto;
+}
+.weight_card {
+  padding: 36px 30px 32px;
+  background: linear-gradient(180deg, rgba(255,255,255,0.025) 0%, rgba(255,255,255,0.005) 100%);
+  border: 1px solid rgba(255,255,255,0.1);
+  text-align: center;
+  position: relative;
+}
+.weight_card::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border: 1.5px solid transparent;
+  pointer-events: none;
+}
+.weight_card.is_high { border-color: rgba(56,189,248,0.38); box-shadow: 0 0 24px rgba(56,189,248,0.12); }
+.weight_card.is_mid { border-color: rgba(34,197,94,0.32); box-shadow: 0 0 24px rgba(34,197,94,0.10); }
+.weight_card.is_low { border-color: rgba(20,184,166,0.32); box-shadow: 0 0 24px rgba(20,184,166,0.10); }
+.weight_label {
+  font-family: "Work Sans", sans-serif;
+  font-size: 44px;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  line-height: 1;
+  margin-bottom: 10px;
+}
+.weight_card.is_high .weight_label { color: #38bdf8; text-shadow: 0 0 16px rgba(56,189,248,0.4); }
+.weight_card.is_mid .weight_label  { color: #22c55e; text-shadow: 0 0 16px rgba(34,197,94,0.35); }
+.weight_card.is_low .weight_label  { color: #14b8a6; text-shadow: 0 0 16px rgba(20,184,166,0.35); }
+.weight_situation {
+  font-size: 13px;
+  color: rgba(255,255,255,0.7);
+  margin-bottom: 20px;
+  letter-spacing: 0.03em;
+}
+.weight_icon {
+  width: 56px; height: 56px;
+  margin: 0 auto 16px;
+  border-radius: 50%;
+  border: 1px solid rgba(56,189,248,0.35);
+  background: rgba(56,189,248,0.04);
+  display: flex; align-items: center; justify-content: center;
+}
+.weight_card.is_mid .weight_icon { border-color: rgba(34,197,94,0.4); background: rgba(34,197,94,0.04); }
+.weight_card.is_low .weight_icon { border-color: rgba(20,184,166,0.4); background: rgba(20,184,166,0.04); }
+.weight_icon svg { width: 26px; height: 26px; color: #38bdf8; }
+.weight_card.is_mid .weight_icon svg { color: #22c55e; }
+.weight_card.is_low .weight_icon svg { color: #14b8a6; }
+.weight_strategy {
+  font-size: 13px;
+  color: rgba(255,255,255,0.85);
+  margin-bottom: 20px;
+}
+.weight_bars { display: flex; flex-direction: column; gap: 8px; padding-top: 14px; border-top: 1px solid rgba(255,255,255,0.08); }
+.weight_bar {
+  display: grid;
+  grid-template-columns: 1fr 36px;
+  align-items: center;
+  gap: 10px;
+}
+.weight_bar_track {
+  height: 6px;
+  background: rgba(255,255,255,0.06);
+  border-radius: 999px;
+  overflow: hidden;
+}
+.weight_bar_fill {
+  display: block;
+  height: 100%;
+  border-radius: 999px;
+}
+.weight_card.is_high .weight_bar:nth-child(1) .weight_bar_fill { background: linear-gradient(90deg, #38bdf8, #0284c7); box-shadow: 0 0 8px rgba(56,189,248,0.4); }
+.weight_card.is_high .weight_bar:nth-child(2) .weight_bar_fill { background: rgba(255,255,255,0.25); }
+.weight_card.is_high .weight_bar:nth-child(3) .weight_bar_fill { background: rgba(255,255,255,0.15); }
+.weight_card.is_mid .weight_bar:nth-child(1) .weight_bar_fill { background: linear-gradient(90deg, #22c55e, #15803d); box-shadow: 0 0 8px rgba(34,197,94,0.35); }
+.weight_card.is_mid .weight_bar:nth-child(2) .weight_bar_fill { background: rgba(255,255,255,0.25); }
+.weight_card.is_mid .weight_bar:nth-child(3) .weight_bar_fill { background: rgba(255,255,255,0.15); }
+.weight_card.is_low .weight_bar:nth-child(1) .weight_bar_fill { background: linear-gradient(90deg, #14b8a6, #0d9488); box-shadow: 0 0 8px rgba(20,184,166,0.35); }
+.weight_card.is_low .weight_bar:nth-child(2) .weight_bar_fill { background: rgba(255,255,255,0.25); }
+.weight_card.is_low .weight_bar:nth-child(3) .weight_bar_fill { background: rgba(255,255,255,0.15); }
+.weight_bar_val {
+  font-family: "Work Sans", sans-serif;
+  font-size: 12px;
+  font-weight: 700;
+  color: rgba(255,255,255,0.85);
+  text-align: right;
+}
+.weight_card.is_high .weight_bar:nth-child(1) .weight_bar_val { color: #38bdf8; }
+.weight_card.is_mid .weight_bar:nth-child(1) .weight_bar_val { color: #22c55e; }
+.weight_card.is_low .weight_bar:nth-child(1) .weight_bar_val { color: #14b8a6; }
+
+/* ====== 03: スコアが決まるまで (6-step + rec card) ====== */
+.flow6 {
+  display: grid;
+  grid-template-columns: repeat(6, 1fr);
+  gap: 8px;
+  margin-bottom: 40px;
+}
+.flow6_step {
+  position: relative;
+  padding: 22px 14px 20px;
+  background: rgba(255,255,255,0.025);
+  border: 1px solid rgba(255,255,255,0.1);
+  text-align: center;
+}
+.flow6_step:not(:last-child)::after {
+  content: "›";
+  position: absolute;
+  top: 50%; right: -12px;
+  transform: translateY(-50%);
+  font-size: 18px;
+  color: rgba(56,189,248,0.5);
+  z-index: 2;
+}
+.flow6_num {
+  font-family: "Work Sans", sans-serif;
+  display: inline-block;
+  width: 24px; height: 24px;
+  border-radius: 50%;
+  border: 1px solid rgba(56,189,248,0.55);
+  font-size: 11px;
+  font-weight: 700;
+  color: #38bdf8;
+  line-height: 23px;
+  margin-bottom: 14px;
+}
+.flow6_icon {
+  width: 36px; height: 36px;
+  margin: 0 auto 12px;
+  display: flex; align-items: center; justify-content: center;
+}
+.flow6_icon svg { width: 28px; height: 28px; color: #38bdf8; }
+.flow6_title {
+  font-size: 12px;
+  font-weight: 600;
+  color: #fff;
+  margin-bottom: 6px;
+  line-height: 1.4;
+}
+.flow6_desc {
+  font-size: 10.5px;
+  line-height: 1.6;
+  color: rgba(255,255,255,0.55);
+}
+.rec_card {
+  max-width: 920px;
+  margin: 0 auto;
+  padding: 24px 28px;
+  background: linear-gradient(135deg, rgba(56,189,248,0.05) 0%, rgba(255,255,255,0.01) 100%);
+  border: 1px solid rgba(56,189,248,0.3);
+  position: relative;
+}
+.rec_card_label {
+  display: inline-block;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.15em;
+  color: #38bdf8;
+  padding: 4px 16px;
+  border: 1px solid rgba(56,189,248,0.5);
+  position: absolute;
+  top: -12px; left: 50%;
+  transform: translateX(-50%);
+  background: #0a0a0a;
+}
+.rec_body { display: grid; grid-template-columns: 64px 1fr auto; gap: 20px; align-items: center; }
+.rec_avatar {
+  width: 64px; height: 64px;
+  border-radius: 50%;
+  background: linear-gradient(180deg, #38bdf8 0%, #818cf8 100%);
+  display: flex; align-items: center; justify-content: center;
+  position: relative;
+  border: 1px solid rgba(56,189,248,0.6);
+}
+.rec_avatar svg { width: 32px; height: 32px; color: rgba(255,255,255,0.95); }
+.rec_avatar_star {
+  position: absolute;
+  bottom: -4px; right: -4px;
+  width: 22px; height: 22px;
+  background: #facc15;
+  border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 11px;
+  color: #000;
+  border: 2px solid #0a0a0a;
+}
+.rec_text { min-width: 0; }
+.rec_role {
+  font-family: "Noto Serif JP", serif;
+  font-size: 18px;
+  font-weight: 500;
+  color: #fff;
+  margin-bottom: 8px;
+  letter-spacing: 0.03em;
+}
+.rec_reason {
+  font-size: 12px;
+  line-height: 1.75;
+  color: rgba(255,255,255,0.65);
+}
+.rec_score { text-align: right; padding-left: 24px; border-left: 1px solid rgba(255,255,255,0.1); }
+.rec_score_label { font-size: 11px; color: rgba(56,189,248,0.8); display: block; margin-bottom: 4px; letter-spacing: 0.06em; }
+.rec_score_value {
+  font-family: "Work Sans", sans-serif;
+  font-size: 44px;
+  font-weight: 800;
+  line-height: 1;
+  background: linear-gradient(180deg, #67e8f9 0%, #38bdf8 60%, #0284c7 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  color: #38bdf8;
+  filter: drop-shadow(0 0 14px rgba(56,189,248,0.4));
+}
+.rec_score_value small { font-size: 22px; font-weight: 700; margin-left: 2px; }
+
+/* ====== 04: 意味空間で理解する (3 spheres) ====== */
+.sem_visual {
+  position: relative;
+  width: 100%;
+  max-width: 980px;
+  margin: 0 auto;
+  min-height: 420px;
+}
+.sem_bg {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 0;
+}
+.sem_bg svg { width: 100%; height: 100%; display: block; }
+.sem_spheres {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  grid-template-rows: auto auto;
+  gap: 24px;
+  padding: 24px;
+}
+.sem_sphere {
+  border-radius: 50%;
+  aspect-ratio: 5 / 4;
+  padding: 30px 26px;
+  text-align: center;
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  position: relative;
+}
+.sem_sphere.is_blue {
+  background: radial-gradient(circle, rgba(56,189,248,0.12) 0%, rgba(56,189,248,0.04) 50%, transparent 80%);
+  border: 1px solid rgba(56,189,248,0.4);
+  box-shadow: inset 0 0 60px rgba(56,189,248,0.10), 0 0 40px rgba(56,189,248,0.18);
+}
+.sem_sphere.is_green {
+  background: radial-gradient(circle, rgba(34,197,94,0.12) 0%, rgba(34,197,94,0.04) 50%, transparent 80%);
+  border: 1px solid rgba(34,197,94,0.4);
+  box-shadow: inset 0 0 60px rgba(34,197,94,0.10), 0 0 40px rgba(34,197,94,0.18);
+}
+.sem_sphere.is_yellow {
+  background: radial-gradient(circle, rgba(250,204,21,0.1) 0%, rgba(250,204,21,0.03) 50%, transparent 80%);
+  border: 1px solid rgba(250,204,21,0.4);
+  box-shadow: inset 0 0 60px rgba(250,204,21,0.08), 0 0 40px rgba(250,204,21,0.14);
+  grid-column: 1 / 3;
+  justify-self: center;
+  max-width: 380px;
+}
+.sem_sphere_icon { width: 32px; height: 32px; margin-bottom: 8px; display: flex; align-items: center; justify-content: center; }
+.sem_sphere_icon svg { width: 24px; height: 24px; }
+.sem_sphere.is_blue .sem_sphere_icon svg { color: #38bdf8; }
+.sem_sphere.is_green .sem_sphere_icon svg { color: #22c55e; }
+.sem_sphere.is_yellow .sem_sphere_icon svg { color: #facc15; }
+.sem_sphere_title {
+  font-size: 17px;
+  font-weight: 600;
+  color: #fff;
+  margin-bottom: 14px;
+  letter-spacing: 0.04em;
+}
+.sem_sphere_list {
+  list-style: none;
+  padding: 0; margin: 0;
+  font-size: 12px;
+  color: rgba(255,255,255,0.75);
+  line-height: 1.85;
+}
+.sem_sphere_list li {
+  display: flex; align-items: center; gap: 8px; justify-content: center;
+}
+.sem_sphere_list li::before {
+  content: ""; display: inline-block; width: 6px; height: 6px; border-radius: 50%; flex-shrink: 0;
+}
+.sem_sphere.is_blue .sem_sphere_list li::before { background: #38bdf8; box-shadow: 0 0 6px rgba(56,189,248,0.6); }
+.sem_sphere.is_green .sem_sphere_list li::before { background: #22c55e; box-shadow: 0 0 6px rgba(34,197,94,0.5); }
+.sem_sphere.is_yellow .sem_sphere_list li::before { background: #facc15; box-shadow: 0 0 6px rgba(250,204,21,0.5); }
+
+/* ====== 05: 言い方が違っても、近い意味ならつながる ====== */
+.syn_visual {
+  position: relative;
+  width: 100%;
+  max-width: 1080px;
+  margin: 0 auto;
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  gap: 80px;
+  align-items: center;
+  padding: 40px 0;
+}
+.syn_lines {
+  position: absolute;
+  inset: 0;
+  width: 100%; height: 100%;
+  pointer-events: none;
+  z-index: 0;
+}
+.syn_col { display: flex; flex-direction: column; gap: 18px; position: relative; z-index: 1; }
+.syn_node {
+  display: flex; align-items: center; gap: 10px;
+  padding: 14px 18px;
+  background: rgba(0,0,0,0.4);
+  border: 1px solid rgba(56,189,248,0.3);
+  font-size: 13px;
+  color: #fff;
+  letter-spacing: 0.03em;
+}
+.syn_node svg { width: 18px; height: 18px; color: #38bdf8; flex-shrink: 0; }
+.syn_center {
+  width: 200px; height: 200px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(56,189,248,0.15) 0%, rgba(56,189,248,0.04) 50%, transparent 80%);
+  border: 1.5px solid rgba(56,189,248,0.55);
+  display: flex; align-items: center; justify-content: center;
+  text-align: center;
+  position: relative;
+  z-index: 2;
+  box-shadow: inset 0 0 80px rgba(56,189,248,0.12), 0 0 50px rgba(56,189,248,0.25);
+}
+.syn_center::before,
+.syn_center::after {
+  content: "";
+  position: absolute;
+  inset: -12px;
+  border: 1px solid rgba(56,189,248,0.18);
+  border-radius: 50%;
+}
+.syn_center::after {
+  inset: -24px;
+  border-color: rgba(56,189,248,0.10);
+}
+.syn_center_text {
+  font-family: "Noto Serif JP", serif;
+  font-size: 16px;
+  line-height: 1.6;
+  color: #fff;
+  letter-spacing: 0.06em;
+}
+
+/* ====== 06: 会話するほどAIプロフィールが育つ ====== */
+.flow5 {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 12px;
+  margin-bottom: 48px;
+}
+.flow5_step { text-align: center; position: relative; }
+.flow5_step:not(:last-child)::after {
+  content: "→";
+  position: absolute;
+  top: 38px; right: -10px;
+  font-size: 18px;
+  color: rgba(56,189,248,0.6);
+}
+.flow5_icon_wrap {
+  width: 76px; height: 76px;
+  border-radius: 50%;
+  background: rgba(56,189,248,0.04);
+  border: 1px solid rgba(56,189,248,0.4);
+  margin: 0 auto 14px;
+  display: flex; align-items: center; justify-content: center;
+  box-shadow: 0 0 20px rgba(56,189,248,0.15);
+}
+.flow5_icon_wrap svg { width: 36px; height: 36px; color: #38bdf8; }
+.flow5_title { font-size: 13px; font-weight: 600; color: #fff; letter-spacing: 0.04em; }
+.flow5_title .hl { color: #facc15; }
+
+.grow_body {
+  display: grid;
+  grid-template-columns: minmax(360px, 1.05fr) minmax(280px, 0.95fr);
+  gap: 24px;
+  align-items: stretch;
+}
+.vector_panel {
+  background: linear-gradient(180deg, rgba(255,255,255,0.025) 0%, rgba(255,255,255,0.008) 100%);
+  border: 1px solid rgba(255,255,255,0.1);
+  padding: 22px 24px;
+}
+.vector_label {
+  display: block;
+  text-align: center;
+  font-size: 14px;
+  font-weight: 600;
+  color: #fff;
+  margin-bottom: 16px;
+  letter-spacing: 0.06em;
+  padding-bottom: 12px;
+  position: relative;
+}
+.vector_label::before, .vector_label::after {
+  content: "";
+  position: absolute;
+  top: 50%;
+  width: 36px; height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(56,189,248,0.5));
+}
+.vector_label::before { left: 8px; }
+.vector_label::after { right: 8px; background: linear-gradient(90deg, rgba(56,189,248,0.5), transparent); }
+.vector_row {
+  display: grid;
+  grid-template-columns: 32px 1fr 1fr;
+  align-items: center;
+  gap: 14px;
+  padding: 12px 4px;
+  border-top: 1px solid rgba(255,255,255,0.06);
+  font-size: 12px;
+}
+.vector_row:first-of-type { border-top: none; }
+.vector_row_icon { width: 24px; height: 24px; color: #38bdf8; }
+.vector_row_icon svg { width: 100%; height: 100%; }
+.vector_row_name {
+  font-family: "Work Sans", monospace;
+  font-size: 13px;
+  font-weight: 500;
+  color: #fff;
+  letter-spacing: 0.02em;
+}
+.vector_row_desc {
+  font-size: 11.5px;
+  color: rgba(255,255,255,0.6);
+  padding-left: 12px;
+  border-left: 1px solid rgba(255,255,255,0.08);
+}
+.grow_cards { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
+.grow_card {
+  padding: 22px 14px;
+  background: linear-gradient(180deg, rgba(255,255,255,0.025) 0%, rgba(255,255,255,0.008) 100%);
+  border: 1px solid rgba(255,255,255,0.1);
+  text-align: center;
+}
+.grow_card_icon {
+  width: 48px; height: 48px;
+  margin: 0 auto 16px;
+  border-radius: 50%;
+  background: rgba(56,189,248,0.04);
+  border: 1px solid rgba(56,189,248,0.4);
+  display: flex; align-items: center; justify-content: center;
+}
+.grow_card_icon svg { width: 22px; height: 22px; color: #38bdf8; }
+.grow_card_text { font-size: 12.5px; line-height: 1.65; color: rgba(255,255,255,0.82); }
+
+/* --- Responsive --- */
+@media (max-width: 1100px) {
+  .engine_title { font-size: 40px; }
+  .grow_body { grid-template-columns: 1fr; }
+  .grow_cards { grid-template-columns: repeat(3, 1fr); }
+}
+@media (max-width: 960px) {
+  #ai_engine { padding: 100px 0 60px; }
+  .engine_intro_title { font-size: 34px; }
+  .engine_intro { margin-bottom: 56px; }
+  .engine_block { padding: 80px 0 70px; }
+  .engine_title { font-size: 32px; }
+  .engine_visual { margin-bottom: 40px; }
+  .engine_features { grid-template-columns: 1fr; gap: 12px; }
+  .weight_grid { grid-template-columns: 1fr; gap: 14px; }
+  .flow6 { grid-template-columns: repeat(3, 1fr); gap: 8px; }
+  .flow6_step:nth-child(3)::after { display: none; }
+  .rec_body { grid-template-columns: 1fr; gap: 16px; text-align: center; }
+  .rec_avatar { margin: 0 auto; }
+  .rec_score { padding-left: 0; border-left: 0; padding-top: 14px; border-top: 1px solid rgba(255,255,255,0.1); text-align: center; }
+  .sem_spheres { grid-template-columns: 1fr; }
+  .sem_sphere.is_yellow { grid-column: 1; max-width: none; }
+  .syn_visual { grid-template-columns: 1fr; gap: 30px; padding: 20px 0; }
+  .syn_lines { display: none; }
+  .syn_center { width: 160px; height: 160px; margin: 0 auto; }
+  .flow5 { grid-template-columns: repeat(5, 1fr); gap: 6px; }
+  .flow5_icon_wrap { width: 56px; height: 56px; }
+  .flow5_icon_wrap svg { width: 26px; height: 26px; }
+  .flow5_step::after { top: 25px; }
+  .flow5_title { font-size: 11px; }
+  .grow_body { grid-template-columns: 1fr; }
+  .grow_cards { grid-template-columns: repeat(3, 1fr); }
+}
+@media (max-width: 560px) {
+  #ai_engine { padding: 80px 0 50px; }
+  .engine_intro_title { font-size: 26px; line-height: 1.7; }
+  .engine_intro_desc { font-size: 13.5px; padding: 0 6px; }
+  .engine_block { padding: 60px 0 56px; }
+  .engine_block:first-of-type { padding-top: 24px; }
+  .engine_num { font-size: 18px; letter-spacing: 0.12em; }
+  .engine_title { font-size: 24px; margin-bottom: 22px; }
+  .engine_sub { font-size: 13px; line-height: 1.95; padding: 0 6px; }
+  .radar_label { font-size: 11px; }
+  .radar_label small { font-size: 9px; }
+  .weight_label { font-size: 36px; }
+  .weight_icon { width: 48px; height: 48px; }
+  .weight_icon svg { width: 22px; height: 22px; }
+  .flow6 { grid-template-columns: repeat(2, 1fr); }
+  .flow6_step:nth-child(2)::after,
+  .flow6_step:nth-child(4)::after { display: none; }
+  .flow5 { grid-template-columns: repeat(2, 1fr); }
+  .flow5_step::after { display: none; }
+  .vector_row { grid-template-columns: 24px 1fr; }
+  .vector_row_desc { grid-column: 2; padding-left: 0; border-left: 0; padding-top: 4px; }
+  .grow_cards { grid-template-columns: 1fr; gap: 10px; }
+  .rec_role { font-size: 15px; }
+  .rec_reason { font-size: 11.5px; }
+  .rec_score_value { font-size: 36px; }
+  .engine_feature { padding: 18px 22px; gap: 14px; }
+}
+</style>
+
+<section id="ai_engine">
+  <div class="main_inner">
+
+    <div class="engine_intro fade fadeInUp">
+      <p class="engine_intro_eyebrow">INTER CONNECT AI ENGINE</p>
+      <h2 class="engine_intro_title"><span class="hl">「会うべき人」</span>を導く、<br>6つのアルゴリズム</h2>
+      <p class="engine_intro_desc">
+        会話・会議から得た情報を、AIが多角的に評価。<br>
+        意味の近さで人をつなぎ、使うほど精度が育つ ── INTER CONNECTのスコアリングエンジン。
+      </p>
+    </div>
+
+    <!-- Round 8 (2026-05-13): 6 アルゴリズム block を design image に差し替え。
+         元 CSS 実装は下の #ai_engine_legacy (display:none) に温存。
+         Rollback: cp index.html.bak.20260513-r8-pre index.html -->
+    <style>
+      #ai_engine::before { display: none !important; }
+      #ai_engine { padding: 100px 0 60px !important; }
+      #ai_engine .engine_image { display: block; width: 100%; max-width: 1200px; margin: 0 auto; }
+      #ai_engine .engine_image img { width: 100%; height: auto; display: block; border-radius: 4px; }
+      #ai_engine .engine_image + .engine_image { margin-top: 64px; }
+      @media (max-width: 768px) {
+        #ai_engine { padding: 80px 0 50px !important; }
+        #ai_engine .engine_image + .engine_image { margin-top: 36px; }
+      }
+    </style>
+
+    <picture class="design_image engine_image fade fadeInUp">
+      <source media="(max-width: 768px)" srcset="img/designs/engine-01-scoring-sp.png">
+      <img src="img/designs/engine-01-scoring-pc.png" alt="01 5次元スコアリング: 会話から抽出した情報を Need×Offer / Reverse Match / Engagement Value / Topic Alignment / Expertise Fit の5軸で評価し、200以上のパラメータで多角的にスコアリング" width="1491" height="1055" loading="lazy" decoding="async">
+    </picture>
+
+    <picture class="design_image engine_image fade fadeInUp">
+      <source media="(max-width: 768px)" srcset="img/designs/engine-02-weights-sp.png">
+      <img src="img/designs/engine-02-weights-pc.png" alt="02 重みは状況で変わる: 課題の明確さに応じて HIGH(70/20/10)・MID(50/30/20)・LOW(30/35/35) の3段階で重みを動的調整。古い情報は3ヶ月で重み0.5に減衰" width="1672" height="941" loading="lazy" decoding="async">
+    </picture>
+
+    <picture class="design_image engine_image fade fadeInUp">
+      <source media="(max-width: 768px)" srcset="img/designs/engine-03-flow-sp.png">
+      <img src="img/designs/engine-03-flow-pc.png" alt="03 スコアが決まるまで: 会話・会議→AI抽出→AIプロフィール更新→候補絞り込み→5次元スコア→推薦理由生成の6ステップで多角的にスコアリングし最適候補を提示" width="1672" height="941" loading="lazy" decoding="async">
+    </picture>
+
+    <picture class="design_image engine_image fade fadeInUp">
+      <source media="(max-width: 768px)" srcset="img/designs/engine-04-meaning-sp.png">
+      <img src="img/designs/engine-04-meaning-pc.png" alt="04 意味空間で理解する: キーワード一致ではなく意味の近さで理解。営業・販路拡大／採用・組織／資金・成長の近接領域を意味空間にマップし文脈を残して把握" width="1491" height="1055" loading="lazy" decoding="async">
+    </picture>
+
+    <picture class="design_image engine_image fade fadeInUp">
+      <source media="(max-width: 768px)" srcset="img/designs/engine-05-semantic-sp.png">
+      <img src="img/designs/engine-05-semantic-pc.png" alt="05 言い方が違っても、近い意味ならつながる: 「営業を強くしたい」を BtoB営業支援/リード獲得施策/販路開拓の実行支援 と意味的に接続。類義語に強くキーワード一致より文脈重視" width="1491" height="1055" loading="lazy" decoding="async">
+    </picture>
+
+    <picture class="design_image engine_image fade fadeInUp">
+      <source media="(max-width: 768px)" srcset="img/designs/engine-06-ai-profile-sp.png">
+      <img src="img/designs/engine-06-ai-profile-pc.png" alt="06 会話するほど、AIプロフィールが育つ: need_vectors / offer_vectors / expertise_vectors / topic_vectors / engagement_signature が会話のたびに更新され、3ヶ月で減衰、ユーザー編集可能" width="1491" height="1055" loading="lazy" decoding="async">
+    </picture>
+
+  </div>
+</section>
+
+<section id="ai_engine_legacy" style="display:none" aria-hidden="true">
+  <div class="main_inner">
+
+    <!-- ============ 01 5次元スコアリング ============ -->
+    <article class="engine_block fade fadeInUp">
+      <div class="engine_head">
+        <span class="engine_num">01</span>
+        <h3 class="engine_title">5次元スコアリング</h3>
+        <p class="engine_sub">会話から抽出した情報を、5つの軸で評価。「誰と会うべきか」を感覚ではなく、構造で見つけます。</p>
+      </div>
+      <div class="engine_visual">
+        <div class="radar_wrap">
+          <svg class="radar_svg" viewBox="0 0 600 500" preserveAspectRatio="xMidYMid meet" aria-hidden="true">
+            <defs>
+              <radialGradient id="radarGlow" cx="0.5" cy="0.5" r="0.5">
+                <stop offset="0%" stop-color="#38bdf8" stop-opacity="0.45"/>
+                <stop offset="60%" stop-color="#38bdf8" stop-opacity="0.15"/>
+                <stop offset="100%" stop-color="#38bdf8" stop-opacity="0"/>
+              </radialGradient>
+            </defs>
+            <!-- concentric pentagons -->
+            <g stroke="rgba(255,255,255,0.10)" fill="none">
+              <polygon points="300,80 478,213 410,420 190,420 122,213"/>
+              <polygon points="300,124 442,231 388,396 212,396 158,231"/>
+              <polygon points="300,168 406,250 366,372 234,372 194,250"/>
+              <polygon points="300,212 370,268 344,348 256,348 230,268"/>
+              <polygon points="300,256 334,286 322,324 278,324 266,286"/>
+            </g>
+            <!-- axes -->
+            <g stroke="rgba(255,255,255,0.10)">
+              <line x1="300" y1="300" x2="300" y2="80"/>
+              <line x1="300" y1="300" x2="478" y2="213"/>
+              <line x1="300" y1="300" x2="410" y2="420"/>
+              <line x1="300" y1="300" x2="190" y2="420"/>
+              <line x1="300" y1="300" x2="122" y2="213"/>
+            </g>
+            <!-- filled shape (sample 5-dim score) -->
+            <polygon points="300,110 452,222 396,400 200,396 138,228" fill="url(#radarGlow)" stroke="#38bdf8" stroke-width="2" filter="drop-shadow(0 0 12px rgba(56,189,248,0.4))"/>
+            <!-- vertex dots -->
+            <g fill="#67e8f9">
+              <circle cx="300" cy="110" r="6"/>
+              <circle cx="452" cy="222" r="6"/>
+              <circle cx="396" cy="400" r="6"/>
+              <circle cx="200" cy="396" r="6"/>
+              <circle cx="138" cy="228" r="6"/>
+            </g>
+          </svg>
+          <div class="radar_label top">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="5"/><circle cx="12" cy="12" r="1.5" fill="currentColor"/></svg>
+            <span class="radar_label_text">Need × Offer<small>あなたの課題×相手の提供価値</small></span>
+          </div>
+          <div class="radar_label tr">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M21 12a9 9 0 11-3-6.7M21 3v5h-5"/></svg>
+            <span class="radar_label_text">Reverse Match<small>相手の課題×あなたの提供価値</small></span>
+          </div>
+          <div class="radar_label br">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4.4 3.6-8 8-8s8 3.6 8 8z"/></svg>
+            <span class="radar_label_text">Expertise Fit<small>専門性・実績の深さ</small></span>
+          </div>
+          <div class="radar_label bl">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M21 11.5a8.4 8.4 0 01-8.5 8.4 8.4 8.4 0 01-3.8-.9L3 21l1.9-5.7a8.4 8.4 0 01-.9-3.8 8.5 8.5 0 0117 0z"/></svg>
+            <span class="radar_label_text">Topic Alignment<small>話題・関心の重なり</small></span>
+          </div>
+          <div class="radar_label tl">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M9 11l3 3 8-8M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h11"/></svg>
+            <span class="radar_label_text">Engagement Value<small>会話の温度感・関係構築相性</small></span>
+          </div>
+        </div>
+      </div>
+      <div class="engine_features">
+        <div class="engine_feature">
+          <div class="engine_feature_icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="6" y="6" width="12" height="12" rx="1"/><path d="M9 6V3M12 6V3M15 6V3M9 21v-3M12 21v-3M15 21v-3M6 9H3M6 12H3M6 15H3M21 9h-3M21 12h-3M21 15h-3"/></svg></div>
+          <div class="engine_feature_text"><div class="engine_feature_title">200以上のパラメータ</div><div class="engine_feature_desc">多角的な情報を統合評価</div></div>
+        </div>
+        <div class="engine_feature">
+          <div class="engine_feature_icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 3v18M3 8h18M5 8l4 8 4-8 4 8M7 16h4M15 16h4"/></svg></div>
+          <div class="engine_feature_text"><div class="engine_feature_title">相互価値を評価</div><div class="engine_feature_desc">片方向ではなく、相互価値を可視化</div></div>
+        </div>
+        <div class="engine_feature">
+          <div class="engine_feature_icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4-4M8 11h6M11 8v6"/></svg></div>
+          <div class="engine_feature_text"><div class="engine_feature_title">理由が見えるスコア設計</div><div class="engine_feature_desc">納得感のあるマッチングを実現</div></div>
+        </div>
+      </div>
+    </article>
+
+    <!-- ============ 02 重みは状況で変わる ============ -->
+    <article class="engine_block fade fadeInUp">
+      <div class="engine_head">
+        <span class="engine_num">02</span>
+        <h3 class="engine_title">重みは状況で変わる</h3>
+        <p class="engine_sub">課題の明確さに応じて、INTER CONNECTが重みを自動で調整。<br>より的確なマッチングと意思決定を実現します。</p>
+      </div>
+      <div class="engine_visual">
+        <div class="weight_grid">
+          <div class="weight_card is_high">
+            <div class="weight_icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="5"/><circle cx="12" cy="12" r="1.5" fill="currentColor"/><path d="M12 3v3M12 18v3M21 12h-3M6 12H3"/></svg></div>
+            <div class="weight_label">HIGH</div>
+            <div class="weight_situation">課題が明確なとき</div>
+            <div class="weight_strategy">解決できる相手を最優先</div>
+            <div class="weight_bars">
+              <div class="weight_bar"><div class="weight_bar_track"><span class="weight_bar_fill" style="width:70%"></span></div><span class="weight_bar_val">70%</span></div>
+              <div class="weight_bar"><div class="weight_bar_track"><span class="weight_bar_fill" style="width:20%"></span></div><span class="weight_bar_val">20%</span></div>
+              <div class="weight_bar"><div class="weight_bar_track"><span class="weight_bar_fill" style="width:10%"></span></div><span class="weight_bar_val">10%</span></div>
+            </div>
+          </div>
+          <div class="weight_card is_mid">
+            <div class="weight_icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 3v18M6 21h12M5 8h14M5 8l-2 5a4 2 0 008 0L5 8M19 8l-2 5a4 2 0 008 0L19 8"/></svg></div>
+            <div class="weight_label">MID</div>
+            <div class="weight_situation">課題がやや不明確なとき</div>
+            <div class="weight_strategy">バランスを重視</div>
+            <div class="weight_bars">
+              <div class="weight_bar"><div class="weight_bar_track"><span class="weight_bar_fill" style="width:50%"></span></div><span class="weight_bar_val">50%</span></div>
+              <div class="weight_bar"><div class="weight_bar_track"><span class="weight_bar_fill" style="width:30%"></span></div><span class="weight_bar_val">30%</span></div>
+              <div class="weight_bar"><div class="weight_bar_track"><span class="weight_bar_fill" style="width:20%"></span></div><span class="weight_bar_val">20%</span></div>
+            </div>
+          </div>
+          <div class="weight_card is_low">
+            <div class="weight_icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="9"/><path d="M16 8l-3 7-5 1 3-7z"/></svg></div>
+            <div class="weight_label">LOW</div>
+            <div class="weight_situation">課題が曖昧なとき</div>
+            <div class="weight_strategy">会話相性やテーマ一致を重視</div>
+            <div class="weight_bars">
+              <div class="weight_bar"><div class="weight_bar_track"><span class="weight_bar_fill" style="width:30%"></span></div><span class="weight_bar_val">30%</span></div>
+              <div class="weight_bar"><div class="weight_bar_track"><span class="weight_bar_fill" style="width:35%"></span></div><span class="weight_bar_val">35%</span></div>
+              <div class="weight_bar"><div class="weight_bar_track"><span class="weight_bar_fill" style="width:35%"></span></div><span class="weight_bar_val">35%</span></div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="engine_features">
+        <div class="engine_feature">
+          <div class="engine_feature_icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M21 12a9 9 0 11-9-9c2.5 0 4.7 1 6.4 2.6M21 4v5h-5"/></svg></div>
+          <div class="engine_feature_text"><div class="engine_feature_title">動的重みで最適化</div><div class="engine_feature_desc">状況に応じて重みを自動調整</div></div>
+        </div>
+        <div class="engine_feature">
+          <div class="engine_feature_icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 2l8 4v6c0 5-3.5 9-8 10-4.5-1-8-5-8-10V6z"/><path d="M9 12l2 2 4-4"/></svg></div>
+          <div class="engine_feature_text"><div class="engine_feature_title">会議の深さで信頼度補正</div><div class="engine_feature_desc">深い議論ほど信頼度を向上</div></div>
+        </div>
+        <div class="engine_feature">
+          <div class="engine_feature_icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M6 2h12M6 22h12M8 2l2 5-2 5 2 5-2 5M16 2l-2 5 2 5-2 5 2 5"/></svg></div>
+          <div class="engine_feature_text"><div class="engine_feature_title">古い情報は時間とともに減衰</div><div class="engine_feature_desc">3ヶ月経過で重み 0.5 に減衰</div></div>
+        </div>
+      </div>
+    </article>
+
+    <!-- ============ 03 スコアが決まるまで ============ -->
+    <article class="engine_block fade fadeInUp">
+      <div class="engine_head">
+        <span class="engine_num">03</span>
+        <h3 class="engine_title">スコアが決まるまで</h3>
+        <p class="engine_sub">会話・会議のデータから、AIが必要な情報を抽出・構造化。<br>多角的に評価し、あなたに最適な候補をスコアリングして提示します。</p>
+      </div>
+      <div class="engine_visual">
+        <div class="flow6">
+          <div class="flow6_step">
+            <span class="flow6_num">1</span>
+            <div class="flow6_icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="9" cy="9" r="3"/><path d="M3 21v-1a5 5 0 0110 0v1"/><circle cx="17" cy="9" r="2"/><path d="M14 7s1-2 3-2 3 1 3 1M14 14l-2 2v3"/></svg></div>
+            <div class="flow6_title">会話・会議</div>
+            <div class="flow6_desc">会話内容がデータになる</div>
+          </div>
+          <div class="flow6_step">
+            <span class="flow6_num">2</span>
+            <div class="flow6_icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M9.5 2a2.5 2.5 0 00-2.5 2.5 2.5 2.5 0 00-2.5 2.5 2.5 2.5 0 00-2.5 2.5v5A2.5 2.5 0 004.5 17v0A2.5 2.5 0 007 19.5 2.5 2.5 0 009.5 22h5a2.5 2.5 0 002.5-2.5 2.5 2.5 0 002.5-2.5 2.5 2.5 0 002.5-2.5v-5A2.5 2.5 0 0019.5 7a2.5 2.5 0 00-2.5-2.5A2.5 2.5 0 0014.5 2z"/><line x1="3" y1="9" x2="6" y2="9"/><line x1="18" y1="9" x2="21" y2="9"/><line x1="3" y1="15" x2="6" y2="15"/><line x1="18" y1="15" x2="21" y2="15"/></svg></div>
+            <div class="flow6_title">AI抽出</div>
+            <div class="flow6_desc">ニーズやトピックを抽出</div>
+          </div>
+          <div class="flow6_step">
+            <span class="flow6_num">3</span>
+            <div class="flow6_icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M21 5v6c0 1.7-4 3-9 3s-9-1.3-9-3V5"/><path d="M21 11v6c0 1.7-4 3-9 3s-9-1.3-9-3v-6"/></svg></div>
+            <div class="flow6_title">AIプロフィール更新</div>
+            <div class="flow6_desc">最新情報を反映・構造化</div>
+          </div>
+          <div class="flow6_step">
+            <span class="flow6_num">4</span>
+            <div class="flow6_icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M3 4h18l-7 9v6l-4 2v-8z"/></svg></div>
+            <div class="flow6_title">候補絞り込み</div>
+            <div class="flow6_desc">最適な候補を選別</div>
+          </div>
+          <div class="flow6_step">
+            <span class="flow6_num">5</span>
+            <div class="flow6_icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><polygon points="12,3 22,9 18,21 6,21 2,9"/><circle cx="12" cy="12" r="2"/></svg></div>
+            <div class="flow6_title">5次元スコア</div>
+            <div class="flow6_desc">多角的にスコアリング</div>
+          </div>
+          <div class="flow6_step">
+            <span class="flow6_num">6</span>
+            <div class="flow6_icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><path d="M14 2v6h6M10 18l2-3 1 2 3-4"/></svg></div>
+            <div class="flow6_title">推薦理由生成</div>
+            <div class="flow6_desc">納得感のある理由を提示</div>
+          </div>
+        </div>
+        <div class="rec_card">
+          <span class="rec_card_label eng">推薦結果 (例)</span>
+          <div class="rec_body">
+            <div class="rec_avatar">
+              <svg viewBox="0 0 24 24" fill="currentColor"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4.4 3.6-8 8-8s8 3.6 8 8z"/></svg>
+              <span class="rec_avatar_star">★</span>
+            </div>
+            <div class="rec_text">
+              <div class="rec_role">事業開発責任者 / SaaS・BtoB</div>
+              <div class="rec_reason">推薦理由：あなたの「海外展開ニーズ」に対し、相手のBtoB営業支援実績が高く、会話相性も良好。</div>
+            </div>
+            <div class="rec_score">
+              <span class="rec_score_label">総合スコア</span>
+              <span class="rec_score_value">92<small>%</small></span>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="engine_features">
+        <div class="engine_feature">
+          <div class="engine_feature_icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="4"/><ellipse cx="12" cy="12" rx="11" ry="4"/></svg></div>
+          <div class="engine_feature_text"><div class="engine_feature_title">カテゴリを超えた発見</div><div class="engine_feature_desc">業界の枠を越えた最適な出会いを提案</div></div>
+        </div>
+        <div class="engine_feature">
+          <div class="engine_feature_icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg></div>
+          <div class="engine_feature_text"><div class="engine_feature_title">古いニーズは減衰</div><div class="engine_feature_desc">時間経過で重みを自動調整</div></div>
+        </div>
+        <div class="engine_feature">
+          <div class="engine_feature_icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M3 17l6-6 4 4 8-8"/><path d="M17 7h4v4"/></svg></div>
+          <div class="engine_feature_text"><div class="engine_feature_title">使うほど推薦が賢くなる</div><div class="engine_feature_desc">フィードバックで継続的に精度向上</div></div>
+        </div>
+      </div>
+    </article>
+
+    <!-- ============ 04 意味空間で理解する ============ -->
+    <article class="engine_block fade fadeInUp">
+      <div class="engine_head">
+        <span class="engine_num">04</span>
+        <h3 class="engine_title">意味空間で理解する</h3>
+        <p class="engine_sub">INTER CONNECTは、言葉の表層ではなく、意味の近さでつながりを捉えます。<br>文脈を保ったまま理解することで、ビジネスの可能性を広げます。</p>
+      </div>
+      <div class="engine_visual">
+        <div class="sem_visual">
+          <div class="sem_bg">
+            <svg viewBox="0 0 980 420" preserveAspectRatio="none" aria-hidden="true">
+              <g stroke="rgba(56,189,248,0.18)" stroke-width="0.8" fill="none" stroke-dasharray="2 3">
+                <path d="M 250 130 Q 490 250, 730 130"/>
+                <path d="M 250 130 Q 250 280, 490 320"/>
+                <path d="M 730 130 Q 730 280, 490 320"/>
+              </g>
+            </svg>
+          </div>
+          <div class="sem_spheres">
+            <div class="sem_sphere is_blue">
+              <div class="sem_sphere_icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M3 17l6-6 4 4 8-8"/><path d="M17 7h4v4"/></svg></div>
+              <h4 class="sem_sphere_title">営業・販路拡大</h4>
+              <ul class="sem_sphere_list"><li>営業を強化したい</li><li>新規顧客を増やしたい</li><li>販路を広げたい</li></ul>
+            </div>
+            <div class="sem_sphere is_green">
+              <div class="sem_sphere_icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="9" cy="7" r="3"/><circle cx="17" cy="7" r="2.5"/><path d="M2 21v-1a5 5 0 0114 0v1M14 21v-1a4 4 0 018 0v1"/></svg></div>
+              <h4 class="sem_sphere_title">採用・組織</h4>
+              <ul class="sem_sphere_list"><li>エンジニア採用に困っている</li><li>採用母集団を増やしたい</li><li>組織づくりを強化したい</li></ul>
+            </div>
+            <div class="sem_sphere is_yellow">
+              <div class="sem_sphere_icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 2v8M8 6l4-4 4 4M5 12c0 5 3 9 7 9s7-4 7-9"/></svg></div>
+              <h4 class="sem_sphere_title">資金・成長</h4>
+              <ul class="sem_sphere_list"><li>資金調達を考えている</li><li>成長戦略を相談したい</li></ul>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="engine_features">
+        <div class="engine_feature">
+          <div class="engine_feature_icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M2 14c2-3 4-3 6 0s4 3 6 0 4-3 6 0M2 18c2-3 4-3 6 0s4 3 6 0 4-3 6 0M2 10c2-3 4-3 6 0s4 3 6 0 4-3 6 0"/></svg></div>
+          <div class="engine_feature_text"><div class="engine_feature_title">言い回しの違いを吸収</div><div class="engine_feature_desc">表現ゆれや言い回しの違いを吸収し、同じ意味として捉えます</div></div>
+        </div>
+        <div class="engine_feature">
+          <div class="engine_feature_icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M3 7a4 4 0 014-4h6a4 4 0 014 4v3a4 4 0 01-4 4h-3l-4 3v-3H7a4 4 0 01-4-4z"/><path d="M14 13a4 4 0 014-4h3v4a3 3 0 01-3 3h-1l-3 2v-2h-2"/></svg></div>
+          <div class="engine_feature_text"><div class="engine_feature_title">文脈を残したまま理解</div><div class="engine_feature_desc">会話の流れや背景を保持し、文脈を残したまま理解します</div></div>
+        </div>
+        <div class="engine_feature">
+          <div class="engine_feature_icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="3"/><ellipse cx="12" cy="12" rx="10" ry="4" transform="rotate(60 12 12)"/><ellipse cx="12" cy="12" rx="10" ry="4" transform="rotate(-60 12 12)"/><path d="M19 5l1-1m0 1l-1-1"/></svg></div>
+          <div class="engine_feature_text"><div class="engine_feature_title">近い課題・近い提供価値を発見</div><div class="engine_feature_desc">意味の近い課題をつなぎ、最適な提供価値の発見につなげます</div></div>
+        </div>
+      </div>
+    </article>
+
+    <!-- ============ 05 言い方が違っても、近い意味ならつながる ============ -->
+    <article class="engine_block fade fadeInUp">
+      <div class="engine_head">
+        <span class="engine_num">05</span>
+        <h3 class="engine_title">言い方が違っても、近い意味ならつながる</h3>
+        <p class="engine_sub">AIが文脈を理解し、近いニーズと最適なつながりをつくります。</p>
+      </div>
+      <div class="engine_visual">
+        <div class="syn_visual">
+          <svg class="syn_lines" viewBox="0 0 1080 460" preserveAspectRatio="none" aria-hidden="true">
+            <g stroke="rgba(56,189,248,0.5)" stroke-width="1.2" fill="none">
+              <path d="M 240 80 Q 360 80, 480 220"/>
+              <path d="M 240 230 Q 360 230, 480 230"/>
+              <path d="M 240 380 Q 360 380, 480 240"/>
+              <path d="M 600 230 Q 720 230, 840 80"/>
+              <path d="M 600 230 Q 720 230, 840 230"/>
+              <path d="M 600 230 Q 720 230, 840 380"/>
+            </g>
+            <g fill="#38bdf8">
+              <circle cx="240" cy="80" r="3"/>
+              <circle cx="240" cy="230" r="3"/>
+              <circle cx="240" cy="380" r="3"/>
+              <circle cx="840" cy="80" r="3"/>
+              <circle cx="840" cy="230" r="3"/>
+              <circle cx="840" cy="380" r="3"/>
+            </g>
+          </svg>
+          <div class="syn_col">
+            <div class="syn_node"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4.4 3.6-8 8-8s8 3.6 8 8z"/></svg>営業を強くしたい</div>
+            <div class="syn_node"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="9" cy="7" r="3"/><circle cx="17" cy="7" r="2.5"/><path d="M2 21v-1a5 5 0 0114 0v1M14 21v-1a4 4 0 018 0v1"/></svg>新規顧客を増やしたい</div>
+            <div class="syn_node"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M3 17l6-6 4 4 8-8"/><path d="M17 7h4v4"/></svg>販路開拓が課題</div>
+          </div>
+          <div class="syn_center">
+            <div class="syn_center_text">営業・販路拡大<br>ニーズ</div>
+          </div>
+          <div class="syn_col">
+            <div class="syn_node"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M14 5h6v6M20 5l-10 10M9 20H4v-5M4 20l10-10"/></svg>BtoB営業支援</div>
+            <div class="syn_node"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M3 3h18l-7 9v6l-4 2v-8z"/></svg>リード獲得施策</div>
+            <div class="syn_node"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M3 17l6-6 4 4 8-8"/><path d="M17 7h4v4"/></svg>販路開拓の実行支援</div>
+          </div>
+        </div>
+      </div>
+      <div class="engine_features">
+        <div class="engine_feature">
+          <div class="engine_feature_icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M9.5 2A2.5 2.5 0 007 4.5A2.5 2.5 0 004.5 7A2.5 2.5 0 002 9.5v5A2.5 2.5 0 004.5 17A2.5 2.5 0 007 19.5A2.5 2.5 0 009.5 22h5a2.5 2.5 0 002.5-2.5a2.5 2.5 0 002.5-2.5a2.5 2.5 0 002.5-2.5v-5A2.5 2.5 0 0019.5 7A2.5 2.5 0 0017 4.5A2.5 2.5 0 0014.5 2z"/></svg></div>
+          <div class="engine_feature_text"><div class="engine_feature_title">類義語に強い</div><div class="engine_feature_desc">単語の表層ではなく意味で結ぶ</div></div>
+        </div>
+        <div class="engine_feature">
+          <div class="engine_feature_icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4-4"/></svg></div>
+          <div class="engine_feature_text"><div class="engine_feature_title">キーワード一致より<span style="color:#facc15">文脈重視</span></div><div class="engine_feature_desc">単純一致ではなく意味の近さで判定</div></div>
+        </div>
+        <div class="engine_feature">
+          <div class="engine_feature_icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="9" cy="7" r="3"/><circle cx="17" cy="7" r="2.5"/><path d="M2 21v-1a5 5 0 0114 0v1M14 21v-1a4 4 0 018 0v1"/></svg></div>
+          <div class="engine_feature_text"><div class="engine_feature_title">近い人・近い課題を<span style="color:#facc15">自然に発見</span></div><div class="engine_feature_desc">能動検索なしでも最適な相手が現れる</div></div>
+        </div>
+      </div>
+    </article>
+
+    <!-- ============ 06 会話するほど、AIプロフィールが育つ ============ -->
+    <article class="engine_block fade fadeInUp">
+      <div class="engine_head">
+        <span class="engine_num">06</span>
+        <h3 class="engine_title">会話するほど、AIプロフィールが育つ</h3>
+        <p class="engine_sub">会議・会話のたびに、あなたのAIプロフィールは更新され、次の推薦精度が高まります。</p>
+      </div>
+      <div class="engine_visual">
+        <div class="flow5">
+          <div class="flow5_step">
+            <div class="flow5_icon_wrap"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="9" cy="9" r="3"/><circle cx="17" cy="9" r="2"/><path d="M3 21v-1a5 5 0 0110 0v1M14 14s1-2 3-2 3 1 3 1"/></svg></div>
+            <div class="flow5_title">会話・会議</div>
+          </div>
+          <div class="flow5_step">
+            <div class="flow5_icon_wrap"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><path d="M14 2v6h6M8 13h8M8 17h6M8 9h2"/></svg></div>
+            <div class="flow5_title">文字起こし・抽出</div>
+          </div>
+          <div class="flow5_step">
+            <div class="flow5_icon_wrap"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M9.5 2A2.5 2.5 0 007 4.5 2.5 2.5 0 004.5 7 2.5 2.5 0 002 9.5v5A2.5 2.5 0 004.5 17 2.5 2.5 0 007 19.5 2.5 2.5 0 009.5 22h5a2.5 2.5 0 002.5-2.5 2.5 2.5 0 002.5-2.5 2.5 2.5 0 002.5-2.5v-5A2.5 2.5 0 0019.5 7 2.5 2.5 0 0017 4.5 2.5 2.5 0 0014.5 2zM7 14l3-3M12 11l-3 3"/></svg></div>
+            <div class="flow5_title">AIプロフィール更新</div>
+          </div>
+          <div class="flow5_step">
+            <div class="flow5_icon_wrap"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M21 12a9 9 0 11-3-6.7M21 3v5h-5"/></svg></div>
+            <div class="flow5_title">再マッチング</div>
+          </div>
+          <div class="flow5_step">
+            <div class="flow5_icon_wrap"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M3 17l6-6 4 4 8-8"/><path d="M17 7h4v4"/></svg></div>
+            <div class="flow5_title">推薦精度<span class="hl">向上</span></div>
+          </div>
+        </div>
+        <div class="grow_body">
+          <div class="vector_panel">
+            <span class="vector_label">AIプロフィール</span>
+            <div class="vector_row">
+              <div class="vector_row_icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="5"/><circle cx="12" cy="12" r="1.5" fill="currentColor"/></svg></div>
+              <div class="vector_row_name">need_vectors</div>
+              <div class="vector_row_desc">いま抱えている課題</div>
+            </div>
+            <div class="vector_row">
+              <div class="vector_row_icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="8" width="18" height="13" rx="1"/><path d="M12 8v13M3 12h18M7 8a2 2 0 110-4 4 4 0 014 4M17 8a2 2 0 100-4 4 4 0 00-4 4"/></svg></div>
+              <div class="vector_row_name">offer_vectors</div>
+              <div class="vector_row_desc">提供できる価値</div>
+            </div>
+            <div class="vector_row">
+              <div class="vector_row_icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4.4 3.6-8 8-8s8 3.6 8 8z"/><path d="M17 5l1 2 2 .3-1.5 1.3.4 2-1.9-1-2 1 .5-2-1.5-1.4 2-.2z"/></svg></div>
+              <div class="vector_row_name">expertise_vectors</div>
+              <div class="vector_row_desc">専門性・実績</div>
+            </div>
+            <div class="vector_row">
+              <div class="vector_row_icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M21 11.5a8.4 8.4 0 01-.9 3.8 8.5 8.5 0 01-7.6 4.7 8.4 8.4 0 01-3.8-.9L3 21l1.9-5.7a8.4 8.4 0 01-.9-3.8 8.5 8.5 0 014.7-7.6 8.4 8.4 0 013.8-.9h.5a8.5 8.5 0 018 8z"/></svg></div>
+              <div class="vector_row_name">topic_vectors</div>
+              <div class="vector_row_desc">よく話すテーマ</div>
+            </div>
+            <div class="vector_row">
+              <div class="vector_row_icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M14 4v10.5a4 4 0 11-4 0V4a2 2 0 014 0z"/></svg></div>
+              <div class="vector_row_name">engagement_signature</div>
+              <div class="vector_row_desc">会話の温度感・進め方</div>
+            </div>
+          </div>
+          <div class="grow_cards">
+            <div class="grow_card">
+              <div class="grow_card_icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg></div>
+              <div class="grow_card_text">最新の話題ほど<br>強く反映</div>
+            </div>
+            <div class="grow_card">
+              <div class="grow_card_icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 9h18M8 3v4M16 3v4"/></svg></div>
+              <div class="grow_card_text">3ヶ月経過で<br>徐々に減衰</div>
+            </div>
+            <div class="grow_card">
+              <div class="grow_card_icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="9" cy="8" r="4"/><path d="M3 21c0-3.3 2.7-6 6-6s6 2.7 6 6"/><circle cx="18" cy="14" r="3"/><path d="M18 11v-1M18 18v-1M21 14h-1M15 14h-1"/></svg></div>
+              <div class="grow_card_text">ユーザーが<br>非表示・修正可能</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </article>
+
+  </div>
+</section>
+
+	<!-- Round 9 (2026-05-13): #howto セクション (3ステップ How it Works) はユーザー要望で削除。
+	     Rollback: cp index.html.bak.20260513-r9-pre index.html -->
 
 	<section id="numbers">
 		<div class="main_inner">
