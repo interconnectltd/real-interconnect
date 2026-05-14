@@ -123,7 +123,10 @@ export function ProductTour({ steps, storageKey, open, onClose }: ProductTourPro
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [open, current, step?.target, step?.skipIfMissing, isLast]);
 
-  // 対象 DOM の rect を計測
+  // 対象 DOM の rect を計測 (scroll 追従用、毎フレームでも安全)。
+  // 注: ここでは scrollIntoView を行わない。 自動スクロールはユーザーの
+  // スクロール操作 (内容を見るための) と衝突するため、 step 切替時に限定
+  // (別 useEffect で 1 回だけ実行する)。
   const measure = useCallback(() => {
     if (!step) return;
     const el = document.querySelector<HTMLElement>(`[data-tour="${step.target}"]`);
@@ -133,16 +136,24 @@ export function ProductTour({ steps, storageKey, open, onClose }: ProductTourPro
     }
     const r = el.getBoundingClientRect();
     setRect({ top: r.top, left: r.left, width: r.width, height: r.height });
-    // viewport にスクロールイン。縦長 target はデフォ "start" で対象上端を画面上部へ。
-    // visualViewport を参照して iOS keyboard 出現時の擬似ビュー高でも判定。
+  }, [step]);
+
+  // step 切替時に対象を一度だけ画面内へスクロール (measure() からは分離)。
+  // これでツアー中ユーザーが context 確認のため自由にスクロールできる。
+  useEffect(() => {
+    if (!open || !step) return;
+    const el = document.querySelector<HTMLElement>(`[data-tour="${step.target}"]`);
+    if (!el) return;
     const viewportH = window.visualViewport?.height ?? window.innerHeight;
+    const r = el.getBoundingClientRect();
     if (r.top < 0 || r.bottom > viewportH) {
       el.scrollIntoView({
         behavior: "smooth",
         block: step.scrollBlock ?? "start",
       });
     }
-  }, [step]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [open, current, step?.target]);
 
   // safe-area-inset-bottom を probe div で実測 (env() は CSS のみで取れるため)
   useEffect(() => {
@@ -340,24 +351,17 @@ export function ProductTour({ steps, storageKey, open, onClose }: ProductTourPro
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [open, current, isLast, isFirst]);
 
-  // tour 中は body スクロール固定 (iOS Safari の touch scroll も止める)
+  // 旧: tour 中は body スクロール完全固定 (position:fixed + top:-scrollY) していたが、
+  //   - ユーザーが highlight 中の context を確認するため自由に scroll したい
+  //   - measure() の scroll listener は capture phase で発火するので位置追従可能
+  //   - joyride / driver.js / shepherd / introjs どれも body lock しない (調査済)
+  //   ため scroll を unlock。 横スクロール防止のみ残す。
   useEffect(() => {
     if (!open) return;
-    const scrollY = window.scrollY;
-    const prevOverflow = document.body.style.overflow;
-    const prevPosition = document.body.style.position;
-    const prevTop = document.body.style.top;
-    const prevWidth = document.body.style.width;
-    document.body.style.overflow = "hidden";
-    document.body.style.position = "fixed";
-    document.body.style.top = `-${scrollY}px`;
-    document.body.style.width = "100%";
+    const prevOverflowX = document.body.style.overflowX;
+    document.body.style.overflowX = "hidden";
     return () => {
-      document.body.style.overflow = prevOverflow;
-      document.body.style.position = prevPosition;
-      document.body.style.top = prevTop;
-      document.body.style.width = prevWidth;
-      window.scrollTo(0, scrollY);
+      document.body.style.overflowX = prevOverflowX;
     };
   }, [open]);
 
