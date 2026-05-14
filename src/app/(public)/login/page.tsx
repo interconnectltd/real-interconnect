@@ -12,7 +12,12 @@ export const metadata: Metadata = { title: "ログイン" };
 export default async function LoginPage({
   searchParams,
 }: {
-  searchParams: Promise<{ confirmed?: string; error?: string; password_reset?: string }>;
+  searchParams: Promise<{
+    confirmed?: string;
+    registered?: string;
+    error?: string;
+    password_reset?: string;
+  }>;
 }) {
   const params = await searchParams;
 
@@ -73,13 +78,26 @@ export default async function LoginPage({
             </div>
           )}
 
+          {params.registered === "true" && (
+            <div
+              role="status"
+              className="mt-6 flex items-start gap-2.5 rounded-lg border border-[color:color-mix(in_oklab,var(--success)_30%,var(--border))] bg-[color:color-mix(in_oklab,var(--success)_10%,var(--card))] px-3.5 py-3 text-sm text-[color:color-mix(in_oklab,var(--success)_85%,var(--foreground))]"
+            >
+              <CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0" aria-hidden="true" />
+              <span>アカウント作成が完了しました。ログインしてください。</span>
+            </div>
+          )}
+
+          {/* `?confirmed=true` は Supabase Auth で「Confirm email」が ON のときに
+              メール内の確認リンクをクリックして戻ってきた経路用に残してある。
+              現状 OFF なので普段は出ないが、将来再有効化した時のフォールバック。 */}
           {params.confirmed === "true" && (
             <div
               role="status"
               className="mt-6 flex items-start gap-2.5 rounded-lg border border-[color:color-mix(in_oklab,var(--accent)_30%,var(--border))] bg-[color:color-mix(in_oklab,var(--accent)_10%,var(--card))] px-3.5 py-3 text-sm text-[color:color-mix(in_oklab,var(--accent)_85%,var(--foreground))]"
             >
               <Mail className="mt-0.5 h-4 w-4 shrink-0" aria-hidden="true" />
-              <span>確認メールを送信しました。メール内のリンクをクリックしてからログインしてください。</span>
+              <span>メール確認が完了しました。ログインしてください。</span>
             </div>
           )}
 

@@ -58,7 +58,7 @@ async function isPasswordPwned(password: string): Promise<boolean> {
  *
  * 設計方針:
  *   - `user_already_exists` は意図的に含めない (anti-enumeration: onSubmit で
- *     /login?confirmed=true へ silent redirect させる)。
+ *     /login?registered=true へ silent redirect させ既存ユーザー判定を秘匿する)。
  *   - その他の code は具体メッセージで UX を上げる。ユーザーが何を直せば
  *     良いか分かるようにする。
  *   - Supabase docs: https://supabase.com/docs/reference/javascript/auth-error-codes
@@ -254,7 +254,7 @@ export function RegisterForm() {
       ) {
         log.info("[register] anti-enumeration: existing email → silent redirect");
         log.groupEnd();
-        router.push("/login?confirmed=true");
+        router.push("/login?registered=true");
         return;
       }
 
@@ -313,9 +313,9 @@ export function RegisterForm() {
       log.warn("[register] legal/accept failed", e);
     }
 
-    log.info("[register] redirect to /login?confirmed=true");
+    log.info("[register] redirect to /login?registered=true");
     log.groupEnd();
-    router.push("/login?confirmed=true");
+    router.push("/login?registered=true");
   }
 
   return (
