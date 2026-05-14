@@ -83,6 +83,14 @@ export function ProductTour({ steps, storageKey, open, onClose }: ProductTourPro
   const initTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const retryTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
+  // iOS home-indicator など safe-area-inset-bottom 分の余白を JS でも知る必要がある
+  // (maxHeight / clampY / center fallback 全てで使う)。env() 値を probe div で測る。
+  const [safeBottom, setSafeBottom] = useState(0);
+  // visualViewport の resize / scroll で URL bar が出入りすると vh が変わるが、
+  // この再描画 trigger が無いと tooltipPos の useLayoutEffect が再実行されず
+  // tooltip が画面外に取り残される。version state で再 measure させる。
+  const [vvVersion, setVvVersion] = useState(0);
+
   const step = steps[current];
   const isLast = current === steps.length - 1;
   const isFirst = current === 0;
@@ -136,6 +144,32 @@ export function ProductTour({ steps, storageKey, open, onClose }: ProductTourPro
     }
   }, [step]);
 
+  // safe-area-inset-bottom を probe div で実測 (env() は CSS のみで取れるため)
+  useEffect(() => {
+    if (!open) return;
+    const probe = document.createElement("div");
+    probe.style.cssText =
+      "position:fixed;left:0;bottom:0;width:1px;height:env(safe-area-inset-bottom,0px);visibility:hidden;pointer-events:none;";
+    document.body.appendChild(probe);
+    const h = probe.getBoundingClientRect().height;
+    probe.remove();
+    setSafeBottom(h);
+  }, [open]);
+
+  // visualViewport 変化 (iOS URL bar 出入り / keyboard 表示) で再 measure を強制
+  useEffect(() => {
+    if (!open) return;
+    const vv = window.visualViewport;
+    if (!vv) return;
+    const tick = () => setVvVersion((v) => v + 1);
+    vv.addEventListener("resize", tick);
+    vv.addEventListener("scroll", tick);
+    return () => {
+      vv.removeEventListener("resize", tick);
+      vv.removeEventListener("scroll", tick);
+    };
+  }, [open]);
+
   useLayoutEffect(() => {
     if (!open) return;
     measure();
@@ -172,7 +206,7 @@ export function ProductTour({ steps, storageKey, open, onClose }: ProductTourPro
         measureRafRef.current = null;
       }
     };
-  }, [open, current, measure, step?.target]);
+  }, [open, current, measure, step?.target, vvVersion]);
 
   // tooltip 位置を計算
   // - per-step `placement` 指定があれば優先 (auto 時のみ自動配置)
@@ -196,7 +230,8 @@ export function ProductTour({ steps, storageKey, open, onClose }: ProductTourPro
     const tw = tooltipRef.current?.offsetWidth ?? 360;
     const th = tooltipRef.current?.offsetHeight ?? 200;
 
-    const spaceBottom = vh - (rect.top + rect.height);
+    // 下端は safe-area-inset-bottom (iPhone home indicator 等) を避ける
+    const spaceBottom = vh - (rect.top + rect.height) - safeBottom;
     const spaceTop = rect.top;
     const spaceRight = vw - (rect.left + rect.width);
     const spaceLeft = rect.left;
@@ -206,8 +241,9 @@ export function ProductTour({ steps, storageKey, open, onClose }: ProductTourPro
     // 中央寄せ left の clamp
     const clampX = (x: number) =>
       Math.max(16, Math.min(vw - tw - 16, x));
+    // 下限に safeBottom を反映 (home indicator 上に重ねない)
     const clampY = (y: number) =>
-      Math.max(16, Math.min(vh - th - 16, y));
+      Math.max(16, Math.min(vh - th - 16 - safeBottom, y));
 
     const wanted = step?.placement ?? "auto";
     const fits = {
@@ -253,12 +289,13 @@ export function ProductTour({ steps, storageKey, open, onClose }: ProductTourPro
     // placement は "center" にして tooltip 側の方向矢印 / border-radius を中立化可能に。
     if (!fits.top && !fits.bottom && !fits.left && !fits.right) {
       placement = "center";
-      top = Math.max(16, vh / 2 - th / 2);
+      // 可視領域 (vh) と safe-area を考慮した中心
+      top = Math.max(16, (vh - safeBottom) / 2 - th / 2);
       left = Math.max(16, vw / 2 - tw / 2);
     }
 
     setTooltipPos({ top, left, placement });
-  }, [rect, current, step?.placement]);
+  }, [rect, current, step?.placement, safeBottom, vvVersion]);
 
   // ESC / 矢印キー / Focus trap (Tab で tooltip 内を循環)
   useEffect(() => {
@@ -380,7 +417,7 @@ export function ProductTour({ steps, storageKey, open, onClose }: ProductTourPro
         // top
         { top: 0, left: 0, width: "100dvw", height: Math.max(0, rect.top - PAD) },
         // bottom
-        { top: rect.top + rect.height + PAD, left: 0, width: "100dvw", height: `calc(100dvh - ${rect.top + rect.height + PAD}px)` },
+        { top: rect.top + rect.height + PAD, left: 0, width: "100dvw", height: `calc(var(--tour-vh, 100dvh) - ${rect.top + rect.height + PAD}px)` },
         // left
         { top: Math.max(0, rect.top - PAD), left: 0, width: Math.max(0, rect.left - PAD), height: rect.height + PAD * 2 },
         // right
@@ -443,8 +480,10 @@ export function ProductTour({ steps, storageKey, open, onClose }: ProductTourPro
         style={{
           top: tooltipPos.top,
           left: tooltipPos.left,
-          // visualViewport 高 - 32px (上下 16px 余白) を上限に。本文長文時は内部 scroll
-          maxHeight: "calc(var(--tour-vh, 100dvh) - 32px)",
+          // visualViewport 高 - 32px (上下 16px 余白) - safe-area (iOS home indicator 等) を
+          // 上限に。本文長文時は内部 scroll に流す。
+          maxHeight:
+            "calc(var(--tour-vh, 100dvh) - 32px - env(safe-area-inset-top, 0px) - env(safe-area-inset-bottom, 0px))",
         }}
       >
         {/* ヘッダ (固定) */}
@@ -493,8 +532,12 @@ export function ProductTour({ steps, storageKey, open, onClose }: ProductTourPro
           )}
         </div>
 
-        {/* フッタ (固定) */}
-        <div className="border-t border-border/60 px-5 py-3">
+        {/* フッタ (固定): 「次へ」ボタンが iPhone home indicator gesture zone に
+            落ちないよう safe-area-inset-bottom 分の追加 padding を確保 */}
+        <div
+          className="border-t border-border/60 px-5 py-3"
+          style={{ paddingBottom: "max(0.75rem, env(safe-area-inset-bottom, 0.75rem))" }}
+        >
           <div className="mb-3 flex items-center justify-center gap-1.5" aria-hidden="true">
             {steps.map((_, i) => (
               <span
