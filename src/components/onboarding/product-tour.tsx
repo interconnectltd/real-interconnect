@@ -48,6 +48,14 @@ export interface TourStep {
    * 縦長 target は "start" にして対象上端を画面上に持ち上げ、tooltip を下に出せる空きを確保。
    */
   scrollBlock?: "start" | "center" | "end" | "nearest";
+  /**
+   * viewport 端への強制 pin。 target が viewport 全体を覆うサイズで通常の
+   * placement だと center fallback で重なってしまう step 用 (例:
+   * recommendation-section 全体を spotlight しつつ tooltip だけ右端に逃がす)。
+   * 指定があれば placement / fits check を bypass して該当端に貼り付ける。
+   * narrow viewport (768px 未満) では right/left は底辺 pin に自動 fallback。
+   */
+  forceEdge?: "top" | "bottom" | "left" | "right";
 }
 
 interface ProductTourProps {
@@ -256,6 +264,35 @@ export function ProductTour({ steps, storageKey, open, onClose }: ProductTourPro
     const clampY = (y: number) =>
       Math.max(16, Math.min(vh - th - 16 - safeBottom, y));
 
+    // ── forceEdge: 巨大 target で通常 placement が center fallback に
+    //    落ちる step 用の強制端 pin。 fits check を bypass。
+    //    narrow viewport (< 640px) では left/right を bottom 自動 fallback。
+    if (step?.forceEdge) {
+      const isNarrow = vw < 640;
+      let edge: "top" | "bottom" | "left" | "right" = step.forceEdge;
+      if (isNarrow && (edge === "left" || edge === "right")) {
+        edge = "bottom"; // SP では横並びが取れないので底辺へ
+      }
+      let edgeTop = 0;
+      let edgeLeft = 0;
+      if (edge === "right") {
+        edgeLeft = vw - tw - 16;
+        edgeTop = clampY(rect.top + rect.height / 2 - th / 2);
+      } else if (edge === "left") {
+        edgeLeft = 16;
+        edgeTop = clampY(rect.top + rect.height / 2 - th / 2);
+      } else if (edge === "top") {
+        edgeTop = 16;
+        edgeLeft = clampX(rect.left + rect.width / 2 - tw / 2);
+      } else {
+        // bottom (SP fallback 含む)
+        edgeTop = vh - th - 16 - safeBottom;
+        edgeLeft = clampX(rect.left + rect.width / 2 - tw / 2);
+      }
+      setTooltipPos({ top: edgeTop, left: edgeLeft, placement: edge });
+      return;
+    }
+
     const wanted = step?.placement ?? "auto";
     const fits = {
       top: spaceTop >= need,
@@ -306,7 +343,7 @@ export function ProductTour({ steps, storageKey, open, onClose }: ProductTourPro
     }
 
     setTooltipPos({ top, left, placement });
-  }, [rect, current, step?.placement, safeBottom, vvVersion]);
+  }, [rect, current, step?.placement, step?.forceEdge, safeBottom, vvVersion]);
 
   // ESC / 矢印キー / Focus trap (Tab で tooltip 内を循環)
   useEffect(() => {

@@ -292,7 +292,9 @@ export default function DashboardPage() {
         {myProfile && <ProfileCompleteness profile={myProfile} />}
       </div>
 
-      {/* おすすめマッチング */}
+      {/* おすすめマッチング — tour 用の data-tour は section 全体に戻す
+          (見出し + 3 カードをまとめて spotlight)。 tooltip は product-tour
+          側で forceEdge: "right" によって右端に固定するので overlap しない。 */}
       <div data-tour="recommendation-section" className="space-y-4">
       <SectionHeader
         eyebrow="Recommendation"

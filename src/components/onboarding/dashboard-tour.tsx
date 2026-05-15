@@ -16,7 +16,9 @@ const STEPS_ALL: TourStep[] = [
       "プロフィール文だけでは捉えきれない「本当の関心」を AI が学習することで、おすすめ精度が Lv1 から Lv3 へ進化し、推薦の的中率が約3倍になります。",
     next: "右側の「接続する」をクリック。所要時間 約2分です。",
     skipIfMissing: true,
-    placement: "bottom",
+    // tldv-cta は横長 banner。 PC では tooltip を左端に逃がして
+    // 右側の「接続する」ボタンが見える状態にする。 SP は底辺自動 fallback。
+    forceEdge: "left",
   },
   {
     target: "kpi-overview",
@@ -26,7 +28,9 @@ const STEPS_ALL: TourStep[] = [
     rationale:
       "経営層の意思決定は数字から始まります。今週の商談機会と進捗を瞬時に把握できる設計です。",
     next: "数字 0 のときは下の「次のアクション」コメントが出ます。",
-    placement: "bottom",
+    // kpi-overview は 4 列横並びで横長 / 縦に短い。 PC では右カラム全幅なので
+    // tooltip を左端に逃がして 4 KPI 数字が見える状態に。 SP は底辺自動 fallback。
+    forceEdge: "left",
   },
   {
     target: "maturity-card",
@@ -36,8 +40,9 @@ const STEPS_ALL: TourStep[] = [
     rationale:
       "Lv3 になると「この相手はあなたの今の課題に直接答えられる」という根拠付き推薦が表示されるようになります。",
     next: "Lv2 になるには 1回、Lv3 までは 5回のミーティング分析が必要です。",
-    // ページ中段: SP では下に出すと footer/HelpDock と被るため top
-    placement: "top",
+    // maturity-card は md+ で左カラム / SP では全幅。 PC では右端 pin で
+    // card 全体を見せながら tooltip だけ右に逃がす。 SP は底辺自動 fallback。
+    forceEdge: "right",
     scrollBlock: "center",
   },
   {
@@ -48,7 +53,8 @@ const STEPS_ALL: TourStep[] = [
     rationale:
       "限られた時間で「会う価値があるか」を判断する経営層にとって、空白だらけのプロフィールは信頼形成の機会を失います。",
     next: "右側の「+%」が大きい項目 (自己紹介 +20% など) から埋めましょう。",
-    placement: "top",
+    // completeness-card は md+ で右カラム → 対称的に左端 pin。 SP は底辺自動 fallback。
+    forceEdge: "left",
     scrollBlock: "center",
   },
   {
@@ -60,9 +66,10 @@ const STEPS_ALL: TourStep[] = [
       "理由付き推薦により、商談前から「何を話すべきか」が明確になり、初回ミーティングの成果が出やすくなります。",
     next: "気になる方の「つながる」ボタンで申請。相手が承諾するとコネクション成立です。",
     skipIfMissing: true,
-    // recommendation-section は 3 カードグリッドで縦長 → tooltip を target 上端に
-    // 配置 + scrollIntoView block:start で対象見出しを画面上部に持ち上げる
-    placement: "top",
+    // section 全体 (見出し+3カード) を spotlight しつつ tooltip だけ右端に
+    // 逃がす設計。 PC: 右端 pin (cards 左部が見える) / SP: 底辺 pin に自動
+    // fallback (cards 上部が tooltip より上に visible)。
+    forceEdge: "right",
     scrollBlock: "start",
   },
 ];
