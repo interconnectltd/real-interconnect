@@ -4,7 +4,7 @@ import * as React from "react"
 import { Dialog as DialogPrimitive } from "@base-ui/react/dialog"
 
 import { cn } from "@/lib/utils"
-import { Button } from "@/components/ui/button"
+import { Button, buttonVariants } from "@/components/ui/button"
 import { XIcon } from "lucide-react"
 
 function Dialog({ ...props }: DialogPrimitive.Root.Props) {
@@ -114,7 +114,10 @@ function DialogFooter({
     >
       {children}
       {showCloseButton && (
-        <DialogPrimitive.Close render={<Button variant="outline" />}>
+        // base-ui Close は native <button> を default render。 buttonVariants
+        // で <Button variant="outline"> と同じ見た目を直書きする (render={<Button>}
+        // は nativeButton 推論で warning が出るため)。
+        <DialogPrimitive.Close className={cn(buttonVariants({ variant: "outline" }))}>
           Close
         </DialogPrimitive.Close>
       )}

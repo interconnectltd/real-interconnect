@@ -4,7 +4,8 @@ import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { Bell, Menu, Settings, User, LogOut } from "lucide-react";
-import { Button } from "@/components/ui/button";
+import { Button, buttonVariants } from "@/components/ui/button";
+import { cn } from "@/lib/utils";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -39,7 +40,11 @@ export function Header() {
         {/* Mobile menu — render prop merges SheetTrigger onto Button */}
         <Sheet open={sidebarOpen} onOpenChange={setSidebarOpen}>
           <SheetTrigger
-            render={<Button variant="ghost" size="icon-lg" className="md:hidden" aria-label="メニューを開く" />}
+            // Trigger 自体が native <button> を render する。 buttonVariants
+            // で <Button> と同じ見た目を直接当てる方式 (render={<Button>} を
+            // 使うと base-ui の nativeButton 推論で warning が出るため)。
+            className={cn(buttonVariants({ variant: "ghost", size: "icon-lg" }), "md:hidden")}
+            aria-label="メニューを開く"
           >
             <Menu className="h-5 w-5" />
           </SheetTrigger>
@@ -98,7 +103,8 @@ export function Header() {
         {/* User menu — render prop merges DropdownMenuTrigger onto Button */}
         <DropdownMenu>
           <DropdownMenuTrigger
-            render={<Button variant="ghost" size="icon-lg" className="rounded-md" aria-label="ユーザーメニュー" />}
+            className={cn(buttonVariants({ variant: "ghost", size: "icon-lg" }), "rounded-md")}
+            aria-label="ユーザーメニュー"
           >
             {myProfile?.avatar_url ? (
               <UserAvatar

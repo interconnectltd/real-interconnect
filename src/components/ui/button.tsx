@@ -57,11 +57,20 @@ function Button({
   className,
   variant = "default",
   size = "default",
+  nativeButton,
+  render,
   ...props
 }: ButtonPrimitive.Props & VariantProps<typeof buttonVariants>) {
+  // `render` が指定されているとき = 描画先が <a> 等の非 button 要素である合図。
+  // Base UI Button の nativeButton (default true) は <button> 前提なので、
+  // 明示指定がなければ自動で false にして warning を抑止する。
+  // ※ 明示的に nativeButton を渡されたらそちらを尊重。
+  const resolvedNativeButton = nativeButton ?? render === undefined;
   return (
     <ButtonPrimitive
       data-slot="button"
+      nativeButton={resolvedNativeButton}
+      render={render}
       className={cn(buttonVariants({ variant, size, className }))}
       {...props}
     />
