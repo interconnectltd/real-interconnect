@@ -104,9 +104,8 @@ export function UserAvatar({
         loading={priority ? "eager" : "lazy"}
         // decoding=async でメインスレッドブロックを避ける
         decoding="async"
-        // Chrome の fetchPriority hint (TS 型は string で受ける)
-        // @ts-expect-error fetchpriority is a valid HTML attribute (React 19)
-        fetchpriority={priority ? "high" : "auto"}
+        // Chrome の fetchPriority hint (React は camelCase 必須)
+        fetchPriority={priority ? "high" : "auto"}
         className={`${sizeClass} shrink-0 rounded-full object-cover ${className}`}
         onError={(e) => {
           // variant URL で失敗した場合、main URL に fallback してリトライ
