@@ -1,0 +1,323 @@
+meeting_id: meeting-001
+pipeline_version: v2-ideal
+description: V2 Layer 2++ が完璧に動作した場合の目標値。 すべての correction を正しく解決。
+speaker_assignments:
+  - timestamp: 25:24
+    speaker: P1
+  - timestamp: 25:35
+    speaker: P1
+  - timestamp: 28:01
+    speaker: P1
+  - timestamp: 28:15
+    speaker: P2
+  - timestamp: 04:19
+    speaker: P2
+  - timestamp: 04:22
+    speaker: P1
+  - timestamp: 04:27
+    speaker: P1
+  - timestamp: 04:48
+    speaker: P1
+  - timestamp: 06:18
+    speaker: P2
+  - timestamp: 06:31
+    speaker: P2
+  - timestamp: 07:03
+    speaker: P1
+  - timestamp: 07:18
+    speaker: P1
+  - timestamp: 07:21
+    speaker: P1
+  - timestamp: 07:32
+    speaker: P1
+  - timestamp: 07:37
+    speaker: P2
+  - timestamp: 08:30
+    speaker: P1
+  - timestamp: 08:34
+    speaker: P2
+  - timestamp: 08:57
+    speaker: P2
+  - timestamp: 09:22
+    speaker: P2
+  - timestamp: 09:25
+    speaker: P1
+  - timestamp: 09:41
+    speaker: P1
+  - timestamp: 10:14
+    speaker: P1
+  - timestamp: 10:21
+    speaker: P2
+  - timestamp: 10:36
+    speaker: P2
+  - timestamp: 11:55
+    speaker: P2
+  - timestamp: 11:58
+    speaker: P2
+  - timestamp: 12:13
+    speaker: P2
+  - timestamp: 12:18
+    speaker: P2
+  - timestamp: 12:23
+    speaker: P2
+  - timestamp: 12:26
+    speaker: P2
+  - timestamp: 13:48
+    speaker: P1
+  - timestamp: 14:08
+    speaker: noise
+  - timestamp: 14:29
+    speaker: P1
+  - timestamp: 15:41
+    speaker: P1
+  - timestamp: 15:47
+    speaker: P2
+  - timestamp: 15:53
+    speaker: P2
+  - timestamp: 16:12
+    speaker: P2
+  - timestamp: 16:26
+    speaker: P2
+  - timestamp: 16:34
+    speaker: P2
+  - timestamp: 16:58
+    speaker: P2
+  - timestamp: 17:10
+    speaker: P1
+  - timestamp: 17:19
+    speaker: P1
+  - timestamp: 17:35
+    speaker: P2
+  - timestamp: 17:42
+    speaker: P2
+  - timestamp: 17:52
+    speaker: P2
+  - timestamp: 17:59
+    speaker: P2
+  - timestamp: 18:09
+    speaker: P2
+  - timestamp: 18:18
+    speaker: P2
+  - timestamp: 18:26
+    speaker: P2
+  - timestamp: 18:38
+    speaker: P2
+  - timestamp: 18:46
+    speaker: P1
+  - timestamp: 19:07
+    speaker: P2
+  - timestamp: 19:14
+    speaker: P2
+  - timestamp: 19:22
+    speaker: P2
+  - timestamp: 19:39
+    speaker: P2
+  - timestamp: 19:44
+    speaker: P1
+  - timestamp: 20:17
+    speaker: P1
+  - timestamp: 20:22
+    speaker: P2
+  - timestamp: 20:32
+    speaker: P1
+  - timestamp: 20:46
+    speaker: P1
+  - timestamp: 21:01
+    speaker: P1
+  - timestamp: 21:08
+    speaker: P2
+  - timestamp: 22:05
+    speaker: P2
+  - timestamp: 22:43
+    speaker: P1
+  - timestamp: 23:20
+    speaker: P1
+  - timestamp: 24:37
+    speaker: P2
+  - timestamp: 24:45
+    speaker: P2
+  - timestamp: 25:04
+    speaker: P2
+  - timestamp: 27:21
+    speaker: P1
+claims:
+  - speaker: P2
+    field: business.industry_main
+    value: 営業代行
+    source_timestamp: 25:24
+  - speaker: P2
+    field: career.history
+    value: ホスト (前職)
+    source_timestamp: 26:12
+  - speaker: P1
+    field: business.product
+    value: 経営者マッチングコミュニティ (AI ベース)
+    source_timestamp: 00:32
+  - speaker: P1
+    field: business.sideline
+    value: シャンパンタワー用シャンパンコール制作
+    source_timestamp: 26:29
+  - speaker: P1
+    field: business.timeline
+    value: 4 月にサービス開始予定 (本会議時点)
+    source_timestamp: 01:00
+  - speaker: P1
+    field: business.product
+    value: 経営者マッチングコミュニティ (AI ベース、 ヒアリング → 文字起こし → DB → AI マッチング)
+    source_timestamp: 00:32
+  - speaker: P1
+    field: business.timeline
+    value: 4 月にサービス開始予定 (本会議時点基準)
+    source_timestamp: 00:32
+  - speaker: P1
+    field: business.acquisition_target
+    value: 200 社程度の無料モニター募集中
+    source_timestamp: 00:32
+  - speaker: P1
+    field: business.parent_program
+    value: 駆け出し経営者支援サービスの最終段階 (マッチング機能) として位置付け
+    source_timestamp: 02:29
+  - speaker: P1
+    field: business.process
+    value: ヒアリングシート (必須質問) を AI に食わせてマッチング
+    source_timestamp: 05:00
+  - speaker: P1
+    field: business.progress
+    value: 本日が 2 人目のヒアリング、 残り 1〜2 週間でローンチ準備完了見込み
+    source_timestamp: 06:38
+  - speaker: P1
+    field: business.acquisition_channel
+    value: 直近の交流会で無料モニター候補を集めた
+    source_timestamp: 06:38
+  - speaker: P2
+    field: meta.late_entry
+    value: 入室が遅れた (会議冒頭)
+    source_timestamp: 00:18
+  - speaker: P2
+    field: business.company_name
+    value: ラフメーカー株式会社
+    source_timestamp: 07:37
+  - speaker: P2
+    field: business.industry_main
+    value: 営業代行 (経営者層トップダウン型)
+    source_timestamp: 07:37
+  - speaker: P2
+    field: business.revenue_annual_jpy
+    value: 約 3 億円
+    source_timestamp: 08:15
+  - speaker: P2
+    field: business.employee_count_total
+    value: 約 20 名 (正社員 9 + アルバイト/業務委託 7-8 + 役員 2)
+    source_timestamp: 08:58
+  - speaker: P2
+    field: business.employee_count_full_time
+    value: 9
+    source_timestamp: 08:58
+  - speaker: P2
+    field: business.executives_count
+    value: 2
+    source_timestamp: 08:57
+  - speaker: P2
+    field: business.model
+    value: B2B
+    source_timestamp: 09:22
+  - speaker: P2
+    field: business.revenue_model
+    value: 年間 300 万円固定 (粗利 600 万円以上保証)
+    source_timestamp: 09:31, 09:56
+  - speaker: P2
+    field: business.deal_size_typical
+    value: 100 万円 × 6 本クラス (高単価帯)
+    source_timestamp: 10:21
+  - speaker: P2
+    field: business.pricing_policy
+    value: 高単価志向
+    source_timestamp: 10:36
+  - speaker: P2
+    field: business.has_subscription_model
+    value: true
+    source_timestamp: 10:51
+  - speaker: P2
+    field: business.target_customer_categories
+    value:
+      - クリエイティブ会社 (Web/HP/LP/映像制作)
+      - 営業コンサル会社
+      - 保険 / FP
+      - 補助金 / 助成金申請会社
+      - 経営者団体への人材紹介団体
+      - 節税系商品
+      - 経費削減 (例: 電気代)
+      - SNS 運用代行
+    source_timestamp: 11:46–12:26
+  - speaker: P2
+    field: career.history
+    value: 広告代理店出身 (マーケティング担当)
+    source_timestamp: 12:30 (block e)
+  - speaker: P2
+    field: strengths.skill
+    value: マーケティングスキル
+    source_timestamp: 13:52
+  - speaker: P2
+    field: career.history_supporting
+    value: 他者からマーケティング系の売り方相談を受け、 アドバイスして感謝されるケースあり
+    source_timestamp: 12:30 (block e)
+  - speaker: P1
+    field: business.role
+    value: 経営者マッチングコミュニティの host / interviewer
+    source_timestamp: 07:21, 14:29
+  - speaker: P2
+    field: business.customer_situation
+    value: 自社売上は安定しているが、顧客企業の中にうまくいっていない先があり、その売上を上げたいのが悩み
+    source_timestamp: 15:00
+  - speaker: P2
+    field: business.matching_philosophy
+    value: マッチングは『求め合っている』ケースは実はほぼなく、潜在ニーズを高精度で捕まえる必要があるという業界観
+    source_timestamp: 15:53
+  - speaker: P2
+    field: business.target_customer
+    value: 課題がたくさんある社長 (とくに比較的大きい会社) と出会いたい
+    source_timestamp: 18:30
+  - speaker: P2
+    field: business.target_customer_rationale
+    value: 大きい会社の方がシステム・人材・予算面で課題が多く、 営業代行のニーズも大きい
+    source_timestamp: 19:22
+  - speaker: P2
+    field: business.customer_referral_demand
+    value: 自社直接の営業代行発注者と、自社顧客への発注をしてくれる相手の双方を探している
+    source_timestamp: 17:46
+  - speaker: P2
+    field: management_stance
+    value: 経営スタンスはバランス型 (急成長思考と安定堅実の中間)。 大それた多角化や横展開はせず慎重だったが、 絞った領域内ではチャレンジングだった
+    source_timestamp: 21:37
+  - speaker: P2
+    field: business.company_age
+    value: 14
+    source_timestamp: 22:25
+  - speaker: P2
+    field: personal.age
+    value: 41
+    source_timestamp: 22:34
+  - speaker: P2
+    field: career.founding_age
+    value: 27-28
+    source_timestamp: 22:47
+  - speaker: P2
+    field: career.pre_founding
+    value: サラリーマン
+    source_timestamp: 22:54
+  - speaker: P2
+    field: business.management_style
+    value: バランス型寄り (絞った領域内ではチャレンジング型)
+    source_timestamp: 21:37
+  - speaker: P2
+    field: career.history
+    value: ホスト (前職, 主要キャリア)
+    source_timestamp: 26:12
+  - speaker: P2
+    field: lifestyle.c_company_attendance
+    value: 行かない
+    source_timestamp: 28:15
+  - speaker: P1
+    field: business.sideline
+    value: シャンパンタワー用シャンパンコール制作 (代々的ではない副業)
+    source_timestamp: 26:29

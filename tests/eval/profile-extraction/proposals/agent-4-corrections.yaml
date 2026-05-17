@@ -1,0 +1,572 @@
+# Agent-4 proposal: 22:00 〜 28:57 section human re-annotation
+#
+# Source transcript: ../transcripts/meeting-001.txt (lines 275-353)
+# Reference ground-truth: ../ground-truth/meeting-001.yaml
+# 既存の corrections (25:24, 25:35, 28:01, 28:15) は上書きせず、
+# 補完するつもりで encode。
+#
+# 確定事実 (絶対に覆らない):
+#   P1 = sara (host, RealInterConnect 創業者, シャンパンコール副業あり)
+#   P2 = 田口恭平 (guest, 営業代行 主業, 前職ホスト, タバコ非喫煙)
+
+annotator: agent-4
+section: ["22:00", "28:57"]
+analysis_date: 2026-05-16
+
+# ────────────────────────────────────────────────────────
+# 1. Speaker attribution corrections
+#    既存 ground-truth と重複しない範囲のみ encode。
+# ────────────────────────────────────────────────────────
+speaker_corrections:
+  # ---- 22:05 block: 経営スタンス答 (challenge / balance) の continuation
+  - timestamp: "22:05"
+    asr_speaker: sara
+    true_speaker: P2  # 田口
+    utterance_excerpt: "まあがっつり人雇って大きくしようみたいなところで言うと まあ別にちゃんとチャレンジもしてたかなぁみたいな ... 領域は絞ってましたけど その絞った領域に関してはある程度チャレンジング型だったかな"
+    reason: |
+      直前 21:37 で sara が「急成長思考か安定堅実か」を質問し
+      田口 が「バランス型に近い」「絞った領域に関してはチャレンジング型」
+      と答えている continuation。 「人雇って大きくしよう」「領域は絞って」
+      は全て 田口 (14 期 / 売上 3 億 / 9 名雇用) の自社経営戦略の振り返り。
+      sara のサービスは現時点で立ち上げ初期 (4 月予定 + 200 名募集中) の
+      ため、 self-describe する文脈に合わない。
+    failure_category: C3  # Type C body-section inversion
+    confidence: high
+
+  - timestamp: "22:25"
+    asr_speaker: 田口 恭平
+    true_speaker: mixed
+    utterance_excerpt: "ああ ちなみにあの今の自分の会社ってもうどれくらいやられてるんですかね 今14期か"
+    reason: |
+      1 タイムスタンプに 2 話者混入。
+      前半 "ちなみに...今の自分の会社ってもうどれくらいやられてるんですかね"
+      = sara が 田口 に問う質問 (「自分の」= 相手の意)。
+      後半 "今14期か" = 田口 の即時応答。
+    failure_category: C5  # Q&A pair break
+    confidence: high
+    note: "前半 = P1, 後半 = P2 — 1 行を 2 分割すべき"
+
+  - timestamp: "22:34"
+    asr_speaker: sara
+    true_speaker: mixed
+    utterance_excerpt: "14期 じゃあ今年齢どういくつってお聞きしてもよろしいですか 41ですね 14期間すごいですね"
+    reason: |
+      1 タイムスタンプに 3 話者ターン混入。
+      "14期" = 田口 の応答末尾 (P2)
+      "じゃあ今年齢どういくつってお聞きしてもよろしいですか" = sara 質問 (P1)
+      "41ですね" = 田口 応答 (P2)
+      "14期間すごいですね" = sara 感想 (P1)
+    failure_category: C5
+    confidence: high
+    note: "P2 → P1 → P2 → P1 の 4 ターン混合"
+
+  - timestamp: "22:43"
+    asr_speaker: 田口 恭平
+    true_speaker: P1  # sara
+    utterance_excerpt: "じゃあ20後半のあたりからずっと走ってこられて"
+    reason: |
+      "走ってこられて" は尊敬語で相手に向けた問い。 田口 の起業時期
+      (28 歳 → 14 期目 → 41 歳) を聞いて sara が「20 後半から走って
+      こられた」と確認している。 sara → 田口 への発話。
+    failure_category: C3
+    confidence: high
+
+  - timestamp: "22:47"
+    asr_speaker: sara
+    true_speaker: mixed
+    utterance_excerpt: "うんそうですね 28とか27とか8の時に起業したんで それまではサラリーマンだったんですか"
+    reason: |
+      前半 "うんそうですね 28とか27とか8の時に起業したんで" = 田口 の応答 (P2)。
+      後半 "それまではサラリーマンだったんですか" = sara の追加質問 (P1)。
+    failure_category: C5
+    confidence: high
+    note: "前半 = P2, 後半 = P1"
+
+  - timestamp: "22:57"
+    asr_speaker: sara
+    true_speaker: mixed
+    utterance_excerpt: "すいません最初に聞くようなことは僕が個人的に聞いてしまってすいません いや全然大丈夫です 最後なんですけども もし今回もこうやってデータを取らせていただいてシステムができたら..."
+    reason: |
+      "すいません最初に聞くようなことは僕が個人的に聞いてしまってすいません"
+      = sara 謝罪 (P1)。
+      "いや全然大丈夫です" = 田口 応答 (P2)。
+      "最後なんですけども もし今回もこうやってデータを取らせていただいて
+      システムができたらこれからマッチングして..." = sara 最後の質問導入 (P1)。
+    failure_category: C5
+    confidence: high
+    note: "P1 → P2 → P1 の 3 ターン混合"
+
+  - timestamp: "23:20"
+    asr_speaker: 田口 恭平
+    true_speaker: P1  # sara
+    utterance_excerpt: "この相手どうですかっていうことを"
+    reason: |
+      22:57 で sara が始めた「データを取らせていただいてシステムができたら
+      マッチングして…」の continuation。 「マッチングしてこの相手どうですか
+      って (お知らせしていく)」と sara の monologue が連続している
+      (23:23 sara のラベル一致 line で「お知らせしていくような形には
+      なるんですけども」と続く)。
+    failure_category: C3
+    confidence: high
+
+  - timestamp: "23:35"
+    asr_speaker: 田口 恭平
+    true_speaker: mixed
+    utterance_excerpt: "何か教えていただけたらとてもありがたいんですけど ありがとうございました そうですね でも考え方的にはすごい面白いなってすごく感じています"
+    reason: |
+      前半 "何か教えていただけたらとてもありがたいんですけど" = sara の
+      質問末尾 (P1)。
+      後半 "ありがとうございました そうですね でも考え方的にはすごい面白い
+      なってすごく感じています" = 田口 の返答 (P2)。
+    failure_category: C5
+    confidence: high
+    note: "前半 = P1, 後半 = P2"
+
+  - timestamp: "23:49"
+    asr_speaker: sara
+    true_speaker: mixed
+    utterance_excerpt: "ありがとうございます ただやっぱりヒアリング事項がやっぱり今日は初回だからかもしれないですけど"
+    reason: |
+      "ありがとうございます" = sara の御礼 (P1)。
+      "ただやっぱりヒアリング事項が..." = 田口 の批評/改善提案の導入 (P2)。
+      この後 23:57 田口 ラベル line で「ヒアリング事項が一般的な感じの質問
+      になっちゃうと AI マッチング要素が生きない」と continuation。
+    failure_category: C3 + C5
+    confidence: high
+    note: "前半 = P1, 後半 = P2"
+
+  - timestamp: "24:10"
+    asr_speaker: sara
+    true_speaker: mixed
+    utterance_excerpt: "あんまり生きないかもしれないなと思っていて あー なるほど うーんなんかその このコミュニティに入るときに 自分の売り上げが上げたくって入るのか"
+    reason: |
+      "あんまり生きないかもしれないなと思っていて" = 田口 批評の結論 (P2)。
+      "あー なるほど うーん" = sara の相槌 (P1)。
+      "なんかその このコミュニティに入る時に 自分の売り上げが上げたくって
+      入るのか" = 田口 が動機分析を再開 (P2)。
+    failure_category: C5
+    confidence: high
+    note: "P2 → P1 → P2 の 3 ターン混合"
+
+  - timestamp: "24:37"
+    asr_speaker: sara
+    true_speaker: P2  # 田口
+    utterance_excerpt: "交流会とかに出てる人ってやっぱりもちろんうちも含めてですけど"
+    reason: |
+      24:24 田口 が「経営課題を解決したくて入るのか…」と分析を続け、
+      24:40 田口 ラベルで「売り上げ欲しい中小企業がほぼなので」と
+      continuation。 24:37 はその間の continuation で、 「うちも含めて」
+      = 田口 が自社 (営業代行) を例に取っている。
+    failure_category: C3
+    confidence: high
+
+  - timestamp: "24:45"
+    asr_speaker: sara
+    true_speaker: P2  # 田口
+    utterance_excerpt: "そうした時にやっぱり売り上げを上げることを求めてくる"
+    reason: |
+      24:40 田口 「売り上げ欲しい中小企業がほぼなので」 →
+      24:48 田口 「お客さんが多分これから増えやすいなと思った時に…」の間。
+      田口 の分析 monologue が継続。
+    failure_category: C3
+    confidence: high
+
+  - timestamp: "25:04"
+    asr_speaker: sara
+    true_speaker: P2  # 田口
+    utterance_excerpt: "AIでどれぐらい精度高くマッチングできるのかなみたいなところが 質問の深さとかジャンルとかそこに寄せていかないと"
+    reason: |
+      24:48 田口 「あなたは売り上げが上がるような質問の回答において」(注:
+      "あなた" は sara を指す) を受けて、 25:04 では sara のサービス精度に
+      ついての評価が続いている。 「あなたは…」と二人称で問う側 = 田口。
+      従って 25:04 もその continuation で 田口 の発話。
+      なお 25:20 sara ラベル line で「っていうところが業界の」と話者交代の
+      signal があり、 sara monologue (25:24-25:35 swap 既知) に転換する。
+    failure_category: C3
+    confidence: medium
+    note: |
+      24:48-25:15 のブロック全体が 田口 monologue (sara への advice)。
+      sara の「あー なるほど」「そうですね」が要所で挟まる程度。
+      25:15 田口「そうですね 間違いないです」のラベルは ambiguous_zones
+      (下記参照) として metric から除外推奨。
+
+  - timestamp: "27:21"
+    asr_speaker: 田口 恭平
+    true_speaker: P1  # sara
+    utterance_excerpt: "びっくりされたりします"
+    reason: |
+      26:29 sara の長尺シャンパンコール monologue 末尾
+      「ホスト知らない人とかに呼ばれたりして」 →
+      27:21 「びっくりされたりします」 = sara monologue の continuation。
+      tl;dv 要約が シャンパンコール 話題を 田口 に誤帰属する
+      symbolic な hallucination pattern (forbidden_001) と同根。
+    failure_category: C3
+    confidence: high
+
+  - timestamp: "27:24"
+    asr_speaker: sara
+    true_speaker: mixed
+    utterance_excerpt: "なるほど はい プライベートでってなると結構あれです そんなプライベートで人付き合いってなると ご飯屋さんが多いですか"
+    reason: |
+      "なるほど はい" = 田口 の相槌 (P2)。
+      "プライベートでってなると... ご飯屋さんが多いですか" = sara の
+      次質問 (P1)。
+    failure_category: C5 + C14  # Q&A pair break + topic transition
+    confidence: high
+    note: |
+      前半 = P2, 後半 = P1。 加えてここで 仕事 → プライベート の
+      topic transition (C14) が発生。
+
+  - timestamp: "27:44"
+    asr_speaker: sara
+    true_speaker: mixed
+    utterance_excerpt: "もうそうですね 飯食いに行ったり飲みに行ったりすることが多いですけどね 最近すごく これ本当にプライベートな質問で申し訳ないんですけども 気になっていることがありまして 僕の周りの人って結構こう じゃあ仕事でミーティングで直接会いましょうっていうと"
+    reason: |
+      "もうそうですね 飯食いに行ったり飲みに行ったりすることが多いです
+      けどね" = 田口 (前職ホスト) の応答 (P2)。
+      "最近すごく これ本当にプライベートな質問で申し訳ないんですけども
+      気になっていることがありまして 僕の周りの人って..." = sara の
+      次質問導入 (P1)。
+    failure_category: C5
+    confidence: high
+    note: "前半 = P2, 後半 = P1"
+
+  - timestamp: "28:25"
+    asr_speaker: sara
+    true_speaker: mixed
+    utterance_excerpt: "タバコも吸わないんで あんまり この間のボアーズの交流会はあれですか もともと会員登録されてる星野さんにあの仕事頼んでる感じですね"
+    reason: |
+      "タバコも吸わないんで あんまり" = 田口 (タバコ非喫煙 確定) の応答 (P2)。
+      "この間のボアーズの交流会はあれですか もともと会員登録されてる
+      星野さんにあの仕事頼んでる感じですね" = sara の次質問 (P1)。
+      ※ 既存 28:15 correction (mixed) と連動する Q&A ターンの直後。
+    failure_category: C5
+    confidence: high
+    note: "前半 = P2, 後半 = P1"
+
+  - timestamp: "28:41"
+    asr_speaker: 田口 恭平
+    true_speaker: mixed
+    utterance_excerpt: "そうなんですね じゃあ ああいう交流会以外の そうですね お時間ですよね ごめんなさい関係は すいません 入れちゃってて申し訳ない すいません すいません 有権な人も ありがとうございました 本当に今後もよろしくお願いします はい引き続きもよろしくお願いします"
+    reason: |
+      クロージング部分で 4 ターン混合:
+      "そうなんですね じゃあ ああいう交流会以外の" = 田口 (P2)。
+      "そうですね お時間ですよね ごめんなさい関係は すいません 入れちゃ
+      ってて申し訳ない すいません すいません 有権な人も ありがとう
+      ございました" = sara が時間超過と話題逸脱を謝罪 (P1)。
+      "本当に今後もよろしくお願いします" = 田口 の closing (P2)。
+      "はい引き続きもよろしくお願いします" = sara の closing (P1)。
+    failure_category: C5
+    confidence: medium
+    note: |
+      P2 → P1 → P2 → P1 の 4 ターン混合だが、 closing の儀礼的応酬で
+      話者特定が voice signal なしには困難な部分も含む。
+
+# ────────────────────────────────────────────────────────
+# 2. Expected claims (明示発話の事実 claim のみ)
+# ────────────────────────────────────────────────────────
+expected_claims:
+  # ---- 田口 (P2) の事実 ----
+  - id: claim_a4_001
+    speaker: P2
+    field: business.company_age
+    value: 14  # 期
+    source_timestamp: "22:25"
+    excerpt: "今14期か"
+    note: |
+      時系列の数値。 発話日 (meeting_date: 2026-05-08 想定) で freeze 必須。
+    failure_category: C18  # Time-relative numeric
+    confidence: confirmed
+
+  - id: claim_a4_002
+    speaker: P2
+    field: personal.age
+    value: 41
+    source_timestamp: "22:34"
+    excerpt: "41ですね"
+    note: |
+      "じゃあ今年齢どういくつって…" (sara) → "41ですね" (田口) の Q&A pair。
+      発話日 freeze 必須 (C18)。
+    failure_category: C18
+    confidence: confirmed
+
+  - id: claim_a4_003
+    speaker: P2
+    field: career.founding_age
+    value: 27-28
+    source_timestamp: "22:47"
+    excerpt: "28とか27とか8の時に起業したんで"
+    note: "発話 source は 22:47 sara ラベル line の前半 (実は P2)。"
+    confidence: confirmed
+
+  - id: claim_a4_004
+    speaker: P2
+    field: career.pre_founding
+    value: サラリーマン
+    source_timestamp: "22:54"
+    excerpt: "うんサラリーマンでした もちろんそうですね"
+    confidence: confirmed
+
+  - id: claim_a4_005
+    speaker: P2
+    field: business.management_style
+    value: バランス型寄り (絞った領域内ではチャレンジング型)
+    source_timestamp: "21:37"  # 該当発話は section 境界手前だが直結
+    excerpt: |
+      "バランス型に近いかもしれないですね ... 領域は絞ってましたけど
+      その絞った領域に関してはある程度チャレンジング型だったかな"
+    note: |
+      21:37 (田口 label, 正) + 22:05 (sara label, swap → P2) の連続発話。
+      section 開始 22:00 をまたぐが、 22:05 portion がメインの defining
+      content。
+    confidence: confirmed
+
+  - id: claim_a4_006
+    speaker: P2
+    field: career.history
+    value: ホスト (前職, 主要キャリア)
+    source_timestamp: "26:12"
+    excerpt: "本当にホスト以外の仕事を僕はほぼしたことがないので"
+    note: |
+      既存 ground-truth claim_002 と一致 (再確認 entry)。 田口 の career
+      の重要 anchor。
+    confidence: confirmed
+
+  - id: claim_a4_007
+    speaker: P2
+    field: lifestyle.c_company_attendance
+    value: 行かない
+    source_timestamp: "28:15"
+    excerpt: "C社って僕ね行かないっす ね ちょっと腹臭くなるの嫌なんだよ"
+    note: |
+      既存 28:15 correction の C 社部分。 「行かない」+ 理由「腹臭く
+      なるの嫌」の 2 つ。
+    confidence: confirmed
+
+  - id: claim_a4_008
+    speaker: P2
+    field: lifestyle.smoking
+    value: false  # 非喫煙
+    source_timestamp: "28:25"
+    excerpt: "タバコも吸わないんで"
+    note: |
+      sara の問い「タバコとかも全然吸われない (?)」(28:15 末尾, mixed
+      line の sara portion) に対する 田口 の回答。 既存 ground-truth
+      claim_003 (low confidence) を high に格上げする evidence。
+      28:25 sara ラベル line の前半 (実は P2) が source。
+    confidence: confirmed
+
+  # ---- sara (P1) の事実 ----
+  - id: claim_a4_009
+    speaker: P1
+    field: business.sideline
+    value: シャンパンタワー用シャンパンコール制作 (代々的ではない副業)
+    source_timestamp: "26:29"
+    excerpt: |
+      "シャンパンタワーに使うシャンパンコールを作成してやりに行くって
+      いう仕事をしてるんですけど"
+    note: |
+      ⚠️ tl;dv 要約の最大誤帰属対象 (forbidden_001 / forbidden_002)。
+      26:29 sara ラベル line + 27:21 (swap → P1) で 1 連の monologue。
+      sara 本人が「代々的にやってる仕事じゃないんですけど」と副業
+      qualifier を明示している点も重要 (C15 multi-business ambiguity の
+      guard rail にも使える)。
+      既存 ground-truth claim_005 と一致 (再確認 entry)。
+    confidence: confirmed
+
+  - id: claim_a4_010
+    speaker: P1
+    field: business.sideline_marketing_channel
+    value: SNS 経由で 「バー等でシャンパンタワーをやりたい」一般客から受注
+    source_timestamp: "26:29"
+    excerpt: |
+      "最近SNSでちょっとホスト何年か前から流行ってるじゃないですか …
+      あれを真似してなんか自分の例えばバーだったりとかそういうところで
+      シャンパンタワーをやりたいみたいな人が結構多くと"
+    note: |
+      シャンパンコール副業の顧客層情報。 ただし「ホスト知らない人とかに
+      呼ばれたり」と顧客プロファイルが ambiguous なため、 claim の field
+      mapping は schema 設計時に注意。
+    confidence: medium
+
+# ────────────────────────────────────────────────────────
+# 3. Forbidden claims (絶対に抽出してはいけない hallucination)
+# ────────────────────────────────────────────────────────
+forbidden_claims:
+  - id: forbidden_a4_001
+    speaker_attributed_wrongly: P2  # 田口
+    true_speaker: P1                # sara
+    field: business.sideline
+    value: シャンパンタワー / シャンパンコール / ホスト関連
+    source_of_hallucination: tl;dv 要約 + 27:21 swap
+    reason: |
+      既知の代表事例 (ground-truth forbidden_001 と一致)。 ただし本提案で
+      27:21 swap (P2→P1) を新たに encode したので、 V2 pipeline の Layer
+      2++ がこの swap を訂正できれば自動的に回避可能。
+    failure_category: C8 + C3
+    severity: critical
+
+  - id: forbidden_a4_002
+    speaker_attributed_wrongly: P2
+    true_speaker: P1
+    field: hobbies_or_interests
+    value: ホスト文化 / バー / 接待
+    source_of_hallucination: 推測
+    reason: |
+      26:29 sara monologue を 田口 monologue として読むと、 「ホスト文化
+      への興味」「バー業界への愛着」のような hobby claim が生成され得る。
+      実際は sara が SNS 経由で受注を取っている工程説明に過ぎない。
+    failure_category: C8
+    severity: high
+
+  - id: forbidden_a4_003
+    speaker_attributed_wrongly: P2  # 田口
+    true_speaker: null  # 該当者なし
+    field: business.industry
+    value: AI マッチング / コミュニティ運営
+    source_of_hallucination: 25:04 / 25:24 / 25:35 swap chain
+    reason: |
+      25:04-25:35 で 田口 ↔ sara の swap が連続するため、 田口 が AI
+      マッチングシステムの設計者であるかのような claim が生成され得る。
+      事実は sara がサービス提供者、 田口 はその顧客 (モニター候補)。
+    failure_category: C3 + C8
+    severity: critical
+
+  - id: forbidden_a4_004
+    speaker_attributed_wrongly: P1  # sara
+    true_speaker: P2  # 田口
+    field: business.financials
+    value: 売上 3 億 / 役員 2 名 / 正社員 9 名 / 業務委託 7-8 名 / 14 期 / 年間 300 万 + 粗利 600 万円保証 など
+    source_of_hallucination: 22:05 / 22:25 / 22:34 / 22:47 swap chain
+    reason: |
+      22:05-22:47 の swap chain で 田口 の会社情報 (14 期, 41 歳起業 27-28,
+      バランス型経営) が sara の情報として誤帰属するリスク。 これは forbidden
+      の 中で最も systemic な hallucination 候補。
+    failure_category: C3 + C8
+    severity: critical
+
+  - id: forbidden_a4_005
+    speaker_attributed_wrongly: P1  # sara
+    true_speaker: P2
+    field: lifestyle.smoking_or_c_company
+    value: 非喫煙 / C 社 行かない / 腹臭くなるの嫌
+    source_of_hallucination: 28:15 mixed line の inversion
+    reason: |
+      28:15 mixed line を sara 発話として読むと、 sara が非喫煙者で C 社
+      を嫌っているかのような誤帰属が起きる。 実は 田口 (確定事実)。
+    failure_category: C3
+    severity: high
+
+  - id: forbidden_a4_006
+    speaker_attributed_wrongly: P2  # 田口
+    true_speaker: P1
+    field: hobbies
+    value: ご飯屋に行く / 飲みに行く
+    source_of_hallucination: 27:44 mixed line の inversion
+    reason: |
+      27:44 前半 "飯食いに行ったり飲みに行ったりすることが多い" = 田口。
+      ただしラベルは sara。 swap しないと田口 のプライベート活動が sara
+      の claim として書かれる… ではなく、 逆に sara にラベルされたまま
+      では 田口 の活動が sara 側に流れる。 swap した方が正しい claim 化。
+    failure_category: C3
+    severity: medium
+    note: |
+      このパターンは forbidden というより 「swap 訂正前の状態でロックされ
+      ると誤抽出」のケース。 監視対象として記載。
+
+  # 第三者話題 (C 社 / 顧客の例) を claim 化しないこと
+  - id: forbidden_a4_007
+    speaker_attributed_wrongly: any
+    true_speaker: any
+    field: third_party_topic
+    value: |
+      C 社 (高級店?) の客層 / 顧客の例 (コピー機売りたい人 / ホームページ
+      会社さん / 補助金会社さん / FP / SNS 運用代行 等) / 星野さん / ボアーズ
+    source_of_hallucination: C11 (third-party leakage)
+    reason: |
+      28:01-28:25 の C 社 話題、 28:25 ボアーズ交流会 / 星野さん 話題、
+      11:55-12:30 の 田口 顧客カテゴリ列挙 (※ section 外だが言及) など、
+      第三者主体の言及を本人 claim として登録してはいけない。
+    failure_category: C11
+    severity: high
+
+# ────────────────────────────────────────────────────────
+# 4. Ambiguous zones (metric 計算から除外)
+# ────────────────────────────────────────────────────────
+ambiguous_zones:
+  - timestamp_range: ["25:15", "25:20"]
+    reason: |
+      25:15 田口 ラベル "そうですね 間違いないです" + 25:20 sara ラベル
+      "っていうところが業界の" の話者特定が monologue / 短い相槌 + 話者
+      交代の境界として曖昧。 既存 ambiguous_zones (25:20-25:41) と隣接
+      するため、 拡張的に [25:15, 25:20] を追加。
+
+  - timestamp_range: ["28:01", "28:07"]
+    reason: |
+      既存 ground-truth で 28:01 P2→P1 swap が low confidence で encode
+      されているが、 「ひよいさん」と sara を呼ぶ発話者は 田口 のはずで、
+      label と true_speaker の方向性が反論余地あり (本提案者は label の
+      まま 田口 とする読みが自然と判断)。
+      28:07 sara label の「C社は」までを含めて role-reversal zone として
+      明示。 metric 計算から除外推奨。
+    note: |
+      既存 correction を上書きしない方針のため、 ここでは override せず
+      ambiguous_zones として記録のみ。 真の解決は本人 confirmation 必要。
+
+  - timestamp_range: ["28:41", "28:57"]
+    reason: |
+      クロージング部分は儀礼的応酬 (「よろしくお願いします」「ありがとう
+      ございました」「すいません」) の連続で、 話者識別の content signal
+      が乏しい。 4 ターン混合と推定したが voice signal なしには confidence
+      が limit される。
+
+# ────────────────────────────────────────────────────────
+# Notes
+# ────────────────────────────────────────────────────────
+notes: |
+  ## Section 全体の感想
+
+  22:00-28:57 は 6 分 57 秒で、 本会議で発生した 41 swap のうちおそらく
+  最も多く (前回 audit の指摘どおり) 集中している区間。 本提案では下記
+  の通り訂正を提案:
+
+  - 単独行 swap (Type C): 22:05, 22:43, 23:20, 24:37, 24:45, 25:04, 27:21
+    の 7 件
+  - Mixed line (1 timestamp に複数話者混入): 22:25, 22:34, 22:47, 22:57,
+    23:35, 23:49, 24:10, 27:24, 27:44, 28:25, 28:41 の 11 件
+  - 合計 18 件の corrections を提案
+
+  ## 田口 の自社情報を sara に誤帰属させない (最重要)
+
+  22:05-22:54 の 田口 自社情報ブロック (14 期 / 41 歳 / 起業 27-28 /
+  バランス型) は本会議で最も systemic な hallucination リスク。
+  sara にこれらの数値が貼り付くと、 V2 pipeline 全体の信頼性が崩壊する。
+  forbidden_a4_004 を critical で encode 済み。
+
+  ## シャンパンコール monologue (26:29-27:21)
+
+  既知の symbolic hallucination test case (forbidden_001)。 本提案では
+  27:21 「びっくりされたりします」 の P2→P1 swap を追加 encode することで、
+  monologue 末尾までを sara に確実に attribute できる setup にした。
+
+  ## C 社 / タバコ zone (28:01-28:25)
+
+  既存 ground-truth と本提案の解釈に微妙な差異あり (28:01 の方向性に
+  関する解釈論争)。 ambiguous_zones に明示記録し、 本人 confirmation
+  を経るまで metric 計算から除外を推奨。
+
+  ## claim 抽出方針
+
+  - 田口 の 14 期 / 41 歳 / 起業 27-28 / サラリーマン前職 → C18 (時系列)
+    として claim 化。 発話日 freeze 必須。
+  - 田口 の前職ホスト → 既存 claim_002 と重複だが confidence 再確認。
+  - 田口 の非喫煙 / C 社 行かない → 既存 claim_003 を low → confirmed に
+    格上げする evidence を 28:15 / 28:25 で提供。
+  - sara のシャンパンコール → 既存 claim_005 を再確認 + marketing
+    channel 情報 (SNS 経由のバー需要) を補足 claim として追加。
+
+  ## 第三者話題は claim にしない
+
+  C 社 (高級店) の客層、 ボアーズ / 星野さん、 田口 顧客カテゴリの
+  列挙 (HP / FP / 補助金 / SNS 運用代行 等) は全て第三者主体の言及。
+  C11 (third-party leakage) の対象として forbidden_a4_007 に集約記録。

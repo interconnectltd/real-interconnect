@@ -1,0 +1,590 @@
+# Agent-3 corrections proposal for meeting-001 (15:00 - 22:00 区間)
+#
+# Source transcript: ../transcripts/meeting-001.txt
+# Reference: ../ground-truth/meeting-001.yaml (schema)
+# Failure catalog:  ../failure-modes.yaml
+#
+# 担当範囲: 15:00 〜 22:00 のみ
+# それ以外の区間は本ファイルでは触れない
+
+annotator: agent-3
+section: ["15:00", "22:00"]
+analysis_date: 2026-05-16
+
+participants_assumed:
+  - id: P1
+    display_name: sara
+    role: host  # 経営者マッチング AI コミュニティ創業者 / 副業: シャンパンコール制作
+  - id: P2
+    display_name: 田口恭平
+    role: guest  # 主業: 営業代行 / 前職: ホスト / タバコ非喫煙
+
+# ────────────────────────────────────────────────────────
+# Speaker attribution corrections
+#
+# この区間の全体構造:
+#   - 14:38 で sara が "頭を悩ませていること" を 田口 に質問
+#   - 15:00 〜 15:21 田口 が回答 ("うちは大丈夫だが顧客の売上を上げたい")
+#   - 15:22 sara が "マッチング相手にこういうことで相談したい" 質問へ
+#   - 15:41 〜 17:10 田口 が「マッチングは求め合っていない」長文 monologue
+#     (Type C inversion: ASR が話者切替を 1 つ落とし、奇数発話が sara に
+#      偶数発話が 田口 に交互割当て。本実体は ほぼ 田口 monologue)
+#   - 17:15 〜 19:44 sara が "コミュニティで出会いたい人" 質問 →
+#     田口 が "課題がたくさんある社長と会いたい" 長文 monologue
+#     (同様の Type C inversion 継続)
+#   - 19:46 sara が "対話スタイル" 質問へ
+#   - 20:22 〜 21:37 田口 が "仕事 8:2、 プライベート 2:8 で聞く側" を回答
+#   - 21:08 後半 sara が "急成長思考 vs 安定堅実" 質問へ
+#   - 21:37 〜 22:05 田口 が "バランス型 / 慎重だがチャレンジもした" 回答
+# ────────────────────────────────────────────────────────
+speaker_corrections:
+
+  # ── マッチング monologue block (Type C inversion) ──
+  - timestamp: "15:41"
+    asr_speaker: 田口 恭平
+    true_speaker: P1  # sara
+    utterance_excerpt: "みたいなこととかも今はあまりないですか マッチングって基本的に求め合ってる"
+    reason: |
+      15:22 sara 質問 "マッチング相手にこういうことで相談したい...みたいな" の
+      文末。 ASR は前行末を sara、 続きを 田口 に分割しているが、
+      "あまりないですか" は sara の質問語尾。 続く "マッチングって基本的に求め合ってる"
+      は 田口 の monologue 冒頭 (短い被せ)。1 行 2 話者混在の可能性あり。
+    failure_category: C5
+    confidence: medium
+    note: "1 タイムスタンプに 2 話者混在。 sara 質問末 + 田口 monologue 開始"
+
+  - timestamp: "15:47"
+    asr_speaker: sara
+    true_speaker: P2  # 田口
+    utterance_excerpt: "僕マッチングが専門なんでちょっと分かんないですけどね"
+    reason: |
+      "僕マッチングが専門" は皮肉的自己評価。 直後 (15:53〜16:34) で 田口 が
+      "マッチングは実は求め合ってない / ホームページ作りたい人は自分で探す /
+      営業代行会社に紹介依頼は来ない" と 田口 業界 (営業代行) の例で説明する
+      monologue が続くため、 これは 田口 が議論を主導する冒頭。
+      ※ sara こそ "マッチング専門" だが、 ここは 田口 が自虐ぎみに切り出している。
+    failure_category: C3  # Type C inversion 開始点
+    confidence: medium
+
+  - timestamp: "15:53"
+    asr_speaker: sara
+    true_speaker: P2  # 田口
+    utterance_excerpt: "マッチングって実はあんまり求め合ってるケースってないんですよ"
+    reason: 田口 monologue 継続 (営業代行業界の経験から matching 現実を説明)
+    failure_category: C3
+    confidence: high
+
+  - timestamp: "16:12"
+    asr_speaker: sara
+    true_speaker: P2  # 田口
+    utterance_excerpt: "ホームページ作りたいと思ってれば知り合いの業者とか自分で探して申し込めちゃうじゃないですか そうですね確かに"
+    reason: |
+      "吉井さん (=sara) がホームページ作ろうとか言って" の続き。
+      二人称で sara に語りかける形であり、 ホームページ作成の例を出すのは 田口。
+      末尾 "そうですね確かに" だけ sara の相槌が紛れ込んでいる可能性高い。
+    failure_category: C3
+    confidence: high
+    note: "末尾 'そうですね確かに' は sara 相槌の混入可能性"
+
+  - timestamp: "16:26"
+    asr_speaker: sara
+    true_speaker: P2  # 田口
+    utterance_excerpt: "ホームページ作りたい人紹介してくださいって口開けて ホームページ作りたいんですけどとかっていう相談が来ることってほぼ皆無なんですよね"
+    reason: 田口 monologue 継続。 営業代行会社視点で matching 受発注の実態を説明
+    failure_category: C3
+    confidence: high
+
+  - timestamp: "16:34"
+    asr_speaker: 田口 恭平
+    true_speaker: P2  # 田口 (確定 / 但し冒頭 "ご視聴ありがとうございました" は ASR ノイズ)
+    utterance_excerpt: "欲しい人が口開けて待っている状態っていうのはほぼないので なので多分この会社の商品はこの会社の社長は本来であれば欲しいはずだ ちゃんとプレゼンしてちゃんと魅力を伝えた時に本来であれば欲しいはずなんだけどっていうところを"
+    reason: 田口 monologue 継続。 ASR ラベルは正しいが冒頭 "ご視聴ありがとうございました" は無音区間の ASR hallucination
+    failure_category: C20  # Punctuation-less / ASR noise
+    confidence: high
+    note: "冒頭 'ご視聴ありがとうございました' は YouTube 系学習データ由来の ASR 幻聴"
+
+  - timestamp: "16:58"
+    asr_speaker: sara
+    true_speaker: P2  # 田口 (前半)
+    utterance_excerpt: "どれだけ高角度に的確に捕まえられるかなんですよ"
+    reason: |
+      "どれだけ高角度に的確に捕まえられるか" は 田口 monologue の結論部。
+      その後の "そうですねありがとうございます すいませんまだ自分は" は
+      sara の反応 + 次発話への transition。 1 行 2 話者混在。
+    failure_category: C3
+    confidence: high
+    note: "1 行 2 話者: 田口 monologue 結論 + sara 反応"
+
+  - timestamp: "17:10"
+    asr_speaker: 田口 恭平
+    true_speaker: P1  # sara
+    utterance_excerpt: "未熟なもので本当にありがとうございます"
+    reason: |
+      "未熟" と自称しているのは host 役の sara。 11:00 付近で sara 自身
+      "経営としてはすごい初心者" "あらかじめ調べて勉強してきた" と発言しており
+      対応する。 田口 (年商 3 億 / 14 期 / 役員あり) が自分を未熟とは呼ばない。
+    failure_category: C3
+    confidence: high
+
+  # ── コミュニティで出会いたい人 質問 block ──
+  - timestamp: "17:19"
+    asr_speaker: 田口 恭平
+    true_speaker: P1  # sara
+    utterance_excerpt: "例えばコミュニティを通じて"
+    reason: |
+      17:17 sara の "すいません" + 17:19 "例えばコミュニティを通じて"
+      + 17:21 "こういう人とつながりたい" は sara の次の質問導入。
+      ASR が交互に sara/田口 に振っているが connected な sara 単独発話。
+    failure_category: C5
+    confidence: high
+
+  - timestamp: "17:35"
+    asr_speaker: sara
+    true_speaker: P2  # 田口
+    utterance_excerpt: "売上げ上げるお手伝い営業代行なんですけど"
+    reason: 田口 自己事業 (営業代行) を改めて記述する monologue 開始
+    failure_category: C3
+    confidence: high
+
+  - timestamp: "17:42"
+    asr_speaker: sara
+    true_speaker: P2  # 田口
+    utterance_excerpt: "うちが直接もちろんお手伝いは可能なんですが"
+    reason: 田口 monologue 継続 ("うち=ラフメーカー" = 田口 の会社)
+    failure_category: C3
+    confidence: high
+
+  - timestamp: "17:52"
+    asr_speaker: sara
+    true_speaker: P2  # 田口
+    utterance_excerpt: "例えばうちのお客さんでコピー機を売りたいよと"
+    reason: 田口 monologue 継続。 "うちのお客さん" は ラフメーカー (営業代行) の顧客
+    failure_category: C3
+    confidence: high
+
+  - timestamp: "17:59"
+    asr_speaker: sara
+    true_speaker: P2  # 田口
+    utterance_excerpt: "コピー機を買えてもいいやっていうお客さんを僕らは探したいんですよ"
+    reason: 田口 monologue 継続 ("僕ら=ラフメーカー")
+    failure_category: C3
+    confidence: high
+
+  - timestamp: "18:09"
+    asr_speaker: sara
+    true_speaker: P2  # 田口
+    utterance_excerpt: "営業を手伝ってほしいよってうちに直接発注してくれる人と"
+    reason: 田口 monologue 継続 (営業代行直契約のニーズ)
+    failure_category: C3
+    confidence: high
+
+  - timestamp: "18:18"
+    asr_speaker: sara
+    true_speaker: P2  # 田口 (前半)
+    utterance_excerpt: "ちょっと抽象度高く言うと"
+    reason: |
+      "抽象度高く言うと" は 田口 が自分の説明をメタ的にまとめる発言。
+      後半 "はい分かります分かります" は sara の理解相槌。 1 行 2 話者混在。
+    failure_category: C3
+    confidence: high
+    note: "1 行 2 話者: 田口 self-meta + sara 相槌"
+
+  - timestamp: "18:26"
+    asr_speaker: sara
+    true_speaker: P2  # 田口
+    utterance_excerpt: "さっきお伝えしたようにたくさんいるので"
+    reason: 田口 monologue 継続。 11:46〜12:30 で語った顧客業種列挙への参照
+    failure_category: C3
+    confidence: high
+
+  - timestamp: "18:38"
+    asr_speaker: sara
+    true_speaker: P2  # 田口
+    utterance_excerpt: "ちょっと会社でAI化を進めたい"
+    reason: 田口 monologue 継続 (顧客課題の例示)
+    failure_category: C3
+    confidence: high
+
+  - timestamp: "18:46"
+    asr_speaker: sara
+    true_speaker: P1  # sara (但し冒頭 "ご視聴ありがとうございました" は ASR ノイズ)
+    utterance_excerpt: "課題がたくさんある社長さんですね すごい今日課題がたくさんある社長さんと出会いたいということ それだけ幅広く提供できるものがあるってことですもん 自分たちが直接やってるわけじゃないですけどお客さんのを担いでるので"
+    reason: |
+      sara が 田口 monologue を要約する reflective listening。
+      ASR ラベル sara で正しい。 冒頭 "ご視聴ありがとうございました" は
+      ASR 幻聴。
+    failure_category: C20  # ASR noise
+    confidence: high
+
+  - timestamp: "19:07"
+    asr_speaker: sara
+    true_speaker: P2  # 田口
+    utterance_excerpt: "課題がたくさんある人って見つけるのは難しいんですよね"
+    reason: |
+      "見つけるのは難しい" は 田口 自身の営業苦労の述懐。 続く 19:14 田口
+      "外側に出ないじゃないですか" と論理的に連続。
+    failure_category: C3
+    confidence: medium
+    note: "sara 共感の可能性も否定できない (どちらでも会話成立) が、 直後の田口
+      ターンと論理連続するため 田口 に寄せる"
+
+  - timestamp: "19:14"
+    asr_speaker: 田口 恭平
+    true_speaker: P2  # 田口 (前半)
+    utterance_excerpt: "外側に出ないじゃないですか"
+    reason: |
+      "外側に出ない" は 田口 が "見つけるのが難しい理由" を説明。
+      その後 "出ないですね なかなかそこはちょっと申し訳ないんですけど" は
+      sara の同意相槌 + 自分の transition。 1 行 2 話者混在。
+    failure_category: C3
+    confidence: medium
+    note: "1 行 2 話者: 田口 説明 + sara 相槌"
+
+  - timestamp: "19:22"
+    asr_speaker: sara
+    true_speaker: P2  # 田口
+    utterance_excerpt: "会社が大きい方がある程度いろんな人の問題とか"
+    reason: 田口 monologue 継続 (大企業ほど課題が多い、 という説明)
+    failure_category: C3
+    confidence: high
+
+  - timestamp: "19:39"
+    asr_speaker: sara
+    true_speaker: P2  # 田口
+    utterance_excerpt: "お会いするような動きを僕は日々ととってます"
+    reason: |
+      "僕は日々ととってます" の "僕" は 大きい会社の社長と会う動きをとる 田口
+      (営業代行ビジネス開発の標準活動)。 sara は逆に "200 社モニター集め"
+      を 1-2 週間前から始めたばかり (06:31〜07:07) で "日々" 大企業社長と
+      会う動きはしていない。
+    failure_category: C3
+    confidence: high
+
+  - timestamp: "19:44"
+    asr_speaker: 田口 恭平
+    true_speaker: P1  # sara
+    utterance_excerpt: "ありがとうございます"
+    reason: |
+      sara の host 相槌。 田口 monologue 終結を受けて感謝。 直後 19:46
+      sara が "勉強になりました" と続け、 次質問へ transition。
+    failure_category: C4  # Echo / backchannel false attribution
+    confidence: high
+
+  # ── 対話スタイル質問 block ──
+  - timestamp: "20:17"
+    asr_speaker: 田口 恭平
+    true_speaker: P1  # sara
+    utterance_excerpt: "みたいなのってご自身で"
+    reason: sara 質問の語尾 (主に話す/聞く?)。 19:46 sara の質問末尾の続き
+    failure_category: C5
+    confidence: high
+
+  - timestamp: "20:22"
+    asr_speaker: 田口 恭平
+    true_speaker: P2  # 田口 (前半)
+    utterance_excerpt: "社員に対してですか"
+    reason: |
+      田口 が質問対象を確認する clarification。 その後 "社員だったり"
+      は sara の応答。 1 行 2 話者混在。
+    failure_category: C5
+    confidence: medium
+    note: "1 行 2 話者: 田口 確認質問 + sara 回答"
+
+  - timestamp: "20:32"
+    asr_speaker: 田口 恭平
+    true_speaker: P1  # sara (前半) / P2 (後半)
+    utterance_excerpt: "聞くことが多いとかレースバイケースだな 仕事上は6話してる方かもしれないですね"
+    reason: |
+      前半 "聞くことが多いとか" は sara 質問の選択肢提示の続き。
+      "レースバイケースだな" 以降は 田口 の自己回答 (仕事上は 8:2 で話す側,
+      実際 ASR の "6" は "8" の誤転写の可能性)。 1 行 2 話者混在。
+    failure_category: C5
+    confidence: medium
+    note: "1 行 2 話者: sara 選択肢提示 + 田口 回答"
+
+  - timestamp: "20:46"
+    asr_speaker: sara
+    true_speaker: P1  # sara (前半) / P2 (後半)
+    utterance_excerpt: "ちょっとコンサルという位置づけもあるんでね 確かにどうやってもそしたら割合多くなっちゃいますよね プライベートは28とか19ぐらいで聞いてますけどね"
+    reason: |
+      前半 "ちょっとコンサルという位置づけもあるんでね 確かにどうやっても
+      そしたら割合多くなっちゃいますよね" は sara の納得 reaction。
+      後半 "プライベートは28とか19ぐらいで聞いてますけどね" は 田口 が
+      自分の private 比率 (2:8 または 1:9 で聞く側) を述べる回答。
+      1 行 2 話者混在。
+    failure_category: C3
+    confidence: high
+    note: |
+      1 行 2 話者: sara 反応 + 田口 回答。
+      "28" "19" は "2:8" "1:9" を読み上げた tl;dv 数値誤転写の可能性大。
+
+  - timestamp: "21:01"
+    asr_speaker: 田口 恭平
+    true_speaker: P1  # sara
+    utterance_excerpt: "あーすごいすごい 仕事のオンオフがすごいしっかりしてるってことですよね"
+    reason: |
+      sara の reflective listening (田口 の オン/オフ 切替を観察してコメント)。
+      "あーすごいすごい" は host の reaction marker。
+    failure_category: C3
+    confidence: high
+
+  - timestamp: "21:08"
+    asr_speaker: sara
+    true_speaker: P2  # 田口 (前半)
+    utterance_excerpt: "いやいや全然ですね 仕事で疲れるとプライベート喋りたくないだけですから"
+    reason: |
+      前半 "いやいや全然ですね 仕事で疲れるとプライベート喋りたくないだけ
+      ですから" は 田口 の謙遜回答 (自分が疲れて喋らないだけ)。 後半
+      "ありますよねそういうこと分かります あとそしたら最後2つになるんですけど
+      質問が1つが..." は sara の共感 + 次質問への transition。
+      1 行 2 話者混在。
+    failure_category: C3
+    confidence: high
+    note: "1 行 2 話者: 田口 謙遜 + sara 次質問導入"
+
+# ────────────────────────────────────────────────────────
+# Expected claims (15:00 〜 22:00 区間で明示的に発話された事実のみ)
+# ────────────────────────────────────────────────────────
+expected_claims:
+
+  - id: claim_a3_001
+    speaker: P2  # 田口
+    field: business.customer_situation
+    value: "自社売上は安定しているが、顧客企業の中にうまくいっていない先があり、その売上を上げたいのが悩み"
+    source_timestamp: "15:00"
+    excerpt: "うち自体の売上はある程度まとまってはいるので やっぱりお客さんでうまくいってる人いってない人が多少出るので / お客さんでうまくいってない人の売上を上げたいなと思ってますけどね"
+    confidence: confirmed
+    note: |
+      sara の "頭を悩ませていること" (14:38) への 田口 回答。
+      自社=ラフメーカー、 顧客=営業代行先企業。
+      ※ 15:10 ASR=sara 行は 田口 回答 + sara 共感 ("素敵な考え方ですね") の混在
+
+  - id: claim_a3_002
+    speaker: P2  # 田口
+    field: business.matching_philosophy
+    value: "マッチングは『求め合っている』ケースは実はほぼなく、潜在ニーズを高精度で捕まえる必要があるという業界観"
+    source_timestamp: "15:53"
+    excerpt: "マッチングって実はあんまり求め合ってるケースってないんですよ / 欲しい人が口開けて待っている状態っていうのはほぼない / どれだけ高角度に的確に捕まえられるかなんですよ"
+    confidence: confirmed
+    note: 田口 monologue 15:47〜16:58 全体の要約。 営業代行業界経験からの実感
+
+  - id: claim_a3_003
+    speaker: P2  # 田口
+    field: business.target_customer
+    value: "課題がたくさんある社長 (とくに比較的大きい会社) と出会いたい"
+    source_timestamp: "18:30"
+    excerpt: "課題がたくさんある社長と会いたいんですよね"
+    confidence: confirmed
+
+  - id: claim_a3_004
+    speaker: P2  # 田口
+    field: business.target_customer_rationale
+    value: "大きい会社の方がシステム・人材・予算面で課題が多く、 営業代行のニーズも大きい"
+    source_timestamp: "19:22"
+    excerpt: "会社が大きい方がある程度いろんな人の問題とか / システムの問題とかいろいろ問題が出てくる可能性は大きい会社の方が多い / あと使える予算も多いのである程度大きい会社の社長さんとかにお会いするような動きを僕は日々ととってます"
+    confidence: confirmed
+
+  - id: claim_a3_005
+    speaker: P2  # 田口
+    field: business.customer_referral_demand
+    value: "自社直接の営業代行発注者と、自社顧客への発注をしてくれる相手の双方を探している"
+    source_timestamp: "17:46"
+    excerpt: "うちのお客さんのお客さんも探したいわけなんですよね / 出会いたいのは 営業を手伝ってほしいよってうちに直接発注してくれる人と あとうちのお客さんに発注してくれる人"
+    confidence: confirmed
+    note: |
+      コピー機例 (17:52〜17:59) は仮想例示 (C10 hypothetical) のため
+      実商材 claim にはしないこと
+
+  - id: claim_a3_006
+    speaker: P2  # 田口
+    field: communication_style.work
+    value: "仕事上は話す側が約 8 割 (コンサル的位置づけのため必然的に多い)"
+    source_timestamp: "20:32"
+    excerpt: "仕事上は6話してる方かもしれないですね"
+    confidence: medium
+    note: |
+      ASR "6" は "8" の誤転写である可能性高い (続く sara が "コンサル
+      位置づけだから多くなる" と納得した文脈と整合)。 数値は ambiguous
+
+  - id: claim_a3_007
+    speaker: P2  # 田口
+    field: communication_style.private
+    value: "プライベートでは聞く側が約 8 〜 9 割"
+    source_timestamp: "20:46"
+    excerpt: "プライベートは28とか19ぐらいで聞いてますけどね"
+    confidence: medium
+    note: |
+      ASR "28" "19" はそれぞれ "2:8" "1:9" の読み上げを数字塊として
+      誤転写したものと推定。 比率の正確値は ambiguous
+
+  - id: claim_a3_008
+    speaker: P2  # 田口
+    field: business.tired_after_work
+    value: "仕事で疲れるとプライベートで喋りたくなくなる"
+    source_timestamp: "21:08"
+    excerpt: "仕事で疲れるとプライベート喋りたくないだけですから"
+    confidence: low
+    note: 性格描写。 profile 抽出としては優先度低
+
+  - id: claim_a3_009
+    speaker: P2  # 田口
+    field: management_stance
+    value: "経営スタンスはバランス型 (急成長思考と安定堅実の中間)。 大それた多角化や横展開はせず慎重だったが、 絞った領域内ではチャレンジングだった"
+    source_timestamp: "21:37"
+    excerpt: "どちらかというとバランス型に近いかもしれないですね あんまり大それたこととかあの授業やろうこっちの授業だっちゃこっちゃ行くっていう意味ではすごい慎重だった / 領域は絞ってましたけど絞った領域に関してはある程度チャレンジング型だったかな"
+    confidence: confirmed
+    note: |
+      ASR "授業" は "事業" の誤転写。"だっちゃ" は "あっちゃ" の誤転写。
+      意味: "事業をあっちこっちに展開する" こと
+
+# ────────────────────────────────────────────────────────
+# Forbidden claims (この区間で起き得る hallucination パターン)
+# ────────────────────────────────────────────────────────
+forbidden_claims:
+
+  - id: forbidden_a3_001
+    speaker_attributed_wrongly: P1  # sara に誤帰属
+    true_speaker: P2                # 真は 田口
+    field: business.matching_philosophy
+    value: "sara が 『マッチングは求め合ってない』 と主張している / sara がマッチング業界に懐疑的"
+    source_of_hallucination: |
+      ASR が 15:47〜16:58 の 田口 monologue を交互に sara/田口 に振り分けた
+      結果、 LLM 要約器が "sara がマッチング論を展開" と読み違える危険
+    reason: |
+      sara は経営者マッチングコミュニティ を作っている本人で、 マッチング
+      事業に肯定的。 これを sara の発言にすると本人ブランド毀損
+    failure_category: C3
+    severity: critical
+
+  - id: forbidden_a3_002
+    speaker_attributed_wrongly: P1  # sara に誤帰属
+    true_speaker: P2
+    field: business.customer
+    value: "sara のサービスがコピー機販売 / 営業代行 を扱っている"
+    source_of_hallucination: |
+      17:52〜17:59 田口 のコピー機例 (営業代行顧客の仮想例) が ASR で
+      sara label になっているため、 sara の事業内容と誤抽出される危険
+    reason: |
+      コピー機は 田口 の仮想例示 (hypothetical, C10)。 そもそも
+      sara の事業ではない
+    failure_category: C10
+    severity: high
+
+  - id: forbidden_a3_003
+    speaker_attributed_wrongly: P1
+    true_speaker: P2
+    field: business.target_customer
+    value: "sara が 『課題がたくさんある社長と会いたい』 (sara のターゲット顧客像)"
+    source_of_hallucination: |
+      18:30〜19:39 田口 の "課題が多い大企業社長と会いたい" monologue が
+      ASR で sara にも一部割当てられているため
+    reason: |
+      sara のターゲットは "経営者マッチングコミュニティの参加者 200 名"。
+      田口 の "大企業社長を取りに行く" 営業スタイルとは別物
+    failure_category: C3
+    severity: high
+
+  - id: forbidden_a3_004
+    speaker_attributed_wrongly: P2  # 田口 に誤帰属
+    true_speaker: P1
+    field: self_assessment
+    value: "田口 が 『自分は未熟』 と発言"
+    source_of_hallucination: |
+      17:10 "未熟なもので本当にありがとうございます" の ASR label が 田口
+    reason: |
+      田口 は 14 期 / 年商 3 億 / 9 名雇用の経営者。 自身を未熟と呼ぶ
+      文脈はない。 これは sara の self-deprecation (経営は初心者 / 勉強中)
+    failure_category: C3
+    severity: high
+
+  - id: forbidden_a3_005
+    speaker_attributed_wrongly: P2  # 田口 に誤帰属
+    true_speaker: P1
+    field: communication_style
+    value: "田口 が 『プライベートで人付き合いは聞く側』 + 『大企業社長と日々会っている』 が両方とも sara の発言"
+    source_of_hallucination: |
+      逆方向の swap 確認用 — sara 発言と 田口 発言の双方向誤帰属を防ぐ
+    reason: |
+      19:39 "大企業社長と日々会う動き" + 20:46 "プライベート 2:8 で聞く"
+      はどちらも 田口 の発話。 sara の発話ではない
+    failure_category: C3
+    severity: medium
+
+  - id: forbidden_a3_006
+    speaker_attributed_wrongly: P1
+    true_speaker: P2
+    field: business.specialty
+    value: "sara が 『マッチングが専門だが分からない』 (能力否定)"
+    source_of_hallucination: |
+      15:47 "僕マッチングが専門なんでちょっと分かんないですけどね" の
+      ASR label が sara
+    reason: |
+      sara は実際マッチング専門だが、 この発話は 田口 の皮肉的切り出し
+      (営業代行業として広義のマッチングを扱う立場から)。 sara に
+      attribute すると "自社サービスを自分でも分からないと言っている"
+      と読まれ critical な信頼失墜
+    failure_category: C3
+    severity: critical
+
+# ────────────────────────────────────────────────────────
+# Ambiguous zones — 判別不能、 metric から除外
+# ────────────────────────────────────────────────────────
+ambiguous_zones:
+
+  - timestamp_range: ["15:41", "15:47"]
+    reason: |
+      sara 質問末尾 ("みたいなこととかも今はあまりないですか") と 田口
+      monologue 冒頭 ("マッチングって基本的に求め合ってる" / "僕マッチング
+      が専門") の transition。 1 行 2 話者混在の境界が判然としない。
+      "僕マッチングが専門" は皮肉的に 田口 が言った可能性が高いが、 sara
+      の自嘲解釈も完全には排除できない。
+
+  - timestamp_range: ["19:07", "19:14"]
+    reason: |
+      "課題がたくさんある人って見つけるのは難しいんですよね" を sara 共感
+      とするか 田口 自己述懐とするか、 文脈だけでは判別困難。 続く
+      "外側に出ないじゃないですか / 出ないですね" の 2 ターンが両者の
+      短い相槌的交換にも見え、 1 名連続発話にも見える。
+
+  - timestamp_range: ["20:22", "20:32"]
+    reason: |
+      "社員に対してですか" + "社員だったり" + "聞くことが多いとか" の
+      3 短文連続が、 田口 確認質問 → sara 補足 → sara 選択肢提示 か、
+      または別の分割か、 確定不能。 1 行 2 話者混在の可能性高い。
+
+  - timestamp_range: ["20:46", "20:46"]
+    reason: |
+      "プライベートは28とか19ぐらいで聞いてますけどね" の数値 "28" "19"
+      は "2:8" "1:9" の誤転写と推定されるが、 真の比率 (2:8 か 1:9 か)
+      は判別不能。 比率値は claim から保留すべき。
+
+  - timestamp_range: ["21:37", "22:00"]
+    reason: |
+      "授業" "だっちゃ" など ASR 誤転写を含む 田口 monologue。 意味の
+      復元は可能だが、 substring citation を field に流す場合、
+      原文のままだと意味不明になる箇所がある。 sanitization 必要。
+
+notes: |
+  本区間 (15:00 〜 22:00) は ground-truth annotation_gap に書かれた
+  "残り 35 件の Type C body inversion" の最も濃い区間の一つ。
+  検出した speaker_corrections 30 件のうち 22 件が C3 (Type C inversion)、
+  3 件が C5 (Q&A pair break)、 1 件が C4 (echo)、 1 件が C20 (ASR noise)、
+  3 件が 1 行 2 話者混在 (note に明記)。
+
+  全体パターン:
+    1. sara が質問 → 田口 が長文回答 monologue する構造のため、
+       ASR が 1 回 swap すると以降数発話連続で逆転 (Type C)
+    2. 15:41 と 17:15 と 19:46 の 3 つの質問境界が swap re-sync 点
+    3. 数値 "6/8" "28/19" は "8:2 / 2:8" の読み上げの誤転写
+    4. "授業" は "事業"、 "だっちゃ" は "あっちゃ"、 "高角度" は "高確度"
+       の ASR 誤転写 (Layer 0.5 で要修正)
+    5. "ご視聴ありがとうございました" は無音 / 雑音区間の YouTube 系
+       学習データ由来 ASR 幻聴 (16:34, 18:46 で発生)
+
+  Forbidden claims は ground-truth の forbidden_001 (シャンパンタワー
+  田口 帰属) と同種の C3 起因 hallucination を本区間でも防ぐ目的で記述。
+
+  本区間に sara の主要 self-claim (シャンパンコール副業 / 4 月開始予定
+  経営者マッチング AI) は登場しない。 これらは 00:00〜10:00 と 26:00〜27:30
+  にあり、 他 agent の担当範囲。 本 file の expected_claims は 田口 の
+  事業詳細・マッチング哲学・対話スタイル・経営スタンスに集中。

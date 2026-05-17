@@ -1,0 +1,331 @@
+annotator: agent-1
+section: ["00:01", "07:30"]
+analysis_date: 2026-05-16
+
+# ────────────────────────────────────────────────────────
+# Speaker attribution corrections
+# ────────────────────────────────────────────────────────
+# 注: この区間 (00:01-07:30) は sara がサービス概要を説明し、
+# その後インタビュー開始の前置きをする「導入セクション」。
+# 田口 の自己開示 claim はほぼ無く、 speaker swap も
+# back-channel と Q&A pair-break が中心。
+speaker_corrections:
+  - timestamp: "04:19"
+    asr_speaker: sara
+    true_speaker: P2  # 田口
+    utterance_excerpt: "具体的にやることは何なんですか"
+    reason: |
+      直前 (04:09) で「無料モニターがやることは」と尋ねている話者の
+      続きの質問。 host (sara) がモニター業務内容を自分自身に
+      聞く流れは不自然。 guest (田口) がサービス内容を host に
+      確認する Q である。
+    failure_category: C5  # Q&A pair break
+    confidence: high
+
+  - timestamp: "04:22"
+    asr_speaker: 田口 恭平
+    true_speaker: P1  # sara
+    utterance_excerpt: "僕とこうやってお話しするだけです"
+    reason: |
+      「僕と (=ホストの僕と) お話しするだけ」は sara がサービス
+      フローを説明する文言。 田口 が「僕とお話しする」と言うと
+      自分と自分が話す自己言及になり破綻。 末尾の「なるほど」のみ
+      田口 の back-channel 可能性あり (mixed turn)。
+    failure_category: C3  # Block-level inversion (mixed turn)
+    confidence: high
+    note: "末尾「なるほど」は 田口 backchannel の可能性 — 1 行を分割すべき"
+
+  - timestamp: "04:27"
+    asr_speaker: 田口 恭平
+    true_speaker: P1  # sara
+    utterance_excerpt: "これ今ノートテイクみたいなの入ってるんでこれを話をして"
+    reason: |
+      ノートテイク (= tl;dv) を導入運用しているのは host 側 (sara)。
+      田口 視点では「自分の発話が記録される」立場で、 自分から
+      「ノートテイク入ってる」と説明する側ではない。 sara が
+      サービス仕組みを解説する一連の monologue (04:22 → 04:27)。
+    failure_category: C3
+    confidence: high
+
+  - timestamp: "04:48"
+    asr_speaker: 田口 恭平
+    true_speaker: P1  # sara
+    utterance_excerpt: "各その200人の議事録をAIに要はどの人とどの人とどうマッチングしたらいいと思うみたいなものを"
+    reason: |
+      AI に 200 人の議事録を食わせてマッチングするのは sara の
+      システム説明。 田口 がこのロジックを自分の言葉で解説する
+      文脈ではない。 後続 05:00 sara で同じ話題が継続。
+    failure_category: C3
+    confidence: high
+
+  - timestamp: "06:18"
+    asr_speaker: sara
+    true_speaker: P2  # 田口
+    utterance_excerpt: "今から何かあれですか"
+    reason: |
+      「今から何か (始めるの) ですか?」は guest が host の進行
+      意図を確認する問い。 直後 06:19 で 田口 が「僕がインタビューに
+      応じればいいってことですか」と言い直しているのと連続。
+    failure_category: C5  # Q&A pair break
+    confidence: high
+
+  - timestamp: "06:31"
+    asr_speaker: sara
+    true_speaker: P2  # 田口
+    utterance_excerpt: "僕何人目ぐらいですか"
+    reason: |
+      「僕は何人目ですか」はインタビュー被験者 (= 田口) が
+      host (sara) に順番を尋ねる典型的 guest 発話。 sara 側から
+      の自問は文脈的に成立しない。 直後 sara「ちなみに今2人目
+      なんですけど」が回答として整合。
+    failure_category: C5
+    confidence: high
+
+  - timestamp: "07:03"
+    asr_speaker: 田口 恭平
+    true_speaker: P1  # sara
+    utterance_excerpt: "いざ人を集めてそろそろ大丈夫かなってなったのが"
+    reason: |
+      「人を集めて、 そろそろ大丈夫かなとなった」のはサービス
+      ローンチ準備をしている sara 側の事情説明。 06:38 sara
+      monologue (2人目、 無料リスト探し、 交流会経由) の自然な
+      継続で、 07:07 「本当に 1、 2 週間くらい」と sara が締める。
+    failure_category: C3
+    confidence: high
+
+  - timestamp: "07:18"
+    asr_speaker: 田口 恭平
+    true_speaker: P1  # sara
+    utterance_excerpt: "早速なんですけど一つずつ"
+    reason: |
+      「早速ですが、 1つずつ (質問していきますね)」は質問する
+      側 (= sara) の前置き。 直後 07:21 sara「簡単な質問ですけど
+      よろしいですか」「一番最初なんですけども会社名と事業内容を」
+      で実際に質問開始する流れと連続。
+    failure_category: C5
+    confidence: high
+
+# ────────────────────────────────────────────────────────
+# Expected claims (00:01-07:30 で抽出されるべき真の claim)
+# ────────────────────────────────────────────────────────
+# 注: この区間で発話された claim は ほぼすべて sara 側 (host) の
+# サービス説明。 田口 の自己開示 claim は 07:30 以降 (会社名以降)
+# で本格的に始まる。
+expected_claims:
+  - id: claim_001
+    speaker: P1
+    field: business.product
+    value: 経営者マッチングコミュニティ (AI ベース、 ヒアリング → 文字起こし → DB → AI マッチング)
+    source_timestamp: "00:32"
+    excerpt: "経営者のマッチングコミュニティ ... AIで全部まとめて文字起こしして内容を予約してくれっていうデータベース"
+    confidence: confirmed
+
+  - id: claim_002
+    speaker: P1
+    field: business.timeline
+    value: 4 月にサービス開始予定 (本会議時点基準)
+    source_timestamp: "00:32"
+    excerpt: "今 4 月を目処に動いてる"
+    confidence: confirmed
+    note: "C18 (time-relative numeric) — 発話日 freeze 必要"
+
+  - id: claim_003
+    speaker: P1
+    field: business.acquisition_target
+    value: 200 社程度の無料モニター募集中
+    source_timestamp: "00:32"
+    excerpt: "今の段階で200社ぐらいの方に ... 無料で登録していただける"
+    confidence: confirmed
+
+  - id: claim_004
+    speaker: P1
+    field: business.parent_program
+    value: 駆け出し経営者支援サービスの最終段階 (マッチング機能) として位置付け
+    source_timestamp: "02:29"
+    excerpt: "駆け出しの何したらいいかわからないスキルがないとか そういう方々たちの支援をするための一貫のサービスプラン ... 最終段階これを使っていろんな人とマッチング"
+    confidence: high
+
+  - id: claim_005
+    speaker: P1
+    field: business.process
+    value: ヒアリングシート (必須質問) を AI に食わせてマッチング
+    source_timestamp: "05:00"
+    excerpt: "ヒアリングシートになるものが ... マッチング段階で必ず聞いておかないといけないものがある"
+    confidence: confirmed
+
+  - id: claim_006
+    speaker: P1
+    field: business.progress
+    value: 本日が 2 人目のヒアリング、 残り 1〜2 週間でローンチ準備完了見込み
+    source_timestamp: "06:38"
+    excerpt: "ちなみに今 2 人目なんですけど ... 本当に 1、 2 週間くらい"
+    confidence: confirmed
+
+  - id: claim_007
+    speaker: P1
+    field: business.acquisition_channel
+    value: 直近の交流会で無料モニター候補を集めた
+    source_timestamp: "06:38"
+    excerpt: "無料リストでお願いできる人を探そうってなって ... 一番最初に足を運んだらこの間の交流を"
+    confidence: high
+
+  - id: claim_008
+    speaker: P2
+    field: meta.late_entry
+    value: 入室が遅れた (会議冒頭)
+    source_timestamp: "00:18"
+    excerpt: "すいません入室ちょっと遅れちゃった"
+    confidence: confirmed
+    note: "プロフィール抽出対象 field ではないが speaker 同定の anchor"
+
+# ────────────────────────────────────────────────────────
+# Forbidden claims (危険な誤抽出パターン)
+# ────────────────────────────────────────────────────────
+forbidden_claims:
+  - id: forbidden_001
+    speaker_attributed_wrongly: P2  # 田口
+    true_speaker: P1                # sara
+    field: business.industry_main
+    value: 営業代行
+    reason: |
+      05:49 の 田口 ラベル発話「営業代行やってますとかって言った時に
+      他の人たちは売り上げ上げたいから ...」は、 sara が AI マッチング
+      の動作を「仮の自己紹介例」として説明している文脈の可能性が高い
+      (但し ambiguous_zones 参照)。 もしこれを田口の self-introduction
+      として抽出すると、 業種フィールドが「営業代行」で確定するが、
+      これは本来 田口 の 07:30 以降の発話 (「ラフメーカー株式会社 ...
+      営業代行」) で確定すべき claim。 source を 05:49 から取ると
+      grounding が脆く、 sara monologue の引用パターン (C12 quotation
+      embedding) に該当する可能性。
+    failure_category: C12
+    severity: high
+    note: |
+      "田口 = 営業代行" は事実だが、 source 選択を誤るとロジックが
+      崩れる。 07:30 以降の self-introduction を grounding source に
+      使うべき。
+
+  - id: forbidden_002
+    speaker_attributed_wrongly: P1  # sara
+    true_speaker: P2                # 田口
+    field: business.product
+    value: ノートテイク / 文字起こしツール
+    reason: |
+      04:27 の「これ今ノートテイクみたいなの入ってるんで」は sara が
+      tl;dv (ノートテイク) を運用説明している発話だが、 ASR では 田口 に
+      ラベルされている。 これを naive に抽出すると「田口 がノートテイク
+      ツール業」のような誤 claim を生成し得る。 さらに sara 側にも
+      「ノートテイクが自社プロダクト」と誤って書かれる危険あり (sara の
+      プロダクトはマッチング community であってノートテイクは外部 tool)。
+    failure_category: C8
+    severity: medium
+
+  - id: forbidden_003
+    speaker_attributed_wrongly: P2  # 田口
+    true_speaker: P1                # sara
+    field: business.scale
+    value: 顧客数 200 名 / 200 社規模
+    reason: |
+      00:32 sara monologue の「200 社ぐらいの方に ... 登録」を、 もし
+      04:48 周辺の swap (田口 ラベルの AI 議事録説明) と混線して
+      抽出すると、 「田口 が 200 名規模の顧客を持つ」誤 claim が
+      生成され得る。 200 という数字は sara の無料モニター目標値で
+      あって 田口 の顧客数ではない。
+    failure_category: C11  # Third-party claim leakage
+    severity: high
+
+  - id: forbidden_004
+    speaker_attributed_wrongly: P2
+    true_speaker: P1
+    field: business.product
+    value: 経営者マッチング AI / AI マッチングシステム
+    reason: |
+      04:22-04:48 の 4 連続 swap ブロック (sara monologue が 田口 に
+      誤ラベル) を放置すると、 田口 の事業が「経営者向け AI マッチング」
+      に誤帰属される。 本 eval の象徴的 hallucination の一つ (sara の
+      事業を guest に擦り付けるパターン)。
+    failure_category: C3
+    severity: critical
+
+# ────────────────────────────────────────────────────────
+# Ambiguous zones — 注釈不能 / 別解釈あり
+# ────────────────────────────────────────────────────────
+ambiguous_zones:
+  - timestamp_range: ["00:09", "00:11"]
+    reason: |
+      "こうやってくれるといただいて嬉しいです" の話者帰属が文脈だけ
+      では決まらない。 host (sara) が来訪を喜ぶ言葉とも、 guest
+      (田口) が招かれた感謝とも読める。 影響は小さいので保留。
+
+  - timestamp_range: ["00:31", "00:32"]
+    reason: |
+      00:31「簡単に」(田口) と 00:32「簡単に言うと」(sara) が
+      連続するが、 同じ話者が言い直した可能性、 もしくは 田口 の
+      促し → sara の応答、 どちらの解釈もある。
+
+  - timestamp_range: ["02:19", "02:25"]
+    reason: |
+      "感じなんですけども大丈夫ですから" "いいですよ" "中身みたいな
+      資料とかはあるんですか" の 3 連発が短く、 各 1 文がどちらの
+      話者かを単独で確定困難。 sara の質問依頼 → 田口 の OK →
+      田口 の質問、 という流れが自然だが、 02:24 sara「いいですよ」が
+      おそらく 田口 の「いいですよ」(質問されることへの同意) と
+      swap している可能性あり。
+
+  - timestamp_range: ["03:44", "04:03"]
+    reason: |
+      "特に資料がないんですよ" (sara の発言寄り) + "別に無料でも
+      有料でも中身が分かれば全然大丈夫" + "どんな内容なのか
+      あんまりイメージできてなくて" (田口 の感想) + "本当ですか"
+      が 1 タイムスタンプに圧縮された mixed turn。 分割境界が
+      acoustic 情報なしでは確定不能。
+
+  - timestamp_range: ["05:47", "06:05"]
+    reason: |
+      「営業代行やってますとかって言った時に ... その方と僕が
+      会うんじゃないか」(05:49) が、 (a) sara が AI マッチングの
+      動作を 田口 の業種を例に説明している、 (b) 田口 が自分の
+      立場で例示している、 のどちらかを文脈だけで決められない。
+      tl;dv は (b) で割り当てているが、 直前直後の話題進行は
+      (a) と整合的。 ⚠️ ここは 田口 の self-introduction source
+      として「使うべきではない」(forbidden_001 参照)。
+
+# ────────────────────────────────────────────────────────
+# Notes — sara review 推奨ポイント
+# ────────────────────────────────────────────────────────
+notes: |
+  ## 区間の概観
+  00:01-07:30 は「サービス説明 + インタビュー導入」の前置きセクション。
+  田口 側からの自己開示 claim は実質ゼロで、 ほぼ全 claim が sara
+  (host) のサービス説明に集中する。 そのため speaker swap の
+  影響は「田口 プロフィール field の誤汚染」という形で出やすい
+  (forbidden_001〜004 参照)。
+
+  ## 確信を持って訂正した swap (8 件)
+  - 04:19 (sara→田口 への質問) … Q&A break
+  - 04:22, 04:27, 04:48 … sara monologue が 田口 にずれる 3 連 (C3 block)
+  - 06:18, 06:31 (田口 → host 質問) … Q&A break
+  - 07:03 (sara monologue 継続) … C3 単発
+  - 07:18 (sara のインタビュー前置き) … C5
+
+  ## 怪しかったが訂正を保留したもの
+  - 02:19-02:25 周辺は短い turn が密集し、 02:24 sara「いいですよ」が
+    田口 のものである可能性が高いが、 別解釈もあり ambiguous_zones に。
+  - 03:44 mixed turn は「資料の有無」を sara が説明 + 田口 が感想、 と
+    読めるが分割点が不明確。
+  - 05:49 「営業代行やってます」発話は、 田口 の self-introduction と
+    読むか sara の例示と読むかで extraction 結果が大きく変わる。
+    sara 本人の確認が必須。
+
+  ## sara review 推奨ポイント
+  1. 05:49 「営業代行やってますとかって言った時に」は sara の例示
+     monologue か、 田口 の self-introduction か。 → forbidden_001 の
+     扱いが変わる。
+  2. 02:24 sara「いいですよ」は実際には 田口 の「いいですよ」では
+     ないか。
+  3. 04:22-04:48 の 4 連 swap (C3 block) は、 ground-truth の
+     25:24 / 25:35 と同じ「sara monologue が長く 田口 にずれ込む」
+     パターン。 25:24 と並んで Layer 2++ 検出評価の primary test
+     case にすべき。
+  4. expected_claims は意図的に conservative。 「実用段階」「予約」
+     「相性がいい」など意味不確定語 (ASR 誤変換含む可能性) は
+     抽出から除外した。

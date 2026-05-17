@@ -1,0 +1,1068 @@
+# Agent-2 annotation for meeting-001, section 07:30–15:00
+#
+# Source transcript: ../transcripts/meeting-001.txt
+# failure-modes:    ../failure-modes.yaml (C1–C20)
+# Reference:        ../ground-truth/meeting-001.yaml (schema)
+#
+# 確定事実 (担当範囲外でも判断根拠として使用):
+#   - 参加者は P1=sara (host, 経営者マッチング AI 創業者) と P2=田口恭平 (guest) の 2 人だけ
+#   - sara は質問する側 (interviewer)、 田口 は答える側 (interviewee)
+#   - 田口 は ラフメーカー株式会社 代表、 経営者層トップダウン型の 営業代行 が主業
+#   - sara には副業として シャンパンタワー 用 シャンパンコール 制作 (out-of-scope だが判断根拠)
+#   - 田口 はタバコ非喫煙者 (28:15 — out-of-scope)
+#
+# 本担当 (07:30–15:00) は HEARING_SCHEMA 構造化質問の本体部:
+#   ① 会社名 / 事業内容  ② 年収  ③ 従業員数  ④ ビジネスモデル
+#   ⑤ 収益モデル / 単価レンジ  ⑥ 主な実績カテゴリ  ⑦ 自信があるテーマ
+#   ⑧ 悩み (15:00 直前で導入のみ)
+#
+# 07:30–15:00 の特徴:
+#   tl;dv の話者ラベルが 1 タイムスタンプ毎に sara/田口 を機械的に交互スイッチ
+#   している節があり、 1 行内に複数話者が連結された "mixed line" が多発。
+#   典型的な C3 (block-level inversion) + C20 (句読点欠落) の合わせ技。
+
+annotator: agent-2
+section: ["07:30", "15:00"]
+analysis_date: 2026-05-16
+
+# ────────────────────────────────────────────────────────
+# Speaker attribution corrections
+#   - asr_speaker:  tl;dv が付けたラベル
+#   - true_speaker: 正しい話者 (P1=sara / P2=田口)
+#   - 1 行内に両話者混在の場合は split_suggestion を付記
+# ────────────────────────────────────────────────────────
+speaker_corrections:
+
+  # ── ①会社名 / 事業内容 (Q1) ──────────────────────────
+  - timestamp: "07:21"
+    asr_speaker: sara
+    true_speaker: P1
+    utterance_excerpt: "簡単な質問ですけどよろしいですか... 会社名と事業内容を"
+    reason: |
+      sara が構造化質問 (Q1) を開始する流れ。 ラベル一致。
+      (補正不要だが、 次行の swap を理解するために記載)
+    failure_category: null
+    confidence: high
+    correction_needed: false
+
+  - timestamp: "07:32"
+    asr_speaker: 田口 恭平
+    true_speaker: P1
+    utterance_excerpt: "一言で簡単に教えていただいてもよろしいですか"
+    reason: |
+      直前 07:21 sara の質問 (Q1) の続き。 「教えていただいてもよろしいですか」は
+      interviewer (sara) の依頼表現で、 自己紹介を求められた側 (田口) の表現
+      ではない。 1 ターン丸ごと swap。
+    failure_category: C5
+    confidence: high
+
+  - timestamp: "07:37"
+    asr_speaker: sara
+    true_speaker: P2
+    utterance_excerpt: "ちょっと途切れちゃった"
+    reason: |
+      回線途切れに対する報告。 後続 07:37 田口ラベル発話冒頭の
+      「何を教えてもいいですか すいません 会社名と事業内容を…」と
+      ペアで読めば、 「途切れた」 ↔ 「何を教えれば？ すみません」の自然な
+      Q&A 接続になる。 つまり 「途切れた」 は 田口 側の発話。
+      ※ 但し別解釈 (sara が自分の声が途切れたことを詫びている) も
+      ありうるため confidence は medium。
+    failure_category: C1
+    confidence: medium
+
+  - timestamp: "07:37"
+    asr_speaker: 田口 恭平
+    true_speaker: mixed
+    utterance_excerpt: "何を教えてもいいですか… 会社名と事業内容を… ラフメーカー株式会社の田口と申しまして 事業内容は経営者層のトップダウン型で"
+    reason: |
+      1 行に 2 話者が連結。
+      前半 「何を教えてもいいですか すいません 会社名と事業内容を一言で
+      簡単な感じで大丈夫ですので教えていただいてよろしいですか」 = P1 sara が
+      再度 Q1 を言い直している (途切れリカバリ)。
+      後半 「ラフメーカー株式会社の田口と申しまして 事業内容は経営者層の
+      トップダウン型で」 = P2 田口 の自己紹介回答。
+      C3 (block-level) + C20 (句読点無し) の典型例。
+    failure_category: C3
+    confidence: high
+    split_suggestion:
+      - speaker: P1
+        excerpt: "何を教えてもいいですか すいません 会社名と事業内容を一言で簡単な感じで大丈夫ですので教えていただいてよろしいですか"
+      - speaker: P2
+        excerpt: "ラフメーカー株式会社の田口と申しまして 事業内容は経営者層のトップダウン型で"
+
+  - timestamp: "07:58"
+    asr_speaker: sara
+    true_speaker: mixed
+    utterance_excerpt: "営業代行するみたいな そういうことをやっています わかりました ありがとうございます いいですね なるほど はい そしたら次なんですけども"
+    reason: |
+      前半 「営業代行するみたいな そういうことをやっています」 = P2 田口 の
+      Q1 回答の続き (07:37 後半からの連続)。
+      後半 「わかりました ありがとうございます いいですね なるほど はい
+      そしたら次なんですけども」 = P1 sara が受けて Q2 へ遷移。
+    failure_category: C3
+    confidence: high
+    split_suggestion:
+      - speaker: P2
+        excerpt: "営業代行するみたいな そういうことをやっています"
+      - speaker: P1
+        excerpt: "わかりました ありがとうございます いいですね なるほど はい そしたら次なんですけども"
+
+  # ── ②年収 (Q2) ─────────────────────────────────────
+  - timestamp: "08:09"
+    asr_speaker: 田口 恭平
+    true_speaker: mixed
+    utterance_excerpt: "年収規模を簡単に教えていただいてもよろしいですか はい 年収のことです"
+    reason: |
+      前半 「年収規模を簡単に教えていただいてもよろしいですか」 = P1 sara の Q2。
+      後半 「はい 年収のことです」 = P2 田口 が質問内容を確認 (もしくは
+      sara の補足だが、 直後の 08:15 で「年収は大体3億ぐらいです」と回答に
+      入る流れから、 田口 の確認発話と読む方が自然)。
+    failure_category: C5
+    confidence: high
+    split_suggestion:
+      - speaker: P1
+        excerpt: "年収規模を簡単に教えていただいてもよろしいですか"
+      - speaker: P2
+        excerpt: "はい 年収のことです"
+
+  - timestamp: "08:15"
+    asr_speaker: sara
+    true_speaker: mixed
+    utterance_excerpt: "はい 年収は大体3億ぐらいです 3億ちょっとぐらいですかね ありがとうございます 次が従業員数なんですけども こちらは業務委託は含まずに"
+    reason: |
+      前半 「はい 年収は大体3億ぐらいです 3億ちょっとぐらいですかね」 =
+      P2 田口 が Q2 に回答 (回答者は田口で確定。 sara は host で「自分の
+      年収を聞かれている側」ではない)。
+      後半 「ありがとうございます 次が従業員数なんですけども こちらは
+      業務委託は含まずに」 = P1 sara が Q3 へ遷移。
+    failure_category: C3
+    confidence: high
+    split_suggestion:
+      - speaker: P2
+        excerpt: "はい 年収は大体3億ぐらいです 3億ちょっとぐらいですかね"
+      - speaker: P1
+        excerpt: "ありがとうございます 次が従業員数なんですけども こちらは業務委託は含まずに"
+
+  # ── ③従業員数 (Q3) ─────────────────────────────────
+  - timestamp: "08:30"
+    asr_speaker: 田口 恭平
+    true_speaker: P1
+    utterance_excerpt: "実際に雇用されている方の人数だけで教えていただきたいんですけど 大体何人ぐらい"
+    reason: |
+      Q3 の本体。 「教えていただきたいんですけど」 は interviewer (sara) の
+      依頼表現。 直前 08:15 後半 sara monologue の連続。
+    failure_category: C5
+    confidence: high
+
+  - timestamp: "08:34"
+    asr_speaker: sara
+    true_speaker: P2
+    utterance_excerpt: "役員は含めますか"
+    reason: |
+      回答者 田口 が「役員はカウントに含めるか？」と質問返し。 これは
+      interviewee 側の確認。 host (sara) が自社の従業員カウント方針を
+      逆質問することは構造上ありえない (sara は質問側)。
+    failure_category: C5
+    confidence: high
+
+  - timestamp: "08:39"
+    asr_speaker: 田口 恭平
+    true_speaker: mixed
+    utterance_excerpt: "役員は含めなくて大丈夫です 正社員かアルバイトの方ぐらいの感じ"
+    reason: |
+      08:34 の問い返しに対する回答。 「役員は含めなくて大丈夫です
+      正社員かアルバイトの方ぐらいの感じ」 = P1 sara が条件指定 (interviewer
+      が回答粒度を指定する典型動作)。 続く 08:46 で再確認のラリーが
+      行われるため、 ここは sara 一色と判断。
+    failure_category: C5
+    confidence: high
+
+  - timestamp: "08:46"
+    asr_speaker: sara
+    true_speaker: mixed
+    utterance_excerpt: "正社員かアルバイトを入れるんですか 入れても大丈夫です 正社員とアルバイト含めての数で"
+    reason: |
+      前半 「正社員かアルバイトを入れるんですか」 = P2 田口 の再確認。
+      後半 「入れても大丈夫です 正社員とアルバイト含めての数で」 =
+      P1 sara の回答。
+    failure_category: C3
+    confidence: high
+    split_suggestion:
+      - speaker: P2
+        excerpt: "正社員かアルバイトを入れるんですか"
+      - speaker: P1
+        excerpt: "入れても大丈夫です 正社員とアルバイト含めての数で"
+
+  - timestamp: "08:52"
+    asr_speaker: 田口 恭平
+    true_speaker: mixed
+    utterance_excerpt: "役員さんの数が なるほど"
+    reason: |
+      「役員さんの数が」 = 田口 の思考発話 (条件を整理中)。
+      「なるほど」 = sara の相槌可能性もあるが、 田口 の自己納得発話
+      とも読める。 1 行内別話者の可能性は中程度。
+    failure_category: C4
+    confidence: low
+
+  - timestamp: "08:57"
+    asr_speaker: sara
+    true_speaker: P2
+    utterance_excerpt: "じゃあ僕と役員もう1名いるんですけど"
+    reason: |
+      自社の役員構成を述べているのは田口本人。 sara は host で、 自社
+      構成を Q3 (相手社員数) の文脈で語ることはない。 「僕と役員もう
+      1 名いる」 = 田口 の会社 (ラフメーカー) の構造説明。
+    failure_category: C5
+    confidence: high
+
+  - timestamp: "08:58"
+    asr_speaker: 田口 恭平
+    true_speaker: mixed
+    utterance_excerpt: "これ抜いた方がいいってことですね はい そうです これ抜くと9名ですね 11名いるんで ごめんなさい 正社員が9名いるからあと残りにアルバイトと業務委託が7,8人ぐらいいるんで"
+    reason: |
+      前半 「これ抜いた方がいいってことですね」 = P1 sara が確認。
+      「はい そうです」 = P2 田口 の同意。
+      「これ抜くと9名ですね 11名いるんで ごめんなさい 正社員が9名いる
+      からあと残りにアルバイトと業務委託が7,8人ぐらいいるんで」 =
+      P2 田口 の従業員数回答。 連続の長い発話で C3 + C20。
+    failure_category: C3
+    confidence: high
+    split_suggestion:
+      - speaker: P1
+        excerpt: "これ抜いた方がいいってことですね"
+      - speaker: P2
+        excerpt: "はい そうです これ抜くと9名ですね 11名いるんで ごめんなさい 正社員が9名いるからあと残りにアルバイトと業務委託が7,8人ぐらいいるんで"
+
+  - timestamp: "09:12"
+    asr_speaker: sara
+    true_speaker: mixed
+    utterance_excerpt: "20名弱ぐらいです 全部 わかりました ありがとうございます ビジネスモデルはさっきなんだ"
+    reason: |
+      前半 「20名弱ぐらいです 全部」 = P2 田口 が合計を提示 (08:58 の続き)。
+      後半 「わかりました ありがとうございます ビジネスモデルはさっきなんだ」
+      = P1 sara が Q4 へ遷移。
+    failure_category: C3
+    confidence: high
+    split_suggestion:
+      - speaker: P2
+        excerpt: "20名弱ぐらいです 全部"
+      - speaker: P1
+        excerpt: "わかりました ありがとうございます ビジネスモデルはさっきなんだ"
+
+  # ── ④ビジネスモデル (Q4) ────────────────────────────
+  - timestamp: "09:22"
+    asr_speaker: 田口 恭平
+    true_speaker: P2
+    utterance_excerpt: "B2Bといった感じですね"
+    reason: |
+      田口 の Q4 回答。 ラベル一致。 (補正不要)
+    failure_category: null
+    confidence: high
+    correction_needed: false
+
+  - timestamp: "09:25"
+    asr_speaker: sara
+    true_speaker: P1
+    utterance_excerpt: "経営者とのビジネスマッチングをしながら営業代行するという感じですかねなるほど"
+    reason: |
+      sara が田口の事業を要約 (Q4 の確認)。 ラベル一致。
+    failure_category: null
+    confidence: high
+    correction_needed: false
+
+  # ── ⑤収益モデル (Q5) ───────────────────────────────
+  - timestamp: "09:31"
+    asr_speaker: 田口 恭平
+    true_speaker: mixed
+    utterance_excerpt: "そうすると収益モデルとしてはどんな感じになりますか 収益モデルはシンプルに年間で300万円もらってます"
+    reason: |
+      前半 「そうすると収益モデルとしてはどんな感じになりますか」 =
+      P1 sara の Q5 質問。
+      後半 「収益モデルはシンプルに年間で300万円もらってます」 =
+      P2 田口 の回答。
+    failure_category: C3
+    confidence: high
+    split_suggestion:
+      - speaker: P1
+        excerpt: "そうすると収益モデルとしてはどんな感じになりますか"
+      - speaker: P2
+        excerpt: "収益モデルはシンプルに年間で300万円もらってます"
+
+  - timestamp: "09:41"
+    asr_speaker: sara
+    true_speaker: P1
+    utterance_excerpt: "月換算すると25万円ぐらいかな 年間で300万円もらって営業代行をお手伝いするという"
+    reason: |
+      sara が田口の回答を要約・換算。 ラベル一致。
+    failure_category: null
+    confidence: high
+    correction_needed: false
+
+  - timestamp: "09:52"
+    asr_speaker: 田口 恭平
+    true_speaker: mixed
+    utterance_excerpt: "成果報酬型ですかね 成果報酬じゃないんですけど"
+    reason: |
+      前半 「成果報酬型ですかね」 = P1 sara の推測質問。
+      後半 「成果報酬じゃないんですけど」 = P2 田口 の否定。
+    failure_category: C3
+    confidence: high
+    split_suggestion:
+      - speaker: P1
+        excerpt: "成果報酬型ですかね"
+      - speaker: P2
+        excerpt: "成果報酬じゃないんですけど"
+
+  - timestamp: "09:56"
+    asr_speaker: sara
+    true_speaker: mixed
+    utterance_excerpt: "年間で300万円もらうんですけど あらりの利益ベースで600万円以上保証しますっていう内容になってるんですよ ああ、なるほど。ありがとうございます。"
+    reason: |
+      前半 「年間で300万円もらうんですけど あらりの利益ベースで
+      600万円以上保証しますっていう内容になってるんですよ」 = P2 田口 の
+      契約内容説明 (粗利保証スキーム)。
+      後半 「ああ、なるほど。ありがとうございます。」 = P1 sara の相槌。
+    failure_category: C3
+    confidence: high
+    split_suggestion:
+      - speaker: P2
+        excerpt: "年間で300万円もらうんですけど あらりの利益ベースで600万円以上保証しますっていう内容になってるんですよ"
+      - speaker: P1
+        excerpt: "ああ、なるほど。ありがとうございます。"
+
+  # ── ⑤'単価レンジ (Q5 補足) ─────────────────────────
+  - timestamp: "10:14"
+    asr_speaker: 田口 恭平
+    true_speaker: P1
+    utterance_excerpt: "清水さん、B to Bのタンカー付帯とかあります?"
+    reason: |
+      「清水さん」 は tl;dv が呼びかけを誤転写したものと推定 (「じゃあ」
+      や 田口さん の音韻誤り)。 重要なのは 「B to B のタンカー (単価) 付帯
+      とかあります?」 という質問で、 これは interviewer (sara) が
+      ticket size を確認している。 田口 が自社単価を自問する文脈
+      ではない。
+    failure_category: C5
+    confidence: high
+    note: |
+      "清水さん" は呼びかけ誤転写。 "タンカー" は "単価" の誤転写。
+
+  - timestamp: "10:21"
+    asr_speaker: sara
+    true_speaker: P2
+    utterance_excerpt: "まああんまり安いのやらないですよね 600万円分のそのあらり保証しないと なので100万円6本とかそういうのは全然いいんですけど"
+    reason: |
+      自社の受注単価レンジを説明している = 田口 (受注する側)。
+      「600万円分の粗利保証」は 09:56 田口 発話との一貫性あり。
+      sara 側 (マッチングコミュニティ) に「100万円6本」のような受注
+      パターンは無い。
+    failure_category: C5
+    confidence: high
+
+  - timestamp: "10:30"
+    asr_speaker: 田口 恭平
+    true_speaker: mixed
+    utterance_excerpt: "6万円100本とかだと動きが大変になっちゃうんで 確かにそうでおっしゃると思うんですね"
+    reason: |
+      前半 「6万円100本とかだと動きが大変になっちゃうんで」 =
+      P2 田口 の単価説明続き。
+      後半 「確かにそうでおっしゃると思うんですね」 = P1 sara の
+      同意相槌。
+    failure_category: C3
+    confidence: high
+    split_suggestion:
+      - speaker: P2
+        excerpt: "6万円100本とかだと動きが大変になっちゃうんで"
+      - speaker: P1
+        excerpt: "確かにそうでおっしゃると思うんですね"
+
+  - timestamp: "10:36"
+    asr_speaker: sara
+    true_speaker: P2
+    utterance_excerpt: "ある程度高単価なものを基本的にはお客様としては取ってますね"
+    reason: |
+      田口 が自社の顧客単価方針を述べる発話。 sara は質問側。
+    failure_category: C5
+    confidence: high
+
+  - timestamp: "10:42"
+    asr_speaker: 田口 恭平
+    true_speaker: mixed
+    utterance_excerpt: "平均で月額で言うとこれぐらいみたいなのあります? いやー 平均分かんないなバラバラすけどね まあでもどうなんでしょうね 100万円"
+    reason: |
+      前半 「平均で月額で言うとこれぐらいみたいなのあります?」 =
+      P1 sara の単価平均質問。
+      後半 「いやー 平均分かんないなバラバラすけどね まあでもどう
+      なんでしょうね 100万円」 = P2 田口 の回答 (バラバラ／約 100 万円)。
+    failure_category: C3
+    confidence: high
+    split_suggestion:
+      - speaker: P1
+        excerpt: "平均で月額で言うとこれぐらいみたいなのあります?"
+      - speaker: P2
+        excerpt: "いやー 平均分かんないなバラバラすけどね まあでもどうなんでしょうね 100万円"
+
+  - timestamp: "10:51"
+    asr_speaker: sara
+    true_speaker: mixed
+    utterance_excerpt: "まあそのサブスカみたいなものもあるんですよ 月額10万円で1年間で100万円くれたとか… まあでも100万ぐらいになるんですかね わかりました。ありがとうございます。 僕自体は経営としてはすごい初心者なんで、聞かせていただく内容を僕はちょっとあらかじめいろいろ調べて勉強してきたんですけど、すごいですね。ありがとうございます。ここから主な実績の方を聞いていきたいんですけども、… 実績のカテゴリーみたいなのって言葉できるものがありますか"
+    reason: |
+      非常に長い 1 行で、 明確に 2 話者にまたがる。
+      前半 「まあそのサブスカみたいなものもあるんですよ 月額10万円で
+      1年間で100万円くれたとか サブスカのものもあるんでちょっと
+      まあ単価で言うと分かんないですけどね まあでも100万ぐらいに
+      なるんですかね」 = P2 田口 (自社のサブスク収益形態を説明)。
+      後半 「わかりました。ありがとうございます。 僕自体は経営としては
+      すごい初心者なんで… ここから主な実績の方を聞いていきたい… 実績の
+      カテゴリーみたいなのって言葉できるものがありますか」 = P1 sara
+      (「経営としては初心者」 は host sara の自己卑下。 田口 は 14 期目の
+      経営者なので "初心者" は文脈矛盾。 また Q6 への遷移を行うのは
+      interviewer のみ)。
+      C3 + C20 の代表的な大型混合行。
+    failure_category: C3
+    confidence: high
+    split_suggestion:
+      - speaker: P2
+        excerpt: "まあそのサブスカみたいなものもあるんですよ 月額10万円で1年間で100万円くれたとか サブスカのものもあるんでちょっと まあ単価で言うと分かんないですけどね まあでも100万ぐらいになるんですかね"
+      - speaker: P1
+        excerpt: "わかりました。ありがとうございます。 僕自体は経営としてはすごい初心者なんで、聞かせていただく内容を僕はちょっとあらかじめいろいろ調べて勉強してきたんですけど、すごいですね。ありがとうございます。ここから主な実績の方を聞いていきたいんですけども、えーっとですね、実績の自分がはっきりこうですって言える実績のカテゴリーみたいなのって言葉できるものがありますか"
+
+  # ── ⑥主な実績カテゴリ (Q6) ─────────────────────────
+  - timestamp: "11:46"
+    asr_speaker: 田口 恭平
+    true_speaker: mixed
+    utterance_excerpt: "例えば売上成長とか資金調達とか 全然ありますよ ウェブだのね"
+    reason: |
+      前半 「例えば売上成長とか資金調達とか」 = P1 sara が
+      categories の例を提示。
+      後半 「全然ありますよ ウェブだのね」 = P2 田口 が肯定し、
+      自社が扱うカテゴリ列挙を開始。
+    failure_category: C3
+    confidence: high
+    split_suggestion:
+      - speaker: P1
+        excerpt: "例えば売上成長とか資金調達とか"
+      - speaker: P2
+        excerpt: "全然ありますよ ウェブだのね"
+
+  - timestamp: "11:55"
+    asr_speaker: sara
+    true_speaker: P2
+    utterance_excerpt: "ホームページとかLPとか映像制作作りますみたいな"
+    reason: |
+      田口 のカテゴリ列挙の続き (Web 系)。 直後 11:58 の "クリエイティブの
+      会社さんとか…" と一連のリスト。 sara がカテゴリを列挙する意味は
+      文脈上ない (sara はマッチングコミュニティの host で、 田口 の
+      実績カテゴリを代弁する立場ではない)。
+    failure_category: C5
+    confidence: medium
+
+  - timestamp: "11:58"
+    asr_speaker: 田口 恭平
+    true_speaker: P2
+    utterance_excerpt: "クリエイティブの会社さんとか あと営業コンサルの会社さんとか あと保険とかも扱ってるようなFPさんとか あと補助金とか助成金とかの申請会社さんとか"
+    reason: |
+      田口 のカテゴリ列挙の本流。 ラベル一致。
+    failure_category: null
+    confidence: high
+    correction_needed: false
+
+  - timestamp: "12:13"
+    asr_speaker: sara
+    true_speaker: P2
+    utterance_excerpt: "あと経営者団体とかに人を紹介してくれみたいな団体とか"
+    reason: |
+      11:58 田口 の列挙の続き。 リスト中に sara が割り込む意味は無く、
+      接続詞 「あと」 で 田口 が列挙を継続している。
+    failure_category: C5
+    confidence: high
+
+  - timestamp: "12:18"
+    asr_speaker: 田口 恭平
+    true_speaker: P2
+    utterance_excerpt: "あとは節税系の商品とか あと経費削減"
+    reason: |
+      田口 のカテゴリ列挙の続き。 ラベル一致。
+    failure_category: null
+    confidence: high
+    correction_needed: false
+
+  - timestamp: "12:23"
+    asr_speaker: sara
+    true_speaker: P2
+    utterance_excerpt: "電気代落としたいだろうなんだろうみたいなやつとか"
+    reason: |
+      12:18 経費削減 の具体例を述べる発話。 リストの流れは 田口 が
+      自社の顧客タイプを羅列している場面で、 sara が顧客例を提示する
+      立場ではない。
+    failure_category: C5
+    confidence: medium
+
+  - timestamp: "12:26"
+    asr_speaker: 田口 恭平
+    true_speaker: P2
+    utterance_excerpt: "あと最近だとSNSの運用代行とかね"
+    reason: |
+      田口 のカテゴリ列挙の最後。 ラベル一致。
+    failure_category: null
+    confidence: high
+    correction_needed: false
+
+  - timestamp: "12:30"
+    asr_speaker: sara
+    true_speaker: mixed
+    utterance_excerpt: "なんかいろいろ本当にマッチマチですいろんな商材がある感じです すごい豊富な詳細ですね ありがとうございます ここからマッチングしたときの… 過去に他の経営者さんから相談されたり感謝されたテーマ どういう意味ですか? お客さんってことですか? お客さんではなく、お客さんに経営者の方もいらっしゃると思うんですけども、自分の周りとかでも経営者の方から個人的にこういうことでとか相談されたりとか、何か自分がしたことによって感謝されたこととかってありますか? どうなんでしょうね。サービスの提供以外でってことですよね。でも僕自身は、もともと広告代理店とかでマーケティングやってた人間なので、売り方の相談とか、そういうのをお聞きいただいたときに、いろいろアドバイス差し上げて喜んでいただけるケースありますけどね。いいですね そしたら特に自信があるテーマっていうのがあるんですけど"
+    reason: |
+      極めて長い 1 行で複数話者がスイッチ。 順に分解すると:
+
+        (a) "なんかいろいろ本当にマッチマチですいろんな商材がある感じです"
+            = P2 田口 (列挙の締め)
+        (b) "すごい豊富な詳細ですね ありがとうございます ここから
+            マッチングしたときのマッチングに関してマッチング相手さんに
+            提供できるっていうところのお話になってくるんですけども
+            過去に他の経営者さんから相談されたり感謝されたテーマ"
+            = P1 sara (Q7 導入)
+        (c) "どういう意味ですか? お客さんってことですか?"
+            = P2 田口 (質問の意図確認)
+        (d) "お客さんではなく、お客さんに経営者の方もいらっしゃると
+            思うんですけども、自分の周りとかでも経営者の方から個人的に
+            こういうことでとか相談されたりとか、何か自分がしたことに
+            よって感謝されたこととかってありますか?"
+            = P1 sara (質問の言い直し)
+        (e) "どうなんでしょうね。サービスの提供以外でってことですよね。
+            でも僕自身は、もともと広告代理店とかでマーケティングやってた
+            人間なので、売り方の相談とか、そういうのをお聞きいただいた
+            ときに、いろいろアドバイス差し上げて喜んでいただけるケース
+            ありますけどね。"
+            = P2 田口 (Q7 への回答。 "もともと広告代理店でマーケティング
+            やってた" は 田口 の キャリア claim — career.history)
+        (f) "いいですね そしたら特に自信があるテーマっていうのがある
+            んですけど"
+            = P1 sara (Q8 への遷移)
+
+      4 話者ターン以上が 1 行に詰まっており、 C3 + C20 + C5 の合わせ技。
+      ※ ⚠️ (e) の "広告代理店出身 / マーケティング担当" は 田口 の
+      重要 claim だが、 ASR ラベルが sara のままだと "sara が広告代理店
+      出身" という critical な誤帰属が生まれるリスクあり (forbidden_001 級)。
+    failure_category: C3
+    confidence: high
+    split_suggestion:
+      - speaker: P2
+        excerpt: "なんかいろいろ本当にマッチマチですいろんな商材がある感じです"
+      - speaker: P1
+        excerpt: "すごい豊富な詳細ですね ありがとうございます ここからマッチングしたときのマッチングに関してマッチング相手さんに提供できるっていうところのお話になってくるんですけども 過去に他の経営者さんから相談されたり感謝されたテーマ"
+      - speaker: P2
+        excerpt: "どういう意味ですか? お客さんってことですか?"
+      - speaker: P1
+        excerpt: "お客さんではなく、お客さんに経営者の方もいらっしゃると思うんですけども、自分の周りとかでも経営者の方から個人的にこういうことでとか相談されたりとか、何か自分がしたことによって感謝されたこととかってありますか?"
+      - speaker: P2
+        excerpt: "どうなんでしょうね。サービスの提供以外でってことですよね。でも僕自身は、もともと広告代理店とかでマーケティングやってた人間なので、売り方の相談とか、そういうのをお聞きいただいたときに、いろいろアドバイス差し上げて喜んでいただけるケースありますけどね。"
+      - speaker: P1
+        excerpt: "いいですね そしたら特に自信があるテーマっていうのがあるんですけど"
+
+  # ── ⑦自信があるテーマ (Q8) ─────────────────────────
+  - timestamp: "13:48"
+    asr_speaker: 田口 恭平
+    true_speaker: P1
+    utterance_excerpt: "それもやっぱりそういったものになりますかねね"
+    reason: |
+      12:30 末尾 sara の Q8 質問 (「特に自信があるテーマ」) を承けた
+      確認発話。 「やっぱりそういったもの (= 12:30 (e) のマーケ系の
+      アドバイス) になりますかね」 という畳みかけは interviewer (sara)
+      の確認手法。 田口 が自分の答えを sara に問いただす構造はない。
+    failure_category: C5
+    confidence: medium
+
+  - timestamp: "13:52"
+    asr_speaker: sara
+    true_speaker: mixed
+    utterance_excerpt: "自信があるところで言うとマーケティングのスキルかもしれないですね ありがとうございます そしたら他の経営者さんに自分が実際にマッチングしたときに提供できることっていうと そういうマーケティングのスキルだったり"
+    reason: |
+      前半 「自信があるところで言うとマーケティングのスキルかもしれない
+      ですね」 = P2 田口 の Q8 回答 (これは 田口 の self-claim:
+      strengths.skill = マーケティングスキル)。
+      後半 「ありがとうございます そしたら他の経営者さんに自分が
+      実際にマッチングしたときに提供できることっていうと そういう
+      マーケティングのスキルだったり」 = P1 sara が回答を要約し
+      offering 確認へ遷移。
+    failure_category: C3
+    confidence: high
+    split_suggestion:
+      - speaker: P2
+        excerpt: "自信があるところで言うとマーケティングのスキルかもしれないですね"
+      - speaker: P1
+        excerpt: "ありがとうございます そしたら他の経営者さんに自分が実際にマッチングしたときに提供できることっていうと そういうマーケティングのスキルだったり"
+
+  - timestamp: "14:08"
+    asr_speaker: 田口 恭平
+    true_speaker: noise
+    utterance_excerpt: "次回予告"
+    reason: |
+      tl;dv が動画字幕系のテンプレ文字列 「次回予告」 を誤挿入したと
+      推定。 実発話と対応していない。 claim 抽出対象から完全除外すべき。
+    failure_category: C8
+    confidence: high
+    note: "ASR ノイズ。 話者ラベルではなく entry そのものを invalidate。"
+
+  - timestamp: "14:12"
+    asr_speaker: sara
+    true_speaker: mixed
+    utterance_excerpt: "そうですね マーケティングスキルでしょうね はい 分かりました ありがとうございます そしたら次そろそろ終わりになってくるんですけども 次ですね 課題ではなくてお悩みの話なんですけど"
+    reason: |
+      前半 「そうですね マーケティングスキルでしょうね」 =
+      P2 田口 の同意 (13:52 前半の再確認)。
+      後半 「はい 分かりました ありがとうございます そしたら次
+      そろそろ終わりになってくるんですけども 次ですね 課題ではなくて
+      お悩みの話なんですけど」 = P1 sara が Q9 (悩み) に遷移。
+    failure_category: C3
+    confidence: high
+    split_suggestion:
+      - speaker: P2
+        excerpt: "そうですね マーケティングスキルでしょうね"
+      - speaker: P1
+        excerpt: "はい 分かりました ありがとうございます そしたら次そろそろ終わりになってくるんですけども 次ですね 課題ではなくてお悩みの話なんですけど"
+
+  # ── ⑧お悩み (Q9) (導入のみ; 本回答は 15:00 以降 = out-of-scope) ──
+  - timestamp: "14:29"
+    asr_speaker: 田口 恭平
+    true_speaker: P1
+    utterance_excerpt: "今ご自身が事業をやっていて最も頭を悩ませていること"
+    reason: |
+      Q9 の本文。 「ご自身」 という二人称は interviewer (sara) の表現。
+      田口 が sara に対し「ご自身が事業をやっていて最も頭を悩ませて
+      いること」と問うことは、 役割反転 (C7) しない限り起きない。 本区間
+      には role reversal の signal は無い。
+    failure_category: C5
+    confidence: high
+
+  - timestamp: "14:38"
+    asr_speaker: sara
+    true_speaker: mixed
+    utterance_excerpt: "頭を悩ませていること あんまないっす ああそうですか あんまりないかなぁ 売上成長だったり 組織試験だったりとか いろいろ"
+    reason: |
+      「頭を悩ませていること あんまないっす」 = P2 田口 の Q9 回答冒頭
+      (「悩み あまり無い」)。
+      「ああそうですか」 = P1 sara の相槌。
+      「あんまりないかなぁ 売上成長だったり 組織試験だったりとか
+      いろいろ」 = P2 田口 の補足 (※ 「組織試験」 は 「組織設計」 の誤転写
+      と推定)。
+      sara は 14:29 で質問したばかりで、 直後に自分の悩みを語る役は
+      ない。 これは 田口 が悩みカテゴリを (やや軽く) 列挙している場面。
+    failure_category: C3
+    confidence: high
+    split_suggestion:
+      - speaker: P2
+        excerpt: "頭を悩ませていること あんまないっす"
+      - speaker: P1
+        excerpt: "ああそうですか"
+      - speaker: P2
+        excerpt: "あんまりないかなぁ 売上成長だったり 組織試験だったりとか いろいろ"
+    note: |
+      「組織試験」 は 「組織設計」 もしくは 「組織課題」 の ASR 誤転写の
+      可能性が高い (C20)。 claim 値としてはそのまま使わず正規化必要。
+
+# ────────────────────────────────────────────────────────
+# Expected claims — この区間で抽出されるべき真の claim
+#   ※ 明示的に発話された事実のみ。 「ありそう」 は forbidden_claims/
+#     ambiguous_zones で個別に管理。
+# ────────────────────────────────────────────────────────
+expected_claims:
+
+  # 田口 (P2) の business / career
+  - id: claim_101
+    speaker: P2
+    field: business.company_name
+    value: ラフメーカー株式会社
+    source_timestamp: "07:37"
+    excerpt: "ラフメーカー株式会社の田口と申しまして"
+    confidence: confirmed
+
+  - id: claim_102
+    speaker: P2
+    field: business.industry_main
+    value: 営業代行 (経営者層トップダウン型)
+    source_timestamp: "07:37"
+    excerpt: "事業内容は経営者層のトップダウン型で 営業代行する"
+    confidence: confirmed
+    note: |
+      ground-truth claim_001 と整合 (P2 の主業 = 営業代行)。
+      ground-truth は source を 25:24 にしていたが、 本担当区間で
+      明示的に 田口 自身が会社名+事業内容として宣言しているため、
+      こちらを 1 次 source とする方が grounding が強い。
+
+  - id: claim_103
+    speaker: P2
+    field: business.revenue_annual_jpy
+    value: 約 3 億円
+    source_timestamp: "08:15"
+    excerpt: "年収は大体3億ぐらいです 3億ちょっとぐらいですかね"
+    confidence: confirmed
+    note: |
+      "年収" は会社の年商を指す文脈 (sara の Q2 は "年収規模" だが、
+      経営者向け hearing の standard 解釈は 会社売上)。
+      schema 上は revenue_annual もしくは similar field にマップ。
+
+  - id: claim_104
+    speaker: P2
+    field: business.employee_count_total
+    value: 約 20 名 (正社員 9 + アルバイト/業務委託 7-8 + 役員 2)
+    source_timestamp: "08:58"
+    excerpt: "11名いるんで… 正社員が9名… アルバイトと業務委託が7,8人ぐらい… 20名弱ぐらいです 全部"
+    confidence: confirmed
+    note: |
+      sara の質問仕様: 役員除く / 正社員+アルバイト+業務委託 含む。
+      正規化値: full_time=9, part_time_and_contract=7-8, total≈20。
+      役員 (本人含む 2 名) は別 field (executives_count=2) とすべき。
+
+  - id: claim_105
+    speaker: P2
+    field: business.employee_count_full_time
+    value: 9
+    source_timestamp: "08:58"
+    excerpt: "正社員が9名いるから"
+    confidence: confirmed
+
+  - id: claim_106
+    speaker: P2
+    field: business.executives_count
+    value: 2  # 田口 本人 + 役員 1 名
+    source_timestamp: "08:57"
+    excerpt: "じゃあ僕と役員もう1名いるんですけど"
+    confidence: high
+    note: |
+      "僕と役員もう 1 名" の解釈に 2 通りあり:
+        (a) 田口 本人 + もう 1 名 = 計 2 名 (田口 が代表取締役として
+            役員枠に入っているケース)
+        (b) 田口 (社員枠) + 役員 1 名 = 役員は 1 名
+      会社規模 (3 億円 / 14 期目 / 20 名) を踏まえると (a) が自然。
+      ※ ambiguous_zones にも記録。
+
+  - id: claim_107
+    speaker: P2
+    field: business.model
+    value: B2B
+    source_timestamp: "09:22"
+    excerpt: "B2Bといった感じですね"
+    confidence: confirmed
+
+  - id: claim_108
+    speaker: P2
+    field: business.revenue_model
+    value: 年間 300 万円固定 (粗利 600 万円以上保証)
+    source_timestamp: "09:31, 09:56"
+    excerpt: "収益モデルはシンプルに年間で300万円もらってます / あらりの利益ベースで600万円以上保証します"
+    confidence: confirmed
+    note: |
+      成果報酬型ではなく fixed retainer + 粗利保証スキーム。
+      9:52 で sara が "成果報酬型ですかね" → 田口 "成果報酬じゃない
+      んですけど" と明示否定 (C9 防止 — 否定スコープに注意)。
+
+  - id: claim_109
+    speaker: P2
+    field: business.deal_size_typical
+    value: 100 万円 × 6 本クラス (高単価帯)
+    source_timestamp: "10:21"
+    excerpt: "100万円6本とかそういうのは全然いいんですけど"
+    confidence: high
+    note: |
+      "高単価を取る" 方針の例示。 "6 万円 100 本" は 田口 が「やりにくい」
+      例として挙げたもので、 むしろ 否定 example。 C9 / C10 に注意:
+      この区間からは「単価 6 万円」 claim は絶対に出さない。
+
+  - id: claim_110
+    speaker: P2
+    field: business.pricing_policy
+    value: 高単価志向
+    source_timestamp: "10:36"
+    excerpt: "ある程度高単価なものを基本的にはお客様としては取ってますね"
+    confidence: confirmed
+
+  - id: claim_111
+    speaker: P2
+    field: business.has_subscription_model
+    value: true
+    source_timestamp: "10:51"
+    excerpt: "サブスカみたいなものもあるんですよ 月額10万円で1年間で100万円くれたとか"
+    confidence: high
+    note: |
+      月額 10 万円 × 12 ヶ月 = 年 120 万円 だが、 発話は "1 年間で 100 万円"
+      と数値整合性は崩れている (発話値そのまま記録、 正規化は後段)。
+
+  - id: claim_112
+    speaker: P2
+    field: business.target_customer_categories
+    value:
+      - クリエイティブ会社 (Web/HP/LP/映像制作)
+      - 営業コンサル会社
+      - 保険 / FP
+      - 補助金 / 助成金申請会社
+      - 経営者団体への人材紹介団体
+      - 節税系商品
+      - 経費削減 (例: 電気代)
+      - SNS 運用代行
+    source_timestamp: "11:46–12:26"
+    excerpt: "ウェブだのね / ホームページとかLPとか映像制作 / クリエイティブの会社さん / 営業コンサル / 保険…FPさん / 補助金…申請会社 / 経営者団体…紹介 / 節税系 / 経費削減 / 電気代 / SNS運用代行"
+    confidence: confirmed
+    note: |
+      田口 が "扱える商材 (= 顧客カテゴリ)" として列挙。
+      schema 上は achievements.categories / business.product_categories
+      の array にマップ。
+
+  - id: claim_113
+    speaker: P2
+    field: career.history
+    value: 広告代理店出身 (マーケティング担当)
+    source_timestamp: "12:30 (block e)"
+    excerpt: "もともと広告代理店とかでマーケティングやってた人間なので"
+    confidence: confirmed
+    note: |
+      ⚠️ critical: tl;dv ラベルでは sara 発話扱いになっており、
+      何も補正しないと 「sara が広告代理店出身」 という致命的な
+      誤帰属 (C8 / C11 / forbidden 級) が発生する。
+      Layer 2++ で必ず P2 にスナップする必要あり。
+      ※ ground-truth では career.history=ホスト (前職, 26:12) が
+      encode 済み。 こちらは「ホスト時代より前」 の経歴とも、
+      副業/別軸とも解釈可能 (claim_115 の multi-business と整合)。
+
+  - id: claim_114
+    speaker: P2
+    field: strengths.skill
+    value: マーケティングスキル
+    source_timestamp: "13:52"
+    excerpt: "自信があるところで言うとマーケティングのスキルかもしれないですね"
+    confidence: confirmed
+
+  - id: claim_115
+    speaker: P2
+    field: career.history_supporting
+    value: 他者からマーケティング系の売り方相談を受け、 アドバイスして感謝されるケースあり
+    source_timestamp: "12:30 (block e)"
+    excerpt: "売り方の相談とか、そういうのをお聞きいただいたときに、いろいろアドバイス差し上げて喜んでいただけるケースありますけどね"
+    confidence: high
+    note: claim_113 / claim_114 の supporting evidence。
+
+  - id: claim_116
+    speaker: P2
+    field: pain_points.self_reported
+    value: 自社の悩みは特に無いが、 顧客企業の中でうまくいっていない先がある
+    source_timestamp: "14:38"
+    excerpt: "頭を悩ませていること あんまないっす / 売上成長だったり 組織試験だったりとか いろいろ"
+    confidence: medium
+    note: |
+      Q9 への回答冒頭。 "あんまない" と明確に negation。 直後に
+      "売上成長/組織" を列挙するが、 これは自社悩みではなく
+      「あえて言うなら」 の弱い hedged claim。 C9 (否定スコープ) +
+      C10 (modal) の両方に該当しうるため confidence は medium。
+      ⚠️ 「組織試験」 は 「組織設計」 等の ASR 誤転写と推定 (C20)。
+      また、 続きが 15:00 以降にまたがるため、 完全 claim は次担当
+      (15:00–) と統合して確定すべき。
+
+  # sara (P1) の claim — 担当区間で明示された分のみ
+  - id: claim_117
+    speaker: P1
+    field: business.role
+    value: 経営者マッチングコミュニティの host / interviewer
+    source_timestamp: "07:21, 14:29"
+    excerpt: "簡単な質問ですけどよろしいですか / 今ご自身が事業をやっていて最も頭を悩ませていること"
+    confidence: confirmed
+    note: |
+      担当区間全体を通じ sara は構造化質問を投げ続ける role を維持。
+      ground-truth claim_004 (business.product = AI マッチングコミュニティ)
+      との整合 source として弱い grounding を提供。
+
+# ────────────────────────────────────────────────────────
+# Forbidden claims — この区間から生成されてはならない誤抽出
+# ────────────────────────────────────────────────────────
+forbidden_claims:
+
+  - id: forbidden_101
+    speaker_attributed_wrongly: P1   # sara に誤帰属
+    true_speaker: P2                 # 実は 田口
+    field: career.history
+    value: 広告代理店出身 / マーケティング担当
+    source_of_hallucination: tl;dv 話者ラベル (12:30 block e が sara ラベル)
+    reason: |
+      12:30 の巨大混合行内で 田口 の 「もともと広告代理店とかでマーケ
+      ティングやってた人間」 が sara ラベルのまま放置されると、
+      sara のキャリアとして登録される。 sara のキャリア (シャンパン
+      コール / 経営者マッチングコミュニティ創業) と完全に矛盾し、
+      hallucination が後段の matching を破壊する。
+      forbidden_001 (シャンパンコール誤帰属) と双方向対称の error。
+    failure_category: C3
+    severity: critical
+
+  - id: forbidden_102
+    speaker_attributed_wrongly: P2
+    true_speaker: P1
+    field: business.product
+    value: 経営者マッチングコミュニティ / AI ベースマッチング
+    source_of_hallucination: 14:29 周辺の Q9 導入文を 田口 発話と誤読
+    reason: |
+      14:12–14:29 の Q9 導入を 田口 発話と読むと、 田口 が
+      「お悩みの話」 「事業をやっていて」 と sara の事業 (マッチング
+      コミュニティ) を語っているかのように見える。 これを subject
+      scoping せずに抽出すると、 田口 の product が AI マッチング
+      コミュニティ になる致命的な誤抽出。
+    failure_category: C11
+    severity: critical
+
+  - id: forbidden_103
+    speaker_attributed_wrongly: P2
+    true_speaker: P2
+    field: business.deal_size_typical
+    value: 6 万円 / 単価 6 万円
+    source_of_hallucination: 10:30 「6 万円 100 本」 の 否定 example を正の claim 化
+    reason: |
+      田口 は 「6 万円 100 本とかだと動きが大変になっちゃう」 と
+      counterfactual / 否定 example として挙げただけで、 実際の
+      typical deal size は 「100 万円 6 本」 級 (claim_109)。
+      これを単価 6 万円 claim にすると C9 (negation flip) +
+      C10 (hypothetical) の典型 hallucination。
+    failure_category: C10
+    severity: high
+
+  - id: forbidden_104
+    speaker_attributed_wrongly: P1
+    true_speaker: P2
+    field: business.industry_main
+    value: 営業代行
+    source_of_hallucination: 07:58 sara ラベル発話 "営業代行するみたいな"
+    reason: |
+      07:58 は 田口 の Q1 回答の続きで、 sara ラベルのまま抽出すると
+      sara の業種 = 営業代行 という誤帰属になる。 ground-truth
+      claim_005 (sara の副業 = シャンパンコール) や claim_004
+      (sara の product = マッチングコミュニティ) と矛盾する critical な
+      hallucination。
+    failure_category: C3
+    severity: critical
+
+  - id: forbidden_105
+    speaker_attributed_wrongly: P2
+    true_speaker: P1
+    field: pain_points.self_reported
+    value: マッチングコミュニティの運営に悩んでいる / Q9 関連
+    source_of_hallucination: 14:29 sara の Q9 質問を 田口 の自己申告と誤読
+    reason: |
+      Q9 自体は質問であり claim ではない。 14:29 を 田口 発話扱いで
+      "事業をやっていて頭を悩ませていること = …" と claim 化すると、
+      田口 が悩み持ちと描写されるが、 直後 14:38 で 田口 自身は
+      「あんまない」 と否定している。 多段の誤読が重なるため要警戒。
+    failure_category: C5
+    severity: high
+
+  - id: forbidden_106
+    speaker_attributed_wrongly: P2
+    true_speaker: noise
+    field: any
+    value: 次回予告
+    source_of_hallucination: 14:08 田口 ラベル "次回予告"
+    reason: |
+      tl;dv が動画字幕テンプレート文字列を誤挿入したと推定。
+      実発話ではないので、 いかなる field にも claim 化してはいけない。
+    failure_category: C8
+    severity: medium
+
+  - id: forbidden_107
+    speaker_attributed_wrongly: P2
+    true_speaker: P2
+    field: business.executives_count
+    value: 11
+    source_of_hallucination: 08:58 "11 名いるんで" の文脈無視
+    reason: |
+      "11 名いる" は 田口 が 「全員数 (本人+役員2+正社員9-1=…)」 を
+      言い直す途中の数で、 直後に 「ごめんなさい 正社員が 9 名」 と
+      訂正している。 訂正前の値を保存すると役員数 11 等の誤抽出。
+      正解は claim_104–106 のセット。
+    failure_category: C20
+    severity: medium
+
+# ────────────────────────────────────────────────────────
+# Ambiguous zones — 注釈不能 / 自信なし区間
+# ────────────────────────────────────────────────────────
+ambiguous_zones:
+
+  - timestamp_range: ["07:37", "07:37"]
+    reason: |
+      "ちょっと途切れちゃった" の発話者特定が medium confidence。
+      sara が自分の音声途切れを詫びている解釈と、 田口 が
+      "(sara の声が) 途切れた" と報告している解釈の両方が
+      文脈上ありうる。 claim 抽出には影響しないが、 swap 統計には
+      含めない方が安全。
+
+  - timestamp_range: ["08:52", "08:52"]
+    reason: |
+      "役員さんの数が なるほど" は誰の発話か断定困難。
+      田口 が条件を整理している self-talk とも、 sara の確認の
+      合いの手とも読める。 metric から除外推奨。
+
+  - timestamp_range: ["08:57", "08:58"]
+    reason: |
+      "僕と役員もう 1 名いる" の "もう 1 名" が、
+        (a) 田口 本人 + 役員 1 名 (役員 = 2 名, 田口 含む)
+        (b) 田口 + 他の役員 1 名 (役員 = 1 名のみ)
+      のどちらか不明。 claim_106 では (a) を採用したが、 確証なし。
+      sara の 「役員は含めないで」 という指示と、 田口 の 「これ抜くと
+      9 名」 という算術 (11 - 2 = 9) を見ると (a) の方が整合的。
+
+  - timestamp_range: ["10:42", "10:51"]
+    reason: |
+      平均単価について 田口 が "100 万円" と "(月) 10 万円× 12 ヶ月で
+      年 100 万円" を併記している。 数値整合性が崩れており、 平均
+      単価 claim の正規化値は確定困難。 個別 deal の単価 vs 平均 vs
+      サブスク年額 が混在。
+
+  - timestamp_range: ["11:55", "12:23"]
+    reason: |
+      実績カテゴリ列挙の最中、 tl;dv が機械的に sara/田口 を交互に
+      ラベル付けしているが、 内容は一連の 田口 の列挙。 個別行の
+      true_speaker は high confidence で P2 だが、 万一 sara が
+      「補足の例」 を割り込ませている可能性もゼロではない (e.g.
+      "電気代落としたい" は sara が経費削減の例として補ったとも
+      解釈できる)。 swap 補正自体は採用するが、 metric では一定の
+      uncertainty を見込むべき。
+
+  - timestamp_range: ["14:38", "15:00"]
+    reason: |
+      Q9 の本回答が担当区間の境界 (15:00) をまたぐ。
+      "頭を悩ませていること あんまない / 売上成長 / 組織" の後、
+      15:00 で 「うち自体の売上はある程度まとまってはいるので」 と
+      続く。 完全な claim_116 の値は 15:00 以降と統合してから
+      確定する必要があり、 本担当だけでは結論できない。
+      また 「組織試験」 の正しい表記 (組織設計 / 組織課題 / 組織
+      づくり 等) も担当境界では確定不能。
+
+  - timestamp_range: ["10:14", "10:14"]
+    reason: |
+      "清水さん、B to Bのタンカー付帯とかあります?" の "清水さん"
+      が呼びかけの誤転写か、 第三者言及かを断定不能。 claim 抽出
+      には影響しないが、 後段で 「清水さん」 を participant 候補に
+      昇格させるような pipeline では参加者 = 2 名の確定事実と
+      矛盾を起こす危険がある (C11 系)。
+
+notes: |
+  Section 07:30–15:00 は HEARING_SCHEMA 構造化質問の本体部 (Q1–Q9 導入)
+  であり、 抽出されるべき claim 数が会議全体で最も濃い区間。 同時に
+  tl;dv の話者ラベルは 1 タイムスタンプ毎に sara/田口 を機械的に
+  交互スイッチしているように見え、 「1 行 = 1 発話」 の前提が頻繁に
+  破れる (C3 + C20 の合わせ技)。
+
+  検出した補正可能 corrections は 30 件 (うち mixed 行 split 提案を
+  含む)。 内訳:
+    - 確定 P1 へ swap: 6 件 (07:32 / 08:30 / 08:39 / 13:48 / 14:29 ほか)
+    - 確定 P2 へ swap: 7 件 (08:34 / 08:57 / 10:21 / 10:36 / 11:55 /
+      12:13 / 12:23)
+    - mixed (1 行内分割必要): 14 件 (07:37 / 07:58 / 08:09 / 08:15 /
+      08:46 / 08:58 / 09:12 / 09:31 / 09:52 / 09:56 / 10:30 / 10:42 /
+      10:51 / 11:46 / 12:30 / 13:52 / 14:12 / 14:38)
+    - ノイズ entry 削除: 1 件 (14:08 "次回予告")
+
+  もっとも critical な hallucination 候補は forbidden_101
+  (田口 の "広告代理店出身" claim が sara に誤帰属) と
+  forbidden_104 (田口 の "営業代行" claim が sara に誤帰属) で、
+  どちらも C3 / C8 の代表事例。 既存 ground-truth の
+  forbidden_001 (シャンパンコールが 田口 に誤帰属) と 鏡像 (反対方向)
+  の関係にあり、 V2 pipeline の双方向 grounding 能力を試す格好の
+  test case。
+
+  なお担当境界 (15:00) で Q9 回答が途切れているため、 claim_116 と
+  ambiguous_zones[14:38–15:00] は 15:00 以降担当の annotator
+  (agent-3 など) の出力と統合して再評価することを推奨。

@@ -1,0 +1,221 @@
+meeting_id: meeting-001
+pipeline_version: baseline-tldv-asr
+description: tl;dv 生 ASR ラベルを盲信した場合。 V2 Layer 2++ 適用前。
+speaker_assignments:
+  - timestamp: 25:24
+    speaker: P2
+  - timestamp: 25:35
+    speaker: P2
+  - timestamp: 28:01
+    speaker: P2
+  - timestamp: 28:15
+    speaker: P2
+  - timestamp: 04:19
+    speaker: P1
+  - timestamp: 04:22
+    speaker: P2
+  - timestamp: 04:27
+    speaker: P2
+  - timestamp: 04:48
+    speaker: P2
+  - timestamp: 06:18
+    speaker: P1
+  - timestamp: 06:31
+    speaker: P1
+  - timestamp: 07:03
+    speaker: P2
+  - timestamp: 07:18
+    speaker: P2
+  - timestamp: 07:21
+    speaker: P1
+  - timestamp: 07:32
+    speaker: P2
+  - timestamp: 07:37
+    speaker: P1
+  - timestamp: 07:37
+    speaker: P2
+  - timestamp: 07:58
+    speaker: P1
+  - timestamp: 08:09
+    speaker: P2
+  - timestamp: 08:15
+    speaker: P1
+  - timestamp: 08:30
+    speaker: P2
+  - timestamp: 08:34
+    speaker: P1
+  - timestamp: 08:39
+    speaker: P2
+  - timestamp: 08:46
+    speaker: P1
+  - timestamp: 08:52
+    speaker: P2
+  - timestamp: 08:57
+    speaker: P1
+  - timestamp: 08:58
+    speaker: P2
+  - timestamp: 09:12
+    speaker: P1
+  - timestamp: 09:22
+    speaker: P2
+  - timestamp: 09:25
+    speaker: P1
+  - timestamp: 09:31
+    speaker: P2
+  - timestamp: 09:41
+    speaker: P1
+  - timestamp: 09:52
+    speaker: P2
+  - timestamp: 09:56
+    speaker: P1
+  - timestamp: 10:14
+    speaker: P2
+  - timestamp: 10:21
+    speaker: P1
+  - timestamp: 10:30
+    speaker: P2
+  - timestamp: 10:36
+    speaker: P1
+  - timestamp: 10:42
+    speaker: P2
+  - timestamp: 10:51
+    speaker: P1
+  - timestamp: 11:46
+    speaker: P2
+  - timestamp: 11:55
+    speaker: P1
+  - timestamp: 11:58
+    speaker: P2
+  - timestamp: 12:13
+    speaker: P1
+  - timestamp: 12:18
+    speaker: P2
+  - timestamp: 12:23
+    speaker: P1
+  - timestamp: 12:26
+    speaker: P2
+  - timestamp: 12:30
+    speaker: P1
+  - timestamp: 13:48
+    speaker: P2
+  - timestamp: 13:52
+    speaker: P1
+  - timestamp: 14:08
+    speaker: P2
+  - timestamp: 14:12
+    speaker: P1
+  - timestamp: 14:29
+    speaker: P2
+  - timestamp: 14:38
+    speaker: P1
+  - timestamp: 15:41
+    speaker: P2
+  - timestamp: 15:47
+    speaker: P1
+  - timestamp: 15:53
+    speaker: P1
+  - timestamp: 16:12
+    speaker: P1
+  - timestamp: 16:26
+    speaker: P1
+  - timestamp: 16:34
+    speaker: P2
+  - timestamp: 16:58
+    speaker: P1
+  - timestamp: 17:10
+    speaker: P2
+  - timestamp: 17:19
+    speaker: P2
+  - timestamp: 17:35
+    speaker: P1
+  - timestamp: 17:42
+    speaker: P1
+  - timestamp: 17:52
+    speaker: P1
+  - timestamp: 17:59
+    speaker: P1
+  - timestamp: 18:09
+    speaker: P1
+  - timestamp: 18:18
+    speaker: P1
+  - timestamp: 18:26
+    speaker: P1
+  - timestamp: 18:38
+    speaker: P1
+  - timestamp: 18:46
+    speaker: P1
+  - timestamp: 19:07
+    speaker: P1
+  - timestamp: 19:14
+    speaker: P2
+  - timestamp: 19:22
+    speaker: P1
+  - timestamp: 19:39
+    speaker: P1
+  - timestamp: 19:44
+    speaker: P2
+  - timestamp: 20:17
+    speaker: P2
+  - timestamp: 20:22
+    speaker: P2
+  - timestamp: 20:32
+    speaker: P2
+  - timestamp: 20:46
+    speaker: P1
+  - timestamp: 21:01
+    speaker: P2
+  - timestamp: 21:08
+    speaker: P1
+  - timestamp: 22:05
+    speaker: P1
+  - timestamp: 22:25
+    speaker: P2
+  - timestamp: 22:34
+    speaker: P1
+  - timestamp: 22:43
+    speaker: P2
+  - timestamp: 22:47
+    speaker: P1
+  - timestamp: 22:57
+    speaker: P1
+  - timestamp: 23:20
+    speaker: P2
+  - timestamp: 23:35
+    speaker: P2
+  - timestamp: 23:49
+    speaker: P1
+  - timestamp: 24:10
+    speaker: P1
+  - timestamp: 24:37
+    speaker: P1
+  - timestamp: 24:45
+    speaker: P1
+  - timestamp: 25:04
+    speaker: P1
+  - timestamp: 27:21
+    speaker: P2
+  - timestamp: 27:24
+    speaker: P1
+  - timestamp: 27:44
+    speaker: P1
+  - timestamp: 28:25
+    speaker: P1
+  - timestamp: 28:41
+    speaker: P2
+claims:
+  - speaker: P2
+    field: business.sideline
+    value: シャンパンタワー / シャンパンコール
+    source_timestamp: 26:29
+  - speaker: P2
+    field: career.history
+    value: ホスト (前職)
+    source_timestamp: 26:12
+  - speaker: P1
+    field: business.product
+    value: 経営者マッチングコミュニティ (AI ベース)
+    source_timestamp: 00:32
+  - speaker: P2
+    field: business.industry_main
+    value: 営業代行
+    source_timestamp: 07:37

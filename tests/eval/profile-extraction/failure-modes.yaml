@@ -1,0 +1,242 @@
+# Failure mode catalog for the profile extraction pipeline.
+# Mirrors §16 of ARCHITECTURE_PROFILE_EXTRACTION_V2.md.
+# Each entry is a category of error the pipeline must detect, mitigate, or flag.
+#
+# status:
+#   - DONE   : V2 で対応設計済み (Layer 2++ / Layer 4 / Layer 4.5 等)
+#   - OPEN   : V2 では検出のみ。 mitigation は v3 で
+#   - V3     : v3 まで punt (現状放置を許容)
+# severity:
+#   - critical : hallucination 直結。 1 件で本人信頼失墜
+#   - high     : 精度を 5% 以上劣化させる
+#   - medium   : 5% 未満の劣化
+#   - low      : edge case
+
+version: 1
+schema_version: 1
+
+failures:
+  # ────────────────────────────────────────────────────────
+  # Speaker attribution failures (Layer 1.5 / 2 / 2++)
+  # ────────────────────────────────────────────────────────
+  - id: C1
+    name: tl;dv ASR mislabel (random)
+    category: speaker_attribution
+    description: |
+      tl;dv の diarization が確率的に話者ラベルを取り違える。
+      Type A (1 発話の単発 swap)。 短い相槌で多い。
+    example_pattern: "田口 [00:09]: (実は sara の相槌)"
+    severity: medium
+    status: DONE
+    mitigation: Layer 2++ multi-signal voting
+
+  - id: C2
+    name: First-person marker chain miss
+    category: speaker_attribution
+    description: |
+      両者が「僕」を使う場合、 first_person_marker 単独 signal では
+      話者特定不能。 weight を下げ、 entity_grounding / Q&A pairing と
+      組み合わせる必要がある。
+    example_pattern: "両参加者がどちらも『僕』を使う"
+    severity: high
+    status: DONE
+    mitigation: Layer 2++ multi-signal (S1 weight=0.40 だが S2-S5 が補完)
+
+  - id: C3
+    name: Systematic body-section inversion (Type C)
+    category: speaker_attribution
+    description: |
+      インタビュー本文の長い段落全体が片側に偏って誤帰属。
+      tl;dv が話者切替を 1 つ落とした結果、 以降数発話が連続して swap。
+      sara/田口 会議では 25 件発生。
+    example_pattern: "26:29 〜 27:21 の シャンパンコール 長文 monologue が誤帰属"
+    severity: critical
+    status: DONE
+    mitigation: Layer 2++ block-level reattribution (S8 bidirectional_reference)
+
+  - id: C4
+    name: Echo / backchannel false attribution
+    category: speaker_attribution
+    description: |
+      「うん」「そうですね」等の相槌が誤って実発話側に attribute される。
+    example_pattern: '田口 [00:18]: "うん"  ← 実は sara の相槌が紛れ込み'
+    severity: low
+    status: DONE
+    mitigation: Layer 1.5 speech_act classification → echo は claim 抽出から除外
+
+  - id: C5
+    name: Question/answer pair break
+    category: speaker_attribution
+    description: |
+      質問者と回答者の交互ターンが ASR で 1 ターン崩れると、
+      以降全部 swap し続ける。
+    example_pattern: "sara が質問 → 田口 が回答 のはずが、 質問が田口側に表示"
+    severity: high
+    status: DONE
+    mitigation: Layer 2++ Q&A pairing (S3)
+
+  - id: C6
+    name: Co-speech / overlap
+    category: speaker_attribution
+    description: |
+      両者が同時に話している区間 (笑い・相槌の被り)。
+      ASR が片方しか拾えない、 もしくは混合する。
+    example_pattern: '相手の語尾に被せて "ですね" を入れる'
+    severity: medium
+    status: OPEN
+    mitigation: Layer 2++ では検出のみ。 v3 で acoustic 分離
+
+  - id: C7
+    name: Role reversal (interviewer asks back)
+    category: speaker_attribution
+    description: |
+      ホストが guest 役を逆質問する瞬間。 期待 role が逆転するため
+      S3 (Q&A pairing) の事前確率が狂う。
+    example_pattern: '田口: "ひよいさんの周りは そういう人いらっしゃらないですか"  (28:01)'
+    severity: medium
+    status: OPEN
+    mitigation: Layer 2++ では検出のみ。 v3 で動的 role tracking
+
+  # ────────────────────────────────────────────────────────
+  # Claim extraction failures (Layer 3 / 4)
+  # ────────────────────────────────────────────────────────
+  - id: C8
+    name: tl;dv summary hallucination
+    category: claim_extraction
+    description: |
+      tl;dv の要約 LLM が、 実発話には無い claim を生成。
+      話者特定もあやふやで、 主語の取り違えが起きる。
+    example_pattern: '"田口氏は シャンパンタワー も手掛ける"  ← 真は sara の発言'
+    severity: critical
+    status: DONE
+    mitigation: Layer 4.5 substring citation grounding (要約は捨て、 本文から再抽出)
+
+  - id: C9
+    name: Sarcasm / negation flip
+    category: claim_extraction
+    description: |
+      皮肉、 反語、 否定 ("やりたくない") を肯定 claim として抽出。
+    example_pattern: '"営業代行 もう嫌だ" → claim: 営業代行 が好き'
+    severity: critical
+    status: V3
+    mitigation: v3 で sentiment + 否定スコーピング
+
+  - id: C10
+    name: Hypothetical / counterfactual
+    category: claim_extraction
+    description: |
+      仮定法・例示が事実 claim として抽出される。
+    example_pattern: '"もし僕が美容業界だったら..."  → claim: 美容業界'
+    severity: high
+    status: V3
+    mitigation: v3 で modal verb / 条件節 detection
+
+  - id: C11
+    name: Third-party claim leakage
+    category: claim_extraction
+    description: |
+      第三者 (顧客、 友人) について話した内容が、 発話者本人の claim
+      として profile に書き込まれる。
+    example_pattern: '田口 が顧客 A の業界を語る → 田口 の業界として登録'
+    severity: critical
+    status: DONE
+    mitigation: Layer 4 subject scoping (S 主語が one of participants かチェック)
+
+  - id: C12
+    name: Quotation embedding
+    category: claim_extraction
+    description: |
+      他者の発言を引用した部分が本人の発話として扱われる。
+    example_pattern: '田口: "お客さんに『うちは飲食店です』と言われた"  → 飲食店 claim'
+    severity: high
+    status: V3
+    mitigation: v3 で quotation parsing
+
+  # ────────────────────────────────────────────────────────
+  # Schema / field mapping failures (Layer 3)
+  # ────────────────────────────────────────────────────────
+  - id: C13
+    name: Free-text field overflow
+    category: schema_mapping
+    description: |
+      HEARING_SCHEMA 16 質問 に当てはまらない発話が free-text に流れ込む。
+      その後の matching algorithm では使えない。
+    severity: medium
+    status: DONE
+    mitigation: V2 §3 extended schema + active learning loop
+
+  - id: C14
+    name: Topic transition lost
+    category: schema_mapping
+    description: |
+      会話途中の topic 切替 (仕事の話 → プライベートの話) を pipeline が
+      検出できず、 同じ field に異種データを混入。
+    example_pattern: '27:24 以降 "プライベートで人付き合い" → hobby field に分離すべき'
+    severity: medium
+    status: OPEN
+    mitigation: V2 では検出のみ。 v3 で topic segmentation
+
+  - id: C15
+    name: Multi-business owner ambiguity
+    category: schema_mapping
+    description: |
+      複数事業を持つ経営者の主業 / 副業を pipeline が判別できない。
+    example_pattern: '田口: 営業代行 (主) + ホスト経歴 (前職) を並列に登録'
+    severity: medium
+    status: V3
+    mitigation: v3 で時系列 + 比重 estimation
+
+  # ────────────────────────────────────────────────────────
+  # Temporal / consistency failures
+  # ────────────────────────────────────────────────────────
+  - id: C16
+    name: Cross-meeting contradiction
+    category: temporal
+    description: |
+      同 user が 2 会議目で 1 会議目と矛盾する claim を発言。
+      pipeline が単一会議だけ見るため検出不能。
+    severity: high
+    status: V3
+    mitigation: v3 で Bayesian update + 矛盾 UI
+
+  - id: C17
+    name: Stale claim (changed reality)
+    category: temporal
+    description: |
+      過去会議で抽出した claim が現実と乖離 (転職、 廃業 etc.)。
+    severity: medium
+    status: V3
+    mitigation: v3 で TTL + 本人 review prompt
+
+  - id: C18
+    name: Time-relative numeric
+    category: temporal
+    description: |
+      「今 14 期目」 「3 年前から」 など発話時点基準の数値を絶対値として保存。
+      5 年後に表示すると意味が変わる。
+    example_pattern: '"今 14 期" → claim: company_age=14 (発話日 freeze 必須)'
+    severity: high
+    status: OPEN
+    mitigation: V2 schema 修正だけで対応可能 — Phase 1 実装で対応
+
+  # ────────────────────────────────────────────────────────
+  # Pipeline / infra failures
+  # ────────────────────────────────────────────────────────
+  - id: C19
+    name: LLM rate limit / outage
+    category: infra
+    description: |
+      Anthropic / Gemini API の障害で extraction 失敗。
+    severity: high
+    status: DONE
+    mitigation: V2 §15 fallback chain (Opus → Haiku → Opus旧)
+
+  - id: C20
+    name: Punctuation-less transcript
+    category: infra
+    description: |
+      tl;dv 出力に句読点が無く、 LLM が文区切りを誤認。
+    example_pattern: '"はい よろしく どう も 失 礼 します"  ← 1 発話に複数文'
+    severity: high
+    status: OPEN
+    mitigation: V2 §17 Layer 0.5 (Haiku で文区切り推論) — Phase 0 で実装可能
