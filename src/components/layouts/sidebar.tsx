@@ -69,7 +69,7 @@ const navGroups: NavGroup[] = [
     icon: MessageCircle,
     items: [
       { href: "/chat", label: "チャット", icon: MessageCircle },
-      { href: "/meetings?tab=calendar", label: "カレンダー", icon: CalendarDays },
+      { href: "/calendar", label: "カレンダー", icon: CalendarDays },
       { href: "/meetings", label: "会議", icon: Calendar },
     ],
   },

@@ -1,10 +1,17 @@
-import { redirect } from "next/navigation";
+"use client";
 
-/**
- * /calendar は /meetings に統合されました (UX audit /calendar Critical: 静的
- * プレースホルダーのみで「カレンダーを開いたのに予定が見えない」二度手間)。
- * /meetings 側に「カレンダー」タブが既に存在するため、そちらへ恒久 redirect。
- */
+import { CalendarWeekView } from "@/components/features/calendar/calendar-week-view";
+
 export default function CalendarPage() {
-  redirect("/meetings?tab=calendar");
+  return (
+    <div className="space-y-6">
+      <div>
+        <h1 className="text-2xl font-bold">カレンダー</h1>
+        <p className="mt-1 text-sm text-muted-foreground">
+          あなたの予定一覧
+        </p>
+      </div>
+      <CalendarWeekView />
+    </div>
+  );
 }
