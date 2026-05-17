@@ -1,3 +1,14 @@
+# pnpm workspace 構成:
+#   - root (.) は Next.js アプリ本体
+#   - public/lp は Netlify hosting 用の独立 LP サブプロジェクト (静的サイト + 軽量
+#     Netlify Functions) で package.json を持つ。 lock 整合性のため workspace
+#     member に明示しないと CI の --frozen-lockfile が
+#     「packages field missing or empty」で落ちる。
+packages:
+  - "."
+  - "public/lp"
+  - "public/lp/netlify/functions"
+
 ignoredBuiltDependencies:
   - sharp
   - unrs-resolver
