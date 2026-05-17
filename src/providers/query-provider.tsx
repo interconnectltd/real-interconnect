@@ -17,8 +17,11 @@ export function QueryProvider({ children }: { children: ReactNode }) {
             retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 10000),
             // staleTime 中の mount 再 fetch を抑止 (B4対策)
             refetchOnMount: false,
-            // window focus 時は stale を尊重して再 fetch (重要更新の見逃し防止)
-            refetchOnWindowFocus: true,
+            // window focus 時の自動 refetch を停止 (タブ復帰時に全 query が
+            // 一斉再 fetch されると loading 表示でチラつくため)。staleTime 内
+            // であれば cache を尊重し、明示的に refetch したい場合は
+            // invalidateQueries / refetch を呼ぶ。
+            refetchOnWindowFocus: false,
             refetchOnReconnect: true,
           },
         },

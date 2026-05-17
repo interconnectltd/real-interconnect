@@ -184,5 +184,36 @@ export async function updateSession(
     }
   }
 
+  // === Auth bypass header pass-through (Phase 2A 高速化) ===
+  // proxy.ts → updateSession で既に getUser() で検証済の user を route handler が
+  // 再検証 (再度 getUser() で +97ms) するのを避けるため、内部 header に user.id /
+  // email を載せて渡す。withAuth() がこれを読み取って fast-path を取る。
+  //
+  // セキュリティ:
+  //   - proxy.ts の matcher は全 /api/* / 全 page route をカバー → updateSession は
+  //     必ず通る = この block も必ず通る
+  //   - 受信時に必ず .delete() で client 偽装値を破棄してから .set() し直す
+  //   - 未認証パスでは .delete() のみ → withAuth 側で header 不在 = 401 になる
+  //   - delete だけでなく、user 有無に関わらず必ず supabaseResponse を再生成して
+  //     最終 headers を bake する (defense-in-depth: Next.js が初期 .next() 時点で
+  //     headers を capture する実装の場合に古い client 値が漏れるのを防ぐ)
+  if (injectedRequestHeaders) {
+    injectedRequestHeaders.delete("x-internal-user-id");
+    injectedRequestHeaders.delete("x-internal-user-email");
+    if (user) {
+      injectedRequestHeaders.set("x-internal-user-id", user.id);
+      injectedRequestHeaders.set("x-internal-user-email", user.email ?? "");
+    }
+    // 常に再生成 (delete だけでも反映を確実にする)。
+    // getUser() 中に setAll が cookie refresh していた場合に備え cookie 移植。
+    const existingCookies = supabaseResponse.cookies.getAll();
+    supabaseResponse = NextResponse.next({
+      request: { headers: injectedRequestHeaders },
+    });
+    existingCookies.forEach((c) => {
+      supabaseResponse.cookies.set(c);
+    });
+  }
+
   return supabaseResponse;
 }

@@ -1,7 +1,7 @@
 import { Header } from "@/components/layouts/header";
 import { Sidebar } from "@/components/layouts/sidebar";
-import { ProfileModal } from "@/components/features/profile/profile-modal";
 // dynamic({ssr:false}) は Next.js 16 で Server Component 禁止 → Client wrapper 経由
+import { LazyProfileModal as ProfileModal } from "@/components/features/profile/profile-modal-client";
 import { LazyGlobalHelpDock as GlobalHelpDock } from "@/components/onboarding/global-help-dock-client";
 
 export default function AuthLayout({

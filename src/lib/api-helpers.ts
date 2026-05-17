@@ -111,13 +111,35 @@ export async function withAuth(
   ensureSameOrigin(request);
 
   const supabase = await createClient();
-  const {
-    data: { user },
-    error,
-  } = await supabase.auth.getUser();
 
-  if (error || !user) {
-    throw new ApiError(401, "UNAUTHORIZED", "認証が必要です");
+  // Phase 2A 高速化: proxy.ts (matcher で /api/* 全カバー) → updateSession が
+  // 既に getUser() で検証した user を内部 header `x-internal-user-id` / `-email`
+  // で受け取り、route 側での再度 getUser() (Supabase ~97ms RTT) を skip する。
+  //
+  // セキュリティ:
+  //   - updateSession 側で client 偽装値を必ず .delete() してから書き直すため
+  //     ここで読む値はサーバが書いた信頼できる値
+  //   - 未認証時は header 自体が無い → fallback の getUser() で 401 を返す
+  //   - supabase client は cookie 経由で RLS context が自動付与されるので
+  //     getUser() を呼ばずとも .from().select() の RLS 認可は維持される
+  const internalUserId = request.headers.get("x-internal-user-id");
+  let user: User;
+  if (internalUserId) {
+    const internalEmail =
+      request.headers.get("x-internal-user-email") || null;
+    // routes が触る field は user.id (169 箇所) + user.email (1 箇所) のみ。
+    // 他 field を要するコードが現れた場合は header を増やすか直接 getUser を使う。
+    user = { id: internalUserId, email: internalEmail ?? undefined } as User;
+  } else {
+    // Fallback: proxy.ts を通っていない経路 (test 環境 / public path 等)
+    const {
+      data: { user: verified },
+      error,
+    } = await supabase.auth.getUser();
+    if (error || !verified) {
+      throw new ApiError(401, "UNAUTHORIZED", "認証が必要です");
+    }
+    user = verified;
   }
 
   // General API rate limit (in-memory fast path)
