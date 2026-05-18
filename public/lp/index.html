@@ -2618,13 +2618,11 @@ setTimeout(function() {
 
 						<div id="wrap">
 
-							<!-- Round 9 (2026-05-13): ユーザー要望でハンバーガーメニューのみ表示。
-							     viewport 幅に関わらず h_menu (横並び nav) を隠し hamburger_btn を常時表示。
-							     ログイン/無料で始める ボタンは sp_menu drawer 内に既に存在するため UX 影響なし。 -->
-							<style id="hamburger-only-override">
-								header .h_menu { display: none !important; }
-								header .hamburger_btn { display: block !important; }
-							</style>
+							<!-- Round 10 (2026-05-18): PC で横並び h_menu を再表示。
+							     Round 9 (2026-05-13) で hamburger-only に切り替えていたが、
+							     PC 訪問者に対するナビ視認性 / コンバージョン低下のためユーザー要望で復元。
+							     元の CSS が responsive (PC: h_menu / SP: hamburger) なので
+							     override を撤去するだけで責務分離が戻る。 -->
 
 							<header>
 								<h1 class="logo"><a href="/"><img src="img/interconnect-logo-header.png" alt="INTER CONNECT | ビジネスコミュニティプラットフォーム" loading="eager" fetchpriority="high"></a></h1>								<nav class="h_menu">
