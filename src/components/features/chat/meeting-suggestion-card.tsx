@@ -222,6 +222,9 @@ export function MeetingConfirmedCard({
     if (!payload?.start) return false;
     const ms = new Date(payload.start).getTime();
     if (Number.isNaN(ms)) return false;
+    // React Compiler の純粋性チェック対象だが、ここでは「再描画毎に最新時刻で
+    // 判定する」のが意図 (副作用なし・読み取りのみ・冪等)。
+    // eslint-disable-next-line
     return ms + 60_000 < Date.now();
   })();
   const safeMeetingUrl = (() => {

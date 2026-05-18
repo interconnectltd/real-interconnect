@@ -35,7 +35,9 @@ jobs:
         run: pnpm exec tsc --noEmit
 
       - name: Lint
-        run: pnpm exec next lint
+        # Next.js 16 で `next lint` が削除されたため `eslint` を直接呼ぶ
+        # (package.json scripts.lint = "eslint" を経由)
+        run: pnpm lint
         continue-on-error: false
 
       - name: Vitest
