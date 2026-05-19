@@ -332,7 +332,7 @@ header.scrolled .h_menu .h_btn_wrap .p_btn_contact:hover {
    高解像度で、 旧ロゴ用に書かれた既存 CSS に max-height/width 制約がなかったため
    等倍で巨大表示されていた。 height 統一 + width: auto で carousel に収まるよう制約。 */
 #banner .splide__slide img {
-  height: 60px !important;
+  height: 100px !important;   /* #campaign の customer-voice-letter (100px) と揃える */
   width: auto !important;
   max-width: 100% !important;
   object-fit: contain;
@@ -340,7 +340,7 @@ header.scrolled .h_menu .h_btn_wrap .p_btn_contact:hover {
 }
 @media (max-width: 768px) {
   #banner .splide__slide img {
-    height: 44px !important;
+    height: 64px !important;
   }
 }
 
