@@ -4211,7 +4211,7 @@ setTimeout(function() {
   letter-spacing: 0.06em;
 }
 
-/* ====== 06: 会話するほどAIプロフィールが育つ ====== */
+/* ====== 06: 行動につながる理由を明確に提示 ====== */
 .flow5 {
   display: grid;
   grid-template-columns: repeat(5, 1fr);
@@ -4428,8 +4428,11 @@ setTimeout(function() {
     </picture>
 
     <picture class="design_image engine_image fade fadeInUp">
-      <source media="(max-width: 768px)" srcset="img/designs/engine-06-ai-profile-sp.png" width="941" height="1672">
-      <img src="img/designs/engine-06-ai-profile-pc.png" alt="06 会話するほど、AIプロフィールが育つ: need_vectors / offer_vectors / expertise_vectors / topic_vectors / engagement_signature が会話のたびに更新され、3ヶ月で減衰、ユーザー編集可能" width="1491" height="1055" loading="lazy" decoding="async">
+      <!-- Round 13 (2026-05-19): セクション 06 を「行動につながる理由を明確に提示」に
+           完全置換。 暫定で SP 縦長画像を PC でも表示 (PC 横長版が未生成のため)。
+           将来 PC 横長 (例 engine-06-reasoning-pc.png) を用意したら picture/source
+           を復活させる。 -->
+      <img src="img/designs/engine-06-ai-profile-sp.png" alt="06 行動につながる理由を明確に提示: スコアの根拠・改善ポイント・次のアクションを明確化し、具体的な改善行動・スコア向上の再現性・社内合意形成のスムーズ化を実現" width="941" height="1672" loading="lazy" decoding="async">
     </picture>
 
   </div>
@@ -4771,77 +4774,49 @@ setTimeout(function() {
       </div>
     </article>
 
-    <!-- ============ 06 会話するほど、AIプロフィールが育つ ============ -->
+    <!-- ============ 06 行動につながる理由を明確に提示 ============ -->
+    <!-- Round 13 (2026-05-19): 旧テーマ「AIプロフィールが育つ」(flow5 + 5 vectors +
+         減衰 grow_cards) を破棄し「行動につながる理由を明確に提示」へ全面差替え。
+         既存 CSS class (.engine_block / .engine_head / .grow_body / .vector_panel
+         / .vector_row / .grow_cards / .grow_card) を流用してスタイル既存維持。 -->
     <article class="engine_block fade fadeInUp">
       <div class="engine_head">
         <span class="engine_num">06</span>
-        <h3 class="engine_title">会話するほど、AIプロフィールが育つ</h3>
-        <p class="engine_sub">会議・会話のたびに、あなたのAIプロフィールは更新され、次の推薦精度が高まります。</p>
+        <h3 class="engine_title">行動につながる理由を明確に提示</h3>
+        <p class="engine_sub">スコアの根拠や改善ポイントを明確に提示することで、次のアクションへ自然につなげます。「なぜこのスコアなのか」「何をすれば上がるのか」を一目で理解できるレポートを提供します。</p>
       </div>
       <div class="engine_visual">
-        <div class="flow5">
-          <div class="flow5_step">
-            <div class="flow5_icon_wrap"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="9" cy="9" r="3"/><circle cx="17" cy="9" r="2"/><path d="M3 21v-1a5 5 0 0110 0v1M14 14s1-2 3-2 3 1 3 1"/></svg></div>
-            <div class="flow5_title">会話・会議</div>
-          </div>
-          <div class="flow5_step">
-            <div class="flow5_icon_wrap"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><path d="M14 2v6h6M8 13h8M8 17h6M8 9h2"/></svg></div>
-            <div class="flow5_title">文字起こし・抽出</div>
-          </div>
-          <div class="flow5_step">
-            <div class="flow5_icon_wrap"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M9.5 2A2.5 2.5 0 007 4.5 2.5 2.5 0 004.5 7 2.5 2.5 0 002 9.5v5A2.5 2.5 0 004.5 17 2.5 2.5 0 007 19.5 2.5 2.5 0 009.5 22h5a2.5 2.5 0 002.5-2.5 2.5 2.5 0 002.5-2.5 2.5 2.5 0 002.5-2.5v-5A2.5 2.5 0 0019.5 7 2.5 2.5 0 0017 4.5 2.5 2.5 0 0014.5 2zM7 14l3-3M12 11l-3 3"/></svg></div>
-            <div class="flow5_title">AIプロフィール更新</div>
-          </div>
-          <div class="flow5_step">
-            <div class="flow5_icon_wrap"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M21 12a9 9 0 11-3-6.7M21 3v5h-5"/></svg></div>
-            <div class="flow5_title">再マッチング</div>
-          </div>
-          <div class="flow5_step">
-            <div class="flow5_icon_wrap"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M3 17l6-6 4 4 8-8"/><path d="M17 7h4v4"/></svg></div>
-            <div class="flow5_title">推薦精度<span class="hl">向上</span></div>
-          </div>
-        </div>
         <div class="grow_body">
           <div class="vector_panel">
-            <span class="vector_label">AIプロフィール</span>
+            <span class="vector_label">提示される内容</span>
             <div class="vector_row">
-              <div class="vector_row_icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="5"/><circle cx="12" cy="12" r="1.5" fill="currentColor"/></svg></div>
-              <div class="vector_row_name">need_vectors</div>
-              <div class="vector_row_desc">いま抱えている課題</div>
+              <div class="vector_row_icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/><path d="M8 13l2-2 1.5 1.5L14 10"/></svg></div>
+              <div class="vector_row_name">スコアの根拠</div>
+              <div class="vector_row_desc">どの要素がスコアに影響しているかを可視化</div>
             </div>
             <div class="vector_row">
-              <div class="vector_row_icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="8" width="18" height="13" rx="1"/><path d="M12 8v13M3 12h18M7 8a2 2 0 110-4 4 4 0 014 4M17 8a2 2 0 100-4 4 4 0 00-4 4"/></svg></div>
-              <div class="vector_row_name">offer_vectors</div>
-              <div class="vector_row_desc">提供できる価値</div>
+              <div class="vector_row_icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 3a7 7 0 00-4 12.5L9 17h6l1-1.5A7 7 0 0012 3z"/><path d="M10 21h4M10 18h4"/></svg></div>
+              <div class="vector_row_name">改善ポイント</div>
+              <div class="vector_row_desc">スコアを向上させる具体的なアドバイス</div>
             </div>
             <div class="vector_row">
-              <div class="vector_row_icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4.4 3.6-8 8-8s8 3.6 8 8z"/><path d="M17 5l1 2 2 .3-1.5 1.3.4 2-1.9-1-2 1 .5-2-1.5-1.4 2-.2z"/></svg></div>
-              <div class="vector_row_name">expertise_vectors</div>
-              <div class="vector_row_desc">専門性・実績</div>
-            </div>
-            <div class="vector_row">
-              <div class="vector_row_icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M21 11.5a8.4 8.4 0 01-.9 3.8 8.5 8.5 0 01-7.6 4.7 8.4 8.4 0 01-3.8-.9L3 21l1.9-5.7a8.4 8.4 0 01-.9-3.8 8.5 8.5 0 014.7-7.6 8.4 8.4 0 013.8-.9h.5a8.5 8.5 0 018 8z"/></svg></div>
-              <div class="vector_row_name">topic_vectors</div>
-              <div class="vector_row_desc">よく話すテーマ</div>
-            </div>
-            <div class="vector_row">
-              <div class="vector_row_icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M14 4v10.5a4 4 0 11-4 0V4a2 2 0 014 0z"/></svg></div>
-              <div class="vector_row_name">engagement_signature</div>
-              <div class="vector_row_desc">会話の温度感・進め方</div>
+              <div class="vector_row_icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M5 12h14M13 5l7 7-7 7"/></svg></div>
+              <div class="vector_row_name">次のアクション</div>
+              <div class="vector_row_desc">優先順位を明確にし、すぐ取り組める行動を提案</div>
             </div>
           </div>
           <div class="grow_cards">
             <div class="grow_card">
-              <div class="grow_card_icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg></div>
-              <div class="grow_card_text">最新の話題ほど<br>強く反映</div>
+              <div class="grow_card_icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="5"/><circle cx="12" cy="12" r="1.5" fill="currentColor"/></svg></div>
+              <div class="grow_card_text">具体的な改善行動が<br>明確になる</div>
             </div>
             <div class="grow_card">
-              <div class="grow_card_icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 9h18M8 3v4M16 3v4"/></svg></div>
-              <div class="grow_card_text">3ヶ月経過で<br>徐々に減衰</div>
+              <div class="grow_card_icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M3 17l6-6 4 4 8-8"/><path d="M17 7h4v4"/></svg></div>
+              <div class="grow_card_text">スコア向上の<br>再現性が高まる</div>
             </div>
             <div class="grow_card">
-              <div class="grow_card_icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="9" cy="8" r="4"/><path d="M3 21c0-3.3 2.7-6 6-6s6 2.7 6 6"/><circle cx="18" cy="14" r="3"/><path d="M18 11v-1M18 18v-1M21 14h-1M15 14h-1"/></svg></div>
-              <div class="grow_card_text">ユーザーが<br>非表示・修正可能</div>
+              <div class="grow_card_icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="9" cy="8" r="3"/><circle cx="17" cy="8" r="3"/><path d="M3 21c0-3 2.7-5 6-5s6 2 6 5M11 21c0-3 2.7-5 6-5s4 2 4 5"/></svg></div>
+              <div class="grow_card_text">社内での合意形成が<br>スムーズに</div>
             </div>
           </div>
         </div>
