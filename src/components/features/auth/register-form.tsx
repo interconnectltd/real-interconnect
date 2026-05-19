@@ -313,9 +313,11 @@ export function RegisterForm() {
       log.warn("[register] legal/accept failed", e);
     }
 
-    log.info("[register] redirect to /login?registered=true");
+    // 新規登録成功 → 確認メール送信案内画面へ (Resend 経由で送信される)。
+    // 既存メールの silent redirect は上 (anti-enumeration) で `/login?registered=true` を維持。
+    log.info("[register] redirect to /register/sent");
     log.groupEnd();
-    router.push("/login?registered=true");
+    router.push(`/register/sent?email=${encodeURIComponent(data.email)}`);
   }
 
   return (

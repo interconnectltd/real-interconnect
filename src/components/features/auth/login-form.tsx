@@ -126,12 +126,23 @@ export function LoginForm() {
     }
     setResending(true);
     try {
-      const supabase = createClient();
-      const { error: resendErr } = await supabase.auth.resend({
-        type: "signup",
-        email,
+      // client 直叩き (anon supabase.auth.resend) は rate-limit 不在 + 文言ばらつき。
+      // server route 経由に統一: IP 軸 10/h + email 軸 3/h で多層 limit + timing 防御 + 常に generic レスポンス。
+      const res = await fetch("/api/v1/auth/resend-confirmation", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email }),
       });
-      if (resendErr) throw resendErr;
+      if (res.status === 429) {
+        toast.error(
+          "再送回数が多すぎます。1 時間ほど経ってから再度お試しください。",
+        );
+        return;
+      }
+      if (!res.ok) {
+        toast.error("再送に失敗しました。しばらくしてから再度お試しください");
+        return;
+      }
       toast.success("確認メールを再送しました。受信トレイをご確認ください");
     } catch {
       toast.error("再送に失敗しました。しばらくしてから再度お試しください");
