@@ -48,7 +48,7 @@ export async function GET(request: Request) {
     // 相互 connection 経由のみ SELECT 可、authenticated client で十分
     const { data: profiles } = await supabase
       .from("user_profiles")
-      .select("id, name, company, avatar_url")
+      .select("id, name, company, avatar_url, is_agency")
       .in("id", otherUserIds)
       .abortSignal(request.signal);
 

@@ -44,7 +44,7 @@ export async function GET(
     const { data: profile, error: profileErr } = await supabase
       .from("user_profiles")
       .select(
-        "id, name, email, company, position, industry, bio, avatar_url, is_admin, is_active, onboarding_step, created_at, updated_at",
+        "id, name, email, company, position, industry, bio, avatar_url, is_admin, is_active, is_agency, onboarding_step, created_at, updated_at",
       )
       .eq("id", id)
       .maybeSingle();

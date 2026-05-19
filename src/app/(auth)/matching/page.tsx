@@ -3,6 +3,7 @@
 import { useMemo } from "react";
 import Image from "next/image";
 import { ConnectedActions } from "@/components/shared/connected-actions";
+import { AgencyBadge } from "@/components/shared/agency-badge";
 import {
   Heart,
   UserPlus,
@@ -486,6 +487,7 @@ function MutualCard({
               <div className="min-w-0 flex-1">
                 <div className="flex flex-wrap items-center gap-x-2 gap-y-1">
                   <p className="truncate text-base font-medium text-foreground">{name}</p>
+                  <AgencyBadge isAgency={p?.is_agency} size="sm" />
                   {isSelf && (
                     <Badge
                       variant="outline"
@@ -634,6 +636,7 @@ function ScoreCard({
               <div className="min-w-0 flex-1">
                 <div className="flex flex-wrap items-center gap-x-2 gap-y-1">
                   <p className="truncate text-base font-medium text-foreground">{name}</p>
+                  <AgencyBadge isAgency={p?.is_agency} size="sm" />
                   {isSelf && (
                     <Badge
                       variant="outline"

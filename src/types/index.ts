@@ -16,6 +16,7 @@ export interface Profile {
   contact_info: string | null;
   is_admin: boolean;
   is_active: boolean;
+  is_agency: boolean;
   created_at: string;
   updated_at: string;
 }

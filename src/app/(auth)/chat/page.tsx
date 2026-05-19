@@ -15,6 +15,7 @@ import {
 import { ChatMessages } from "@/components/features/chat/chat-messages";
 import { ChatInput } from "@/components/features/chat/chat-input";
 import { ChatConsentBanner } from "@/components/features/chat/chat-consent-banner";
+import { AgencyBadge } from "@/components/shared/agency-badge";
 
 function ChatPageInner() {
   const { user, supabase } = useSupabase();
@@ -186,9 +187,18 @@ function ChatPageInner() {
                     </div>
                   )}
                   <div className="min-w-0">
-                    <p className="truncate text-sm font-medium">
-                      {selectedRoom.other_user.name ?? "ユーザー"}
-                    </p>
+                    <div className="flex items-center gap-1">
+                      <p className="truncate text-sm font-medium">
+                        {selectedRoom.other_user.name ?? "ユーザー"}
+                      </p>
+                      <AgencyBadge
+                        isAgency={
+                          (selectedRoom.other_user as { is_agency?: boolean | null })
+                            .is_agency
+                        }
+                        size="sm"
+                      />
+                    </div>
                     {selectedRoom.other_user.company && (
                       <p className="truncate text-xs text-muted-foreground">
                         {selectedRoom.other_user.company}

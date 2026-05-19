@@ -37,7 +37,9 @@ export type AuditAction =
   | "admin.user.unsuspend"
   | "admin.user.delete"
   | "admin.role.grant"
-  | "admin.role.revoke";
+  | "admin.role.revoke"
+  | "admin.user.grant_agency_badge"
+  | "admin.user.revoke_agency_badge";
 
 export type AuditLogParams = {
   actor_id: string;

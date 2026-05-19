@@ -22,6 +22,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { UserAvatar } from "@/components/shared/user-avatar";
+import { AgencyBadge } from "@/components/shared/agency-badge";
 import { useMembers } from "@/hooks/queries/use-members";
 import { useBookmarks } from "@/hooks/queries/use-bookmarks";
 import { useToggleBookmark } from "@/hooks/mutations/use-toggle-bookmark";
@@ -414,14 +415,17 @@ function MemberCard({
             </button>
           </div>
 
-          {member.industry && (
-            <Badge
-              variant="outline"
-              className="h-6 border-accent/25 bg-accent/5 px-2.5 text-xs font-medium text-accent-strong"
-            >
-              {member.industry}
-            </Badge>
-          )}
+          <div className="flex flex-wrap items-center gap-1.5">
+            {member.industry && (
+              <Badge
+                variant="outline"
+                className="h-6 border-accent/25 bg-accent/5 px-2.5 text-xs font-medium text-accent-strong"
+              >
+                {member.industry}
+              </Badge>
+            )}
+            <AgencyBadge isAgency={member.is_agency} />
+          </div>
           {member.bio && (
             <p className="line-clamp-2 text-xs leading-relaxed text-muted-foreground">
               {member.bio}

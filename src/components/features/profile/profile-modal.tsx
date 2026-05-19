@@ -20,6 +20,7 @@ import { useRequestConnection } from "@/hooks/mutations/use-request-connection";
 import { useToggleBookmark } from "@/hooks/mutations/use-toggle-bookmark";
 import { useRequestMeeting } from "@/hooks/mutations/use-request-meeting";
 import { ConnectedActions } from "@/components/shared/connected-actions";
+import { AgencyBadge } from "@/components/shared/agency-badge";
 import { api } from "@/lib/api-client";
 // V2: SCORE_AXIS_LABELS 不要（おすすめ度のみ表示）
 import { ScoreBar, ReasonList } from "@/components/shared/score-bar";
@@ -136,7 +137,10 @@ export function ProfileModal() {
                   size="lg"
                 />
                 <div>
-                  <DialogTitle className="text-xl">{profile.name}</DialogTitle>
+                  <div className="flex flex-wrap items-center gap-2">
+                    <DialogTitle className="text-xl">{profile.name}</DialogTitle>
+                    <AgencyBadge isAgency={profile.is_agency} />
+                  </div>
                   <div className="flex items-center gap-2 text-sm text-muted-foreground">
                     {profile.company && <span>{profile.company}</span>}
                     {profile.position && (

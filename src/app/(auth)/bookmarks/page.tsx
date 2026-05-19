@@ -22,6 +22,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { UserAvatar } from "@/components/shared/user-avatar";
+import { AgencyBadge } from "@/components/shared/agency-badge";
 
 interface BookmarkRow {
   id: string;
@@ -36,6 +37,7 @@ interface BookmarkRow {
     industry: string | null;
     bio: string | null;
     avatar_url: string | null;
+    is_agency: boolean | null;
   } | null;
 }
 
@@ -162,9 +164,12 @@ export default function BookmarksPage() {
                             size="md"
                           />
                           <div className="min-w-0 flex-1">
-                            <p className="truncate text-base font-medium text-foreground">
-                              {p.name}
-                            </p>
+                            <div className="flex flex-wrap items-center gap-1.5">
+                              <p className="truncate text-base font-medium text-foreground">
+                                {p.name}
+                              </p>
+                              <AgencyBadge isAgency={p.is_agency} size="sm" />
+                            </div>
                             <p className="mt-0.5 truncate text-xs text-muted-foreground">
                               {[p.company, p.position]
                                 .filter(Boolean)

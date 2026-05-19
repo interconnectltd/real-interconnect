@@ -64,6 +64,7 @@ export interface Database {
           timezone: string;
           is_admin: boolean;
           is_active: boolean;
+          is_agency: boolean;
           linkedin_id: string | null;
           created_at: string;
           updated_at: string;
@@ -82,6 +83,7 @@ export interface Database {
           timezone?: string;
           is_admin?: boolean;
           is_active?: boolean;
+          is_agency?: boolean;
         };
         Update: Partial<Database["public"]["Tables"]["user_profiles"]["Insert"]>;
         Relationships: [];

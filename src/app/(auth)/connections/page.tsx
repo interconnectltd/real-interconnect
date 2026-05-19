@@ -19,6 +19,7 @@ import { useConnections } from "@/hooks/queries/use-connections";
 import { useUpdateConnection } from "@/hooks/mutations/use-update-connection";
 import { useFeedbackStatus } from "@/hooks/queries/use-feedback-status";
 import { FeedbackModal } from "@/components/shared/feedback-modal";
+import { AgencyBadge } from "@/components/shared/agency-badge";
 import { useFilterStore } from "@/stores/filter-store";
 import { useSupabase } from "@/providers/supabase-provider";
 import { api } from "@/lib/api-client";
@@ -142,7 +143,10 @@ export default function ConnectionsPage() {
               <Card key={conn.id}>
                 <CardContent className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between p-4">
                   <div className="min-w-0">
-                    <p className="truncate font-medium">{profile?.name ?? "ユーザー"}</p>
+                    <div className="flex items-center gap-1.5">
+                      <p className="truncate font-medium">{profile?.name ?? "ユーザー"}</p>
+                      <AgencyBadge isAgency={profile?.is_agency} size="sm" />
+                    </div>
                     <p className="text-xs text-muted-foreground">
                       {profile?.company}
                       {profile?.position ? ` / ${profile.position}` : ""}

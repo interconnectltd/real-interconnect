@@ -11,8 +11,9 @@ import { useState, useEffect, use } from "react";
 import { useQuery } from "@tanstack/react-query";
 import Link from "next/link";
 import {
-  ArrowLeft, Loader2, ShieldCheck, AlertTriangle, Info,
+  ArrowLeft, Loader2, ShieldCheck, AlertTriangle, Info, Briefcase,
 } from "lucide-react";
+import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { api } from "@/lib/api-client";
@@ -30,6 +31,7 @@ interface UserDetail {
     avatar_url: string | null;
     is_admin: boolean;
     is_active: boolean;
+    is_agency: boolean;
     onboarding_step: number | null;
     created_at: string;
     updated_at: string | null;
@@ -91,7 +93,7 @@ export default function AdminUserDetailPage({
     if (cached) setReason(cached);
   }, [id]);
 
-  const { data, isLoading, isError, error } = useQuery({
+  const { data, isLoading, isError, error, refetch } = useQuery({
     queryKey: ["admin-user-detail", id, reason],
     queryFn: () =>
       // reason はヘッダ経由で送信 (URL 履歴 / Referer leak 回避)
@@ -100,6 +102,28 @@ export default function AdminUserDetailPage({
       }),
     enabled: Boolean(reason),
   });
+
+  // 代理店バッジ付与/解除 (PATCH → audit_logs に admin.user.grant_agency_badge を残す)
+  const [agencyLoading, setAgencyLoading] = useState(false);
+  async function toggleAgencyBadge() {
+    if (!data) return;
+    const grant = !data.profile.is_agency;
+    setAgencyLoading(true);
+    try {
+      await api.patch<{ id: string; is_agency: boolean }>(
+        `/admin/users/${id}/agency-badge`,
+        { grant },
+      );
+      toast.success(grant ? "代理店バッジを付与しました" : "代理店バッジを解除しました");
+      await refetch();
+    } catch (e) {
+      const msg =
+        e instanceof ApiError ? e.message : "更新に失敗しました。少し待ってから再試行してください。";
+      toast.error(msg);
+    } finally {
+      setAgencyLoading(false);
+    }
+  }
 
   function submitReason() {
     const trimmed = reasonInput.trim();
@@ -215,6 +239,15 @@ export default function AdminUserDetailPage({
                 </Badge>
               )}
               {!data.profile.is_active && <Badge variant="destructive">停止中</Badge>}
+              {data.profile.is_agency && (
+                <Badge
+                  variant="outline"
+                  className="border-amber-300 bg-amber-50 text-amber-800 dark:border-amber-700 dark:bg-amber-950 dark:text-amber-200"
+                >
+                  <Briefcase className="mr-1 h-3 w-3" aria-hidden="true" />
+                  代理店
+                </Badge>
+              )}
               {(data.profile.onboarding_step ?? 0) < 3 && (
                 <Badge variant="secondary">オンボ未完了</Badge>
               )}
@@ -256,6 +289,32 @@ export default function AdminUserDetailPage({
                 自己紹介が未入力です
               </p>
             )}
+          </section>
+
+          {/* 管理アクション — 代理店バッジ付与/解除 */}
+          <section className="mb-6 rounded-lg border bg-card p-4 shadow-sm">
+            <h2 className="mb-2 text-sm font-bold">管理アクション</h2>
+            <div className="flex flex-wrap items-center justify-between gap-3">
+              <div className="text-sm">
+                <p className="font-medium">代理店バッジ</p>
+                <p className="text-xs text-muted-foreground">
+                  付与すると member 一覧・マッチング・プロフィール等に「代理店」バッジが表示されます。
+                </p>
+              </div>
+              <Button
+                type="button"
+                size="sm"
+                variant={data.profile.is_agency ? "outline" : "default"}
+                onClick={toggleAgencyBadge}
+                disabled={agencyLoading}
+                aria-busy={agencyLoading}
+              >
+                {agencyLoading && (
+                  <Loader2 className="h-3.5 w-3.5 animate-spin" aria-hidden="true" />
+                )}
+                {data.profile.is_agency ? "バッジを解除" : "バッジを付与"}
+              </Button>
+            </div>
           </section>
 
           {/* Goals / Offerings */}
