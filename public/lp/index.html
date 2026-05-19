@@ -327,6 +327,23 @@ header.scrolled .h_menu .h_btn_wrap .p_btn_contact:hover {
   background-color: transparent !important;
 }
 
+/* Round 14 (2026-05-19): #banner 社名ロゴのサイズ統一。
+   新ロゴ画像 (Moinpros / Makuake / AO SOGO / サブルートAS / TONAKAI) は 2116x743 等
+   高解像度で、 旧ロゴ用に書かれた既存 CSS に max-height/width 制約がなかったため
+   等倍で巨大表示されていた。 height 統一 + width: auto で carousel に収まるよう制約。 */
+#banner .splide__slide img {
+  height: 60px !important;
+  width: auto !important;
+  max-width: 100% !important;
+  object-fit: contain;
+  display: block;
+}
+@media (max-width: 768px) {
+  #banner .splide__slide img {
+    height: 44px !important;
+  }
+}
+
 /* フッターロゴ白色化 */
 footer .bottom_block .img_block img {
   filter: brightness(0) invert(1);
