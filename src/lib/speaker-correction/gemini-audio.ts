@@ -34,6 +34,23 @@ interface ClassifyOptions {
 const RETRY_REGEX = /503|429|500|ECONNRESET|fetch failed/i;
 
 /**
+ * セグメント中央付近から音声クリップを取り出すための ffmpeg 引数を計算。
+ * PoC `5-verify-voice.ts` の挙動を完全再現:
+ *   useDur = max(1, min(targetClipSec, duration - 0.3))   // 端は被り発話で他者の声混入を避けて 0.3 秒削る
+ *   midSec = startSec + max(0, (duration - useDur) / 2)   // 中央寄せ
+ */
+export function computeAudioExtractParams(
+  segmentStartSec: number,
+  segmentEndSec: number,
+  targetClipSec: number,
+): { startSec: number; durationSec: number } {
+  const duration = segmentEndSec - segmentStartSec;
+  const durationSec = Math.max(1, Math.min(targetClipSec, duration - 0.3));
+  const startSec = segmentStartSec + Math.max(0, (duration - durationSec) / 2);
+  return { startSec, durationSec };
+}
+
+/**
  * 検証音声 (clip) が参照声 (refs) のどれと一致するかを判定。
  * 「声質類似度」のみで判定するようプロンプト指示 (内容・役割の解釈を抑制)。
  */

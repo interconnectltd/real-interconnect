@@ -9,3 +9,4 @@ export * from "./pool";
 export * from "./ffmpeg";
 export * from "./gemini-vision";
 export * from "./gemini-audio";
+export * from "./correct";
