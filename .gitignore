@@ -53,3 +53,9 @@ supabase/_apply/
 
 # eval runner outputs (predictions/ は committed)
 /tests/eval/**/results/*.json
+
+# tldv-speaker-fix: meeting recordings & extracted frames (do not commit)
+*.mp4
+scripts/tldv-speaker-fix/samples/
+scripts/tldv-speaker-fix/frames/
+scripts/tldv-speaker-fix/output/

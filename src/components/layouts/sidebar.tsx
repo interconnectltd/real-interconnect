@@ -23,10 +23,13 @@ import {
   ScrollText,
   Bookmark,
   ShieldAlert,
+  Briefcase,
+  ListChecks,
   type LucideIcon,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useMyProfile } from "@/hooks/queries/use-profile";
+import { useAgencyMe } from "@/hooks/queries/use-agency";
 
 interface NavItem {
   href: string;
@@ -92,10 +95,22 @@ const adminGroup: NavGroup = {
   items: [
     { href: "/admin/dashboard", label: "ダッシュボード", icon: LayoutGrid },
     { href: "/admin/users", label: "ユーザー", icon: Users },
+    { href: "/admin/agency", label: "代理店申請", icon: ListChecks },
     { href: "/admin/contacts", label: "お問い合わせ", icon: MessageCircle },
     { href: "/admin/data-rights", label: "データ権利請求", icon: ShieldAlert },
     { href: "/admin/import-requests", label: "取込申請", icon: Inbox },
     { href: "/admin/audit-logs", label: "監査ログ", icon: ScrollText },
+  ],
+};
+
+// is_agency=true かつ status=approved のユーザーにだけ表示される代理店セクション。
+// amber accent で運営 (emerald) とも通常ナビとも区別。
+const agencyGroup: NavGroup = {
+  id: "agency",
+  label: "代理店",
+  icon: Briefcase,
+  items: [
+    { href: "/agency", label: "ダッシュボード", icon: LayoutGrid },
   ],
 };
 
@@ -108,15 +123,23 @@ function isPathInGroup(pathname: string, group: NavGroup): boolean {
 export function Sidebar({ onNavigate }: { onNavigate?: () => void }) {
   const pathname = usePathname();
   const { data: myProfile } = useMyProfile();
+  const { data: agencyData } = useAgencyMe();
   const isAdmin = Boolean(myProfile?.is_admin);
+  const isAgency = Boolean(
+    agencyData?.agency && agencyData.agency.status === "approved",
+  );
 
   // 現在ページが含まれる group だけ default で open、他は閉じる
   const initialOpen = useMemo(() => {
     const set = new Set<string>();
-    const all = isAdmin ? [...navGroups, adminGroup] : navGroups;
+    const all = [
+      ...navGroups,
+      ...(isAgency ? [agencyGroup] : []),
+      ...(isAdmin ? [adminGroup] : []),
+    ];
     for (const g of all) if (isPathInGroup(pathname, g)) set.add(g.id);
     return set;
-  }, [pathname, isAdmin]);
+  }, [pathname, isAdmin, isAgency]);
 
   const [openGroups, setOpenGroups] = useState<Set<string>>(initialOpen);
 
@@ -195,6 +218,24 @@ export function Sidebar({ onNavigate }: { onNavigate?: () => void }) {
         );
       })}
 
+      {/* ── 代理店セクション (is_agency=approved のみ) ──
+       * amber accent で運営とも通常ナビとも区別。
+       */}
+      {isAgency && (
+        <div className="mt-3 border-t border-border pt-3">
+          <p className="mb-1 px-3 text-[10px] font-bold uppercase tracking-[0.18em] text-amber-700 dark:text-amber-300">
+            Agency
+          </p>
+          <AgencyGroup
+            group={agencyGroup}
+            pathname={pathname}
+            isOpen={openGroups.has(agencyGroup.id)}
+            onToggle={() => toggle(agencyGroup.id)}
+            onNavigate={onNavigate}
+          />
+        </div>
+      )}
+
       {/* ── 運営セクション (admin のみ) ──
        * 通常ナビと罫線で視覚的に区切り、ラベル/アクセントを emerald 系に
        * 切り替えて「権限スコープが違う領域」だと一目で分かるようにする。
@@ -215,6 +256,83 @@ export function Sidebar({ onNavigate }: { onNavigate?: () => void }) {
         </div>
       )}
     </nav>
+  );
+}
+
+function AgencyGroup({
+  group,
+  pathname,
+  isOpen,
+  onToggle,
+  onNavigate,
+}: {
+  group: NavGroup;
+  pathname: string;
+  isOpen: boolean;
+  onToggle: () => void;
+  onNavigate?: () => void;
+}) {
+  const groupActive = isPathInGroup(pathname, group);
+  const panelId = `nav-group-${group.id}`;
+
+  return (
+    <div className="flex flex-col">
+      <button
+        type="button"
+        onClick={onToggle}
+        aria-expanded={isOpen}
+        aria-controls={panelId}
+        className={cn(
+          "flex min-h-11 items-center justify-between gap-3 rounded-md px-3 py-2.5 text-sm font-medium transition-colors",
+          "focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/70",
+          groupActive
+            ? "text-amber-700 dark:text-amber-300"
+            : "text-muted-foreground hover:bg-amber-50/60 hover:text-amber-700 dark:hover:bg-amber-950/30 dark:hover:text-amber-300",
+        )}
+      >
+        <span className="flex items-center gap-3">
+          <group.icon className="h-4 w-4 shrink-0" aria-hidden="true" />
+          {group.label}
+        </span>
+        <ChevronDown
+          className={cn(
+            "h-3.5 w-3.5 shrink-0 text-muted-foreground transition-transform duration-200 ease-out",
+            isOpen && "rotate-180",
+          )}
+          aria-hidden="true"
+        />
+      </button>
+
+      {isOpen && (
+        <div
+          id={panelId}
+          role="region"
+          className="ml-3 mt-0.5 flex flex-col gap-0.5 border-l border-amber-300/50 pl-2 dark:border-amber-800/60"
+        >
+          {group.items.map((item) => {
+            const isActive =
+              pathname === item.href || pathname.startsWith(item.href + "/");
+            return (
+              <Link
+                key={item.href}
+                href={item.href}
+                onClick={onNavigate}
+                aria-current={isActive ? "page" : undefined}
+                className={cn(
+                  "flex min-h-11 items-center gap-3 rounded-md px-3 py-2 text-sm transition-colors",
+                  isActive
+                    ? "bg-amber-100/80 font-medium text-amber-800 dark:bg-amber-950/50 dark:text-amber-200"
+                    : "text-muted-foreground hover:bg-amber-50/60 hover:text-amber-700 dark:hover:bg-amber-950/30 dark:hover:text-amber-300",
+                )}
+              >
+                <item.icon className="h-4 w-4 shrink-0" aria-hidden="true" />
+                {item.label}
+              </Link>
+            );
+          })}
+        </div>
+      )}
+    </div>
   );
 }
 

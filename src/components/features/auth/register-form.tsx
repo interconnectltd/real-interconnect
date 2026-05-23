@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import { useForm, useWatch } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { AlertCircle, ChevronDown, Loader2, ShieldCheck } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -100,6 +100,8 @@ const log = {
 
 export function RegisterForm() {
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const refCode = searchParams.get("ref")?.trim() ?? null;
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [activeStep, setActiveStep] = useState<1 | 2 | 3 | 4>(1);
@@ -226,6 +228,8 @@ export function RegisterForm() {
           industry: data.industry,
           bio: data.bio ?? "",
           invitation_code: data.invitationCode.trim(),
+          // 紹介リンク経由の場合 referral code を埋め込む。trigger handle_referral_attribution が消費
+          referral_code: refCode ?? "",
         },
       },
     });

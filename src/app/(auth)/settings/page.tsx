@@ -58,6 +58,8 @@ import {
 } from "@/components/ui/dialog";
 import { useSupabase } from "@/providers/supabase-provider";
 import { useAnalysisCount } from "@/hooks/queries/use-ai-profile";
+import { useAgencyMe, useAgencyApplication } from "@/hooks/queries/use-agency";
+import { useApplyAgency } from "@/hooks/mutations/use-agency-mutations";
 import { useQuery } from "@tanstack/react-query";
 import { api } from "@/lib/api-client";
 import { toast } from "sonner";
@@ -170,6 +172,50 @@ export default function SettingsPage() {
   const { supabase, user } = useSupabase();
   const router = useRouter();
   const { data: analysisCount } = useAnalysisCount();
+
+  // 代理店プログラム関連 (00063)
+  const { data: agencyMe } = useAgencyMe();
+  const { data: agencyApp } = useAgencyApplication();
+  const applyAgency = useApplyAgency();
+  const [applicantNote, setApplicantNote] = useState("");
+  const [agencyApplyOpen, setAgencyApplyOpen] = useState(false);
+
+  // Stripe 課金 (00064)
+  const { data: subData } = useQuery({
+    queryKey: ["subscription-me"],
+    queryFn: () =>
+      api.get<{ subscription: { status: string; cancel_at_period_end: boolean; current_period_end: string | null } | null }>(
+        "/billing/subscription",
+      ),
+    staleTime: 30_000,
+  });
+  const [billingLoading, setBillingLoading] = useState(false);
+  async function handleSubscribe() {
+    setBillingLoading(true);
+    try {
+      const res = await api.post<{ url: string }>("/billing/checkout");
+      if (res?.url) window.location.href = res.url;
+    } catch (e) {
+      toast.error(
+        e instanceof Error ? e.message : "決済画面の作成に失敗しました",
+      );
+    } finally {
+      setBillingLoading(false);
+    }
+  }
+  async function handlePortal() {
+    setBillingLoading(true);
+    try {
+      const res = await api.post<{ url: string }>("/billing/portal");
+      if (res?.url) window.location.href = res.url;
+    } catch (e) {
+      toast.error(
+        e instanceof Error ? e.message : "管理画面の作成に失敗しました",
+      );
+    } finally {
+      setBillingLoading(false);
+    }
+  }
 
   // tl;dv 連携メタ情報 (last_analyzed_at) — 設定画面で「次回会議で再分析」期待値に使う
   const { data: aiProfileMeta } = useQuery({
@@ -795,6 +841,68 @@ export default function SettingsPage() {
         </CardContent>
       </Card>
 
+      {/* Subscription / Billing (00064) */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2 text-base">
+            <KeyRound className="h-5 w-5" />
+            プラン / 課金
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-3 text-sm">
+          {subData?.subscription?.status === "active" ||
+          subData?.subscription?.status === "trialing" ? (
+            <>
+              <p className="text-emerald-700 dark:text-emerald-300">
+                Standard プラン {subData.subscription.status === "trialing" ? "(トライアル中)" : "(有効)"}
+              </p>
+              {subData.subscription.cancel_at_period_end && (
+                <p className="text-xs text-orange-700 dark:text-orange-300">
+                  期間終了時に解約されます
+                </p>
+              )}
+              <Button
+                size="sm"
+                variant="outline"
+                onClick={handlePortal}
+                disabled={billingLoading}
+                aria-busy={billingLoading}
+              >
+                {billingLoading ? (
+                  <>
+                    <Loader2 className="mr-1.5 h-3.5 w-3.5 animate-spin" />
+                    遷移中
+                  </>
+                ) : (
+                  "プランを管理 (Stripe)"
+                )}
+              </Button>
+            </>
+          ) : (
+            <>
+              <p className="text-xs leading-relaxed text-muted-foreground">
+                Standard プラン ¥30,000/月 でマッチング/AI 推薦/コネクション機能をフル活用できます。
+              </p>
+              <Button
+                size="sm"
+                onClick={handleSubscribe}
+                disabled={billingLoading}
+                aria-busy={billingLoading}
+              >
+                {billingLoading ? (
+                  <>
+                    <Loader2 className="mr-1.5 h-3.5 w-3.5 animate-spin" />
+                    遷移中
+                  </>
+                ) : (
+                  "プランに申し込む"
+                )}
+              </Button>
+            </>
+          )}
+        </CardContent>
+      </Card>
+
       {/* AI Profile link */}
       <Card>
         <CardHeader>
@@ -822,6 +930,113 @@ export default function SettingsPage() {
           </Button>
         </CardContent>
       </Card>
+
+      {/* 代理店プログラム (00063) */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2 text-base">
+            <Handshake className="h-5 w-5" />
+            代理店プログラム
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-3 text-sm">
+          {agencyMe?.agency?.status === "approved" ? (
+            <>
+              <p className="text-emerald-700 dark:text-emerald-300">
+                承認済み代理店として有効です。
+              </p>
+              <Button size="sm" variant="outline" render={<Link href="/agency" />}>
+                代理店ダッシュボードへ
+                <ChevronRight className="ml-1 h-3.5 w-3.5" />
+              </Button>
+            </>
+          ) : agencyMe?.agency?.status === "suspended" ? (
+            <p className="text-orange-700 dark:text-orange-300">
+              代理店資格は現在停止されています。サポートまでお問い合わせください。
+            </p>
+          ) : agencyApp?.application?.status === "pending" ? (
+            <p className="text-muted-foreground">
+              申請を受け付けました。承認をお待ちください。
+            </p>
+          ) : agencyApp?.application?.status === "rejected" ? (
+            <>
+              <p className="text-muted-foreground">
+                前回の申請は却下されました
+                {agencyApp.application.admin_note
+                  ? ` (理由: ${agencyApp.application.admin_note})`
+                  : ""}
+                。
+              </p>
+              <Button size="sm" onClick={() => setAgencyApplyOpen(true)}>
+                再申請する
+              </Button>
+            </>
+          ) : (
+            <>
+              <p className="text-xs leading-relaxed text-muted-foreground">
+                紹介リンクを発行し、新規ユーザー獲得時にコミッションを受け取れる
+                代理店プログラムに申請できます。無料会員でも申請可能です。
+              </p>
+              <Button size="sm" onClick={() => setAgencyApplyOpen(true)}>
+                代理店として申請する
+              </Button>
+            </>
+          )}
+        </CardContent>
+      </Card>
+
+      <Dialog open={agencyApplyOpen} onOpenChange={setAgencyApplyOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>代理店プログラム申請</DialogTitle>
+            <DialogDescription>
+              申請理由を任意で記入してください (5-2000字、空欄でも可)。
+              承認後、紹介リンクの発行と紹介管理が可能になります。
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-2 py-2">
+            <Label htmlFor="agency-applicant-note">申請理由 (任意)</Label>
+            <textarea
+              id="agency-applicant-note"
+              value={applicantNote}
+              onChange={(e) => setApplicantNote(e.target.value)}
+              placeholder="例: 経営者コミュニティを運営しており、メンバーに紹介したい"
+              maxLength={2000}
+              rows={5}
+              className="w-full rounded-md border bg-background px-3 py-2 text-sm focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/70"
+            />
+            <p className="text-right text-xs text-muted-foreground">
+              {applicantNote.length} / 2000
+            </p>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setAgencyApplyOpen(false)}>
+              キャンセル
+            </Button>
+            <Button
+              disabled={applyAgency.isPending}
+              aria-busy={applyAgency.isPending}
+              onClick={async () => {
+                const note = applicantNote.trim();
+                await applyAgency.mutateAsync({
+                  applicant_note: note.length >= 5 ? note : undefined,
+                });
+                setAgencyApplyOpen(false);
+                setApplicantNote("");
+              }}
+            >
+              {applyAgency.isPending ? (
+                <>
+                  <Loader2 className="mr-1.5 h-3.5 w-3.5 animate-spin" />
+                  送信中
+                </>
+              ) : (
+                "申請する"
+              )}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
 
       {/* tl;dv connection
         * 注: tl;dv API は 単一テナント (TLDV_API_KEY env) で動作する。

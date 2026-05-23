@@ -66,6 +66,7 @@ export interface Database {
           is_active: boolean;
           is_agency: boolean;
           linkedin_id: string | null;
+          stripe_customer_id: string | null;
           created_at: string;
           updated_at: string;
         };
@@ -84,6 +85,7 @@ export interface Database {
           is_admin?: boolean;
           is_active?: boolean;
           is_agency?: boolean;
+          stripe_customer_id?: string | null;
         };
         Update: Partial<Database["public"]["Tables"]["user_profiles"]["Insert"]>;
         Relationships: [];
@@ -1042,6 +1044,261 @@ export interface Database {
         Update: Partial<Database["public"]["Tables"]["judge_quota_log"]["Insert"]>;
         Relationships: [];
       };
+      agencies: {
+        Row: {
+          user_id: string;
+          status: "pending" | "approved" | "suspended" | "rejected";
+          applied_at: string;
+          approved_at: string | null;
+          approved_by: string | null;
+          suspended_at: string | null;
+          suspended_by: string | null;
+          total_clicks: number;
+          total_referrals: number;
+          total_earnings_jpy: number;
+          current_balance_jpy: number;
+          current_rank: "bronze" | "silver" | "gold" | "platinum" | "diamond";
+          payout_method: string | null;
+          payout_info_encrypted: string | null;
+          min_withdrawal_jpy: number;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          user_id: string;
+          status?: "pending" | "approved" | "suspended" | "rejected";
+          approved_at?: string | null;
+          approved_by?: string | null;
+          suspended_at?: string | null;
+          suspended_by?: string | null;
+          total_clicks?: number;
+          total_referrals?: number;
+          total_earnings_jpy?: number;
+          current_balance_jpy?: number;
+          current_rank?: "bronze" | "silver" | "gold" | "platinum" | "diamond";
+          payout_method?: string | null;
+          payout_info_encrypted?: string | null;
+          min_withdrawal_jpy?: number;
+        };
+        Update: {
+          status?: "pending" | "approved" | "suspended" | "rejected";
+          approved_at?: string | null;
+          approved_by?: string | null;
+          suspended_at?: string | null;
+          suspended_by?: string | null;
+          total_clicks?: number;
+          total_referrals?: number;
+          total_earnings_jpy?: number;
+          current_balance_jpy?: number;
+          current_rank?: "bronze" | "silver" | "gold" | "platinum" | "diamond";
+          payout_method?: string | null;
+          payout_info_encrypted?: string | null;
+          min_withdrawal_jpy?: number;
+        };
+        Relationships: [];
+      };
+      agency_applications: {
+        Row: {
+          id: string;
+          applicant_id: string;
+          status: "pending" | "approved" | "rejected";
+          applicant_note: string | null;
+          admin_note: string | null;
+          reviewed_by: string | null;
+          reviewed_at: string | null;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          applicant_id: string;
+          status?: "pending" | "approved" | "rejected";
+          applicant_note?: string | null;
+          admin_note?: string | null;
+          reviewed_by?: string | null;
+          reviewed_at?: string | null;
+        };
+        Update: {
+          status?: "pending" | "approved" | "rejected";
+          applicant_note?: string | null;
+          admin_note?: string | null;
+          reviewed_by?: string | null;
+          reviewed_at?: string | null;
+        };
+        Relationships: [];
+      };
+      referral_links: {
+        Row: {
+          id: string;
+          agency_user_id: string;
+          code: string;
+          label: string | null;
+          is_active: boolean;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          agency_user_id: string;
+          code: string;
+          label?: string | null;
+          is_active?: boolean;
+        };
+        Update: {
+          label?: string | null;
+          is_active?: boolean;
+        };
+        Relationships: [];
+      };
+      referral_clicks: {
+        Row: {
+          id: string;
+          referral_link_id: string;
+          visitor_id: string;
+          ip_hash: string | null;
+          user_agent: string | null;
+          referrer: string | null;
+          converted_to_referral_id: string | null;
+          clicked_at: string;
+        };
+        Insert: {
+          referral_link_id: string;
+          visitor_id: string;
+          ip_hash?: string | null;
+          user_agent?: string | null;
+          referrer?: string | null;
+          converted_to_referral_id?: string | null;
+        };
+        Update: {
+          converted_to_referral_id?: string | null;
+        };
+        Relationships: [];
+      };
+      referrals: {
+        Row: {
+          id: string;
+          referral_link_id: string;
+          referred_user_id: string;
+          status: "signed_up" | "paying" | "churned" | "refunded";
+          signed_up_at: string;
+          first_payment_at: string | null;
+          churned_at: string | null;
+          refunded_at: string | null;
+        };
+        Insert: {
+          referral_link_id: string;
+          referred_user_id: string;
+          status?: "signed_up" | "paying" | "churned" | "refunded";
+          first_payment_at?: string | null;
+          churned_at?: string | null;
+          refunded_at?: string | null;
+        };
+        Update: {
+          status?: "signed_up" | "paying" | "churned" | "refunded";
+          first_payment_at?: string | null;
+          churned_at?: string | null;
+          refunded_at?: string | null;
+        };
+        Relationships: [];
+      };
+      commissions: {
+        Row: {
+          id: string;
+          agency_user_id: string;
+          referral_id: string;
+          amount_jpy: number;
+          rate: number;
+          basis_jpy: number;
+          status: "pending" | "confirmed" | "paid" | "reversed";
+          payout_id: string | null;
+          created_at: string;
+          confirmed_at: string | null;
+        };
+        Insert: {
+          agency_user_id: string;
+          referral_id: string;
+          amount_jpy: number;
+          rate: number;
+          basis_jpy: number;
+          status?: "pending" | "confirmed" | "paid" | "reversed";
+          payout_id?: string | null;
+          confirmed_at?: string | null;
+        };
+        Update: {
+          status?: "pending" | "confirmed" | "paid" | "reversed";
+          payout_id?: string | null;
+          confirmed_at?: string | null;
+        };
+        Relationships: [];
+      };
+      payouts: {
+        Row: {
+          id: string;
+          agency_user_id: string;
+          amount_jpy: number;
+          method: string;
+          status: "requested" | "processing" | "completed" | "failed";
+          requested_at: string;
+          processed_at: string | null;
+          failed_reason: string | null;
+        };
+        Insert: {
+          agency_user_id: string;
+          amount_jpy: number;
+          method: string;
+          status?: "requested" | "processing" | "completed" | "failed";
+          processed_at?: string | null;
+          failed_reason?: string | null;
+        };
+        Update: {
+          status?: "requested" | "processing" | "completed" | "failed";
+          processed_at?: string | null;
+          failed_reason?: string | null;
+        };
+        Relationships: [];
+      };
+      subscriptions: {
+        Row: {
+          id: string;
+          user_id: string;
+          stripe_subscription_id: string;
+          stripe_customer_id: string;
+          stripe_price_id: string;
+          status: string;
+          current_period_start: string | null;
+          current_period_end: string | null;
+          cancel_at_period_end: boolean;
+          canceled_at: string | null;
+          trial_end: string | null;
+          last_invoice_amount_jpy: number | null;
+          last_invoice_paid_at: string | null;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          user_id: string;
+          stripe_subscription_id: string;
+          stripe_customer_id: string;
+          stripe_price_id: string;
+          status: string;
+          current_period_start?: string | null;
+          current_period_end?: string | null;
+          cancel_at_period_end?: boolean;
+          canceled_at?: string | null;
+          trial_end?: string | null;
+          last_invoice_amount_jpy?: number | null;
+          last_invoice_paid_at?: string | null;
+        };
+        Update: {
+          status?: string;
+          current_period_start?: string | null;
+          current_period_end?: string | null;
+          cancel_at_period_end?: boolean;
+          canceled_at?: string | null;
+          trial_end?: string | null;
+          last_invoice_amount_jpy?: number | null;
+          last_invoice_paid_at?: string | null;
+        };
+        Relationships: [];
+      };
     };
     Views: Record<string, never>;
     Functions: {
@@ -1075,6 +1332,36 @@ export interface Database {
           p_window_seconds?: number;
         };
         Returns: boolean;
+      };
+      lookup_referral_link: {
+        Args: { p_code: string };
+        Returns: { id: string; is_active: boolean }[];
+      };
+      record_referral_click: {
+        Args: {
+          p_link_id: string;
+          p_visitor_id: string;
+          p_ip_hash: string | null;
+          p_user_agent: string | null;
+          p_referrer: string | null;
+        };
+        Returns: string;
+      };
+      compute_agency_rank: {
+        Args: { p_total_referrals: number };
+        Returns: string;
+      };
+      handle_subscription_payment: {
+        Args: {
+          p_user_id: string;
+          p_amount_jpy: number;
+          p_stripe_invoice_id: string;
+        };
+        Returns: undefined;
+      };
+      handle_subscription_canceled: {
+        Args: { p_user_id: string };
+        Returns: undefined;
       };
     };
     Enums: {

@@ -39,7 +39,16 @@ export type AuditAction =
   | "admin.role.grant"
   | "admin.role.revoke"
   | "admin.user.grant_agency_badge"
-  | "admin.user.revoke_agency_badge";
+  | "admin.user.revoke_agency_badge"
+  // 代理店プログラム (00063)
+  | "agency.application.create"
+  | "agency.referral_link.create"
+  | "agency.referral_link.update"
+  | "agency.payout_info.update"
+  | "admin.agency.approve"
+  | "admin.agency.reject"
+  | "admin.agency.suspend"
+  | "admin.agency.unsuspend";
 
 export type AuditLogParams = {
   actor_id: string;

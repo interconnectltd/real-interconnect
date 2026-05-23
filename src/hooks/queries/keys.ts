@@ -43,4 +43,19 @@ export const queryKeys = {
     all: ["feedback"] as const,
     byTarget: (targetId: string) => ["feedback", targetId] as const,
   },
+  agency: {
+    all: ["agency"] as const,
+    me: () => ["agency", "me"] as const,
+    applicationMe: () => ["agency", "application", "me"] as const,
+    links: () => ["agency", "links"] as const,
+    referrals: () => ["agency", "referrals"] as const,
+    clicks: () => ["agency", "clicks"] as const,
+  },
+  adminAgency: {
+    all: ["admin-agency"] as const,
+    applications: (status?: string) =>
+      ["admin-agency", "applications", { status }] as const,
+    agencies: (status?: string) =>
+      ["admin-agency", "agencies", { status }] as const,
+  },
 } as const;

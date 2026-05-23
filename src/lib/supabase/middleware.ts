@@ -101,7 +101,9 @@ export async function updateSession(
     pathname.startsWith("/lp/") ||
     pathname.startsWith("/api/v1/webhooks/") ||
     // ICS feed は token 認証で公開
-    pathname.startsWith("/api/v1/calendar/feed/");
+    pathname.startsWith("/api/v1/calendar/feed/") ||
+    // 紹介リンクのリダイレクト route (/r/<code>) は anon 到達可
+    pathname.startsWith("/r/");
 
   if (!user && !isPublicPath) {
     const url = request.nextUrl.clone();

@@ -43,3 +43,9 @@ CREATE INDEX IF NOT EXISTS idx_user_profiles_is_agency
 
 COMMENT ON COLUMN public.user_profiles.is_agency IS
   '代理店バッジ。admin が grant/revoke。service_role 以外は変更不可 (protect_admin trigger)。';
+
+-- 4) PostgREST schema cache 再読込
+--    本 migration を apply した直後、PostgREST 側 cache が古いまま
+--    `SELECT ... is_agency` で "column not found" を返す事故が発生したため、
+--    末尾で NOTIFY を送って即時反映を確実化する。
+NOTIFY pgrst, 'reload schema';
