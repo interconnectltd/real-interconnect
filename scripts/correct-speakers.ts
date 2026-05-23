@@ -1,39 +1,40 @@
-// 3-way speaker correction CLI (MVP)
+// 3-way speaker correction CLI v2
 //
-// 動画 mp4 + transcript + 参照声サンプル から、tldv の話者ラベル誤判定を
-// 自動補正した transcript を JSON で出力する。 DB 書き込みはまだ実装しない
-// (= 安全に試せる。 sara が中身を確認してから DB 反映する想定)。
+// 動画 mp4 から、tldv の話者ラベル誤判定を 3-way 多数決で補正した transcript を
+// JSON で出力する。 DB 書き込みはまだ実装しない (= 安全に試せる)。
 //
-// === 使い方 ===
+// === 使い方 (v2 自動モード, 推奨) ===
 //
-//   pnpm correct-speakers \
-//     --video        ~/Downloads/田島-2026-05-10.mp4 \
-//     --transcript   ./scripts/tldv-speaker-fix/samples/transcript.txt \
-//     --ref-dir      ./scripts/tldv-speaker-fix/audio/refs \
-//     --left         "田島康平"      --left-id  tajima \
-//     --right        "connect inter" --right-id sara \
-//     --out          ./output/cli-test.json \
-//     [--limit-seconds 600]   # 動画の最初の N 秒だけ処理
-//     [--skip-frames]          # 既存フレームを再利用 (連続実行時のコスト削減)
-//     [--work-dir <path>]      # 中間ファイル置き場 (デフォルト e2e-work/)
+//   pnpm correct-speakers -- \
+//     --video ~/Downloads/田島-2026-05-10.mp4
+//
+//   ファイル名から日付 + 名前を抽出 → Supabase で meeting を特定 →
+//   tldv API から transcript 取得 → 参加者から speaker map 自動構築。
+//
+// === 使い方 (v1 手動モード, 後方互換) ===
+//
+//   pnpm correct-speakers -- \
+//     --video <path> --transcript <path> --ref-dir <dir> \
+//     --left "田島康平" --left-id tajima \
+//     --right "connect inter" --right-id sara \
+//     --out <path>
 //
 // === 引数 ===
 //
-//   --video       mp4 ファイル絶対 or 相対パス (必須)
-//   --transcript  transcript テキスト ("<speaker> [MM:SS]: <text>" 形式、必須)
-//   --ref-dir     参照声 mp3 dir。 配下に <left-id>.mp3 と <right-id>.mp3 が必要
-//   --left        左タイルの speaker 生名 (transcript と完全一致)
-//   --left-id     左タイルの正規化 ID (例: tajima)
-//   --right       右タイルの speaker 生名
-//   --right-id    右タイルの正規化 ID
-//   --out         出力 JSON 絶対 or 相対パス
-//
-// === MVP の制限 ===
-//
-//   - DB 書き込みなし (DB 統合は次フェーズ)
-//   - 2 人会議のみ対応 (transcript の unique speaker が 3 以上だと skip)
-//   - 参照声は手動用意必須 (--ref-dir/<speaker-id>.mp3)
-//   - filename → Supabase 自動 lookup は未実装 (次フェーズ)
+//   --video         mp4 ファイルパス (必須)
+//   --meeting-id    DB lookup 結果を override (任意、UUID)
+//   --transcript    transcript テキストを直指定 (任意、指定時は DB lookup スキップ = v1 モード)
+//   --ref-dir       参照声 mp3 dir (default: scripts/tldv-speaker-fix/audio/refs)
+//   --left          左タイル speaker 生名 (任意、auto-derive)
+//   --right         右タイル speaker 生名 (任意、auto-derive)
+//   --left-id       左タイル正規化 ID (任意、auto-derive)
+//   --right-id      右タイル正規化 ID (任意、auto-derive)
+//   --out           出力 JSON パス (default: <video-basename>.corrected.json)
+//   --limit-seconds 動画の最初の N 秒だけ処理 (任意)
+//   --skip-frames   既存フレーム再利用 (任意)
+//   --work-dir      中間ファイル dir (default: ./scripts/tldv-speaker-fix/e2e-work)
+//   --non-interactive  複数候補時にエラー (default は TTY で選択)
+//   --auto-pick-first  複数候補時に最初を採用
 
 import { config as loadEnv } from "dotenv";
 loadEnv({ path: ".env.local", quiet: true });
@@ -41,13 +42,21 @@ loadEnv({ path: ".env.local", quiet: true });
 import { existsSync } from "node:fs";
 import { readFile, writeFile, mkdir } from "node:fs/promises";
 import { basename, dirname, resolve } from "node:path";
+import { createInterface } from "node:readline/promises";
+import { stdin as input, stdout as output } from "node:process";
+
+import { createClient } from "@supabase/supabase-js";
 
 import {
+  buildFullText,
   correctSpeakers,
+  fromTldvSegments,
   parseTranscriptText,
   type CorrectSpeakersOutput,
   type ReferenceVoice,
+  type Segment,
 } from "../src/lib/speaker-correction";
+import { createTldvClient } from "../src/lib/tldv/client";
 
 // ──────────────────────────────────────────────────────────────────
 // CLI 引数パース
@@ -55,16 +64,19 @@ import {
 
 interface CliArgs {
   video: string;
-  transcript: string;
+  meetingId?: string;
+  transcriptPath?: string;
   refDir: string;
-  leftName: string;
-  rightName: string;
-  leftId: string;
-  rightId: string;
+  leftName?: string;
+  rightName?: string;
+  leftId?: string;
+  rightId?: string;
   out: string;
   workDir: string;
   limitSeconds?: number;
   skipFrames: boolean;
+  nonInteractive: boolean;
+  autoPickFirst: boolean;
 }
 
 function parseArgs(): CliArgs {
@@ -76,36 +88,31 @@ function parseArgs(): CliArgs {
   const has = (flag: string): boolean => argv.includes(flag);
 
   const video = get("--video");
-  const transcript = get("--transcript");
-  const refDir = get("--ref-dir");
-  const leftName = get("--left");
-  const rightName = get("--right");
-  const leftId = get("--left-id");
-  const rightId = get("--right-id");
-  const out = get("--out");
-
-  if (!video || !transcript || !refDir || !leftName || !rightName || !leftId || !rightId || !out) {
+  if (!video) {
     console.error(
-      "Usage: pnpm correct-speakers \\\n" +
-        "  --video <path> --transcript <path> --ref-dir <dir> \\\n" +
-        "  --left <name> --left-id <id> --right <name> --right-id <id> \\\n" +
-        "  --out <path> [--limit-seconds N] [--skip-frames] [--work-dir <path>]\n",
+      "Usage:\n" +
+        "  v2 (auto): pnpm correct-speakers -- --video <path>\n" +
+        "  v1 (manual): pnpm correct-speakers -- --video <path> --transcript <path> \\\n" +
+        "                 --ref-dir <dir> --left <name> --left-id <id> --right <name> --right-id <id> --out <path>\n",
     );
     process.exit(1);
   }
-
+  const videoResolved = resolve(video);
   return {
-    video: resolve(video),
-    transcript: resolve(transcript),
-    refDir: resolve(refDir),
-    leftName,
-    rightName,
-    leftId,
-    rightId,
-    out: resolve(out),
+    video: videoResolved,
+    meetingId: get("--meeting-id"),
+    transcriptPath: get("--transcript") ? resolve(get("--transcript") as string) : undefined,
+    refDir: resolve(get("--ref-dir") ?? "./scripts/tldv-speaker-fix/audio/refs"),
+    leftName: get("--left"),
+    rightName: get("--right"),
+    leftId: get("--left-id"),
+    rightId: get("--right-id"),
+    out: resolve(get("--out") ?? videoResolved.replace(/\.[mM][pP]4$/, "") + ".corrected.json"),
     workDir: resolve(get("--work-dir") ?? "./scripts/tldv-speaker-fix/e2e-work"),
     limitSeconds: get("--limit-seconds") ? Number(get("--limit-seconds")) : undefined,
     skipFrames: has("--skip-frames"),
+    nonInteractive: has("--non-interactive"),
+    autoPickFirst: has("--auto-pick-first"),
   };
 }
 
@@ -120,6 +127,264 @@ function bail(message: string, hint?: string, exitCode: 1 | 2 = 1): never {
 }
 
 // ──────────────────────────────────────────────────────────────────
+// filename パース
+// ──────────────────────────────────────────────────────────────────
+
+interface FilenameParts {
+  name: string;
+  date: string; // YYYY-MM-DD
+}
+
+function parseFilename(videoPath: string): FilenameParts | null {
+  const fn = basename(videoPath);
+  // 基本形: <名前>[-_]<YYYY-MM-DD>.mp4
+  const m = fn.match(/^(.+?)[-_](\d{4}-\d{1,2}-\d{1,2})\.[mM][pP]4$/);
+  if (!m) return null;
+  const name = (m[1] ?? "").trim();
+  const rawDate = m[2] ?? "";
+  // 0 埋め正規化: 2026-5-10 → 2026-05-10
+  const parts = rawDate.split("-");
+  if (parts.length !== 3) return null;
+  const date = `${parts[0]}-${(parts[1] ?? "").padStart(2, "0")}-${(parts[2] ?? "").padStart(2, "0")}`;
+  return { name, date };
+}
+
+// ──────────────────────────────────────────────────────────────────
+// Supabase クライアント
+// ──────────────────────────────────────────────────────────────────
+
+function createSupabase() {
+  const url = (process.env.NEXT_PUBLIC_SUPABASE_URL ?? "")
+    .trim()
+    .replace(/\/rest\/v1\/?$/, "")
+    .replace(/\/+$/, "");
+  const key = (process.env.SUPABASE_SERVICE_ROLE_KEY ?? "").trim();
+  if (!url || !key) {
+    bail(
+      "Supabase env not set",
+      "Add NEXT_PUBLIC_SUPABASE_URL and SUPABASE_SERVICE_ROLE_KEY to .env.local",
+      2,
+    );
+  }
+  return createClient(url, key, { auth: { persistSession: false } });
+}
+
+// ──────────────────────────────────────────────────────────────────
+// meeting 検索
+// ──────────────────────────────────────────────────────────────────
+
+interface ParticipantRow {
+  id: string;
+  transcript_id: string;
+  speaker_name: string;
+  speaking_ratio: number | null;
+  user_id: string | null;
+  is_linked: boolean;
+}
+
+interface MeetingRow {
+  id: string;
+  tldv_meeting_id: string;
+  title: string | null;
+  meeting_date: string | null;
+  meeting_kind: string;
+  status: string;
+  participants: ParticipantRow[];
+}
+
+async function searchMeetings(
+  supabase: ReturnType<typeof createSupabase>,
+  name: string,
+  date: string,
+): Promise<MeetingRow[]> {
+  // 日本時刻 YYYY-MM-DD → UTC range
+  const jstStart = new Date(`${date}T00:00:00+09:00`).toISOString();
+  const jstEnd = new Date(
+    new Date(`${date}T00:00:00+09:00`).getTime() + 24 * 3600 * 1000 - 1,
+  ).toISOString();
+
+  const { data: meetings, error } = await supabase
+    .from("meeting_transcripts")
+    .select("id, tldv_meeting_id, title, meeting_date, meeting_kind, status")
+    .gte("meeting_date", jstStart)
+    .lte("meeting_date", jstEnd)
+    .not("meeting_kind", "in", "(internal,onboarding)")
+    .in("status", ["ready", "analyzed"]);
+
+  if (error) bail(`Supabase query failed: ${error.message}`, "Check connection / RLS", 2);
+  if (!meetings || meetings.length === 0) return [];
+
+  // participants を batch fetch
+  const transcriptIds = meetings.map((m) => m.id);
+  const { data: parts, error: pErr } = await supabase
+    .from("meeting_participants")
+    .select("id, transcript_id, speaker_name, speaking_ratio, user_id, is_linked")
+    .in("transcript_id", transcriptIds);
+
+  if (pErr) bail(`Supabase participants query failed: ${pErr.message}`, undefined, 2);
+
+  const partsByTranscript = new Map<string, ParticipantRow[]>();
+  for (const p of (parts as ParticipantRow[] | null) ?? []) {
+    const existing = partsByTranscript.get(p.transcript_id) ?? [];
+    existing.push(p);
+    partsByTranscript.set(p.transcript_id, existing);
+  }
+
+  // 名前で絞り込み
+  const candidates: MeetingRow[] = [];
+  for (const m of meetings) {
+    const ps = partsByTranscript.get(m.id) ?? [];
+    const matchesName = ps.some((p) =>
+      p.speaker_name.toLowerCase().includes(name.toLowerCase()),
+    );
+    if (matchesName) {
+      candidates.push({ ...m, participants: ps });
+    }
+  }
+  return candidates;
+}
+
+// ──────────────────────────────────────────────────────────────────
+// 候補選択 (TTY interactive)
+// ──────────────────────────────────────────────────────────────────
+
+async function pickMeeting(
+  candidates: MeetingRow[],
+  args: CliArgs,
+): Promise<MeetingRow> {
+  if (candidates.length === 0) {
+    bail(
+      "No matching meeting found",
+      "Check filename format (<name>-YYYY-MM-DD.mp4) or use --meeting-id <uuid>",
+    );
+  }
+  if (candidates.length === 1) {
+    return candidates[0] as MeetingRow;
+  }
+  if (args.autoPickFirst) {
+    console.warn(`[correct-speakers] WARN: ${candidates.length} candidates found, picking the first`);
+    return candidates[0] as MeetingRow;
+  }
+  if (args.nonInteractive || !input.isTTY) {
+    bail(
+      `${candidates.length} meetings match, cannot disambiguate in non-interactive mode`,
+      "Use --meeting-id <uuid> to specify exactly which meeting, or --auto-pick-first",
+    );
+  }
+
+  console.log(`\n複数の候補が見つかりました (${candidates.length} 件):`);
+  candidates.forEach((m, i) => {
+    const title = m.title ?? "(untitled)";
+    const date = m.meeting_date ? new Date(m.meeting_date).toLocaleString("ja-JP") : "(no date)";
+    const names = m.participants.map((p) => p.speaker_name).join(", ");
+    console.log(`  [${i + 1}] ${title}  (${date})  参加者: ${names}`);
+  });
+
+  const rl = createInterface({ input, output });
+  try {
+    const ans = await rl.question(`\nどれを選びますか? (1-${candidates.length}): `);
+    const idx = parseInt(ans.trim(), 10) - 1;
+    if (Number.isNaN(idx) || idx < 0 || idx >= candidates.length) {
+      bail(`Invalid selection: "${ans.trim()}"`);
+    }
+    return candidates[idx] as MeetingRow;
+  } finally {
+    rl.close();
+  }
+}
+
+// ──────────────────────────────────────────────────────────────────
+// speaker map auto-derive
+// ──────────────────────────────────────────────────────────────────
+
+interface SpeakerMapResolved {
+  leftName: string;
+  rightName: string;
+  leftId: string;
+  rightId: string;
+  nameToId: Record<string, string>;
+  idToName: Record<string, string>;
+}
+
+function makeSpeakerId(participant: ParticipantRow | undefined, index: 0 | 1): string {
+  if (participant?.user_id) {
+    const prefix = participant.user_id.split("-")[0]?.slice(0, 8) ?? "";
+    if (prefix) return `user_${prefix}`;
+  }
+  return `speaker_${index}`;
+}
+
+function deriveSpeakerMap(
+  segments: Segment[],
+  participants: ParticipantRow[],
+  override: { leftName?: string; rightName?: string; leftId?: string; rightId?: string },
+): SpeakerMapResolved {
+  const uniqueSpeakers = [...new Set(segments.map((s) => s.speaker))];
+  if (uniqueSpeakers.length === 1) {
+    bail(
+      `transcript has only 1 unique speaker: ${uniqueSpeakers[0]}`,
+      "モノローグは補正対象外 (誤判定が起きない)",
+    );
+  }
+  if (uniqueSpeakers.length > 2) {
+    bail(
+      `${uniqueSpeakers.length} unique speakers detected (multi-party): ${uniqueSpeakers.join(", ")}`,
+      "MVP は 2 人会議のみ対応",
+    );
+  }
+
+  // 発話開始順 = 左タイル
+  const firstSpeaker = uniqueSpeakers[0] as string;
+  const otherSpeaker = uniqueSpeakers.find((s) => s !== firstSpeaker) as string;
+
+  const leftName = override.leftName ?? firstSpeaker;
+  const rightName = override.rightName ?? otherSpeaker;
+
+  // participant 行を引く (transcript の speaker_name と完全一致で参照)
+  const leftPart = participants.find((p) => p.speaker_name === leftName);
+  const rightPart = participants.find((p) => p.speaker_name === rightName);
+
+  const leftId = override.leftId ?? makeSpeakerId(leftPart, 0);
+  const rightId = override.rightId ?? makeSpeakerId(rightPart, 1);
+
+  return {
+    leftName,
+    rightName,
+    leftId,
+    rightId,
+    nameToId: { [leftName]: leftId, [rightName]: rightId },
+    idToName: { [leftId]: leftName, [rightId]: rightName },
+  };
+}
+
+// ──────────────────────────────────────────────────────────────────
+// reference voice 解決 (3 段階 fallback)
+// ──────────────────────────────────────────────────────────────────
+
+function resolveReferenceVoicePath(
+  refDir: string,
+  id: string,
+  name: string,
+  userId: string | null,
+): string {
+  const candidates: string[] = [];
+  if (userId) {
+    const prefix = userId.split("-")[0]?.slice(0, 8) ?? "";
+    if (prefix) candidates.push(resolve(refDir, `user_${prefix}.mp3`));
+  }
+  candidates.push(resolve(refDir, `${id}.mp3`));
+  candidates.push(resolve(refDir, `${name}.mp3`));
+
+  for (const p of candidates) {
+    if (existsSync(p)) return p;
+  }
+  bail(
+    `Reference voice not found for "${name}" (id=${id})`,
+    `Provide ONE of these files:\n  ${candidates.join("\n  ")}`,
+  );
+}
+
+// ──────────────────────────────────────────────────────────────────
 // 出力 JSON スキーマ
 // ──────────────────────────────────────────────────────────────────
 
@@ -129,30 +394,6 @@ interface OutputCorrection {
   originalLabel: string;
   newLabel: string;
   text: string;
-}
-
-interface OutputJson {
-  videoPath: string;
-  speakerMap: {
-    left: { name: string; id: string };
-    right: { name: string; id: string };
-  };
-  summary: {
-    totalSegments: number;
-    correctedSegments: number;
-    correctionConfidence: number;
-    durationSec: number;
-    visionFrames: number;
-    visionErrors: number;
-    audioCalls: number;
-    audioErrors: number;
-    audioFloorApplied: number;
-  };
-  correctedFullText: string;
-  corrections: OutputCorrection[];
-  perSegment: CorrectSpeakersOutput["perSegment"];
-  meta: CorrectSpeakersOutput["meta"];
-  generatedAt: string;
 }
 
 // ──────────────────────────────────────────────────────────────────
@@ -172,64 +413,122 @@ async function main(): Promise<void> {
   if (!existsSync(args.video)) {
     bail(`video file not found: ${args.video}`, "Check the --video path");
   }
-  if (!existsSync(args.transcript)) {
-    bail(`transcript file not found: ${args.transcript}`, "Check the --transcript path");
-  }
   if (!existsSync(args.refDir)) {
-    bail(`reference voice dir not found: ${args.refDir}`, "Check the --ref-dir path");
-  }
-
-  // 参照声ファイル読み込み
-  const refLeftPath = resolve(args.refDir, `${args.leftId}.mp3`);
-  const refRightPath = resolve(args.refDir, `${args.rightId}.mp3`);
-  if (!existsSync(refLeftPath)) {
     bail(
-      `reference voice not found: ${refLeftPath}`,
-      `Place the reference voice for "${args.leftName}" as ${args.leftId}.mp3 in --ref-dir`,
-    );
-  }
-  if (!existsSync(refRightPath)) {
-    bail(
-      `reference voice not found: ${refRightPath}`,
-      `Place the reference voice for "${args.rightName}" as ${args.rightId}.mp3 in --ref-dir`,
+      `reference voice dir not found: ${args.refDir}`,
+      "Provide --ref-dir or place files in default location",
     );
   }
 
-  // transcript パース + 検証
-  const transcriptRaw = await readFile(args.transcript, "utf-8");
-  const segments = parseTranscriptText(transcriptRaw);
-  if (segments.length === 0) {
-    bail("transcript is empty or unparseable", "Check the transcript file format");
+  // モード判定: --transcript 指定なら v1 (手動)、そうでなければ v2 (auto)
+  const isManualMode = !!args.transcriptPath;
+
+  let segments: Segment[];
+  let participants: ParticipantRow[] = [];
+  let resolvedMeetingId: string | undefined;
+  let tldvMeetingId: string | undefined;
+
+  if (isManualMode) {
+    console.log("[correct-speakers] mode: v1 (manual, --transcript specified)");
+    if (!args.transcriptPath || !existsSync(args.transcriptPath)) {
+      bail(`transcript file not found: ${args.transcriptPath}`);
+    }
+    const transcriptRaw = await readFile(args.transcriptPath, "utf-8");
+    segments = parseTranscriptText(transcriptRaw);
+    if (segments.length === 0) {
+      bail("transcript is empty or unparseable");
+    }
+  } else {
+    // v2 自動モード: filename → DB → tldv API
+    console.log("[correct-speakers] mode: v2 (auto via Supabase + tldv API)");
+    const supabase = createSupabase();
+
+    let meeting: MeetingRow;
+
+    if (args.meetingId) {
+      // 明示指定された meeting_id を取得
+      const { data, error } = await supabase
+        .from("meeting_transcripts")
+        .select("id, tldv_meeting_id, title, meeting_date, meeting_kind, status")
+        .eq("id", args.meetingId)
+        .maybeSingle();
+      if (error) bail(`Supabase fetch failed: ${error.message}`, undefined, 2);
+      if (!data) bail(`meeting_id not found: ${args.meetingId}`);
+      const { data: parts, error: pErr } = await supabase
+        .from("meeting_participants")
+        .select("id, transcript_id, speaker_name, speaking_ratio, user_id, is_linked")
+        .eq("transcript_id", data.id);
+      if (pErr) bail(`Supabase participants fetch failed: ${pErr.message}`, undefined, 2);
+      meeting = { ...data, participants: (parts as ParticipantRow[] | null) ?? [] };
+    } else {
+      // filename からパース
+      const parts = parseFilename(args.video);
+      if (!parts) {
+        bail(
+          `Cannot parse filename: ${basename(args.video)}`,
+          "Use format <name>-YYYY-MM-DD.mp4 or specify --meeting-id <uuid>",
+        );
+      }
+      console.log(`  parsed: name="${parts.name}" date=${parts.date}`);
+      const candidates = await searchMeetings(supabase, parts.name, parts.date);
+      meeting = await pickMeeting(candidates, args);
+    }
+
+    resolvedMeetingId = meeting.id;
+    tldvMeetingId = meeting.tldv_meeting_id;
+    participants = meeting.participants;
+
+    if (!tldvMeetingId) {
+      bail(
+        `meeting ${meeting.id} has no tldv_meeting_id`,
+        "Manual imports not supported in MVP; use --transcript path instead",
+      );
+    }
+
+    console.log(`  meeting: ${meeting.title ?? "(untitled)"} (id=${meeting.id})`);
+    console.log(`  participants: ${participants.map((p) => p.speaker_name).join(", ")}`);
+
+    // tldv API から segments 取得 (startTime/endTime 付き)
+    const tldv = createTldvClient();
+    let transcriptRes;
+    try {
+      transcriptRes = await tldv.getTranscript(tldvMeetingId);
+    } catch (e) {
+      const msg = e instanceof Error ? e.message : String(e);
+      bail(`tldv API getTranscript failed: ${msg}`, "Check TLDV_API_KEY or network", 2);
+    }
+    segments = fromTldvSegments(transcriptRes.data ?? []);
+    if (segments.length === 0) {
+      bail("tldv API returned 0 segments");
+    }
   }
 
-  // multi-party ガード: transcript の unique speaker 数
-  const uniqueSpeakers = new Set(segments.map((s) => s.speaker));
-  if (uniqueSpeakers.size === 1) {
-    bail(
-      `transcript has only 1 unique speaker: ${[...uniqueSpeakers].join(", ")}`,
-      "1 人モノローグは補正対象外 (誤判定が起きない)",
-    );
-  }
-  if (uniqueSpeakers.size > 2) {
-    bail(
-      `transcript has ${uniqueSpeakers.size} unique speakers (multi-party not supported): ${[...uniqueSpeakers].join(", ")}`,
-      "MVP は 2 人会議のみ対応。3 人以上は次フェーズで対応予定",
-    );
-  }
+  // speaker map 構築
+  const speakerMap = deriveSpeakerMap(segments, participants, {
+    leftName: args.leftName,
+    rightName: args.rightName,
+    leftId: args.leftId,
+    rightId: args.rightId,
+  });
 
-  // --left / --right の名前が transcript の speaker と一致するか
-  if (!uniqueSpeakers.has(args.leftName)) {
-    bail(
-      `--left "${args.leftName}" not found in transcript speakers: ${[...uniqueSpeakers].join(", ")}`,
-      "transcript の speaker と完全一致する名前を指定してください",
-    );
-  }
-  if (!uniqueSpeakers.has(args.rightName)) {
-    bail(
-      `--right "${args.rightName}" not found in transcript speakers: ${[...uniqueSpeakers].join(", ")}`,
-      "transcript の speaker と完全一致する名前を指定してください",
-    );
-  }
+  // multi-party guard は deriveSpeakerMap 内で bail されてるので、ここまで来たら 2 人確定
+
+  // 参照声ファイル解決
+  const leftPart = participants.find((p) => p.speaker_name === speakerMap.leftName);
+  const rightPart = participants.find((p) => p.speaker_name === speakerMap.rightName);
+
+  const refLeftPath = resolveReferenceVoicePath(
+    args.refDir,
+    speakerMap.leftId,
+    speakerMap.leftName,
+    leftPart?.user_id ?? null,
+  );
+  const refRightPath = resolveReferenceVoicePath(
+    args.refDir,
+    speakerMap.rightId,
+    speakerMap.rightName,
+    rightPart?.user_id ?? null,
+  );
 
   const [refLeftBuf, refRightBuf] = await Promise.all([
     readFile(refLeftPath),
@@ -237,35 +536,20 @@ async function main(): Promise<void> {
   ]);
 
   const referenceVoices: ReferenceVoice[] = [
-    { id: args.leftId, displayLabel: args.leftName, audioBuffer: refLeftBuf },
-    { id: args.rightId, displayLabel: args.rightName, audioBuffer: refRightBuf },
+    { id: speakerMap.leftId, displayLabel: speakerMap.leftName, audioBuffer: refLeftBuf },
+    { id: speakerMap.rightId, displayLabel: speakerMap.rightName, audioBuffer: refRightBuf },
   ];
 
-  const speakerMap = {
-    nameToId: {
-      [args.leftName]: args.leftId,
-      [args.rightName]: args.rightId,
-    },
-    idToName: {
-      [args.leftId]: args.leftName,
-      [args.rightId]: args.rightName,
-    },
-    leftId: args.leftId,
-    rightId: args.rightId,
-  };
-
-  // 実行情報を表示
-  console.log("[correct-speakers] starting");
+  // 実行情報
+  console.log("\n[correct-speakers] starting orchestrator");
   console.log(`  video        : ${args.video}`);
-  console.log(`  transcript   : ${args.transcript} (${segments.length} segments)`);
-  console.log(`  ref-dir      : ${args.refDir}`);
-  console.log(`  left         : ${args.leftName} (${args.leftId})`);
-  console.log(`  right        : ${args.rightName} (${args.rightId})`);
+  console.log(`  segments     : ${segments.length}`);
+  console.log(`  left         : ${speakerMap.leftName} (${speakerMap.leftId})  ref=${basename(refLeftPath)}`);
+  console.log(`  right        : ${speakerMap.rightName} (${speakerMap.rightId})  ref=${basename(refRightPath)}`);
   console.log(`  out          : ${args.out}`);
   if (args.limitSeconds !== undefined) console.log(`  limit-seconds: ${args.limitSeconds}`);
-  if (args.skipFrames) console.log(`  skip-frames  : true (再利用)`);
+  if (args.skipFrames) console.log(`  skip-frames  : true`);
 
-  // 進捗表示
   let lastPhase = "";
   const onProgress = (phase: string, done: number, total: number): void => {
     if (phase !== lastPhase) {
@@ -279,14 +563,18 @@ async function main(): Promise<void> {
     }
   };
 
-  // orchestrator 実行
   let result: CorrectSpeakersOutput;
   try {
     result = await correctSpeakers({
       videoPath: args.video,
       segments,
       referenceVoices,
-      speakerMap,
+      speakerMap: {
+        nameToId: speakerMap.nameToId,
+        idToName: speakerMap.idToName,
+        leftId: speakerMap.leftId,
+        rightId: speakerMap.rightId,
+      },
       geminiApiKey: geminiKey,
       workDir: args.workDir,
       options: {
@@ -306,7 +594,7 @@ async function main(): Promise<void> {
     bail(`correction failed: ${msg}`, "Check above logs for details", 2);
   }
 
-  // corrections (diff だけ抜粋)
+  // corrections (verdict=tldv-wrong のみ抽出)
   const corrections: OutputCorrection[] = result.perSegment
     .filter((s) => s.verdict === "tldv-wrong" && s.correctedLabel !== s.tldvLabel)
     .map((s) => {
@@ -321,12 +609,14 @@ async function main(): Promise<void> {
       };
     });
 
-  // 出力 JSON 組み立て
-  const output: OutputJson = {
+  const output = {
     videoPath: args.video,
+    mode: isManualMode ? ("manual" as const) : ("auto" as const),
+    meetingId: resolvedMeetingId,
+    tldvMeetingId,
     speakerMap: {
-      left: { name: args.leftName, id: args.leftId },
-      right: { name: args.rightName, id: args.rightId },
+      left: { name: speakerMap.leftName, id: speakerMap.leftId },
+      right: { name: speakerMap.rightName, id: speakerMap.rightId },
     },
     summary: {
       totalSegments: result.meta.totalSegments,
@@ -340,25 +630,25 @@ async function main(): Promise<void> {
       audioFloorApplied: result.meta.audioFloorApplied,
     },
     correctedFullText: result.correctedFullText,
+    correctedDbFullText: buildFullText(
+      segments,
+      result.perSegment.map((p) => p.correctedLabel),
+    ),
     corrections,
     perSegment: result.perSegment,
     meta: result.meta,
     generatedAt: new Date().toISOString(),
   };
 
-  // 出力ファイル書き込み
   await mkdir(dirname(args.out), { recursive: true });
   await writeFile(args.out, JSON.stringify(output, null, 2), "utf-8");
 
-  // サマリ表示
   console.log("\n=== Summary ===");
   console.log(`  total segments     : ${output.summary.totalSegments}`);
-  console.log(`  corrected segments : ${output.summary.correctedSegments} (verdict=tldv-wrong)`);
+  console.log(`  corrected segments : ${output.summary.correctedSegments}`);
   console.log(`  confidence         : ${output.summary.correctionConfidence.toFixed(3)}`);
   console.log(`  duration           : ${output.summary.durationSec.toFixed(1)} sec`);
-  console.log(`  vision frames      : ${output.summary.visionFrames} (errors: ${output.summary.visionErrors})`);
-  console.log(`  audio calls        : ${output.summary.audioCalls} (errors: ${output.summary.audioErrors})`);
-  console.log(`  audio-floor applied: ${output.summary.audioFloorApplied}`);
+  console.log(`  vision/audio errors: ${output.summary.visionErrors} / ${output.summary.audioErrors}`);
 
   if (corrections.length > 0) {
     console.log("\n=== Corrected Labels ===");
@@ -372,7 +662,6 @@ async function main(): Promise<void> {
   }
 
   console.log(`\n[correct-speakers] saved: ${args.out}`);
-  console.log(`[correct-speakers] basename: ${basename(args.out)}`);
 }
 
 main().catch((err) => {
