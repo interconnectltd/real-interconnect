@@ -195,7 +195,7 @@ export async function handleAnalyze(payload: {
 
   const { data: transcript } = await supabase
     .from("meeting_transcripts")
-    .select("full_text, title, meeting_type")
+    .select("full_text, corrected_full_text, title, meeting_type")
     .eq("id", transcript_id)
     .single();
 
@@ -208,6 +208,10 @@ export async function handleAnalyze(payload: {
   if (!transcript?.full_text || !participant) {
     throw new Error("Transcript or participant not found");
   }
+
+  // 3-way 補正済み (corrected_full_text) があればそちらを使う (00065 で追加)。
+  // 未補正 (NULL) なら従来通り full_text を使う後方互換。
+  const textToAnalyze: string = transcript.corrected_full_text ?? transcript.full_text;
 
   // アクティブなプロンプトを取得（v3.0.0 優先、なければハードコード使用）
   const { data: promptVersion } = await supabase
@@ -225,10 +229,10 @@ export async function handleAnalyze(payload: {
 
   const promptVersionStr = promptVersion?.version ?? "3.0.0";
 
-  // 会議品質係数
+  // 会議品質係数 (補正済みテキストがあればそれを使う)
   const qualityCoeff = calcMeetingQualityCoeff(
     transcript.meeting_type,
-    transcript.full_text,
+    textToAnalyze,
   );
 
   // Claude Opus 4.6 呼び出し
@@ -238,7 +242,7 @@ export async function handleAnalyze(payload: {
     messages: [
       {
         role: "user",
-        content: `${promptTemplate}\n\n## 発言者: ${participant.speaker_name}\n\n## トランスクリプト:\n${transcript.full_text.slice(0, 30000)}`,
+        content: `${promptTemplate}\n\n## 発言者: ${participant.speaker_name}\n\n## トランスクリプト:\n${textToAnalyze.slice(0, 30000)}`,
       },
     ],
   });
@@ -276,7 +280,7 @@ export async function handleAnalyze(payload: {
       messages: [
         {
           role: "user",
-          content: `${promptTemplate}\n\n[重要: JSON形式を厳密に守ってください。全フィールドを含めてください。]\n\n## 発言者: ${participant.speaker_name}\n\n## トランスクリプト:\n${transcript.full_text.slice(0, 25000)}`,
+          content: `${promptTemplate}\n\n[重要: JSON形式を厳密に守ってください。全フィールドを含めてください。]\n\n## 発言者: ${participant.speaker_name}\n\n## トランスクリプト:\n${textToAnalyze.slice(0, 25000)}`,
         },
       ],
     });

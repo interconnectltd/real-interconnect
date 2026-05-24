@@ -45,6 +45,8 @@ import { basename, dirname, resolve } from "node:path";
 import { createInterface } from "node:readline/promises";
 import { stdin as input, stdout as output } from "node:process";
 
+import { hostname, userInfo } from "node:os";
+
 import { createClient } from "@supabase/supabase-js";
 
 import {
@@ -78,6 +80,13 @@ interface CliArgs {
   nonInteractive: boolean;
   autoPickFirst: boolean;
   noAutoRefs: boolean;
+  // === Day 4 (DB integration) flags ===
+  writeDb: boolean;
+  dryRun: boolean;
+  forceOverwrite: boolean;
+  noReAnalyze: boolean;
+  reset: boolean;
+  skipAlreadyCorrected: boolean;
 }
 
 function parseArgs(): CliArgs {
@@ -115,6 +124,12 @@ function parseArgs(): CliArgs {
     nonInteractive: has("--non-interactive"),
     autoPickFirst: has("--auto-pick-first"),
     noAutoRefs: has("--no-auto-refs"),
+    writeDb: has("--write-db"),
+    dryRun: has("--dry-run"),
+    forceOverwrite: has("--force-overwrite"),
+    noReAnalyze: has("--no-re-analyze"),
+    reset: has("--reset"),
+    skipAlreadyCorrected: has("--skip-already-corrected"),
   };
 }
 
@@ -424,13 +439,234 @@ interface OutputCorrection {
 }
 
 // ──────────────────────────────────────────────────────────────────
+// DB write helpers (Day 4)
+// ──────────────────────────────────────────────────────────────────
+
+/**
+ * カラム不在を表す PostgREST / PostgreSQL エラーコード。
+ * - PG raw: 42703 (column does not exist)
+ * - PostgREST schema cache miss: PGRST204
+ */
+const PG_UNDEFINED_COLUMN_CODES = new Set(["42703", "PGRST204"]);
+
+function isColumnNotFoundError(error: { code?: string; message?: string } | null): boolean {
+  if (!error) return false;
+  if (error.code && PG_UNDEFINED_COLUMN_CODES.has(error.code)) return true;
+  const msg = error.message ?? "";
+  return /column .* (does not exist|not found|missing)|schema cache/i.test(msg);
+}
+
+const REFRESH_GUARD_HOURS = 24;
+
+/** correction_meta JSONB に入れる payload (PII を含まない) */
+function buildCorrectionMetaPayload(
+  result: CorrectSpeakersOutput,
+  context: {
+    speakerLeftId: string;
+    speakerRightId: string;
+    libVersion: string;
+  },
+): Record<string, unknown> {
+  return {
+    counts: result.meta.counts,
+    totalSegments: result.meta.totalSegments,
+    correctedSegments: result.meta.correctedSegments,
+    visionFrames: result.meta.visionFrames,
+    visionErrors: result.meta.visionErrors,
+    audioCalls: result.meta.audioCalls,
+    audioErrors: result.meta.audioErrors,
+    audioFloorApplied: result.meta.audioFloorApplied,
+    referenceVoiceIds: result.meta.referenceVoiceIds,
+    autoExtractedRefIds: result.meta.autoExtractedRefIds,
+    autoExtractedRefRanges: result.meta.autoExtractedRefRanges,
+    model: result.meta.model,
+    speakerSlots: { left: context.speakerLeftId, right: context.speakerRightId },
+    libVersion: context.libVersion,
+    executedBy: `${userInfo().username}@${hostname()}`,
+    durationMs: result.meta.durationMs,
+    lowConfidence: result.correctionConfidence < 0.8,
+  };
+}
+
+/**
+ * meeting_transcripts に補正結果を書き込む。
+ * - column 不在 (PG 42703) → 親切なエラーで bail
+ */
+async function writeCorrectionToDb(
+  supabase: ReturnType<typeof createSupabase>,
+  meetingId: string,
+  payload: {
+    corrected_full_text: string;
+    correction_confidence: number;
+    correction_meta: Record<string, unknown>;
+    correction_run_at: string;
+  },
+): Promise<void> {
+  const { error } = await supabase.from("meeting_transcripts").update(payload).eq("id", meetingId);
+  if (error) {
+    if (isColumnNotFoundError(error)) {
+      bail(
+        `Migration 00065 is not applied yet (PostgreSQL error: ${error.message})`,
+        "Run: supabase db push  (or apply 00065 via psql; see _docs/speaker-correction-migration.md)",
+        2,
+      );
+    }
+    bail(`DB update failed: ${error.message}`, "Check Supabase logs", 2);
+  }
+}
+
+/**
+ * meeting_transcripts に書き込んだ後、各 participant について analyze ジョブを enqueue。
+ * 既に同じ payload の pending/running job があれば作らない (job_queue にユニーク制約は無いので code 側で重複チェック)。
+ */
+async function enqueueReAnalyzeJobs(
+  supabase: ReturnType<typeof createSupabase>,
+  transcriptId: string,
+  participantIds: string[],
+): Promise<{ enqueued: number; skipped: number }> {
+  let enqueued = 0;
+  let skipped = 0;
+  for (const participantId of participantIds) {
+    const payload = { transcript_id: transcriptId, participant_id: participantId };
+
+    // 重複チェック
+    const { data: existing } = await supabase
+      .from("job_queue")
+      .select("id")
+      .eq("type", "analyze")
+      .contains("payload", payload)
+      .in("status", ["pending", "running"])
+      .maybeSingle();
+    if (existing) {
+      skipped++;
+      continue;
+    }
+
+    const { error } = await supabase.from("job_queue").insert({
+      type: "analyze",
+      payload,
+      status: "pending",
+      priority: 10,
+      attempts: 0,
+      max_attempts: 3,
+    });
+    if (error) {
+      console.warn(`[correct-speakers] failed to enqueue analyze job for participant ${participantId}: ${error.message}`);
+    } else {
+      enqueued++;
+    }
+  }
+  return { enqueued, skipped };
+}
+
+/** meeting_transcripts.correction_* 4 列を NULL に戻す (reset mode) */
+async function resetMeetingCorrection(
+  supabase: ReturnType<typeof createSupabase>,
+  meetingId: string,
+): Promise<void> {
+  const { error } = await supabase
+    .from("meeting_transcripts")
+    .update({
+      corrected_full_text: null,
+      correction_confidence: null,
+      correction_meta: null,
+      correction_run_at: null,
+    })
+    .eq("id", meetingId);
+  if (error) {
+    if (isColumnNotFoundError(error)) {
+      bail(
+        `Migration 00065 is not applied yet (PostgreSQL error: ${error.message})`,
+        "Apply 00065 first; nothing to reset until then",
+        2,
+      );
+    }
+    bail(`DB reset failed: ${error.message}`, undefined, 2);
+  }
+}
+
+/**
+ * meeting_transcripts.correction_run_at をチェックして
+ * 「最近補正済み」「補正済み」を判定する。
+ */
+async function fetchExistingCorrectionRunAt(
+  supabase: ReturnType<typeof createSupabase>,
+  meetingId: string,
+): Promise<Date | null> {
+  const { data, error } = await supabase
+    .from("meeting_transcripts")
+    .select("correction_run_at")
+    .eq("id", meetingId)
+    .maybeSingle();
+  if (error) {
+    if (isColumnNotFoundError(error)) {
+      // マイグレ未適用 → null と同じ扱い (補正が無い state)
+      return null;
+    }
+    bail(`Supabase fetch failed (correction_run_at): ${error.message}`, undefined, 2);
+  }
+  const raw = (data as { correction_run_at: string | null } | null)?.correction_run_at ?? null;
+  return raw ? new Date(raw) : null;
+}
+
+// ──────────────────────────────────────────────────────────────────
 // main
 // ──────────────────────────────────────────────────────────────────
 
 async function main(): Promise<void> {
   const args = parseArgs();
 
-  // 環境変数チェック
+  // フラグ整合性チェック
+  if (args.dryRun && !args.writeDb && !args.reset) {
+    console.warn("[correct-speakers] WARN: --dry-run has no effect without --write-db or --reset (ignored)");
+  }
+  if (args.forceOverwrite && !args.writeDb) {
+    console.warn("[correct-speakers] WARN: --force-overwrite has no effect without --write-db");
+  }
+  if (args.noReAnalyze && !args.writeDb) {
+    console.warn("[correct-speakers] WARN: --no-re-analyze has no effect without --write-db");
+  }
+
+  // --write-db は v2 自動モード (Supabase 経由で meeting_id が確定可能) でないと動かない。
+  // v1 (--transcript 指定) かつ --meeting-id 無指定だと最後に fail するので、ここで fast fail。
+  if (args.writeDb && args.transcriptPath && !args.meetingId) {
+    bail(
+      "--write-db requires a known meeting_id, but --transcript mode bypasses DB lookup",
+      "Either drop --transcript (use v2 auto mode), or add --meeting-id <uuid>",
+    );
+  }
+
+  // === --reset モード === (補正実行せず DB の 4 列を NULL に戻して終了)
+  if (args.reset) {
+    const supabase = createSupabase();
+    let resetMeetingId: string;
+    if (args.meetingId) {
+      resetMeetingId = args.meetingId;
+    } else {
+      // filename から meeting_id を逆引き
+      const parts = parseFilename(args.video);
+      if (!parts) {
+        bail(
+          `--reset requires --meeting-id <uuid>, or --video with parseable filename`,
+          "Use format <name>-YYYY-MM-DD.mp4 or pass --meeting-id",
+        );
+      }
+      console.log("[correct-speakers] reset mode: looking up meeting from filename");
+      const candidates = await searchMeetings(supabase, parts.name, parts.date);
+      const m = await pickMeeting(candidates, args);
+      resetMeetingId = m.id;
+    }
+    console.log(`[correct-speakers] resetting correction columns for meeting ${resetMeetingId}`);
+    if (args.dryRun) {
+      console.log("[correct-speakers] (dry-run) would NULL: corrected_full_text, correction_confidence, correction_meta, correction_run_at");
+      process.exit(0);
+    }
+    await resetMeetingCorrection(supabase, resetMeetingId);
+    console.log("[correct-speakers] ✅ reset complete");
+    process.exit(0);
+  }
+
+  // 環境変数チェック (通常モード)
   const geminiKey = process.env.GEMINI_API_KEY;
   if (!geminiKey) {
     bail("GEMINI_API_KEY not set", "Add GEMINI_API_KEY=... to .env.local", 2);
@@ -516,6 +752,17 @@ async function main(): Promise<void> {
 
     console.log(`  meeting: ${meeting.title ?? "(untitled)"} (id=${meeting.id})`);
     console.log(`  participants: ${participants.map((p) => p.speaker_name).join(", ")}`);
+
+    // --skip-already-corrected: 既に補正済みなら expensive な orchestrator 実行をスキップ
+    if (args.skipAlreadyCorrected) {
+      const existingRunAt = await fetchExistingCorrectionRunAt(supabase, meeting.id);
+      if (existingRunAt) {
+        console.log(
+          `[correct-speakers] ⏭ skip (--skip-already-corrected): already corrected at ${existingRunAt.toISOString()}`,
+        );
+        process.exit(0);
+      }
+    }
 
     // tldv API から segments 取得 (startTime/endTime 付き)
     const tldv = createTldvClient();
@@ -745,6 +992,69 @@ async function main(): Promise<void> {
   }
 
   console.log(`\n[correct-speakers] saved: ${args.out}`);
+
+  // === --write-db: DB に corrected_full_text 等を書き込み + re-analyze enqueue ===
+  if (args.writeDb) {
+    if (!resolvedMeetingId) {
+      bail(
+        "--write-db requires a resolved meeting_id (auto mode required)",
+        "Use auto mode (no --transcript) or specify --meeting-id explicitly",
+      );
+    }
+    const supabase = createSupabase();
+
+    // 既存補正の上書きガード
+    const existingRunAt = await fetchExistingCorrectionRunAt(supabase, resolvedMeetingId);
+    if (existingRunAt && !args.forceOverwrite) {
+      const hoursAgo = (Date.now() - existingRunAt.getTime()) / 3600_000;
+      if (hoursAgo < REFRESH_GUARD_HOURS) {
+        bail(
+          `meeting was already corrected ${hoursAgo.toFixed(1)}h ago (< ${REFRESH_GUARD_HOURS}h)`,
+          "Pass --force-overwrite to override the freshness guard",
+        );
+      }
+      console.warn(
+        `[correct-speakers] WARN: overwriting existing correction from ${existingRunAt.toISOString()}`,
+      );
+    }
+
+    const dbPayload = {
+      corrected_full_text: output.correctedDbFullText,
+      correction_confidence: result.correctionConfidence,
+      correction_meta: buildCorrectionMetaPayload(result, {
+        speakerLeftId: speakerMap.leftId,
+        speakerRightId: speakerMap.rightId,
+        libVersion: "0.1.0",
+      }),
+      correction_run_at: new Date().toISOString(),
+    };
+
+    if (args.dryRun) {
+      console.log("\n=== --dry-run: would UPDATE meeting_transcripts ===");
+      console.log(`  meeting_id: ${resolvedMeetingId}`);
+      console.log(`  corrected_full_text length: ${dbPayload.corrected_full_text.length} chars`);
+      console.log(`  correction_confidence: ${dbPayload.correction_confidence.toFixed(3)}`);
+      console.log(`  correction_run_at: ${dbPayload.correction_run_at}`);
+      console.log(`  correction_meta keys: ${Object.keys(dbPayload.correction_meta).join(", ")}`);
+      console.log("[correct-speakers] (dry-run) skipped DB write");
+    } else {
+      console.log("\n=== Writing to DB ===");
+      await writeCorrectionToDb(supabase, resolvedMeetingId, dbPayload);
+      console.log(`  ✅ meeting_transcripts updated (id=${resolvedMeetingId})`);
+
+      if (!args.noReAnalyze) {
+        const participantIds = participants.map((p) => p.id);
+        if (participantIds.length > 0) {
+          const r = await enqueueReAnalyzeJobs(supabase, resolvedMeetingId, participantIds);
+          console.log(`  ✅ re-analyze enqueued: ${r.enqueued} new (${r.skipped} already pending/running)`);
+        } else {
+          console.warn("  ⚠️ no participants found, re-analyze not enqueued");
+        }
+      } else {
+        console.log("  ⏭ re-analyze skipped (--no-re-analyze)");
+      }
+    }
+  }
 }
 
 main().catch((err) => {
