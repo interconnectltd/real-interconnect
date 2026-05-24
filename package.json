@@ -12,7 +12,8 @@
     "test:watch": "vitest",
     "worker": "npx tsx worker/src/index.ts",
     "worker:dev": "npx tsx --watch worker/src/index.ts",
-    "correct-speakers": "npx tsx scripts/correct-speakers.ts"
+    "correct-speakers": "npx tsx scripts/correct-speakers.ts",
+    "batch-correct-speakers": "npx tsx scripts/batch-correct-speakers.ts"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.82.0",
