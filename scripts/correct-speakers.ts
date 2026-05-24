@@ -77,6 +77,7 @@ interface CliArgs {
   skipFrames: boolean;
   nonInteractive: boolean;
   autoPickFirst: boolean;
+  noAutoRefs: boolean;
 }
 
 function parseArgs(): CliArgs {
@@ -113,6 +114,7 @@ function parseArgs(): CliArgs {
     skipFrames: has("--skip-frames"),
     nonInteractive: has("--non-interactive"),
     autoPickFirst: has("--auto-pick-first"),
+    noAutoRefs: has("--no-auto-refs"),
   };
 }
 
@@ -361,12 +363,16 @@ function deriveSpeakerMap(
 // reference voice 解決 (3 段階 fallback)
 // ──────────────────────────────────────────────────────────────────
 
-function resolveReferenceVoicePath(
+/**
+ * 参照声ファイルを 3 段階 fallback で検索。
+ * 見つからなければ null を返す (caller が自動抽出 or bail を判断)。
+ */
+function findReferenceVoicePath(
   refDir: string,
   id: string,
   name: string,
   userId: string | null,
-): string {
+): { path: string; tried: string[] } | { path: null; tried: string[] } {
   const candidates: string[] = [];
   if (userId) {
     const prefix = userId.split("-")[0]?.slice(0, 8) ?? "";
@@ -376,12 +382,33 @@ function resolveReferenceVoicePath(
   candidates.push(resolve(refDir, `${name}.mp3`));
 
   for (const p of candidates) {
-    if (existsSync(p)) return p;
+    if (existsSync(p)) return { path: p, tried: candidates };
   }
-  bail(
-    `Reference voice not found for "${name}" (id=${id})`,
-    `Provide ONE of these files:\n  ${candidates.join("\n  ")}`,
-  );
+  return { path: null, tried: candidates };
+}
+
+/**
+ * 自動抽出した参照声をキャッシュとして ref-dir に保存。
+ * 優先キー: user_<short-uuid> > <speaker-id>。 次回 CLI 実行時に findReferenceVoicePath が拾える形。
+ */
+async function saveExtractedRefToCache(
+  refDir: string,
+  speakerId: string,
+  userId: string | null,
+  audioBuffer: Buffer,
+): Promise<string> {
+  await mkdir(refDir, { recursive: true });
+  let filename: string;
+  if (userId) {
+    const prefix = userId.split("-")[0]?.slice(0, 8) ?? "";
+    if (prefix) filename = `user_${prefix}.mp3`;
+    else filename = `${speakerId}.mp3`;
+  } else {
+    filename = `${speakerId}.mp3`;
+  }
+  const filepath = resolve(refDir, filename);
+  await writeFile(filepath, audioBuffer);
+  return filepath;
 }
 
 // ──────────────────────────────────────────────────────────────────
@@ -413,10 +440,12 @@ async function main(): Promise<void> {
   if (!existsSync(args.video)) {
     bail(`video file not found: ${args.video}`, "Check the --video path");
   }
-  if (!existsSync(args.refDir)) {
+  // ref-dir は存在しなくても OK (自動抽出する場合は後で mkdir される)。 ただし
+  // --no-auto-refs フラグ指定時は ref-dir が必要。
+  if (args.noAutoRefs && !existsSync(args.refDir)) {
     bail(
-      `reference voice dir not found: ${args.refDir}`,
-      "Provide --ref-dir or place files in default location",
+      `reference voice dir not found: ${args.refDir} (--no-auto-refs set)`,
+      "Provide --ref-dir or remove --no-auto-refs to allow auto-extraction",
     );
   }
 
@@ -513,39 +542,65 @@ async function main(): Promise<void> {
 
   // multi-party guard は deriveSpeakerMap 内で bail されてるので、ここまで来たら 2 人確定
 
-  // 参照声ファイル解決
+  // 参照声ファイル解決 (見つからないものは null で進める → orchestrator が自動抽出)
   const leftPart = participants.find((p) => p.speaker_name === speakerMap.leftName);
   const rightPart = participants.find((p) => p.speaker_name === speakerMap.rightName);
 
-  const refLeftPath = resolveReferenceVoicePath(
+  const refLeftResult = findReferenceVoicePath(
     args.refDir,
     speakerMap.leftId,
     speakerMap.leftName,
     leftPart?.user_id ?? null,
   );
-  const refRightPath = resolveReferenceVoicePath(
+  const refRightResult = findReferenceVoicePath(
     args.refDir,
     speakerMap.rightId,
     speakerMap.rightName,
     rightPart?.user_id ?? null,
   );
 
-  const [refLeftBuf, refRightBuf] = await Promise.all([
-    readFile(refLeftPath),
-    readFile(refRightPath),
-  ]);
+  // --no-auto-refs 指定時は不在で bail
+  if (args.noAutoRefs) {
+    if (!refLeftResult.path) {
+      bail(
+        `Reference voice not found for "${speakerMap.leftName}" (--no-auto-refs set)`,
+        `Provide ONE:\n  ${refLeftResult.tried.join("\n  ")}`,
+      );
+    }
+    if (!refRightResult.path) {
+      bail(
+        `Reference voice not found for "${speakerMap.rightName}" (--no-auto-refs set)`,
+        `Provide ONE:\n  ${refRightResult.tried.join("\n  ")}`,
+      );
+    }
+  }
 
-  const referenceVoices: ReferenceVoice[] = [
-    { id: speakerMap.leftId, displayLabel: speakerMap.leftName, audioBuffer: refLeftBuf },
-    { id: speakerMap.rightId, displayLabel: speakerMap.rightName, audioBuffer: refRightBuf },
-  ];
+  const providedRefs: ReferenceVoice[] = [];
+  if (refLeftResult.path) {
+    const buf = await readFile(refLeftResult.path);
+    providedRefs.push({ id: speakerMap.leftId, displayLabel: speakerMap.leftName, audioBuffer: buf });
+  }
+  if (refRightResult.path) {
+    const buf = await readFile(refRightResult.path);
+    providedRefs.push({ id: speakerMap.rightId, displayLabel: speakerMap.rightName, audioBuffer: buf });
+  }
+  const missingCount = 2 - providedRefs.length;
 
   // 実行情報
   console.log("\n[correct-speakers] starting orchestrator");
   console.log(`  video        : ${args.video}`);
   console.log(`  segments     : ${segments.length}`);
-  console.log(`  left         : ${speakerMap.leftName} (${speakerMap.leftId})  ref=${basename(refLeftPath)}`);
-  console.log(`  right        : ${speakerMap.rightName} (${speakerMap.rightId})  ref=${basename(refRightPath)}`);
+  console.log(
+    `  left         : ${speakerMap.leftName} (${speakerMap.leftId})  ` +
+      `ref=${refLeftResult.path ? basename(refLeftResult.path) : "AUTO-EXTRACT"}`,
+  );
+  console.log(
+    `  right        : ${speakerMap.rightName} (${speakerMap.rightId})  ` +
+      `ref=${refRightResult.path ? basename(refRightResult.path) : "AUTO-EXTRACT"}`,
+  );
+  if (missingCount > 0) {
+    console.log(`  refs to auto-extract: ${missingCount} / 2`);
+  }
   console.log(`  out          : ${args.out}`);
   if (args.limitSeconds !== undefined) console.log(`  limit-seconds: ${args.limitSeconds}`);
   if (args.skipFrames) console.log(`  skip-frames  : true`);
@@ -568,7 +623,7 @@ async function main(): Promise<void> {
     result = await correctSpeakers({
       videoPath: args.video,
       segments,
-      referenceVoices,
+      referenceVoices: providedRefs,
       speakerMap: {
         nameToId: speakerMap.nameToId,
         idToName: speakerMap.idToName,
@@ -592,6 +647,19 @@ async function main(): Promise<void> {
     process.stdout.write("\n");
     const msg = err instanceof Error ? err.message : String(err);
     bail(`correction failed: ${msg}`, "Check above logs for details", 2);
+  }
+
+  // 自動抽出した参照声を ref-dir にキャッシュ保存 (次回 CLI 実行時に再利用される)
+  const cachedRefPaths: string[] = [];
+  for (const r of result.autoExtractedReferences) {
+    const userId =
+      r.id === speakerMap.leftId
+        ? (leftPart?.user_id ?? null)
+        : r.id === speakerMap.rightId
+          ? (rightPart?.user_id ?? null)
+          : null;
+    const saved = await saveExtractedRefToCache(args.refDir, r.id, userId, r.audioBuffer);
+    cachedRefPaths.push(saved);
   }
 
   // corrections (verdict=tldv-wrong のみ抽出)
@@ -658,6 +726,21 @@ async function main(): Promise<void> {
     }
     if (corrections.length > 10) {
       console.log(`  ... and ${corrections.length - 10} more`);
+    }
+  }
+
+  if (cachedRefPaths.length > 0) {
+    console.log("\n=== Auto-Extracted Reference Voices (cached) ===");
+    for (let i = 0; i < result.autoExtractedReferences.length; i++) {
+      const r = result.autoExtractedReferences[i];
+      const path = cachedRefPaths[i];
+      if (!r || !path) continue;
+      const shortFlag = r.shortClip ? " (短: 8秒未満)" : "";
+      console.log(
+        `  ${r.id} (${r.displayLabel}): ${r.actualClipSec.toFixed(1)}s ` +
+          `@ ${r.sourceRange.startSec}-${r.sourceRange.endSec}s${shortFlag}`,
+      );
+      console.log(`    saved: ${path}`);
     }
   }
 

@@ -5,11 +5,14 @@
 //
 // 設計判断:
 //   - I/O はこの関数内に閉じ込める。テストは smoke test (8-) / e2e test (9-) で。
-//   - 致命的: ffmpeg 失敗 / 参照声不在 / 全 Gemini エラー → throw
+//   - 致命的: ffmpeg 失敗 / 全 Gemini エラー → throw
 //   - 続行可: 個別 Gemini call の error → "unknown" 扱いで多数決
 //   - サーキットブレーカ: vision または audio の error 率 > 30% で throw
 //   - 出力は DB スキーマ (`corrected_full_text` + `correction_confidence` +
 //     `correction_meta`) と一対一対応。
+//   - **参照声の自動抽出 (Day 3b)**: referenceVoices を省略 or 部分指定すると、
+//     classify-frames 完了後に tldv-video 一致区間から自動抽出して埋める。
+//     これにより CLI は「動画 1 ファイル」だけで補正を回せる。
 
 import { mkdir, readdir } from "node:fs/promises";
 import { join } from "node:path";
@@ -35,11 +38,15 @@ import {
 } from "./merge-3way";
 import { runPool } from "./pool";
 import {
+  extractReferenceVoicesFromVideo,
+  type ExtractedReferenceVoice,
+} from "./ref-voice";
+import {
   buildFullText,
   fillEndSec,
   type Segment,
 } from "./transcript";
-import { videoDominantInRange, type VideoTimelineItem } from "./timeline";
+import { videoDominantInRange, type VideoTimelineItem, type VideoSide } from "./timeline";
 
 /** 補正実行のサーキットブレーカ閾値 (0.3 = 30% エラーで打ち切り) */
 export const CIRCUIT_BREAKER_ERROR_RATE = 0.3;
@@ -49,6 +56,7 @@ export type CorrectionPhase =
   | "probe"
   | "extract-frames"
   | "classify-frames"
+  | "extract-refs"
   | "classify-audio"
   | "merge"
   | "build-output";
@@ -58,8 +66,12 @@ export interface CorrectSpeakersInput {
   videoPath: string;
   /** 事前パース済みセグメント (CLI 側で transcript.txt or tldv API から作る) */
   segments: Segment[];
-  /** 参照声サンプル (id, displayLabel, audioBuffer) */
-  referenceVoices: ReferenceVoice[];
+  /**
+   * 参照声サンプル (id, displayLabel, audioBuffer)。
+   * 省略時は tldv-video 一致区間から自動抽出する (Day 3b)。
+   * 部分指定 (片方だけ) も可能で、不足分のみ自動抽出。
+   */
+  referenceVoices?: ReferenceVoice[];
   /** 名前/ID マッピング */
   speakerMap: {
     /** tldv の生 speaker 文字列 → 正規化 ID */
@@ -78,6 +90,8 @@ export interface CorrectSpeakersInput {
   options?: {
     /** デフォルト 2 秒ごとに 1 フレーム */
     frameIntervalSec?: number;
+    /** フレーム抽出を最初の N 秒に制限 (テスト/長尺対策) */
+    limitSeconds?: number;
     /** vision 並列度。デフォルト 5 */
     visionConcurrency?: number;
     /** audio 並列度。デフォルト 6 */
@@ -86,6 +100,13 @@ export interface CorrectSpeakersInput {
     audioClipSec?: number;
     /** 既存フレームを再利用 (extractFrames 自体をスキップ) */
     skipFrameExtraction?: boolean;
+    /**
+     * 既存の video timeline を再利用 (vision phase 全体を skip)。
+     * 解決案 C のための入口。 提供されたら frames も classify-frames も実行しない。
+     */
+    precomputedTimeline?: VideoTimelineItem[];
+    /** 自動抽出参照声のクリップ目標長 (秒)。デフォルト 12 */
+    refVoiceClipSec?: number;
     /** 進捗 callback */
     onProgress?: (phase: CorrectionPhase, done: number, total: number) => void;
   };
@@ -119,6 +140,17 @@ export interface CorrectionMeta {
   audioErrors: number;
   audioFloorApplied: number; // audioConfidence < FLOOR のセグメント数
   referenceVoiceIds: string[];
+  /** 自動抽出した参照声の ID (空配列 = 全て手動指定) */
+  autoExtractedRefIds: string[];
+  /** 自動抽出した参照声のメタ情報 (どの区間から取ったか) */
+  autoExtractedRefRanges: Array<{
+    speakerId: string;
+    startSec: number;
+    endSec: number;
+    durationSec: number;
+    actualClipSec: number;
+    shortClip: boolean;
+  }>;
   model: { vision: string; audio: string };
   durationMs: number;
 }
@@ -130,6 +162,8 @@ export interface CorrectSpeakersOutput {
   correctionConfidence: number;
   meta: CorrectionMeta;
   perSegment: SegmentCorrection[];
+  /** 自動抽出された参照声 (CLI 側でファイルキャッシュする用) */
+  autoExtractedReferences: ExtractedReferenceVoice[];
 }
 
 /**
@@ -146,11 +180,9 @@ export async function correctSpeakers(
   const visionConcurrency = opts.visionConcurrency ?? 5;
   const audioConcurrency = opts.audioConcurrency ?? 6;
   const audioClipSec = opts.audioClipSec ?? 5;
+  const refVoiceClipSec = opts.refVoiceClipSec ?? 12;
   const onProgress = opts.onProgress ?? (() => {});
 
-  if (input.referenceVoices.length === 0) {
-    throw new Error("correctSpeakers: at least one reference voice required");
-  }
   if (input.segments.length === 0) {
     throw new Error("correctSpeakers: no transcript segments");
   }
@@ -161,59 +193,107 @@ export async function correctSpeakers(
   onProgress("probe", 1, 1);
 
   const segments = fillEndSec(input.segments, videoDurationSec);
-
-  // 2) フレーム抽出 (skip 可)
-  const framesDir = join(input.workDir, "frames");
-  if (!opts.skipFrameExtraction) {
-    onProgress("extract-frames", 0, 1);
-    await mkdir(input.workDir, { recursive: true });
-    await extractFrames({
-      input: input.videoPath,
-      outDir: framesDir,
-      everySec: frameIntervalSec,
-    });
-    onProgress("extract-frames", 1, 1);
-  }
-
-  // 3) フレーム一覧 → vision API で active speaker 判定
-  const frameFiles = (await readdir(framesDir))
-    .filter((f) => f.endsWith(".jpg"))
-    .sort();
-  if (frameFiles.length === 0) {
-    throw new Error(`correctSpeakers: no frames in ${framesDir}`);
-  }
-
   const client = new GoogleGenerativeAI(input.geminiApiKey);
 
-  const visionResults = await runPool(
-    frameFiles,
-    visionConcurrency,
-    async (file, idx) => {
-      const res = await classifyFrameFile(client, join(framesDir, file));
-      // frame_NNNNN.jpg → timestampSec = (NNNNN - 1) * frameIntervalSec
-      const m = file.match(/frame_(\d+)\.jpg$/);
-      const frameIndex = m ? parseInt(m[1] ?? "0", 10) : idx + 1;
-      const timestampSec = (frameIndex - 1) * frameIntervalSec;
-      const item: VideoTimelineItem = {
-        frameIndex,
-        timestampSec,
-        speaker: res.speaker,
-        confidence: res.confidence,
-        reason: res.reason,
-      };
-      return { item, isError: res.speaker === "error" };
-    },
-    (done, total) => onProgress("classify-frames", done, total),
-  );
+  // 2) フレーム抽出 + 3) vision 判定。 precomputed timeline 提供時は完全 skip。
+  let timeline: VideoTimelineItem[];
+  let visionFrames: number;
+  let visionErrors: number;
 
-  const timeline = visionResults.map((r) => r.item);
-  const visionErrors = visionResults.filter((r) => r.isError).length;
-  if (visionErrors / visionResults.length > CIRCUIT_BREAKER_ERROR_RATE) {
-    throw new Error(
-      `correctSpeakers: vision error rate ${(visionErrors / visionResults.length).toFixed(2)} ` +
-        `exceeds circuit breaker ${CIRCUIT_BREAKER_ERROR_RATE}`,
+  if (opts.precomputedTimeline && opts.precomputedTimeline.length > 0) {
+    timeline = [...opts.precomputedTimeline];
+    visionFrames = timeline.length;
+    visionErrors = timeline.filter((t) => t.speaker === "error").length;
+  } else {
+    const framesDir = join(input.workDir, "frames");
+    if (!opts.skipFrameExtraction) {
+      onProgress("extract-frames", 0, 1);
+      await mkdir(input.workDir, { recursive: true });
+      await extractFrames({
+        input: input.videoPath,
+        outDir: framesDir,
+        everySec: frameIntervalSec,
+        limitSeconds: opts.limitSeconds,
+      });
+      onProgress("extract-frames", 1, 1);
+    }
+
+    const frameFiles = (await readdir(framesDir))
+      .filter((f) => f.endsWith(".jpg"))
+      .sort();
+    if (frameFiles.length === 0) {
+      throw new Error(`correctSpeakers: no frames in ${framesDir}`);
+    }
+
+    const visionResults = await runPool(
+      frameFiles,
+      visionConcurrency,
+      async (file, idx) => {
+        const res = await classifyFrameFile(client, join(framesDir, file));
+        const m = file.match(/frame_(\d+)\.jpg$/);
+        const frameIndex = m ? parseInt(m[1] ?? "0", 10) : idx + 1;
+        const timestampSec = (frameIndex - 1) * frameIntervalSec;
+        const item: VideoTimelineItem = {
+          frameIndex,
+          timestampSec,
+          speaker: res.speaker,
+          confidence: res.confidence,
+          reason: res.reason,
+        };
+        return { item, isError: res.speaker === "error" };
+      },
+      (done, total) => onProgress("classify-frames", done, total),
     );
+
+    timeline = visionResults.map((r) => r.item);
+    visionFrames = visionResults.length;
+    visionErrors = visionResults.filter((r) => r.isError).length;
+    if (visionErrors / visionResults.length > CIRCUIT_BREAKER_ERROR_RATE) {
+      throw new Error(
+        `correctSpeakers: vision error rate ${(visionErrors / visionResults.length).toFixed(2)} ` +
+          `exceeds circuit breaker ${CIRCUIT_BREAKER_ERROR_RATE}`,
+      );
+    }
   }
+
+  const sideToId = (side: VideoSide): string => {
+    if (side === "left") return input.speakerMap.leftId;
+    if (side === "right") return input.speakerMap.rightId;
+    return "unknown";
+  };
+
+  // 3.5) 参照声の解決: 提供された refs + 不足分は tldv-video 一致区間から自動抽出
+  const providedRefs = input.referenceVoices ?? [];
+  const providedIds = new Set(providedRefs.map((r) => r.id));
+  const requiredIds = [input.speakerMap.leftId, input.speakerMap.rightId];
+  const missingIds = requiredIds.filter((id) => !providedIds.has(id));
+
+  let autoExtractedReferences: ExtractedReferenceVoice[] = [];
+  if (missingIds.length > 0) {
+    onProgress("extract-refs", 0, missingIds.length);
+    const result = await extractReferenceVoicesFromVideo({
+      videoPath: input.videoPath,
+      segments,
+      timeline,
+      nameToId: input.speakerMap.nameToId,
+      idToName: input.speakerMap.idToName,
+      sideToId,
+      speakerIds: missingIds,
+      videoDurationSec,
+      clipSec: refVoiceClipSec,
+    });
+
+    if (result.missing.length > 0) {
+      throw new Error(
+        `correctSpeakers: could not extract reference voices for: ${result.missing.join(", ")}. ` +
+          `Either tldv has no agreement zones for these speakers, or you must provide them manually.`,
+      );
+    }
+    autoExtractedReferences = result.voices;
+    onProgress("extract-refs", missingIds.length, missingIds.length);
+  }
+
+  const allReferenceVoices: ReferenceVoice[] = [...providedRefs, ...autoExtractedReferences];
 
   // 4) セグメントごとに音声クリップ抽出 → audio API で声紋照合
   const audioResults = await runPool(
@@ -227,7 +307,7 @@ export async function correctSpeakers(
         startSec: params.startSec,
         durationSec: params.durationSec,
       });
-      const res = await classifyAudioClip(client, clip, input.referenceVoices);
+      const res = await classifyAudioClip(client, clip, allReferenceVoices);
       return { idx, res, isError: res.speaker === "error" };
     },
     (done, total) => onProgress("classify-audio", done, total),
@@ -244,12 +324,6 @@ export async function correctSpeakers(
   // 5) 3-way 多数決
   onProgress("merge", 0, segments.length);
 
-  const sideToId = (side: "left" | "right" | "unknown"): string => {
-    if (side === "left") return input.speakerMap.leftId;
-    if (side === "right") return input.speakerMap.rightId;
-    return "unknown";
-  };
-
   const perSegment: SegmentCorrection[] = [];
   const verdictResults: VerdictResult[] = [];
   let audioFloorApplied = 0;
@@ -264,9 +338,7 @@ export async function correctSpeakers(
     const videoSide = videoDominantInRange(timeline, seg.startSec, endSec);
     const video = sideToId(videoSide);
     const audioRes = audioResultByIdx.get(i);
-    const audio = audioRes && (audioRes.speaker !== "error")
-      ? audioRes.speaker
-      : "unknown";
+    const audio = audioRes && audioRes.speaker !== "error" ? audioRes.speaker : "unknown";
     const audioConfidence = audioRes?.confidence ?? 0;
 
     if (audioConfidence < AUDIO_CONFIDENCE_FLOOR && audio !== "unknown") {
@@ -321,12 +393,21 @@ export async function correctSpeakers(
     counts,
     totalSegments: segments.length,
     correctedSegments,
-    visionFrames: visionResults.length,
+    visionFrames,
     visionErrors,
     audioCalls: audioResults.length,
     audioErrors,
     audioFloorApplied,
-    referenceVoiceIds: input.referenceVoices.map((r) => r.id),
+    referenceVoiceIds: allReferenceVoices.map((r) => r.id),
+    autoExtractedRefIds: autoExtractedReferences.map((r) => r.id),
+    autoExtractedRefRanges: autoExtractedReferences.map((r) => ({
+      speakerId: r.id,
+      startSec: r.sourceRange.startSec,
+      endSec: r.sourceRange.endSec,
+      durationSec: r.sourceRange.durationSec,
+      actualClipSec: r.actualClipSec,
+      shortClip: r.shortClip,
+    })),
     model: { vision: "gemini-2.5-flash-lite", audio: "gemini-2.5-flash" },
     durationMs: Date.now() - t0,
   };
@@ -338,5 +419,6 @@ export async function correctSpeakers(
     correctionConfidence,
     meta,
     perSegment,
+    autoExtractedReferences,
   };
 }
