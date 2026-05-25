@@ -1,5 +1,5 @@
 import type { Stripe as StripeNS } from "stripe";
-import { stripe } from "@/lib/stripe";
+import { getStripe } from "@/lib/stripe";
 import { createServiceClient } from "@/lib/supabase/server";
 import { jsonError } from "@/lib/api-helpers";
 
@@ -36,7 +36,7 @@ export async function POST(request: Request) {
 
   let event: StripeNS.Event;
   try {
-    event = stripe.webhooks.constructEvent(rawBody, signature, secret);
+    event = getStripe().webhooks.constructEvent(rawBody, signature, secret);
   } catch (err) {
     console.warn(
       "[stripe.webhook] signature verification failed:",

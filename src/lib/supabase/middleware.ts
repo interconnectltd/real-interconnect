@@ -174,9 +174,22 @@ export async function updateSession(
       }
     }
 
+    // onboarding gate の除外パス:
+    //  - /onboarding (本体)
+    //  - /api/ (全 API、それぞれが個別に gate する設計)
+    //  - /admin/* (admin 機能、admin 自身は onboarding を経ない運用前提)
+    //  - /agency/* (代理店ダッシュボード、申請承認後は onboarding 完了前でも見られるべき)
+    //  - /settings/* (申請ボタン等、onboarding 中でも触れたい設定がある)
+    const skipOnboarding =
+      pathname.startsWith("/onboarding") ||
+      pathname.startsWith("/api/") ||
+      pathname.startsWith("/admin/") ||
+      pathname.startsWith("/agency/") ||
+      pathname === "/agency" ||
+      pathname.startsWith("/settings");
+
     if (
-      !pathname.startsWith("/onboarding") &&
-      !pathname.startsWith("/api/") &&
+      !skipOnboarding &&
       profile &&
       (profile.onboarding_step ?? 0) < 3
     ) {

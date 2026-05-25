@@ -1,5 +1,5 @@
 import { withAuth, json, jsonError, handleApiError } from "@/lib/api-helpers";
-import { stripe, STRIPE_PRICE_ID_STANDARD_MONTHLY } from "@/lib/stripe";
+import { getStripe, STRIPE_PRICE_ID_STANDARD_MONTHLY } from "@/lib/stripe";
 import { createServiceClient } from "@/lib/supabase/server";
 
 export async function POST(request: Request) {
@@ -8,6 +8,7 @@ export async function POST(request: Request) {
     if (!STRIPE_PRICE_ID_STANDARD_MONTHLY) {
       return jsonError(500, "PRICE_NOT_CONFIGURED", "料金プランが未設定です");
     }
+    const stripe = getStripe();
 
     const { data: profile } = await supabase
       .from("user_profiles")

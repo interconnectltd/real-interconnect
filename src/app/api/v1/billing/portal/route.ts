@@ -1,5 +1,5 @@
 import { withAuth, json, jsonError, handleApiError } from "@/lib/api-helpers";
-import { stripe } from "@/lib/stripe";
+import { getStripe } from "@/lib/stripe";
 
 export async function POST(request: Request) {
   try {
@@ -10,6 +10,8 @@ export async function POST(request: Request) {
       .select("stripe_customer_id")
       .eq("id", user.id)
       .maybeSingle();
+
+    const stripe = getStripe();
 
     if (!profile?.stripe_customer_id) {
       return jsonError(
