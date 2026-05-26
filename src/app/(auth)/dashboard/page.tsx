@@ -35,6 +35,7 @@ import { DashboardTour } from "@/components/onboarding/dashboard-tour";
 import { api } from "@/lib/api-client";
 import { useMyProfile } from "@/hooks/queries/use-profile";
 import type { LucideIcon } from "lucide-react";
+import { useSubscriptionGate } from "@/hooks/use-subscription-gate";
 import type { MutualMatch, Profile } from "@/types";
 
 interface Stat {
@@ -58,9 +59,10 @@ export default function DashboardPage() {
   const { data: mutualMatches } = useMutualMatches();
   const { data: membersData } = useMembers("", { page: 1 });
   const { openProfileModal } = useUIStore();
+  const { isSubscribed } = useSubscriptionGate();
 
   useEffect(() => {
-    if (!user || computedRef.current) return;
+    if (!user || computedRef.current || !isSubscribed) return;
     const key = `interconnect_computed_${user.id}`;
     if (sessionStorage.getItem(key)) {
       computedRef.current = true;
@@ -80,7 +82,7 @@ export default function DashboardPage() {
         // 最低限 console.error に残し、Sentry 導入後は捕捉対象に。
         console.error("[dashboard] matching/compute-v2 failed", err);
       });
-  }, [user, queryClient]);
+  }, [user, queryClient, isSubscribed]);
 
   const acceptedCount = connections?.filter(
     (c: { status: string }) => c.status === "accepted",

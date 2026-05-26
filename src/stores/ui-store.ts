@@ -19,6 +19,10 @@ interface UIStore {
   confirmDialog: (ConfirmDialogConfig & { open: true }) | null;
   showConfirmDialog: (config: ConfirmDialogConfig) => void;
   closeConfirmDialog: () => void;
+
+  upgradeDialogOpen: boolean;
+  openUpgradeDialog: () => void;
+  closeUpgradeDialog: () => void;
 }
 
 export const useUIStore = create<UIStore>((set) => ({
@@ -34,4 +38,8 @@ export const useUIStore = create<UIStore>((set) => ({
   showConfirmDialog: (config) =>
     set({ confirmDialog: { ...config, open: true } }),
   closeConfirmDialog: () => set({ confirmDialog: null }),
+
+  upgradeDialogOpen: false,
+  openUpgradeDialog: () => set({ upgradeDialogOpen: true }),
+  closeUpgradeDialog: () => set({ upgradeDialogOpen: false }),
 }));

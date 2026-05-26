@@ -39,6 +39,7 @@ import {
   MEMBER_SORT_OPTIONS,
   type MemberSortBy,
 } from "@/lib/constants";
+import { useSubscriptionGate } from "@/hooks/use-subscription-gate";
 import type { Profile, Connection } from "@/types";
 
 export default function MembersPage() {
@@ -73,6 +74,7 @@ export default function MembersPage() {
   const toggleBookmark = useToggleBookmark();
   const requestConnection = useRequestConnection();
   const { openProfileModal } = useUIStore();
+  const { guard } = useSubscriptionGate();
 
   const bookmarkedIds = useMemo(
     () =>
@@ -246,12 +248,14 @@ export default function MembersPage() {
                 bookmarkPending={toggleBookmark.isPending}
                 onOpen={() => openProfileModal(member.id)}
                 onToggleBookmark={() =>
-                  toggleBookmark.mutate({
-                    userId: member.id,
-                    isBookmarked: bookmarkedIds.has(member.id),
-                  })
+                  guard(() =>
+                    toggleBookmark.mutate({
+                      userId: member.id,
+                      isBookmarked: bookmarkedIds.has(member.id),
+                    }),
+                  )
                 }
-                onConnect={() => requestConnection.mutate(member.id)}
+                onConnect={() => guard(() => requestConnection.mutate(member.id))}
               />
               </div>
             ))}

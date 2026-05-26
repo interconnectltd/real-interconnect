@@ -24,6 +24,8 @@ export type NotificationType =
   | "intervention_alert"
   | "followup_reminder"
   | "chat_message"
+  | "referral_signed_up"
+  | "referral_paying"
   | "system";
 
 export type ConnectionStatus =

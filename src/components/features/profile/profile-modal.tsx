@@ -25,6 +25,7 @@ import { api } from "@/lib/api-client";
 // V2: SCORE_AXIS_LABELS 不要（おすすめ度のみ表示）
 import { ScoreBar, ReasonList } from "@/components/shared/score-bar";
 import { UserAvatar } from "@/components/shared/user-avatar";
+import { useSubscriptionGate } from "@/hooks/use-subscription-gate";
 import type { MatchScore, Connection } from "@/types";
 
 interface TimeSuggestion {
@@ -53,6 +54,7 @@ export function ProfileModal() {
   const requestConnection = useRequestConnection();
   const toggleBookmark = useToggleBookmark();
   const requestMeeting = useRequestMeeting();
+  const { guard } = useSubscriptionGate();
 
   const [showMeetingForm, setShowMeetingForm] = useState(false);
   const [meetingMessage, setMeetingMessage] = useState("");
@@ -311,36 +313,37 @@ export function ProfileModal() {
                       size="sm"
                       className="flex-1"
                       disabled={requestMeeting.isPending || (selectedSlotIndex == null && (!useCustomTime || !proposedTimes.trim()))}
-                      onClick={() => {
-                        if (profileModalUserId) {
-                          // Build proposed_times from selected slot or custom input
-                          let times: string | undefined;
-                          if (!useCustomTime && selectedSlotIndex !== null && suggestions[selectedSlotIndex]) {
-                            const slot = suggestions[selectedSlotIndex];
-                            times = `${formatDateWithWeekday(slot.date)} ${slot.start}〜${slot.end}`;
-                          } else if (proposedTimes) {
-                            times = proposedTimes;
-                          }
+                      onClick={() =>
+                        guard(() => {
+                          if (profileModalUserId) {
+                            let times: string | undefined;
+                            if (!useCustomTime && selectedSlotIndex !== null && suggestions[selectedSlotIndex]) {
+                              const slot = suggestions[selectedSlotIndex];
+                              times = `${formatDateWithWeekday(slot.date)} ${slot.start}〜${slot.end}`;
+                            } else if (proposedTimes) {
+                              times = proposedTimes;
+                            }
 
-                          requestMeeting.mutate(
-                            {
-                              target_id: profileModalUserId,
-                              message: meetingMessage || undefined,
-                              proposed_times: times,
-                            },
-                            {
-                              onSuccess: () => {
-                                setShowMeetingForm(false);
-                                setMeetingMessage("");
-                                setProposedTimes("");
-                                setSuggestions([]);
-                                setSelectedSlotIndex(null);
-                                setUseCustomTime(false);
+                            requestMeeting.mutate(
+                              {
+                                target_id: profileModalUserId,
+                                message: meetingMessage || undefined,
+                                proposed_times: times,
                               },
-                            },
-                          );
-                        }
-                      }}
+                              {
+                                onSuccess: () => {
+                                  setShowMeetingForm(false);
+                                  setMeetingMessage("");
+                                  setProposedTimes("");
+                                  setSuggestions([]);
+                                  setSelectedSlotIndex(null);
+                                  setUseCustomTime(false);
+                                },
+                              },
+                            );
+                          }
+                        })
+                      }
                     >
                       {requestMeeting.isPending ? "送信中..." : "送信"}
                     </Button>
@@ -379,11 +382,13 @@ export function ProfileModal() {
                 ) : (
                   <Button
                     className="flex-1"
-                    onClick={() => {
-                      if (profileModalUserId) {
-                        requestConnection.mutate(profileModalUserId);
-                      }
-                    }}
+                    onClick={() =>
+                      guard(() => {
+                        if (profileModalUserId) {
+                          requestConnection.mutate(profileModalUserId);
+                        }
+                      })
+                    }
                     disabled={requestConnection.isPending}
                   >
                     <UserPlus className="mr-1.5 h-4 w-4" />
@@ -393,14 +398,16 @@ export function ProfileModal() {
                 <Button
                   variant="outline"
                   size="icon"
-                  onClick={() => {
-                    if (profileModalUserId) {
-                      toggleBookmark.mutate({
-                        userId: profileModalUserId,
-                        isBookmarked,
-                      });
-                    }
-                  }}
+                  onClick={() =>
+                    guard(() => {
+                      if (profileModalUserId) {
+                        toggleBookmark.mutate({
+                          userId: profileModalUserId,
+                          isBookmarked,
+                        });
+                      }
+                    })
+                  }
                 >
                   <Bookmark className="h-4 w-4" fill={isBookmarked ? "currentColor" : "none"} />
                 </Button>

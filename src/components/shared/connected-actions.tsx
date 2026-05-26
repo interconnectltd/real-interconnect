@@ -20,6 +20,7 @@
 import { MessageSquare, CalendarPlus, User } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useOpenChatRoom } from "@/hooks/mutations/use-open-chat-room";
+import { useSubscriptionGate } from "@/hooks/use-subscription-gate";
 
 type Variant = "card" | "modal" | "row";
 
@@ -45,13 +46,14 @@ export function ConnectedActions({
   className = "",
 }: Props) {
   const openChat = useOpenChatRoom();
+  const { guard } = useSubscriptionGate();
 
   const handleChat = () => {
     if (!connectionId) return;
-    openChat.mutate(connectionId);
+    guard(() => openChat.mutate(connectionId));
   };
   const handleMeeting = () => {
-    onRequestMeeting?.(targetUserId);
+    guard(() => onRequestMeeting?.(targetUserId));
   };
   const handleProfile = () => {
     onOpenProfile?.(targetUserId);

@@ -3,6 +3,7 @@ import { Sidebar } from "@/components/layouts/sidebar";
 // dynamic({ssr:false}) は Next.js 16 で Server Component 禁止 → Client wrapper 経由
 import { LazyProfileModal as ProfileModal } from "@/components/features/profile/profile-modal-client";
 import { LazyGlobalHelpDock as GlobalHelpDock } from "@/components/onboarding/global-help-dock-client";
+import { LazyUpgradeDialog as UpgradeDialog } from "@/components/shared/upgrade-dialog-client";
 
 export default function AuthLayout({
   children,
@@ -41,6 +42,7 @@ export default function AuthLayout({
         </div>
       </div>
       <ProfileModal />
+      <UpgradeDialog />
       <GlobalHelpDock />
     </>
   );

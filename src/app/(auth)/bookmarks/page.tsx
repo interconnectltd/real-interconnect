@@ -23,6 +23,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { UserAvatar } from "@/components/shared/user-avatar";
 import { AgencyBadge } from "@/components/shared/agency-badge";
+import { useSubscriptionGate } from "@/hooks/use-subscription-gate";
 
 interface BookmarkRow {
   id: string;
@@ -47,6 +48,7 @@ export default function BookmarksPage() {
   const { openProfileModal } = useUIStore();
   const { data: connections } = useConnections();
   const { data: myProfile } = useMyProfile();
+  const { guard } = useSubscriptionGate();
 
   const items = useMemo(() => {
     if (!Array.isArray(data)) return [] as BookmarkRow[];
@@ -209,7 +211,7 @@ export default function BookmarksPage() {
                     type="button"
                     onClick={(e) => {
                       e.stopPropagation();
-                      toggle.mutate(
+                      guard(() => toggle.mutate(
                         { userId: p.id, isBookmarked: true },
                         {
                           onSuccess: () => {
@@ -230,7 +232,7 @@ export default function BookmarksPage() {
                             });
                           },
                         },
-                      );
+                      ));
                     }}
                     disabled={toggle.isPending}
                     aria-label={`${p.name} の保存を解除`}

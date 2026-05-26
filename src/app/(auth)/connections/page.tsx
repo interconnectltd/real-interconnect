@@ -24,6 +24,7 @@ import { useFilterStore } from "@/stores/filter-store";
 import { useSupabase } from "@/providers/supabase-provider";
 import { api } from "@/lib/api-client";
 import { toast } from "sonner";
+import { useSubscriptionGate } from "@/hooks/use-subscription-gate";
 import type { Connection } from "@/types";
 
 const STATUS_LABELS: Record<string, string> = {
@@ -50,6 +51,7 @@ export default function ConnectionsPage() {
     name: string;
   } | null>(null);
   const [chatLoading, setChatLoading] = useState<string | null>(null);
+  const { guard } = useSubscriptionGate();
 
   const handleChat = async (connectionId: string) => {
     setChatLoading(connectionId);
@@ -180,7 +182,7 @@ export default function ConnectionsPage() {
                         size="sm"
                         variant="outline"
                         disabled={chatLoading === conn.id}
-                        onClick={() => handleChat(conn.id)}
+                        onClick={() => guard(() => handleChat(conn.id))}
                       >
                         <MessageCircle className="mr-1 h-3.5 w-3.5" />
                         チャットを開始
@@ -188,12 +190,14 @@ export default function ConnectionsPage() {
                       <Button
                         size="sm"
                         variant="outline"
-                        onClick={() => {
-                          const targetId = conn.user_id === user?.id
-                            ? conn.connected_user_id
-                            : conn.user_id;
-                          openProfileModal(targetId);
-                        }}
+                        onClick={() =>
+                          guard(() => {
+                            const targetId = conn.user_id === user?.id
+                              ? conn.connected_user_id
+                              : conn.user_id;
+                            openProfileModal(targetId);
+                          })
+                        }
                       >
                         <CalendarPlus className="mr-1 h-3.5 w-3.5" />
                         日程を調整

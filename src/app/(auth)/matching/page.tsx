@@ -32,6 +32,7 @@ import { ImportRequestCTA } from "@/components/features/import-request/import-re
 import { ScoreBar, ReasonList } from "@/components/shared/score-bar";
 import { UserAvatar } from "@/components/shared/user-avatar";
 import { toast } from "sonner";
+import { useSubscriptionGate } from "@/hooks/use-subscription-gate";
 import type { MatchScore, MutualMatch, Connection, ScorePhase } from "@/types";
 
 const PHASE_META: Record<
@@ -72,6 +73,7 @@ export default function MatchingPage() {
   const { data: connections } = useConnections();
   const { data: myProfile } = useMyProfile();
   const { dismissedSet, dismiss, restore, resetAll } = useDismissedUsers(myProfile?.id);
+  const { guard } = useSubscriptionGate();
 
   // ── 二重防御フィルタ (Persona W3 / R3 audit) ──
   // Backend の除外漏れに備え、UI 側でも以下を防ぐ:
@@ -255,12 +257,14 @@ export default function MatchingPage() {
                     if (isSelf) return;
                     openProfileModal(m.user_id);
                   }}
-                  onConnect={() => requestConnection.mutate(m.user_id)}
+                  onConnect={() => guard(() => requestConnection.mutate(m.user_id))}
                   onToggleBookmark={() =>
-                    toggleBookmark.mutate({
-                      userId: m.user_id,
-                      isBookmarked: bookmarkedIds.has(m.user_id),
-                    })
+                    guard(() =>
+                      toggleBookmark.mutate({
+                        userId: m.user_id,
+                        isBookmarked: bookmarkedIds.has(m.user_id),
+                      }),
+                    )
                   }
                   onDismiss={() => handleDismiss(m.user_id)}
                 />
@@ -305,12 +309,14 @@ export default function MatchingPage() {
                     if (isSelf) return;
                     openProfileModal(score.target_id);
                   }}
-                  onConnect={() => requestConnection.mutate(score.target_id)}
+                  onConnect={() => guard(() => requestConnection.mutate(score.target_id))}
                   onToggleBookmark={() =>
-                    toggleBookmark.mutate({
-                      userId: score.target_id,
-                      isBookmarked: bookmarkedIds.has(score.target_id),
-                    })
+                    guard(() =>
+                      toggleBookmark.mutate({
+                        userId: score.target_id,
+                        isBookmarked: bookmarkedIds.has(score.target_id),
+                      }),
+                    )
                   }
                   onDismiss={() => handleDismiss(score.target_id)}
                 />
