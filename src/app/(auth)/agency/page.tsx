@@ -17,6 +17,7 @@ import {
   Wallet,
   TrendingUp,
   Percent,
+  FileDown,
 } from "lucide-react";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -197,6 +198,63 @@ export default function AgencyDashboardPage() {
           </CardContent>
         </Card>
       )}
+
+      {/* 明細書ダウンロード */}
+      <Card>
+        <CardContent className="flex flex-wrap items-center gap-3 py-4">
+          <FileDown className="h-4 w-4 text-muted-foreground" aria-hidden="true" />
+          <span className="text-sm font-medium">支払明細書</span>
+          <select
+            id="statement-month"
+            className="rounded-md border bg-background px-3 py-1.5 text-sm"
+            defaultValue=""
+          >
+            <option value="" disabled>月を選択</option>
+            {Array.from({ length: 6 }, (_, i) => {
+              const d = new Date();
+              d.setMonth(d.getMonth() - i);
+              const y = d.getFullYear();
+              const m = d.getMonth() + 1;
+              return (
+                <option key={`${y}-${m}`} value={`year=${y}&month=${m}`}>
+                  {y}年{m}月分
+                </option>
+              );
+            })}
+          </select>
+          <Button
+            size="sm"
+            variant="outline"
+            onClick={async () => {
+              const sel = document.getElementById("statement-month") as HTMLSelectElement | null;
+              if (!sel?.value) return;
+              const btn = document.activeElement as HTMLButtonElement | null;
+              if (btn) btn.disabled = true;
+              try {
+                const res = await fetch(`/api/v1/agency/commissions/pdf?${sel.value}`);
+                if (!res.ok) throw new Error("PDF generation failed");
+                const blob = await res.blob();
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement("a");
+                a.href = url;
+                a.download = `interconnect_statement_${sel.value.replace(/[&=]/g, "_")}.pdf`;
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                URL.revokeObjectURL(url);
+              } catch {
+                const { toast } = await import("sonner");
+                toast.error("明細書の生成に失敗しました。しばらくしてから再試行してください");
+              } finally {
+                if (btn) btn.disabled = false;
+              }
+            }}
+          >
+            <FileDown className="mr-1 h-3.5 w-3.5" />
+            ダウンロード
+          </Button>
+        </CardContent>
+      </Card>
 
       <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 md:grid-cols-6">
         <StatCard

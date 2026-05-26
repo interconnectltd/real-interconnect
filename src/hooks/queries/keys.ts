@@ -46,6 +46,8 @@ export const queryKeys = {
     links: () => ["agency", "links"] as const,
     referrals: () => ["agency", "referrals"] as const,
     clicks: () => ["agency", "clicks"] as const,
+    commissions: (filter?: Record<string, unknown>) =>
+      ["agency", "commissions", filter] as const,
   },
   adminAgency: {
     all: ["admin-agency"] as const,
