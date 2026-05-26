@@ -14,7 +14,7 @@ export async function PATCH(
 ) {
   try {
     const { id } = await params;
-    const { user, adminSupabase } = await withAdminAuth(request);
+    const { user, supabase, adminSupabase } = await withAdminAuth(request);
 
     const raw = await request.json().catch(() => ({}));
     const parsed = commissionRateBodySchema.safeParse(raw);
@@ -44,7 +44,7 @@ export async function PATCH(
     }
 
     const h = await headers();
-    void writeAuditLog(adminSupabase, {
+    void writeAuditLog(supabase, {
       actor_id: user.id,
       action: "admin.agency.update_commission_rate",
       target_type: "agency",
