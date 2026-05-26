@@ -18,11 +18,11 @@ export async function GET(request: Request) {
     // AI分析回数を取得
     const { data: aiProfile } = await supabase
       .from("member_ai_profiles_v2")
-      .select("analysis_count")
+      .select("analysis_count, last_analyzed_at")
       .eq("user_id", user.id)
       .maybeSingle();
 
-    return json({ ...data, analysis_count: aiProfile?.analysis_count ?? 0 });
+    return json({ ...data, analysis_count: aiProfile?.analysis_count ?? 0, last_analyzed_at: aiProfile?.last_analyzed_at ?? null });
   } catch (error) {
     return handleApiError(error);
   }

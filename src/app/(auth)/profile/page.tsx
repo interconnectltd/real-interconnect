@@ -80,7 +80,7 @@ interface ProfileForm {
 }
 
 export default function ProfilePage() {
-  const { data: profile, isLoading } = useMyProfile();
+  const { data: profile, isLoading, isError, refetch } = useMyProfile();
   const updateProfile = useUpdateProfile();
   const uploadAvatar = useUploadAvatar();
   // 編集開始時の値を凍結 (refetch でズレないよう ref で保持)
@@ -289,7 +289,22 @@ export default function ProfilePage() {
   }
 
   if (isLoading) return <ProfileSkeleton />;
-  if (!profile) return null;
+  if (isError || !profile) {
+    return (
+      <div role="alert" className="flex flex-col items-center justify-center gap-4 py-20">
+        <p className="text-sm text-muted-foreground">
+          プロフィールの読み込みに失敗しました
+        </p>
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={() => refetch()}
+        >
+          再読み込み
+        </Button>
+      </div>
+    );
+  }
 
   return (
     <div className="mx-auto max-w-4xl space-y-6">

@@ -31,10 +31,6 @@ export const queryKeys = {
     all: ["bookmarks"] as const,
     list: () => ["bookmarks", "list"] as const,
   },
-  aiProfile: {
-    all: ["ai-profile"] as const,
-    analysisCount: () => ["ai-profile", "analysis-count"] as const,
-  },
   meetings: {
     all: ["meetings"] as const,
     list: () => ["meetings", "list"] as const,

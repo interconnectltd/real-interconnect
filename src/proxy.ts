@@ -1,5 +1,5 @@
 import { updateSession } from "@/lib/supabase/middleware";
-import { type NextRequest } from "next/server";
+import { NextResponse, type NextRequest } from "next/server";
 
 /**
  * Next.js 16 proxy (旧 middleware)。
@@ -55,6 +55,16 @@ function buildCsp(nonce: string): string {
 }
 
 export async function proxy(request: NextRequest) {
+  // Supabase が recovery/signup トークン検証失敗時にサイトルート `/?error=...` へ
+  // リダイレクトする。next.config の rewrite (`/` → `/lp/index.html`) が先に適用
+  // されると LP に error params 付きで着地してしまうため、ここで /login に転送。
+  const { pathname, searchParams } = request.nextUrl;
+  if (pathname === "/" && searchParams.has("error")) {
+    const url = request.nextUrl.clone();
+    url.pathname = "/login";
+    return NextResponse.redirect(url);
+  }
+
   const nonce = generateNonce();
 
   // request 側 headers に nonce を載せ、updateSession に渡して Server Component

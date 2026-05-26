@@ -19,6 +19,9 @@ export interface Profile {
   is_agency: boolean;
   created_at: string;
   updated_at: string;
+  /** Merged by /api/v1/profiles/me — not part of the base table */
+  analysis_count?: number;
+  last_analyzed_at?: string | null;
 }
 
 export interface Connection {

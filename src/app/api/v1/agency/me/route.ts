@@ -17,7 +17,21 @@ export async function GET(request: Request) {
       return jsonError(500, "FETCH_FAILED", "代理店情報の取得に失敗しました");
     }
 
-    return json({ agency: data });
+    let activeReferralCount = 0;
+    if (data && (data.status === "approved" || data.status === "suspended")) {
+      try {
+        const { data: count } = await supabase.rpc("get_active_referral_count", {
+          p_agency_user_id: user.id,
+        });
+        activeReferralCount = typeof count === "number" ? count : 0;
+      } catch {
+        // RPC 未適用時は 0 で fallback
+      }
+    }
+
+    return json({
+      agency: data ? { ...data, active_referral_count: activeReferralCount } : data,
+    });
   } catch (e) {
     return handleApiError(e);
   }

@@ -6,6 +6,7 @@ import {
   Crown,
   Link2,
   Users,
+  UserCheck,
   MousePointerClick,
   Copy,
   Check,
@@ -196,7 +197,7 @@ export default function AgencyDashboardPage() {
         </Card>
       )}
 
-      <div className="grid grid-cols-2 gap-3 md:grid-cols-4">
+      <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 md:grid-cols-5">
         <StatCard
           icon={<MousePointerClick className="h-4 w-4" />}
           label="累計クリック"
@@ -206,6 +207,11 @@ export default function AgencyDashboardPage() {
           icon={<Users className="h-4 w-4" />}
           label="累計紹介"
           value={`${agency.total_referrals.toLocaleString("ja-JP")} 人`}
+        />
+        <StatCard
+          icon={<UserCheck className="h-4 w-4" />}
+          label="累計アクティブ"
+          value={`${(agency.active_referral_count ?? 0).toLocaleString("ja-JP")} 人`}
         />
         <StatCard
           icon={<TrendingUp className="h-4 w-4" />}

@@ -23,13 +23,10 @@ import {
   Video,
   LogOut,
   KeyRound,
-  Bell,
   Users,
   Handshake,
   CalendarCheck,
   Calendar,
-  Clock,
-  Brain,
   ChevronRight,
   Trash2,
   Plus,
@@ -37,7 +34,6 @@ import {
   Unlink,
   Loader2,
   X,
-  Rss,
   Copy,
   Check,
 } from "lucide-react";
@@ -60,7 +56,8 @@ import { useSupabase } from "@/providers/supabase-provider";
 import { useAnalysisCount } from "@/hooks/queries/use-ai-profile";
 import { useAgencyMe, useAgencyApplication } from "@/hooks/queries/use-agency";
 import { useApplyAgency } from "@/hooks/mutations/use-agency-mutations";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { queryKeys } from "@/hooks/queries/keys";
 import { api } from "@/lib/api-client";
 import { toast } from "sonner";
 
@@ -171,22 +168,31 @@ function saveNotificationPrefs(prefs: NotificationPrefs) {
 export default function SettingsPage() {
   const { supabase, user } = useSupabase();
   const router = useRouter();
-  const { data: analysisCount } = useAnalysisCount();
+  const queryClient = useQueryClient();
+  const { data: analysisCount, lastAnalyzedAt, isLoading: analysisLoading } = useAnalysisCount();
 
   // 代理店プログラム関連 (00063)
-  const { data: agencyMe } = useAgencyMe();
-  const { data: agencyApp } = useAgencyApplication();
+  const { data: agencyMe, isLoading: agencyMeLoading } = useAgencyMe();
+  const { data: agencyApp, isLoading: agencyAppLoading } = useAgencyApplication();
   const applyAgency = useApplyAgency();
   const [applicantNote, setApplicantNote] = useState("");
   const [agencyApplyOpen, setAgencyApplyOpen] = useState(false);
 
   // Stripe 課金 (00064)
-  const { data: subData } = useQuery({
+  const { data: subData, isLoading: subLoading } = useQuery({
     queryKey: ["subscription-me"],
     queryFn: () =>
-      api.get<{ subscription: { status: string; cancel_at_period_end: boolean; current_period_end: string | null } | null }>(
-        "/billing/subscription",
-      ),
+      api.get<{
+        subscription: {
+          status: string;
+          cancel_at_period_end: boolean;
+          current_period_end: string | null;
+          current_period_start: string | null;
+          canceled_at: string | null;
+          trial_end: string | null;
+          last_invoice_amount_jpy: number | null;
+        } | null;
+      }>("/billing/subscription"),
     staleTime: 30_000,
   });
   const [billingLoading, setBillingLoading] = useState(false);
@@ -217,15 +223,6 @@ export default function SettingsPage() {
     }
   }
 
-  // tl;dv 連携メタ情報 (last_analyzed_at) — 設定画面で「次回会議で再分析」期待値に使う
-  const { data: aiProfileMeta } = useQuery({
-    queryKey: ["ai-profile-meta"],
-    queryFn: () =>
-      api.get<{ analysis_count: number; last_analyzed_at: string | null }>(
-        "/ai-profile",
-      ),
-    staleTime: 30_000,
-  });
   const [tldvSyncing, setTldvSyncing] = useState(false);
 
   // Password change
@@ -850,13 +847,21 @@ export default function SettingsPage() {
           </CardTitle>
         </CardHeader>
         <CardContent className="space-y-3 text-sm">
-          {subData?.subscription?.status === "active" ||
-          subData?.subscription?.status === "trialing" ? (
+          {subLoading ? (
+            <div className="flex items-center gap-2 py-2">
+              <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />
+              <span className="text-sm text-muted-foreground">読み込み中...</span>
+            </div>
+          ) : subData?.subscription?.status === "active" ||
+            subData?.subscription?.status === "trialing" ? (
             <>
               <p className="text-emerald-700 dark:text-emerald-300">
-                Standard プラン {subData.subscription.status === "trialing" ? "(トライアル中)" : "(有効)"}
+                Standard プラン{" "}
+                {subData?.subscription?.status === "trialing"
+                  ? "(トライアル中)"
+                  : "(有効)"}
               </p>
-              {subData.subscription.cancel_at_period_end && (
+              {subData?.subscription?.cancel_at_period_end && (
                 <p className="text-xs text-orange-700 dark:text-orange-300">
                   期間終了時に解約されます
                 </p>
@@ -878,10 +883,76 @@ export default function SettingsPage() {
                 )}
               </Button>
             </>
+          ) : subData?.subscription?.status === "past_due" ||
+            subData?.subscription?.status === "unpaid" ? (
+            <>
+              <p className="text-orange-700 dark:text-orange-300">
+                お支払いに問題があります。支払い情報を更新してください。
+              </p>
+              <Button
+                size="sm"
+                variant="outline"
+                onClick={handlePortal}
+                disabled={billingLoading}
+                aria-busy={billingLoading}
+              >
+                {billingLoading ? (
+                  <>
+                    <Loader2 className="mr-1.5 h-3.5 w-3.5 animate-spin" />
+                    遷移中
+                  </>
+                ) : (
+                  "支払い情報を更新"
+                )}
+              </Button>
+            </>
+          ) : subData?.subscription?.status === "canceled" ? (
+            <>
+              <p className="text-muted-foreground">
+                プランは解約済みです。
+              </p>
+              <Button
+                size="sm"
+                onClick={handleSubscribe}
+                disabled={billingLoading}
+                aria-busy={billingLoading}
+              >
+                {billingLoading ? (
+                  <>
+                    <Loader2 className="mr-1.5 h-3.5 w-3.5 animate-spin" />
+                    遷移中
+                  </>
+                ) : (
+                  "プランに再申し込み"
+                )}
+              </Button>
+            </>
+          ) : subData?.subscription?.status === "incomplete" ? (
+            <>
+              <p className="text-orange-700 dark:text-orange-300">
+                決済が未完了です。お支払いを完了してください。
+              </p>
+              <Button
+                size="sm"
+                onClick={handlePortal}
+                disabled={billingLoading}
+                aria-busy={billingLoading}
+              >
+                {billingLoading ? (
+                  <>
+                    <Loader2 className="mr-1.5 h-3.5 w-3.5 animate-spin" />
+                    遷移中
+                  </>
+                ) : (
+                  "決済を完了する"
+                )}
+              </Button>
+            </>
           ) : (
             <>
               <p className="text-xs leading-relaxed text-muted-foreground">
-                Standard プラン ¥30,000/月 でマッチング/AI 推薦/コネクション機能をフル活用できます。
+                Standard プラン ¥30,000/月
+                でマッチング/AI 推薦/コネクション機能をフル活用できます。
               </p>
               <Button
                 size="sm"
@@ -912,6 +983,13 @@ export default function SettingsPage() {
           </CardTitle>
         </CardHeader>
         <CardContent>
+          {analysisLoading ? (
+            <div className="flex items-center gap-2 py-2">
+              <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />
+              <span className="text-sm text-muted-foreground">読み込み中...</span>
+            </div>
+          ) : (
+          <>
           <p className="mb-3 text-xs leading-relaxed text-muted-foreground">
             AIがミーティング記録から分析したあなたのプロフィールを確認・管理できます。
           </p>
@@ -928,6 +1006,8 @@ export default function SettingsPage() {
             )}
             <ChevronRight className="ml-1 h-3.5 w-3.5" />
           </Button>
+          </>
+          )}
         </CardContent>
       </Card>
 
@@ -940,7 +1020,12 @@ export default function SettingsPage() {
           </CardTitle>
         </CardHeader>
         <CardContent className="space-y-3 text-sm">
-          {agencyMe?.agency?.status === "approved" ? (
+          {agencyMeLoading || agencyAppLoading ? (
+            <div className="flex items-center gap-2 py-2">
+              <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />
+              <span className="text-sm text-muted-foreground">読み込み中...</span>
+            </div>
+          ) : agencyMe?.agency?.status === "approved" ? (
             <>
               <p className="text-emerald-700 dark:text-emerald-300">
                 承認済み代理店として有効です。
@@ -962,8 +1047,8 @@ export default function SettingsPage() {
             <>
               <p className="text-muted-foreground">
                 前回の申請は却下されました
-                {agencyApp.application.admin_note
-                  ? ` (理由: ${agencyApp.application.admin_note})`
+                {agencyApp?.application?.admin_note
+                  ? ` (理由: ${agencyApp?.application?.admin_note})`
                   : ""}
                 。
               </p>
@@ -1053,6 +1138,12 @@ export default function SettingsPage() {
           </CardTitle>
         </CardHeader>
         <CardContent>
+          {analysisLoading ? (
+            <div className="flex items-center gap-2 py-2">
+              <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />
+              <span className="text-sm text-muted-foreground">読み込み中...</span>
+            </div>
+          ) : (
           <div className="space-y-3">
             <div className="flex items-center gap-3">
               <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10">
@@ -1074,11 +1165,11 @@ export default function SettingsPage() {
                     <p className="text-xs text-muted-foreground">
                       {analysisCount}件のミーティングを分析済み
                     </p>
-                    {aiProfileMeta?.last_analyzed_at && (
+                    {lastAnalyzedAt && (
                       <p className="text-xs text-muted-foreground">
                         最終分析:{" "}
                         {new Date(
-                          aiProfileMeta.last_analyzed_at,
+                          lastAnalyzedAt,
                         ).toLocaleString("ja-JP")}
                       </p>
                     )}
@@ -1119,6 +1210,8 @@ export default function SettingsPage() {
                     } else {
                       toast.info("新しいミーティングはありませんでした");
                     }
+                    // プロフィールのanalysis_countを再取得してUIを更新
+                    void queryClient.invalidateQueries({ queryKey: queryKeys.profile.me() });
                   } catch (err: unknown) {
                     const message =
                       err instanceof Error
@@ -1150,6 +1243,7 @@ export default function SettingsPage() {
               )}
             </div>
           </div>
+          )}
         </CardContent>
       </Card>
 

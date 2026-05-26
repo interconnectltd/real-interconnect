@@ -9,8 +9,8 @@ import { useMyProfile } from "./use-profile";
 export function useAnalysisCount() {
   const { data, isLoading } = useMyProfile();
   return {
-    data:
-      ((data as unknown as { analysis_count?: number } | undefined)?.analysis_count) ?? 0,
+    data: data?.analysis_count ?? 0,
+    lastAnalyzedAt: data?.last_analyzed_at ?? null,
     isLoading,
   };
 }

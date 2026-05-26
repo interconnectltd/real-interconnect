@@ -1324,6 +1324,10 @@ export interface Database {
         Args: Record<string, never>;
         Returns: { room_id: string; unread_count: number }[];
       };
+      get_active_referral_count: {
+        Args: { p_agency_user_id: string };
+        Returns: number;
+      };
       check_rate_limit: {
         Args: {
           p_user_id: string;

@@ -17,6 +17,7 @@ export interface AgencyMe {
   current_rank: "bronze" | "silver" | "gold" | "platinum" | "diamond";
   payout_method: string | null;
   min_withdrawal_jpy: number;
+  active_referral_count: number;
   created_at: string;
   updated_at: string;
 }
