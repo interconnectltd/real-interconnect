@@ -1,6 +1,8 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import { safeInternalPath } from "@/lib/safe-redirect";
+import { extractClientInfo } from "@/lib/audit-log";
+import { parseUserAgent } from "@/lib/ua-parse";
 
 /**
  * GET /auth/callback
@@ -42,8 +44,20 @@ export async function GET(request: Request) {
 
   if (code && hasVerifier) {
     const supabase = await createClient();
-    const { error } = await supabase.auth.exchangeCodeForSession(code);
-    if (!error) {
+    const { error, data: sessionData } = await supabase.auth.exchangeCodeForSession(code);
+    if (!error && sessionData?.user) {
+      const { ip, ua } = extractClientInfo(request);
+      const { device, browser, os } = parseUserAgent(ua);
+      const ref = request.headers.get("referer") ?? null;
+      supabase.from("login_sessions").insert({
+        user_id: sessionData.user.id,
+        ip_address: ip,
+        user_agent: ua,
+        device,
+        browser,
+        os,
+        referrer: ref,
+      }).then(() => {}, () => {});
       return NextResponse.redirect(`${origin}${safePath}`);
     }
   }

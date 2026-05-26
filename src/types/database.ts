@@ -497,6 +497,9 @@ export interface Database {
           device: string | null;
           browser: string | null;
           ip_address: string | null;
+          user_agent: string | null;
+          os: string | null;
+          referrer: string | null;
           created_at: string;
         };
         Insert: {
@@ -504,6 +507,9 @@ export interface Database {
           device?: string | null;
           browser?: string | null;
           ip_address?: string | null;
+          user_agent?: string | null;
+          os?: string | null;
+          referrer?: string | null;
         };
         Update: never;
         Relationships: [];

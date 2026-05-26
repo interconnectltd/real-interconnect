@@ -7,13 +7,15 @@ async function request<T>(
   path: string,
   options?: RequestInit,
 ): Promise<T> {
+  const { headers: customHeaders, ...restOptions } = options ?? {};
   let res: Response;
   try {
     res = await fetch(`${BASE}${path}`, {
-      headers: { "Content-Type": "application/json", ...options?.headers },
-      ...options,
+      ...restOptions,
+      headers: { "Content-Type": "application/json", ...(customHeaders as Record<string, string> | undefined) },
     });
-  } catch {
+  } catch (fetchErr) {
+    console.error("[api-client] fetch failed:", fetchErr);
     throw new ApiError(0, "NETWORK_ERROR", "ネットワークに接続できません");
   }
 

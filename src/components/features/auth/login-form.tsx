@@ -105,6 +105,9 @@ export function LoginForm() {
       // 失敗しても続行 (signInWithPassword 成功時点で cookie はほぼ確実に存在)
     }
 
+    // ログインセッション記録 (IP/UA/Referer をサーバー側で取得)
+    fetch("/api/v1/auth/login-event", { method: "POST" }).catch(() => {});
+
     // ?redirect=<path> があればそちらへ (open redirect / backslash bypass を safeInternalPath で遮断)
     const target = safeInternalPath(searchParams.get("redirect"), "/dashboard");
     // window.location.assign は full nav で cookie / RSC キャッシュをリセット → middleware が

@@ -11,7 +11,7 @@ import { useState, useEffect, use } from "react";
 import { useQuery } from "@tanstack/react-query";
 import Link from "next/link";
 import {
-  ArrowLeft, Loader2, ShieldCheck, AlertTriangle, Info, Briefcase,
+  ArrowLeft, Loader2, ShieldCheck, AlertTriangle, Info, Briefcase, Globe,
 } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
@@ -46,6 +46,16 @@ interface UserDetail {
     target_type: string | null;
     target_id: string | null;
     payload: Record<string, unknown> | null;
+    created_at: string;
+  }>;
+  login_sessions: Array<{
+    id: string;
+    ip_address: string | null;
+    user_agent: string | null;
+    device: string | null;
+    browser: string | null;
+    os: string | null;
+    referrer: string | null;
     created_at: string;
   }>;
 }
@@ -98,7 +108,7 @@ export default function AdminUserDetailPage({
     queryFn: () =>
       // reason はヘッダ経由で送信 (URL 履歴 / Referer leak 回避)
       api.getWithHeaders<UserDetail>(`/admin/users/${id}`, {
-        "X-Admin-Reason": reason!,
+        "X-Admin-Reason": encodeURIComponent(reason!),
       }),
     enabled: Boolean(reason),
   });
@@ -217,7 +227,7 @@ export default function AdminUserDetailPage({
               ? "閲覧記録の保存に失敗したため詳細を表示できません。少し時間をおいてから再試行してください (連続失敗時は運営に連絡してください)。"
               : error instanceof ApiError && error.code === "FORBIDDEN"
                 ? "admin 権限が確認できません。再ログインを試してください。"
-                : "読み込みに失敗しました。"}
+                : `読み込みに失敗しました。[${error instanceof ApiError ? `${error.status} ${error.code}: ${error.message}` : String(error)}]`}
         </div>
       )}
 
@@ -321,6 +331,77 @@ export default function AdminUserDetailPage({
           <section className="mb-6 grid gap-3 md:grid-cols-2">
             <CardList title="求めていること" items={data.goals} emptyText="未登録" />
             <CardList title="提供できること" items={data.offerings} emptyText="未登録" />
+          </section>
+
+          {/* Login Sessions */}
+          <section className="mb-6 rounded-lg border bg-card shadow-sm">
+            <h2 className="border-b px-4 py-3 text-sm font-bold flex items-center gap-1.5">
+              <Globe className="h-4 w-4" aria-hidden="true" />
+              ログイン履歴 (最新 50 件)
+            </h2>
+            {data.login_sessions.length === 0 ? (
+              <p className="px-4 py-6 text-center text-sm text-muted-foreground">
+                <Info className="mx-auto mb-2 h-4 w-4" aria-hidden="true" />
+                ログイン記録がありません
+              </p>
+            ) : (
+              <>
+                {/* Desktop table */}
+                <div className="hidden md:block overflow-x-auto">
+                  <table className="w-full text-sm">
+                    <thead>
+                      <tr className="border-b bg-muted/30 text-xs uppercase tracking-wider text-muted-foreground">
+                        <th className="px-4 py-2 text-left font-medium">日時</th>
+                        <th className="px-4 py-2 text-left font-medium">IP</th>
+                        <th className="px-4 py-2 text-left font-medium">端末 / OS</th>
+                        <th className="px-4 py-2 text-left font-medium">ブラウザ</th>
+                        <th className="px-4 py-2 text-left font-medium">リファラー</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y">
+                      {data.login_sessions.map((s) => (
+                        <tr key={s.id} className="hover:bg-muted/20">
+                          <td className="whitespace-nowrap px-4 py-2 font-mono text-xs text-muted-foreground">
+                            {new Date(s.created_at).toLocaleString("ja-JP")}
+                          </td>
+                          <td className="whitespace-nowrap px-4 py-2 font-mono text-xs">
+                            {s.ip_address ?? "—"}
+                          </td>
+                          <td className="whitespace-nowrap px-4 py-2 text-xs">
+                            {[s.device, s.os].filter(Boolean).join(" / ") || "—"}
+                          </td>
+                          <td className="whitespace-nowrap px-4 py-2 text-xs">
+                            {s.browser ?? "—"}
+                          </td>
+                          <td className="max-w-[200px] truncate px-4 py-2 text-xs text-muted-foreground" title={s.referrer ?? undefined}>
+                            {s.referrer ?? "—"}
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+                {/* Mobile cards */}
+                <ul className="divide-y md:hidden list-none p-0">
+                  {data.login_sessions.map((s) => (
+                    <li key={s.id} className="px-4 py-3 space-y-1">
+                      <p className="font-mono text-xs text-muted-foreground">
+                        {new Date(s.created_at).toLocaleString("ja-JP")}
+                      </p>
+                      <p className="font-mono text-xs">IP: {s.ip_address ?? "—"}</p>
+                      <p className="text-xs">
+                        {[s.device, s.os, s.browser].filter(Boolean).join(" / ") || "—"}
+                      </p>
+                      {s.referrer && (
+                        <p className="text-xs text-muted-foreground truncate">
+                          Ref: {s.referrer}
+                        </p>
+                      )}
+                    </li>
+                  ))}
+                </ul>
+              </>
+            )}
           </section>
 
           {/* Audit Trail */}

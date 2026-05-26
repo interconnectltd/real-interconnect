@@ -289,9 +289,19 @@ export async function withAdminAuth(
         if (e instanceof ApiError) throw e;
         throw new ApiError(403, "FORBIDDEN", "Invalid origin header");
       }
-    } else if (!referer) {
-      throw new ApiError(403, "FORBIDDEN", "Origin/Referer required for admin");
+    } else if (referer) {
+      try {
+        const u = new URL(referer);
+        if (!isAllowedHost(u.hostname)) {
+          throw new ApiError(403, "FORBIDDEN", "Cross-origin admin GET rejected");
+        }
+      } catch (e) {
+        if (e instanceof ApiError) throw e;
+        // malformed referer — ignore
+      }
     }
+    // Origin も Referer も無い場合は same-origin fetch と判定 (ブラウザは
+    // cross-origin GET で必ず Origin を送る仕様なので、不在 = same-origin)。
   }
 
   const { data, error } = await supabase
@@ -307,9 +317,10 @@ export async function withAdminAuth(
   if (options.requireReason) {
     // X-Admin-Reason ヘッダ専用 (URL 履歴 / Referer leak / Netlify access log への
     // PII 流出を完全回避するため query fallback は廃止)
-    const headerReason = (request.headers.get("x-admin-reason") ?? "")
+    let headerReason = (request.headers.get("x-admin-reason") ?? "")
       .replace(/[\r\n\t\0]/g, " ")
       .trim();
+    try { headerReason = decodeURIComponent(headerReason); } catch { /* already decoded */ }
     if (headerReason.length < 5 || headerReason.length > 500) {
       throw new ApiError(
         400,
