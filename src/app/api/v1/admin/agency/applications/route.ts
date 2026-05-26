@@ -34,16 +34,23 @@ export async function GET(request: Request) {
     const applicantIds = Array.from(
       new Set((apps ?? []).map((a) => a.applicant_id)),
     );
+    const safeIds =
+      applicantIds.length > 0
+        ? applicantIds
+        : ["00000000-0000-0000-0000-000000000000"];
     const { data: users } = await adminSupabase
       .from("user_profiles")
       .select("id, name, email, company, avatar_url")
-      .in(
-        "id",
-        applicantIds.length > 0
-          ? applicantIds
-          : ["00000000-0000-0000-0000-000000000000"],
-      );
+      .in("id", safeIds);
     const userMap = new Map((users ?? []).map((u) => [u.id, u]));
+
+    const { data: agencies } = await adminSupabase
+      .from("agencies")
+      .select("user_id, commission_rate")
+      .in("user_id", safeIds);
+    const agencyMap = new Map(
+      (agencies ?? []).map((a) => [a.user_id, a]),
+    );
 
     const enriched = (apps ?? []).map((a) => ({
       id: a.id,
@@ -53,6 +60,8 @@ export async function GET(request: Request) {
       reviewed_at: a.reviewed_at,
       created_at: a.created_at,
       applicant: userMap.get(a.applicant_id) ?? null,
+      commission_rate: agencyMap.get(a.applicant_id)?.commission_rate ?? 0.2,
+      applicant_id: a.applicant_id,
     }));
 
     return json({ applications: enriched });

@@ -1,10 +1,12 @@
 "use client";
 
 import { useState } from "react";
-import { Loader2, CheckCircle2, XCircle, Clock, ListChecks } from "lucide-react";
+import { Loader2, CheckCircle2, XCircle, Clock, ListChecks, Percent } from "lucide-react";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import {
   Dialog,
   DialogContent,
@@ -16,7 +18,11 @@ import {
 import {
   useAdminAgencyApplications,
   useReviewAgencyApplication,
+  useAdminAgencies,
+  useUpdateCommissionRate,
+  useSuspendAgency,
   type AdminAgencyApplication,
+  type AdminAgency,
 } from "@/hooks/queries/use-admin-agency";
 import { cn } from "@/lib/utils";
 
@@ -38,6 +44,14 @@ const STATUS_BADGE: Record<string, string> = {
     "border-rose-300 bg-rose-50 text-rose-800 dark:border-rose-700 dark:bg-rose-950 dark:text-rose-200",
 };
 
+const RANK_BADGE: Record<string, string> = {
+  diamond: "border-violet-300 bg-violet-50 text-violet-800 dark:border-violet-700 dark:bg-violet-950 dark:text-violet-200",
+  platinum: "border-sky-300 bg-sky-50 text-sky-800 dark:border-sky-700 dark:bg-sky-950 dark:text-sky-200",
+  gold: "border-yellow-300 bg-yellow-50 text-yellow-800 dark:border-yellow-700 dark:bg-yellow-950 dark:text-yellow-200",
+  silver: "border-slate-300 bg-slate-50 text-slate-800 dark:border-slate-700 dark:bg-slate-950 dark:text-slate-200",
+  bronze: "border-amber-300 bg-amber-50 text-amber-800 dark:border-amber-700 dark:bg-amber-950 dark:text-amber-200",
+};
+
 function formatDate(iso: string): string {
   return new Date(iso).toLocaleString("ja-JP", {
     year: "numeric",
@@ -55,9 +69,14 @@ export default function AdminAgencyApplicationsPage() {
     action: "approve" | "reject";
   } | null>(null);
   const [adminNote, setAdminNote] = useState("");
+  const [rateTarget, setRateTarget] = useState<AdminAgency | null>(null);
+  const [newRatePercent, setNewRatePercent] = useState("");
 
   const { data, isLoading, refetch } = useAdminAgencyApplications(tab);
   const review = useReviewAgencyApplication();
+  const agenciesQuery = useAdminAgencies();
+  const updateRate = useUpdateCommissionRate();
+  const suspend = useSuspendAgency();
 
   const tabs: StatusFilter[] = ["pending", "approved", "rejected", "all"];
 
@@ -69,7 +88,7 @@ export default function AdminAgencyApplicationsPage() {
         </p>
         <h1 className="flex items-center gap-2 text-xl font-bold md:text-2xl">
           <ListChecks className="h-5 w-5" />
-          代理店申請レビュー
+          代理店管理
         </h1>
       </div>
 
@@ -97,7 +116,85 @@ export default function AdminAgencyApplicationsPage() {
         ))}
       </nav>
 
-      {isLoading ? (
+      {tab === "approved" ? (
+        agenciesQuery.isLoading ? (
+          <div className="flex justify-center py-12" aria-live="polite">
+            <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" aria-label="読み込み中" />
+          </div>
+        ) : (agenciesQuery.data?.agencies ?? []).length === 0 ? (
+          <Card>
+            <CardContent className="py-12 text-center text-sm text-muted-foreground">
+              承認済みの代理店はありません
+            </CardContent>
+          </Card>
+        ) : (
+          <ul className="space-y-3">
+            {(agenciesQuery.data?.agencies ?? []).map((ag) => (
+              <li key={ag.user_id}>
+                <Card>
+                  <CardHeader className="pb-2">
+                    <div className="flex flex-wrap items-start justify-between gap-2">
+                      <div className="min-w-0">
+                        <CardTitle className="text-base">{ag.profile?.name ?? "(不明)"}</CardTitle>
+                        <p className="mt-0.5 text-xs text-muted-foreground">
+                          {ag.profile?.email ?? "—"} · {ag.profile?.company ?? "—"}
+                        </p>
+                      </div>
+                      <Badge variant="outline" className={RANK_BADGE[ag.current_rank] ?? ""}>
+                        {ag.current_rank}
+                      </Badge>
+                    </div>
+                  </CardHeader>
+                  <CardContent className="space-y-2 text-sm">
+                    <div className="grid grid-cols-2 gap-x-4 gap-y-1 sm:grid-cols-4">
+                      <div>
+                        <p className="text-[11px] font-medium uppercase tracking-wide text-muted-foreground">紹介料率</p>
+                        <p className="font-bold tabular-nums">{(ag.commission_rate * 100).toFixed(0)}%</p>
+                      </div>
+                      <div>
+                        <p className="text-[11px] font-medium uppercase tracking-wide text-muted-foreground">紹介数</p>
+                        <p className="tabular-nums">{ag.total_referrals.toLocaleString("ja-JP")} 人</p>
+                      </div>
+                      <div>
+                        <p className="text-[11px] font-medium uppercase tracking-wide text-muted-foreground">累計報酬</p>
+                        <p className="tabular-nums">¥{ag.total_earnings_jpy.toLocaleString("ja-JP")}</p>
+                      </div>
+                      <div>
+                        <p className="text-[11px] font-medium uppercase tracking-wide text-muted-foreground">承認日</p>
+                        <p>{ag.approved_at ? formatDate(ag.approved_at) : "—"}</p>
+                      </div>
+                    </div>
+                    <div className="flex flex-wrap gap-2 pt-2">
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        onClick={() => {
+                          setRateTarget(ag);
+                          setNewRatePercent(String((ag.commission_rate * 100).toFixed(0)));
+                        }}
+                      >
+                        <Percent className="mr-1 h-3.5 w-3.5" />
+                        料率変更
+                      </Button>
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        className="text-destructive hover:bg-destructive/10"
+                        onClick={async () => {
+                          if (!window.confirm(`${ag.profile?.name ?? "この代理店"} を停止しますか？`)) return;
+                          await suspend.mutateAsync({ userId: ag.user_id, action: "suspend" });
+                        }}
+                      >
+                        停止
+                      </Button>
+                    </div>
+                  </CardContent>
+                </Card>
+              </li>
+            ))}
+          </ul>
+        )
+      ) : isLoading ? (
         <div className="flex justify-center py-12" aria-live="polite">
           <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" aria-label="読み込み中" />
         </div>
@@ -158,35 +255,65 @@ export default function AdminAgencyApplicationsPage() {
                       </p>
                     </div>
                   )}
-                  <p className="text-xs text-muted-foreground">
-                    申請: {formatDate(app.created_at)}
-                    {app.reviewed_at && ` · レビュー: ${formatDate(app.reviewed_at)}`}
-                  </p>
-                  {app.status === "pending" && (
-                    <div className="flex flex-wrap gap-2 pt-2">
-                      <Button
-                        size="sm"
-                        onClick={() => {
-                          setReviewTarget({ app, action: "approve" });
-                          setAdminNote("");
-                        }}
-                      >
-                        <CheckCircle2 className="mr-1 h-3.5 w-3.5" />
-                        承認
-                      </Button>
-                      <Button
-                        size="sm"
-                        variant="outline"
-                        onClick={() => {
-                          setReviewTarget({ app, action: "reject" });
-                          setAdminNote("");
-                        }}
-                      >
-                        <XCircle className="mr-1 h-3.5 w-3.5" />
-                        却下
-                      </Button>
-                    </div>
-                  )}
+                  <div className="flex items-center gap-3 text-xs text-muted-foreground">
+                    <span>
+                      申請: {formatDate(app.created_at)}
+                      {app.reviewed_at && ` · レビュー: ${formatDate(app.reviewed_at)}`}
+                    </span>
+                    <span className="font-medium text-foreground">
+                      紹介料率: {(app.commission_rate * 100).toFixed(0)}%
+                    </span>
+                  </div>
+                  <div className="flex flex-wrap gap-2 pt-2">
+                    {app.status === "pending" && (
+                      <>
+                        <Button
+                          size="sm"
+                          onClick={() => {
+                            setReviewTarget({ app, action: "approve" });
+                            setAdminNote("");
+                          }}
+                        >
+                          <CheckCircle2 className="mr-1 h-3.5 w-3.5" />
+                          承認
+                        </Button>
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          onClick={() => {
+                            setReviewTarget({ app, action: "reject" });
+                            setAdminNote("");
+                          }}
+                        >
+                          <XCircle className="mr-1 h-3.5 w-3.5" />
+                          却下
+                        </Button>
+                      </>
+                    )}
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      onClick={() => {
+                        setRateTarget({
+                          user_id: app.applicant_id,
+                          commission_rate: app.commission_rate,
+                          status: app.status,
+                          current_rank: "bronze",
+                          total_referrals: 0,
+                          total_clicks: 0,
+                          total_earnings_jpy: 0,
+                          current_balance_jpy: 0,
+                          approved_at: null,
+                          created_at: app.created_at,
+                          profile: app.applicant,
+                        });
+                        setNewRatePercent(String((app.commission_rate * 100).toFixed(0)));
+                      }}
+                    >
+                      <Percent className="mr-1 h-3.5 w-3.5" />
+                      料率変更
+                    </Button>
+                  </div>
                 </CardContent>
               </Card>
             </li>
@@ -261,6 +388,71 @@ export default function AdminAgencyApplicationsPage() {
                 "承認する"
               ) : (
                 "却下する"
+              )}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog
+        open={rateTarget !== null}
+        onOpenChange={(o) => !o && setRateTarget(null)}
+      >
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>紹介料率を変更</DialogTitle>
+            <DialogDescription>
+              {rateTarget?.profile?.name ?? "代理店"} の紹介料率を変更します。変更は次回以降の支払いから適用されます。
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-3 py-2">
+            <div>
+              <Label htmlFor="rate-input">紹介料率 (%)</Label>
+              <Input
+                id="rate-input"
+                type="number"
+                min={1}
+                max={100}
+                step={1}
+                value={newRatePercent}
+                onChange={(e) => setNewRatePercent(e.target.value)}
+                className="mt-1"
+              />
+            </div>
+            {rateTarget && newRatePercent && (
+              <p className="text-sm text-muted-foreground">
+                現在: {(rateTarget.commission_rate * 100).toFixed(0)}% → 新: {newRatePercent}%
+              </p>
+            )}
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setRateTarget(null)}>
+              キャンセル
+            </Button>
+            <Button
+              disabled={
+                updateRate.isPending ||
+                !newRatePercent ||
+                Number(newRatePercent) < 1 ||
+                Number(newRatePercent) > 100
+              }
+              aria-busy={updateRate.isPending}
+              onClick={async () => {
+                if (!rateTarget || !newRatePercent) return;
+                await updateRate.mutateAsync({
+                  userId: rateTarget.user_id,
+                  rate: Number(newRatePercent) / 100,
+                });
+                setRateTarget(null);
+              }}
+            >
+              {updateRate.isPending ? (
+                <>
+                  <Loader2 className="mr-1 h-3.5 w-3.5 animate-spin" />
+                  変更中
+                </>
+              ) : (
+                "変更する"
               )}
             </Button>
           </DialogFooter>

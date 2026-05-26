@@ -15,6 +15,7 @@ export interface AgencyMe {
   total_earnings_jpy: number;
   current_balance_jpy: number;
   current_rank: "bronze" | "silver" | "gold" | "platinum" | "diamond";
+  commission_rate: number;
   payout_method: string | null;
   min_withdrawal_jpy: number;
   active_referral_count: number;

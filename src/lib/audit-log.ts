@@ -48,7 +48,8 @@ export type AuditAction =
   | "admin.agency.approve"
   | "admin.agency.reject"
   | "admin.agency.suspend"
-  | "admin.agency.unsuspend";
+  | "admin.agency.unsuspend"
+  | "admin.agency.update_commission_rate";
 
 export type AuditLogParams = {
   actor_id: string;

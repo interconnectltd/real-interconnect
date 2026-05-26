@@ -16,6 +16,7 @@ import {
   ExternalLink,
   Wallet,
   TrendingUp,
+  Percent,
 } from "lucide-react";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -197,7 +198,12 @@ export default function AgencyDashboardPage() {
         </Card>
       )}
 
-      <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 md:grid-cols-5">
+      <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 md:grid-cols-6">
+        <StatCard
+          icon={<Percent className="h-3.5 w-3.5" />}
+          label="紹介料率"
+          value={`${(agency.commission_rate * 100).toFixed(0)}%`}
+        />
         <StatCard
           icon={<MousePointerClick className="h-4 w-4" />}
           label="累計クリック"

@@ -39,6 +39,6 @@ export const STRIPE_PRICE_ID_STANDARD_MONTHLY =
 
 /**
  * デフォルトのコミッション率 (0.0000-1.0000)。
- * 将来 admin UI で代理店ごとに差し替え可能にする想定。
+ * admin UI で代理店ごとに差し替え可能 (agencies.commission_rate)。
  */
 export const DEFAULT_COMMISSION_RATE = 0.20;

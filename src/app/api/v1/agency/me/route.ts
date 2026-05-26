@@ -7,7 +7,7 @@ export async function GET(request: Request) {
     const { data, error } = await supabase
       .from("agencies")
       .select(
-        "user_id, status, applied_at, approved_at, suspended_at, total_clicks, total_referrals, total_earnings_jpy, current_balance_jpy, current_rank, payout_method, min_withdrawal_jpy, created_at, updated_at",
+        "user_id, status, applied_at, approved_at, suspended_at, total_clicks, total_referrals, total_earnings_jpy, current_balance_jpy, current_rank, commission_rate, payout_method, min_withdrawal_jpy, created_at, updated_at",
       )
       .eq("user_id", user.id)
       .maybeSingle();

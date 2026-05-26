@@ -1058,6 +1058,7 @@ export interface Database {
           total_earnings_jpy: number;
           current_balance_jpy: number;
           current_rank: "bronze" | "silver" | "gold" | "platinum" | "diamond";
+          commission_rate: number;
           payout_method: string | null;
           payout_info_encrypted: string | null;
           min_withdrawal_jpy: number;
@@ -1076,6 +1077,7 @@ export interface Database {
           total_earnings_jpy?: number;
           current_balance_jpy?: number;
           current_rank?: "bronze" | "silver" | "gold" | "platinum" | "diamond";
+          commission_rate?: number;
           payout_method?: string | null;
           payout_info_encrypted?: string | null;
           min_withdrawal_jpy?: number;
@@ -1091,6 +1093,7 @@ export interface Database {
           total_earnings_jpy?: number;
           current_balance_jpy?: number;
           current_rank?: "bronze" | "silver" | "gold" | "platinum" | "diamond";
+          commission_rate?: number;
           payout_method?: string | null;
           payout_info_encrypted?: string | null;
           min_withdrawal_jpy?: number;

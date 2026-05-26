@@ -20,6 +20,8 @@ export interface AdminAgencyApplication {
     company: string | null;
     avatar_url: string | null;
   } | null;
+  commission_rate: number;
+  applicant_id: string;
 }
 
 export function useAdminAgencyApplications(
@@ -69,6 +71,51 @@ export function useSuspendAgency() {
     onSuccess: (_, vars) => {
       qc.invalidateQueries({ queryKey: queryKeys.adminAgency.all });
       toast.success(vars.action === "suspend" ? "停止しました" : "再開しました");
+    },
+    onError: (err) => showErrorToast(err),
+  });
+}
+
+export interface AdminAgency {
+  user_id: string;
+  status: string;
+  commission_rate: number;
+  current_rank: string;
+  total_referrals: number;
+  total_clicks: number;
+  total_earnings_jpy: number;
+  current_balance_jpy: number;
+  approved_at: string | null;
+  created_at: string;
+  profile: {
+    name: string;
+    email: string | null;
+    company: string | null;
+    avatar_url: string | null;
+  } | null;
+}
+
+export function useAdminAgencies(status: string = "approved") {
+  return useQuery({
+    queryKey: queryKeys.adminAgency.agencies(status),
+    queryFn: () =>
+      api.get<{ agencies: AdminAgency[] }>(
+        `/admin/agency/agencies?status=${status}`,
+      ),
+  });
+}
+
+export function useUpdateCommissionRate() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (vars: { userId: string; rate: number }) =>
+      api.patch<{ user_id: string; commission_rate: number }>(
+        `/admin/agency/agencies/${vars.userId}/commission-rate`,
+        { rate: vars.rate },
+      ),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: queryKeys.adminAgency.all });
+      toast.success("紹介料率を更新しました");
     },
     onError: (err) => showErrorToast(err),
   });
