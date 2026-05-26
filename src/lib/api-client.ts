@@ -15,7 +15,9 @@ async function request<T>(
       headers: { "Content-Type": "application/json", ...(customHeaders as Record<string, string> | undefined) },
     });
   } catch (fetchErr) {
-    console.error("[api-client] fetch failed:", fetchErr);
+    if (fetchErr instanceof DOMException && fetchErr.name === "AbortError") {
+      throw fetchErr;
+    }
     throw new ApiError(0, "NETWORK_ERROR", "ネットワークに接続できません");
   }
 
