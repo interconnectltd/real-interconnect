@@ -26,6 +26,7 @@ export type NotificationType =
   | "chat_message"
   | "referral_signed_up"
   | "referral_paying"
+  | "referral_resubscribed"
   | "system";
 
 export type ConnectionStatus =
