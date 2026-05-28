@@ -57,7 +57,7 @@ export default function AdminUsersPage() {
   });
 
   return (
-    <div className="mx-auto w-full max-w-5xl px-4 py-8">
+    <div className="mx-auto w-full max-w-7xl px-4 py-8">
       <header className="mb-6">
         <p className="text-xs font-bold tracking-widest text-emerald-700 dark:text-emerald-300">
           ADMIN
@@ -123,63 +123,93 @@ export default function AdminUsersPage() {
         </div>
       )}
 
-      {/* SP: card stack / md+: テーブル */}
-      <ul className="space-y-2 list-none p-0 md:hidden">
+      {/* SP〜タブレット: card stack / lg+: テーブル (狭幅ではテーブルが詰まるためカードに切替) */}
+      <ul className="space-y-2 list-none p-0 lg:hidden">
         {data?.users.map((u) => (
           <li key={u.id}>
             <Link
               href={`/admin/users/${u.id}`}
-              className="block rounded-lg border bg-card p-4 shadow-sm hover:bg-muted/50"
+              className="flex items-center gap-3 rounded-lg border bg-card p-3 shadow-sm transition-colors hover:bg-muted/50"
             >
-              <div className="flex items-center justify-between gap-2">
-                <p className="truncate text-sm font-semibold">{u.name}</p>
-                <UserBadges user={u} />
+              <UserAvatar name={u.name} />
+              <div className="min-w-0 flex-1">
+                <div className="flex items-center justify-between gap-2">
+                  <p className="truncate text-sm font-semibold">{u.name}</p>
+                  <UserBadges user={u} />
+                </div>
+                <p className="mt-0.5 truncate text-xs text-muted-foreground">
+                  {u.email ?? "(no email)"}
+                </p>
+                <p className="mt-0.5 truncate text-xs text-muted-foreground">
+                  {[u.company, u.position].filter(Boolean).join(" / ") || "(未設定)"}
+                  {u.industry && <span className="ml-2 text-muted-foreground/70">· {u.industry}</span>}
+                </p>
               </div>
-              <p className="mt-1 truncate text-xs text-muted-foreground">
-                {u.email ?? "(no email)"}
-              </p>
-              <p className="mt-0.5 truncate text-xs text-muted-foreground">
-                {[u.company, u.position].filter(Boolean).join(" / ") || "(未設定)"}
-              </p>
             </Link>
           </li>
         ))}
       </ul>
 
-      <div className="hidden overflow-hidden rounded-lg border bg-card md:block">
-        <table className="w-full text-sm">
+      <div className="hidden overflow-x-auto rounded-lg border bg-card lg:block">
+        <table className="w-full table-fixed text-sm">
+          <colgroup>
+            <col className="w-[30%]" />
+            <col className="w-[24%]" />
+            <col className="w-[14%]" />
+            <col className="w-[20%]" />
+            <col className="w-[12%]" />
+          </colgroup>
           <thead className="border-b bg-muted/30 text-xs uppercase tracking-wider text-muted-foreground">
             <tr>
-              <th className="px-4 py-2 text-left">名前</th>
-              <th className="px-4 py-2 text-left">メール</th>
-              <th className="px-4 py-2 text-left">会社 / 役職</th>
-              <th className="px-4 py-2 text-left">業界</th>
-              <th className="px-4 py-2 text-left">状態</th>
-              <th className="px-4 py-2 text-left">登録日</th>
+              <th className="whitespace-nowrap px-4 py-3 text-left font-medium">ユーザー</th>
+              <th className="whitespace-nowrap px-4 py-3 text-left font-medium">会社 / 役職</th>
+              <th className="whitespace-nowrap px-4 py-3 text-left font-medium">業界</th>
+              <th className="whitespace-nowrap px-4 py-3 text-left font-medium">状態</th>
+              <th className="whitespace-nowrap px-4 py-3 text-left font-medium">登録日</th>
             </tr>
           </thead>
           <tbody>
             {data?.users.map((u) => (
-              <tr key={u.id} className="border-b last:border-b-0 hover:bg-muted/30">
-                <td className="px-4 py-3">
+              <tr key={u.id} className="border-b last:border-b-0 transition-colors hover:bg-muted/40">
+                <td className="px-4 py-3 align-middle">
                   <Link
                     href={`/admin/users/${u.id}`}
-                    className="font-medium text-foreground hover:underline"
+                    className="group flex min-w-0 items-center gap-3"
                   >
-                    {u.name}
+                    <UserAvatar name={u.name} />
+                    <div className="min-w-0 flex-1">
+                      <p className="truncate font-medium text-foreground group-hover:underline">
+                        {u.name}
+                      </p>
+                      <p className="truncate text-xs text-muted-foreground">
+                        {u.email ?? "—"}
+                      </p>
+                    </div>
                   </Link>
                 </td>
-                <td className="px-4 py-3 text-muted-foreground">
-                  {u.email ?? "—"}
+                <td className="px-4 py-3 align-middle">
+                  <div className="min-w-0">
+                    <p className="truncate text-foreground/90">
+                      {u.company ?? "—"}
+                    </p>
+                    <p className="truncate text-xs text-muted-foreground">
+                      {u.position ?? "—"}
+                    </p>
+                  </div>
                 </td>
-                <td className="px-4 py-3 text-muted-foreground">
-                  {[u.company, u.position].filter(Boolean).join(" / ") || "—"}
+                <td className="px-4 py-3 align-middle">
+                  {u.industry ? (
+                    <span className="inline-flex max-w-full truncate rounded-md bg-muted px-2 py-0.5 text-xs text-foreground/80">
+                      {u.industry}
+                    </span>
+                  ) : (
+                    <span className="text-xs text-muted-foreground">—</span>
+                  )}
                 </td>
-                <td className="px-4 py-3 text-muted-foreground">{u.industry ?? "—"}</td>
-                <td className="px-4 py-3">
+                <td className="px-4 py-3 align-middle">
                   <UserBadges user={u} />
                 </td>
-                <td className="px-4 py-3 text-muted-foreground">
+                <td className="whitespace-nowrap px-4 py-3 align-middle text-xs tabular-nums text-muted-foreground">
                   {new Date(u.created_at).toLocaleDateString("ja-JP")}
                 </td>
               </tr>
@@ -230,16 +260,33 @@ function UserBadges({ user }: { user: UserRow }) {
       {user.is_admin && (
         <Badge
           variant="outline"
-          className="border-emerald-300 bg-emerald-50 text-emerald-800 dark:border-emerald-700 dark:bg-emerald-950 dark:text-emerald-200"
+          className="whitespace-nowrap border-emerald-300 bg-emerald-50 text-emerald-800 dark:border-emerald-700 dark:bg-emerald-950 dark:text-emerald-200"
         >
           <ShieldCheck className="mr-1 h-3 w-3" aria-hidden="true" />
           admin
         </Badge>
       )}
-      {!user.is_active && <Badge variant="destructive">停止中</Badge>}
+      {!user.is_active && <Badge variant="destructive" className="whitespace-nowrap">停止中</Badge>}
       {(user.onboarding_step ?? 0) < 3 && (
-        <Badge variant="secondary">オンボ未完了</Badge>
+        <Badge variant="secondary" className="whitespace-nowrap">オンボ未完了</Badge>
       )}
     </span>
+  );
+}
+
+function UserAvatar({ name }: { name: string }) {
+  const initial = (name?.trim().charAt(0) || "?").toUpperCase();
+  // 名前から決定的に色相を導出 (HSL) → ユーザーごとに固定の見た目
+  let hash = 0;
+  for (let i = 0; i < name.length; i++) hash = (hash * 31 + name.charCodeAt(i)) & 0x7fffffff;
+  const hue = hash % 360;
+  return (
+    <div
+      aria-hidden="true"
+      className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full text-sm font-semibold text-white shadow-sm ring-1 ring-black/5"
+      style={{ backgroundColor: `hsl(${hue}, 45%, 55%)` }}
+    >
+      {initial}
+    </div>
   );
 }

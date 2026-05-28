@@ -18,9 +18,41 @@ export default function ResetPasswordPage() {
 
   useEffect(() => {
     const supabase = createClient();
-    supabase.auth.getUser().then(({ data }) => {
-      setHasSession(!!data.user);
-    });
+    let cancelled = false;
+
+    async function init() {
+      // URL hash に access_token / refresh_token がある場合は明示的に setSession する。
+      // @supabase/ssr の createBrowserClient は hash 自動検出 (detectSessionInUrl) が
+      // 動かないケースがあるため、ここで自前で処理する。
+      const hash = typeof window !== "undefined" ? window.location.hash : "";
+      if (hash.length > 1) {
+        const params = new URLSearchParams(hash.slice(1));
+        const accessToken = params.get("access_token");
+        const refreshToken = params.get("refresh_token");
+        if (accessToken && refreshToken) {
+          await supabase.auth.setSession({
+            access_token: accessToken,
+            refresh_token: refreshToken,
+          });
+          // hash を URL から削除 (token を URL に残さない: 履歴 / 共有時の漏洩防止)
+          if (typeof window !== "undefined") {
+            window.history.replaceState(
+              null,
+              "",
+              window.location.pathname + window.location.search,
+            );
+          }
+        }
+      }
+
+      const { data } = await supabase.auth.getUser();
+      if (!cancelled) setHasSession(!!data.user);
+    }
+
+    init();
+    return () => {
+      cancelled = true;
+    };
   }, []);
 
   const { register, handleSubmit, formState: { errors } } = useForm<ResetPasswordInput>();

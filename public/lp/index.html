@@ -1,6 +1,20 @@
 <!DOCTYPE html>
 
-<html class="no-js wf-source-han-sans-japanese-n5-active wf-source-han-sans-japanese-n4-active wf-active mdl-js" lang="ja"><!--<![endif]--><head prefix="og: https://ogp.me/ns# fb: http://ogp.me/ns/fb# article: http://ogp.me/ns/article#"><meta http-equiv="Content-Type" content="text/html; charset=UTF-8"><style>body {transition: opacity ease-in 0.2s; } 
+<html class="no-js wf-source-han-sans-japanese-n5-active wf-source-han-sans-japanese-n4-active wf-active mdl-js" lang="ja"><!--<![endif]--><head prefix="og: https://ogp.me/ns# fb: http://ogp.me/ns/fb# article: http://ogp.me/ns/article#"><meta http-equiv="Content-Type" content="text/html; charset=UTF-8"><script>
+// Supabase Auth redirect rescue: メールリンクが site_url の bare root に
+// 着地した場合 (Dashboard の Redirect URL 許可リスト不足が原因)、適切なページへ転送する。
+// hash 例: #access_token=...&type=recovery&...
+(function(){try{
+  var h = window.location.hash || "";
+  if (h.length < 2) return;
+  var p = new URLSearchParams(h.slice(1));
+  if (!p.get("access_token") && !p.get("error")) return;
+  var type = p.get("type");
+  if (type === "recovery") {
+    window.location.replace("/reset-password" + h);
+  }
+}catch(_e){}})();
+</script><style>body {transition: opacity ease-in 0.2s; }
 body[unresolved] {opacity: 0; display: block; overflow: hidden; position: relative; } 
 </style>
 
