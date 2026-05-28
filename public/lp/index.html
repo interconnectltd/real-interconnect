@@ -349,12 +349,12 @@ header.scrolled .h_menu .h_btn_wrap .p_btn_contact:hover {
 header .h_menu {
   display: flex !important;
   align-items: center !important;
-  gap: 28px !important;
+  gap: 20px !important;
 }
 header .h_menu .h_menu_wrap {
   display: flex !important;
   align-items: center !important;
-  gap: 28px !important;
+  gap: 20px !important;
   margin: 0 !important;
   padding: 0 !important;
   list-style: none !important;
@@ -373,10 +373,19 @@ header .h_menu .h_menu_wrap > li.menu_list > a > span.plus_wrap {
   display: inline-flex !important;
   align-items: center !important;
 }
+/* .plus_wrap (Service の dropdown 用) には padding-right: 24px が
+   入っているが、アイコンが見えないため Service-Works 間だけ余白が広く見える
+   バグになっていた。padding-right と疑似要素を消して視覚的に等間隔に揃える。 */
+header .h_menu .h_menu_wrap > li.menu_list > a > span.plus_wrap {
+  padding-right: 0 !important;
+}
+header .h_menu .h_menu_wrap > li.menu_list > a > span.plus_wrap::after {
+  display: none !important;
+}
 header .h_menu .h_btn_wrap {
   display: flex !important;
   align-items: center !important;
-  gap: 28px !important;
+  gap: 20px !important;
   margin: 0 !important;
 }
 header .h_menu .h_btn_wrap .p_btn_document,
@@ -389,12 +398,12 @@ header .h_menu .h_btn_wrap .p_btn_contact span {
   line-height: 1 !important;
   letter-spacing: 0.02em !important;
 }
-/* 1300px 以下: gap を少し詰める (font-size は既に統一済) */
+/* 1300px 以下: gap をさらに詰める */
 @media screen and (max-width: 1300px) {
   header .h_menu,
   header .h_menu .h_menu_wrap,
   header .h_menu .h_btn_wrap {
-    gap: 20px !important;
+    gap: 16px !important;
   }
 }
 
