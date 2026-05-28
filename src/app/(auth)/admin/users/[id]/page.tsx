@@ -11,8 +11,10 @@ import { useState, useEffect, use } from "react";
 import { useQuery } from "@tanstack/react-query";
 import Link from "next/link";
 import {
-  ArrowLeft, Loader2, ShieldCheck, AlertTriangle, Info, Briefcase, Globe,
+  ArrowLeft, Loader2, ShieldCheck, AlertTriangle, Info, Briefcase, Globe, Shield,
 } from "lucide-react";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -115,6 +117,9 @@ export default function AdminUserDetailPage({
 
   // 代理店バッジ付与/解除 (PATCH → audit_logs に admin.user.grant_agency_badge を残す)
   const [agencyLoading, setAgencyLoading] = useState(false);
+  const [sessionPassword, setSessionPassword] = useState("");
+  const [sessionLoading, setSessionLoading] = useState(false);
+  const [sessionData, setSessionData] = useState<UserDetail["login_sessions"] | null>(null);
   async function toggleAgencyBadge() {
     if (!data) return;
     const grant = !data.profile.is_agency;
@@ -333,20 +338,74 @@ export default function AdminUserDetailPage({
             <CardList title="提供できること" items={data.offerings} emptyText="未登録" />
           </section>
 
-          {/* Login Sessions */}
+          {/* Login Sessions — パスワード再認証ゲート */}
           <section className="mb-6 rounded-lg border bg-card shadow-sm">
             <h2 className="border-b px-4 py-3 text-sm font-bold flex items-center gap-1.5">
-              <Globe className="h-4 w-4" aria-hidden="true" />
+              <Shield className="h-4 w-4" aria-hidden="true" />
               ログイン履歴 (最新 50 件)
             </h2>
-            {data.login_sessions.length === 0 ? (
+            {!sessionData ? (
+              <div className="px-4 py-6 space-y-3">
+                <p className="text-xs text-muted-foreground">
+                  個人情報に準ずるデータです。パスワードを再入力してください。すべてのアクセスは監査ログに記録されます。
+                </p>
+                <div>
+                  <Label htmlFor="session-password">パスワード再入力</Label>
+                  <Input
+                    id="session-password"
+                    type="password"
+                    value={sessionPassword}
+                    onChange={(e) => setSessionPassword(e.target.value)}
+                    placeholder="ログインパスワード"
+                    autoComplete="new-password"
+                    className="mt-1 max-w-sm"
+                  />
+                </div>
+                <Button
+                  size="sm"
+                  disabled={sessionLoading || !sessionPassword}
+                  aria-busy={sessionLoading}
+                  onClick={async () => {
+                    setSessionLoading(true);
+                    try {
+                      const result = await api.post<{ login_sessions: UserDetail["login_sessions"] }>(
+                        `/admin/users/${id}/login-sessions`,
+                        { password: sessionPassword },
+                        { headers: { "X-Admin-Reason": encodeURIComponent(reason!) } },
+                      );
+                      setSessionData(result.login_sessions);
+                      setSessionPassword("");
+                    } catch (e) {
+                      if (e instanceof ApiError) {
+                        toast.error(e.message);
+                      } else {
+                        toast.error("取得に失敗しました");
+                      }
+                    } finally {
+                      setSessionLoading(false);
+                    }
+                  }}
+                >
+                  {sessionLoading ? (
+                    <>
+                      <Loader2 className="mr-1 h-3.5 w-3.5 animate-spin" />
+                      検証中
+                    </>
+                  ) : (
+                    <>
+                      <Shield className="mr-1 h-3.5 w-3.5" />
+                      ログイン履歴を表示
+                    </>
+                  )}
+                </Button>
+              </div>
+            ) : sessionData.length === 0 ? (
               <p className="px-4 py-6 text-center text-sm text-muted-foreground">
                 <Info className="mx-auto mb-2 h-4 w-4" aria-hidden="true" />
                 ログイン記録がありません
               </p>
             ) : (
               <>
-                {/* Desktop table */}
                 <div className="hidden md:block overflow-x-auto">
                   <table className="w-full text-sm">
                     <thead>
@@ -359,7 +418,7 @@ export default function AdminUserDetailPage({
                       </tr>
                     </thead>
                     <tbody className="divide-y">
-                      {data.login_sessions.map((s) => (
+                      {sessionData.map((s) => (
                         <tr key={s.id} className="hover:bg-muted/20">
                           <td className="whitespace-nowrap px-4 py-2 font-mono text-xs text-muted-foreground">
                             {new Date(s.created_at).toLocaleString("ja-JP")}
@@ -381,9 +440,8 @@ export default function AdminUserDetailPage({
                     </tbody>
                   </table>
                 </div>
-                {/* Mobile cards */}
                 <ul className="divide-y md:hidden list-none p-0">
-                  {data.login_sessions.map((s) => (
+                  {sessionData.map((s) => (
                     <li key={s.id} className="px-4 py-3 space-y-1">
                       <p className="font-mono text-xs text-muted-foreground">
                         {new Date(s.created_at).toLocaleString("ja-JP")}

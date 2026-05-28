@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { Loader2, CheckCircle2, XCircle, Clock, ListChecks, Percent } from "lucide-react";
+import { Loader2, CheckCircle2, XCircle, Clock, ListChecks, Percent, MousePointerClick, Shield } from "lucide-react";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -21,8 +21,10 @@ import {
   useAdminAgencies,
   useUpdateCommissionRate,
   useSuspendAgency,
+  useViewAgencyClicks,
   type AdminAgencyApplication,
   type AdminAgency,
+  type AdminClickDetail,
 } from "@/hooks/queries/use-admin-agency";
 import { cn } from "@/lib/utils";
 
@@ -71,12 +73,17 @@ export default function AdminAgencyApplicationsPage() {
   const [adminNote, setAdminNote] = useState("");
   const [rateTarget, setRateTarget] = useState<AdminAgency | null>(null);
   const [newRatePercent, setNewRatePercent] = useState("");
+  const [clickTarget, setClickTarget] = useState<AdminAgency | null>(null);
+  const [clickReason, setClickReason] = useState("");
+  const [clickPassword, setClickPassword] = useState("");
+  const [clickData, setClickData] = useState<AdminClickDetail[] | null>(null);
 
   const { data, isLoading, refetch } = useAdminAgencyApplications(tab);
   const review = useReviewAgencyApplication();
   const agenciesQuery = useAdminAgencies();
   const updateRate = useUpdateCommissionRate();
   const suspend = useSuspendAgency();
+  const viewClicks = useViewAgencyClicks();
 
   const tabs: StatusFilter[] = ["pending", "approved", "rejected", "all"];
 
@@ -175,6 +182,19 @@ export default function AdminAgencyApplicationsPage() {
                       >
                         <Percent className="mr-1 h-3.5 w-3.5" />
                         料率変更
+                      </Button>
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        onClick={() => {
+                          setClickTarget(ag);
+                          setClickReason("");
+                          setClickPassword("");
+                          setClickData(null);
+                        }}
+                      >
+                        <MousePointerClick className="mr-1 h-3.5 w-3.5" />
+                        クリック詳細
                       </Button>
                       <Button
                         size="sm"
@@ -456,6 +476,138 @@ export default function AdminAgencyApplicationsPage() {
               )}
             </Button>
           </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog
+        open={clickTarget !== null}
+        onOpenChange={(o) => {
+          if (!o) {
+            setClickTarget(null);
+            setClickData(null);
+          }
+        }}
+      >
+        <DialogContent className="max-w-3xl">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Shield className="h-4 w-4" />
+              クリック詳細 — {clickTarget?.profile?.name ?? "代理店"}
+            </DialogTitle>
+            <DialogDescription>
+              個人情報に準ずるデータです。閲覧理由とパスワードが必要です。すべてのアクセスは監査ログに記録されます。
+            </DialogDescription>
+          </DialogHeader>
+
+          {!clickData ? (
+            <div className="space-y-3 py-2">
+              <div>
+                <Label htmlFor="click-reason">閲覧理由（5文字以上）</Label>
+                <Input
+                  id="click-reason"
+                  value={clickReason}
+                  onChange={(e) => setClickReason(e.target.value)}
+                  placeholder="例: 不正クリック調査"
+                  autoComplete="off"
+                  className="mt-1"
+                />
+              </div>
+              <div>
+                <Label htmlFor="click-password">パスワード再入力</Label>
+                <Input
+                  id="click-password"
+                  type="password"
+                  value={clickPassword}
+                  onChange={(e) => setClickPassword(e.target.value)}
+                  placeholder="ログインパスワード"
+                  autoComplete="new-password"
+                  className="mt-1"
+                />
+              </div>
+              <DialogFooter>
+                <Button variant="outline" onClick={() => setClickTarget(null)}>
+                  キャンセル
+                </Button>
+                <Button
+                  disabled={viewClicks.isPending || clickReason.trim().length < 5 || !clickPassword}
+                  aria-busy={viewClicks.isPending}
+                  onClick={async () => {
+                    if (!clickTarget) return;
+                    const result = await viewClicks.mutateAsync({
+                      userId: clickTarget.user_id,
+                      reason: clickReason.trim(),
+                      password: clickPassword,
+                    });
+                    setClickData(result.clicks);
+                    setClickPassword("");
+                  }}
+                >
+                  {viewClicks.isPending ? (
+                    <>
+                      <Loader2 className="mr-1 h-3.5 w-3.5 animate-spin" />
+                      検証中
+                    </>
+                  ) : (
+                    <>
+                      <Shield className="mr-1 h-3.5 w-3.5" />
+                      取得する
+                    </>
+                  )}
+                </Button>
+              </DialogFooter>
+            </div>
+          ) : (
+            <div className="space-y-3">
+              <p className="text-xs text-muted-foreground">
+                {clickData.length} 件のクリック（最新100件）
+              </p>
+              {clickData.length === 0 ? (
+                <p className="py-8 text-center text-sm text-muted-foreground">
+                  クリックデータがありません
+                </p>
+              ) : (
+                <div className="max-h-[400px] overflow-auto rounded-md border">
+                  <table className="w-full text-xs">
+                    <thead className="sticky top-0 bg-muted/80 backdrop-blur-sm">
+                      <tr>
+                        <th className="px-3 py-2 text-left font-medium">日時</th>
+                        <th className="px-3 py-2 text-left font-medium">ブラウザ / OS</th>
+                        <th className="px-3 py-2 text-left font-medium">リファラー</th>
+                        <th className="px-3 py-2 text-left font-medium">IP ハッシュ</th>
+                        <th className="px-3 py-2 text-left font-medium">CV</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-border">
+                      {clickData.map((c) => (
+                        <tr key={c.id} className="hover:bg-muted/20">
+                          <td className="whitespace-nowrap px-3 py-2">
+                            {formatDate(c.clicked_at)}
+                          </td>
+                          <td className="px-3 py-2" title={c.user_agent_raw ?? undefined}>
+                            {c.user_agent_parsed}
+                          </td>
+                          <td className="max-w-[200px] truncate px-3 py-2" title={c.referrer_raw ?? undefined}>
+                            {c.referrer_display}
+                          </td>
+                          <td className="px-3 py-2 font-mono text-[10px]" title={c.ip_hash ?? undefined}>
+                            {c.ip_hash ? `${c.ip_hash.slice(0, 8)}...${c.ip_hash.slice(-8)}` : "—"}
+                          </td>
+                          <td className="px-3 py-2 text-center">
+                            {c.converted ? "✓" : ""}
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              )}
+              <DialogFooter>
+                <Button variant="outline" onClick={() => { setClickTarget(null); setClickData(null); }}>
+                  閉じる
+                </Button>
+              </DialogFooter>
+            </div>
+          )}
         </DialogContent>
       </Dialog>
     </div>

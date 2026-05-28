@@ -81,6 +81,10 @@ export function generateReferralCode(length = 8): string {
  */
 export function hashIp(ip: string | null): string | null {
   if (!ip) return null;
-  const salt = process.env.REFERRAL_IP_SALT ?? "interconnect-referral-default-salt";
+  const salt = process.env.REFERRAL_IP_SALT;
+  if (!salt) {
+    console.error("[hashIp] REFERRAL_IP_SALT is not configured");
+    return null;
+  }
   return createHash("sha256").update(`${salt}:${ip}`).digest("hex");
 }

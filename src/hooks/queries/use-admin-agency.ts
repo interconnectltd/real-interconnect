@@ -105,6 +105,34 @@ export function useAdminAgencies(status: string = "approved") {
   });
 }
 
+export interface AdminClickDetail {
+  id: string;
+  clicked_at: string;
+  ip_hash: string | null;
+  user_agent_raw: string | null;
+  user_agent_parsed: string;
+  referrer_raw: string | null;
+  referrer_display: string;
+  visitor_id: string | null;
+  converted: boolean;
+}
+
+export function useViewAgencyClicks() {
+  return useMutation({
+    mutationFn: (vars: {
+      userId: string;
+      reason: string;
+      password: string;
+    }) =>
+      api.post<{ clicks: AdminClickDetail[] }>(
+        `/admin/agency/agencies/${vars.userId}/clicks`,
+        { password: vars.password },
+        { headers: { "X-Admin-Reason": vars.reason } },
+      ),
+    onError: (err) => showErrorToast(err),
+  });
+}
+
 export function useUpdateCommissionRate() {
   const qc = useQueryClient();
   return useMutation({

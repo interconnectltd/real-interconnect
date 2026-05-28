@@ -55,5 +55,7 @@ export const queryKeys = {
       ["admin-agency", "applications", { status }] as const,
     agencies: (status?: string) =>
       ["admin-agency", "agencies", { status }] as const,
+    clicks: (userId: string) =>
+      ["admin-agency", "clicks", userId] as const,
   },
 } as const;

@@ -16,7 +16,7 @@ export async function GET(request: Request) {
     let query = adminSupabase
       .from("agencies")
       .select(
-        "user_id, status, commission_rate, current_rank, total_referrals, total_clicks, total_earnings_jpy, current_balance_jpy, approved_at, created_at, user_profiles(name, email, company, avatar_url)",
+        "user_id, status, commission_rate, current_rank, total_referrals, total_clicks, total_earnings_jpy, current_balance_jpy, approved_at, created_at",
       )
       .order("approved_at", { ascending: false });
 
@@ -30,10 +30,21 @@ export async function GET(request: Request) {
       return jsonError(500, "QUERY_FAILED", "代理店一覧の取得に失敗しました");
     }
 
+    const userIds = (data ?? []).map((r) => r.user_id);
+    const { data: profiles } = userIds.length > 0
+      ? await adminSupabase
+          .from("user_profiles")
+          .select("id, name, email, company, avatar_url")
+          .in("id", userIds)
+      : { data: [] };
+
+    const profileMap = new Map(
+      (profiles ?? []).map((p) => [p.id, p]),
+    );
+
     const agencies = (data ?? []).map((row) => ({
       ...row,
-      profile: Array.isArray(row.user_profiles) ? row.user_profiles[0] : row.user_profiles,
-      user_profiles: undefined,
+      profile: profileMap.get(row.user_id) ?? null,
     }));
 
     return json({ agencies });

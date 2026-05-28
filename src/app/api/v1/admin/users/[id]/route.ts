@@ -85,19 +85,9 @@ export async function GET(
         .limit(20),
     ]);
 
-    // login_sessions は migration 未適用時にカラム不在でエラーになるため分離
-    let loginSessions: Array<Record<string, unknown>> = [];
-    try {
-      const { data: sessData } = await supabase
-        .from("login_sessions")
-        .select("id, ip_address, user_agent, device, browser, os, referrer, created_at")
-        .eq("user_id", id)
-        .order("created_at", { ascending: false })
-        .limit(50);
-      loginSessions = sessData ?? [];
-    } catch {
-      // migration 未適用時は空配列で fallback
-    }
+    // login_sessions は PII のためパスワード再認証が必要な別 endpoint に分離。
+    // POST /api/v1/admin/users/[id]/login-sessions で取得する。
+    const loginSessions: Array<Record<string, unknown>> = [];
 
     // 閲覧監査ログ (法務 R5: 失敗時は閲覧自体を拒否)。
     // 旧 fire-and-forget は Edge/Serverless で Promise が破棄されるため
