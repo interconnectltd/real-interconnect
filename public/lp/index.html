@@ -341,6 +341,63 @@ header.scrolled .h_menu .h_btn_wrap .p_btn_contact:hover {
   background-color: transparent !important;
 }
 
+/* ヘッダーナビゲーション: 文字サイズ・間隔の統一
+   既存の margin-right: 2rem (PC) / 1.2rem (1300px-) と margin-left: 16-24px が
+   混在し、項目間隔が不均一だったため、flex + gap で全項目を等間隔に揃える。
+   font-size も Service/Works/etc=19px、無料で始める=15px、ログイン=15px の
+   バラつきを 15px に統一。 */
+header .h_menu {
+  display: flex !important;
+  align-items: center !important;
+  gap: 28px !important;
+}
+header .h_menu .h_menu_wrap {
+  display: flex !important;
+  align-items: center !important;
+  gap: 28px !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  list-style: none !important;
+}
+header .h_menu .h_menu_wrap > li.menu_list {
+  margin: 0 !important;
+  padding: 0 !important;
+  display: flex !important;
+  align-items: center !important;
+}
+header .h_menu .h_menu_wrap > li.menu_list > a,
+header .h_menu .h_menu_wrap > li.menu_list > a > span.plus_wrap {
+  font-size: 15px !important;
+  line-height: 1 !important;
+  letter-spacing: 0.02em !important;
+  display: inline-flex !important;
+  align-items: center !important;
+}
+header .h_menu .h_btn_wrap {
+  display: flex !important;
+  align-items: center !important;
+  gap: 28px !important;
+  margin: 0 !important;
+}
+header .h_menu .h_btn_wrap .p_btn_document,
+header .h_menu .h_btn_wrap .p_btn_contact {
+  margin: 0 !important;
+}
+header .h_menu .h_btn_wrap .p_btn_document span,
+header .h_menu .h_btn_wrap .p_btn_contact span {
+  font-size: 15px !important;
+  line-height: 1 !important;
+  letter-spacing: 0.02em !important;
+}
+/* 1300px 以下: gap を少し詰める (font-size は既に統一済) */
+@media screen and (max-width: 1300px) {
+  header .h_menu,
+  header .h_menu .h_menu_wrap,
+  header .h_menu .h_btn_wrap {
+    gap: 20px !important;
+  }
+}
+
 /* Round 14 (2026-05-19): #banner 社名ロゴのサイズ統一。
    新ロゴ画像 (Moinpros / Makuake / AO SOGO / サブルートAS / TONAKAI) は 2116x743 等
    高解像度で、 旧ロゴ用に書かれた既存 CSS に max-height/width 制約がなかったため
