@@ -9,6 +9,9 @@
 [build.environment]
   NODE_VERSION = "22"
   NEXT_TELEMETRY_DISABLED = "1"
+  # /auth/callback が本番では SITE_URL 必須のため。
+  # x-forwarded-host fallback を撤去している (Wave1 sec audit) ので、build-time に inline する。
+  NEXT_PUBLIC_SITE_URL = "https://inter-connect.app"
 
 # Netlify Next.js Runtime (auto-installed if not present)
 [[plugins]]
