@@ -44,7 +44,7 @@ export async function GET(
     const { data: profile, error: profileErr } = await supabase
       .from("user_profiles")
       .select(
-        "id, name, email, company, position, industry, bio, avatar_url, is_admin, is_active, is_agency, onboarding_step, created_at, updated_at",
+        "id, name, email, company, position, industry, bio, avatar_url, is_admin, is_active, is_agency, onboarding_step, manual_plan, prospect_invite_at, created_at, updated_at",
       )
       .eq("id", id)
       .maybeSingle();
@@ -52,6 +52,15 @@ export async function GET(
     if (!profile) {
       return jsonError(404, "NOT_FOUND", "ユーザーが見つかりません");
     }
+
+    // 最新の subscription 状態 (Stripe 基準のプラン判定に使用)
+    const { data: subscription } = await supabase
+      .from("subscriptions")
+      .select("status, current_period_end")
+      .eq("user_id", id)
+      .order("created_at", { ascending: false })
+      .limit(1)
+      .maybeSingle();
 
     // 集計: connections / meetings / chats
     const [
@@ -112,6 +121,7 @@ export async function GET(
 
     return json({
       profile,
+      subscription: subscription ?? null,
       counts: {
         connections: connectionsRes.count ?? 0,
         meetings: meetingsRes.count ?? 0,

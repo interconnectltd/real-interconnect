@@ -40,6 +40,7 @@ export type AuditAction =
   | "admin.role.revoke"
   | "admin.user.grant_agency_badge"
   | "admin.user.revoke_agency_badge"
+  | "admin.user.downgrade_plan_monitor_to_free"
   // 代理店プログラム (00063)
   | "agency.application.create"
   | "agency.referral_link.create"

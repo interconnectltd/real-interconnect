@@ -42,7 +42,7 @@ export async function GET(request: Request) {
       .from("user_profiles")
       // count: estimated で 50k+ rows でも seq scan を回避 (HubSpot/Salesforce 標準)
       .select(
-        "id, name, email, company, position, industry, is_admin, is_active, onboarding_step, created_at",
+        "id, name, email, company, position, industry, is_admin, is_active, is_agency, manual_plan, onboarding_step, created_at",
         { count: "estimated" },
       );
 
@@ -73,6 +73,35 @@ export async function GET(request: Request) {
       return jsonError(500, "DB_ERROR", error.message);
     }
 
+    // 各 user の最新 subscription を一括取得して merge (N+1 回避)。
+    // idx_subscriptions_user (user_id, created_at DESC) を使うので fast。
+    const userIds = (data ?? []).map((u) => u.id);
+    const subsMap = new Map<
+      string,
+      { status: string | null; current_period_end: string | null }
+    >();
+    if (userIds.length > 0) {
+      const { data: subs } = await supabase
+        .from("subscriptions")
+        .select("user_id, status, current_period_end, created_at")
+        .in("user_id", userIds)
+        .order("created_at", { ascending: false });
+      // 同一 user_id の最初の行 (= 最新) のみ採用
+      for (const s of subs ?? []) {
+        if (!subsMap.has(s.user_id)) {
+          subsMap.set(s.user_id, {
+            status: s.status ?? null,
+            current_period_end: s.current_period_end ?? null,
+          });
+        }
+      }
+    }
+    const usersWithSub = (data ?? []).map((u) => ({
+      ...u,
+      subscription_status: subsMap.get(u.id)?.status ?? null,
+      current_period_end: subsMap.get(u.id)?.current_period_end ?? null,
+    }));
+
     // Bulk PII access の証跡 (Wave5 sec audit / 個情法 R5)。
     // best-effort で fire-and-forget。失敗時はサービス継続。
     const client = extractClientInfo(request);
@@ -95,7 +124,7 @@ export async function GET(request: Request) {
     });
 
     const res = json({
-      users: data ?? [],
+      users: usersWithSub,
       meta: {
         page,
         pageSize,

@@ -7,7 +7,7 @@
  * SP では card stack に切替.
  */
 
-import { useState, useDeferredValue } from "react";
+import { useState, useDeferredValue, useMemo } from "react";
 import { useQuery } from "@tanstack/react-query";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
@@ -26,8 +26,12 @@ interface UserRow {
   industry: string | null;
   is_admin: boolean;
   is_active: boolean;
+  is_agency: boolean;
+  manual_plan: "monitor" | "free" | null;
   onboarding_step: number | null;
   created_at: string;
+  subscription_status: string | null;
+  current_period_end: string | null;
 }
 
 interface ListResponse {
@@ -254,9 +258,63 @@ export default function AdminUsersPage() {
   );
 }
 
+type TierKind = "monitor" | "paid" | "free";
+
+function resolveTierKind(user: UserRow): TierKind {
+  if (user.manual_plan === "monitor") return "monitor";
+  if (user.manual_plan === "free") return "free";
+  const isStripeActive =
+    (user.subscription_status === "active" ||
+      user.subscription_status === "trialing") &&
+    (!user.current_period_end ||
+      new Date(user.current_period_end).getTime() >= Date.now());
+  return isStripeActive ? "paid" : "free";
+}
+
+function PlanBadge({ user }: { user: UserRow }) {
+  const tier = useMemo(() => resolveTierKind(user), [user]);
+  if (tier === "monitor") {
+    return (
+      <Badge
+        variant="outline"
+        className="whitespace-nowrap border-sky-300 bg-sky-50 text-sky-800 dark:border-sky-700 dark:bg-sky-950 dark:text-sky-200"
+      >
+        モニター
+      </Badge>
+    );
+  }
+  if (tier === "paid") {
+    return (
+      <Badge
+        variant="outline"
+        className="whitespace-nowrap border-violet-300 bg-violet-50 text-violet-800 dark:border-violet-700 dark:bg-violet-950 dark:text-violet-200"
+      >
+        有料
+      </Badge>
+    );
+  }
+  return (
+    <Badge
+      variant="outline"
+      className="whitespace-nowrap border-slate-300 bg-slate-50 text-slate-700 dark:border-slate-700 dark:bg-slate-950 dark:text-slate-200"
+    >
+      無料
+    </Badge>
+  );
+}
+
 function UserBadges({ user }: { user: UserRow }) {
   return (
     <span className="inline-flex flex-wrap items-center gap-1">
+      <PlanBadge user={user} />
+      {user.is_agency && (
+        <Badge
+          variant="outline"
+          className="whitespace-nowrap border-amber-300 bg-amber-50 text-amber-800 dark:border-amber-700 dark:bg-amber-950 dark:text-amber-200"
+        >
+          代理店
+        </Badge>
+      )}
       {user.is_admin && (
         <Badge
           variant="outline"

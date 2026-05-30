@@ -18,6 +18,14 @@ import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+  DialogFooter,
+} from "@/components/ui/dialog";
 import { api } from "@/lib/api-client";
 import { ApiError } from "@/lib/errors";
 
@@ -35,9 +43,15 @@ interface UserDetail {
     is_active: boolean;
     is_agency: boolean;
     onboarding_step: number | null;
+    manual_plan: "monitor" | "free" | null;
+    prospect_invite_at: string | null;
     created_at: string;
     updated_at: string | null;
   };
+  subscription: {
+    status: string | null;
+    current_period_end: string | null;
+  } | null;
   counts: { connections: number; meetings: number };
   goals: Array<{ type: string; detail: string | null; created_at: string }>;
   offerings: Array<{ type: string; detail: string | null; created_at: string }>;
@@ -117,6 +131,8 @@ export default function AdminUserDetailPage({
 
   // 代理店バッジ付与/解除 (PATCH → audit_logs に admin.user.grant_agency_badge を残す)
   const [agencyLoading, setAgencyLoading] = useState(false);
+  const [downgradeLoading, setDowngradeLoading] = useState(false);
+  const [downgradeDialogOpen, setDowngradeDialogOpen] = useState(false);
   const [sessionPassword, setSessionPassword] = useState("");
   const [sessionLoading, setSessionLoading] = useState(false);
   const [sessionData, setSessionData] = useState<UserDetail["login_sessions"] | null>(null);
@@ -137,6 +153,35 @@ export default function AdminUserDetailPage({
       toast.error(msg);
     } finally {
       setAgencyLoading(false);
+    }
+  }
+
+  async function confirmDowngradeToFree() {
+    if (!data) return;
+    if (data.profile.manual_plan !== "monitor") return;
+    setDowngradeLoading(true);
+    try {
+      const res = await api.patch<{ id: string; manual_plan: string; email_status: string }>(
+        `/admin/users/${id}/downgrade-plan`,
+        {},
+      );
+      const emailMsg =
+        res.email_status === "sent"
+          ? "メール送信済"
+          : res.email_status === "fallback"
+            ? "メール未送信 (RESEND_API_KEY 未設定 / log 出力)"
+            : "メール送信失敗 (DB 更新は完了)";
+      toast.success(`無料会員にダウングレードしました (${emailMsg})`);
+      setDowngradeDialogOpen(false);
+      await refetch();
+    } catch (e) {
+      const msg =
+        e instanceof ApiError
+          ? e.message
+          : "ダウングレードに失敗しました。少し待ってから再試行してください。";
+      toast.error(msg);
+    } finally {
+      setDowngradeLoading(false);
     }
   }
 
@@ -331,6 +376,92 @@ export default function AdminUserDetailPage({
               </Button>
             </div>
           </section>
+
+          {/* プラン管理 — モニター → 無料 ダウングレード */}
+          <section className="mb-6 rounded-lg border bg-card p-4 shadow-sm">
+            <h2 className="mb-2 text-sm font-bold">プラン管理</h2>
+            <div className="flex flex-wrap items-center justify-between gap-3">
+              <div className="text-sm">
+                <p className="font-medium">
+                  現在のプラン:{" "}
+                  <span className="font-normal">
+                    {data.profile.manual_plan === "monitor"
+                      ? "モニター会員 (有料相当)"
+                      : data.profile.manual_plan === "free"
+                        ? "無料会員 (運営付与)"
+                        : data.subscription?.status === "active" ||
+                            data.subscription?.status === "trialing"
+                          ? "有料会員 (Stripe)"
+                          : "無料会員 (Stripe基準)"}
+                  </span>
+                </p>
+                <p className="text-xs text-muted-foreground">
+                  モニター → 無料 に変更すると本人にダウングレード通知メールが送信されます。
+                </p>
+              </div>
+              {data.profile.manual_plan === "monitor" && (
+                <Button
+                  type="button"
+                  size="sm"
+                  variant="outline"
+                  onClick={() => setDowngradeDialogOpen(true)}
+                  disabled={downgradeLoading}
+                  aria-busy={downgradeLoading}
+                >
+                  {downgradeLoading && (
+                    <Loader2 className="h-3.5 w-3.5 animate-spin" aria-hidden="true" />
+                  )}
+                  無料にダウングレード
+                </Button>
+              )}
+            </div>
+          </section>
+
+          {/* ダウングレード確認 Dialog (window.confirm のサイト内置換) */}
+          <Dialog
+            open={downgradeDialogOpen}
+            onOpenChange={(open: boolean) => {
+              if (!downgradeLoading) setDowngradeDialogOpen(open);
+            }}
+          >
+            <DialogContent className="sm:max-w-md">
+              <DialogHeader>
+                <DialogTitle>モニター → 無料 にダウングレード</DialogTitle>
+                <DialogDescription>
+                  <span className="block">
+                    <strong>{data.profile.name}</strong> さんをモニター会員から無料会員に変更します。
+                  </span>
+                  <span className="mt-2 block">
+                    本人に <code>{data.profile.email}</code> 宛でダウングレード通知メールが送信されます。
+                  </span>
+                  <span className="mt-2 block text-amber-700 dark:text-amber-300">
+                    無料会員への変更後、有料機能の一部はご利用いただけなくなります。
+                  </span>
+                </DialogDescription>
+              </DialogHeader>
+              <DialogFooter>
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={() => setDowngradeDialogOpen(false)}
+                  disabled={downgradeLoading}
+                >
+                  キャンセル
+                </Button>
+                <Button
+                  type="button"
+                  onClick={confirmDowngradeToFree}
+                  disabled={downgradeLoading}
+                  aria-busy={downgradeLoading}
+                >
+                  {downgradeLoading && (
+                    <Loader2 className="h-3.5 w-3.5 animate-spin" aria-hidden="true" />
+                  )}
+                  無料にダウングレード
+                </Button>
+              </DialogFooter>
+            </DialogContent>
+          </Dialog>
 
           {/* Goals / Offerings */}
           <section className="mb-6 grid gap-3 md:grid-cols-2">

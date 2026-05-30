@@ -70,6 +70,10 @@ export interface Database {
           is_agency: boolean;
           linkedin_id: string | null;
           stripe_customer_id: string | null;
+          manual_plan: "monitor" | "free" | null;
+          prospect_invite_at: string | null;
+          prospect_invite_expires_at: string | null;
+          onboarding_step: number | null;
           created_at: string;
           updated_at: string;
         };
@@ -89,6 +93,9 @@ export interface Database {
           is_active?: boolean;
           is_agency?: boolean;
           stripe_customer_id?: string | null;
+          manual_plan?: "monitor" | "free" | null;
+          prospect_invite_at?: string | null;
+          prospect_invite_expires_at?: string | null;
         };
         Update: Partial<Database["public"]["Tables"]["user_profiles"]["Insert"]>;
         Relationships: [];
