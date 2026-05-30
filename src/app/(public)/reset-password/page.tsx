@@ -15,6 +15,7 @@ export default function ResetPasswordPage() {
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [hasSession, setHasSession] = useState<boolean | null>(null);
+  const [linkError, setLinkError] = useState<string | null>(null);
 
   useEffect(() => {
     const supabase = createClient();
@@ -25,12 +26,49 @@ export default function ResetPasswordPage() {
       // @supabase/ssr の createBrowserClient は hash 自動検出 (detectSessionInUrl) が
       // 動かないケースがあるため、ここで自前で処理する。
       const hash = typeof window !== "undefined" ? window.location.hash : "";
-      if (hash.length > 1) {
-        const params = new URLSearchParams(hash.slice(1));
-        const accessToken = params.get("access_token");
-        const refreshToken = params.get("refresh_token");
+      const search = typeof window !== "undefined" ? window.location.search : "";
+      const hashParams = hash.length > 1 ? new URLSearchParams(hash.slice(1)) : null;
+      const searchParams = search.length > 1 ? new URLSearchParams(search.slice(1)) : null;
+
+      // エラーパターン: token 期限切れ・再使用・無効など
+      const errorCode =
+        hashParams?.get("error_code") ?? searchParams?.get("error_code") ?? null;
+      const errorDesc =
+        hashParams?.get("error_description") ??
+        searchParams?.get("error_description") ??
+        hashParams?.get("error") ??
+        searchParams?.get("error") ??
+        null;
+      if (errorCode || errorDesc) {
+        if (!cancelled) {
+          if (/expired/i.test(errorCode ?? "") || /expired/i.test(errorDesc ?? "")) {
+            setLinkError(
+              "パスワードリセットリンクの有効期限が切れています。再度リセットを申請してください。",
+            );
+          } else if (/used|consumed/i.test(errorCode ?? "")) {
+            setLinkError(
+              "このリセットリンクは既に使用済みです。再度リセットを申請してください。",
+            );
+          } else {
+            setLinkError(
+              `リセットリンクが無効です: ${errorDesc ?? errorCode ?? "不明なエラー"}`,
+            );
+          }
+          setHasSession(false);
+        }
+        // hash/query を URL から削除
+        if (typeof window !== "undefined") {
+          window.history.replaceState(null, "", window.location.pathname);
+        }
+        return;
+      }
+
+      // 正常パターン: access_token + refresh_token を setSession
+      if (hashParams) {
+        const accessToken = hashParams.get("access_token");
+        const refreshToken = hashParams.get("refresh_token");
         if (accessToken && refreshToken) {
-          await supabase.auth.setSession({
+          const { error: setErr } = await supabase.auth.setSession({
             access_token: accessToken,
             refresh_token: refreshToken,
           });
@@ -41,6 +79,13 @@ export default function ResetPasswordPage() {
               "",
               window.location.pathname + window.location.search,
             );
+          }
+          if (setErr && !cancelled) {
+            setLinkError(
+              "セッションの確立に失敗しました。再度リセットを申請してください。",
+            );
+            setHasSession(false);
+            return;
           }
         }
       }
@@ -97,7 +142,7 @@ export default function ResetPasswordPage() {
       <div className="flex min-h-[60dvh] items-center justify-center px-4">
         <div className="w-full max-w-sm space-y-4 text-center">
           <p className="text-sm text-destructive">
-            パスワードリセットリンクが無効または期限切れです。
+            {linkError ?? "パスワードリセットリンクが無効または期限切れです。"}
           </p>
           <Link href="/forgot-password" className="text-primary underline-offset-4 hover:underline">
             再度リセットを申請する

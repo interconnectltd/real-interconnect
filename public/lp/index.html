@@ -3,15 +3,27 @@
 <html class="no-js wf-source-han-sans-japanese-n5-active wf-source-han-sans-japanese-n4-active wf-active mdl-js" lang="ja"><!--<![endif]--><head prefix="og: https://ogp.me/ns# fb: http://ogp.me/ns/fb# article: http://ogp.me/ns/article#"><meta http-equiv="Content-Type" content="text/html; charset=UTF-8"><script>
 // Supabase Auth redirect rescue: メールリンクが site_url の bare root に
 // 着地した場合 (Dashboard の Redirect URL 許可リスト不足が原因)、適切なページへ転送する。
-// hash 例: #access_token=...&type=recovery&...
+// パターン:
+//   - 正常 hash: #access_token=...&type=recovery → /reset-password へ
+//   - エラー hash: #error=otp_expired&error_code=... (type 無し) → /reset-password へ
+//     (token 期限切れ・再使用時。LP に留めず error 表示ページへ送る)
+//   - クエリ ?error= (PKCE flow 失敗等) → /reset-password へ
 (function(){try{
   var h = window.location.hash || "";
-  if (h.length < 2) return;
-  var p = new URLSearchParams(h.slice(1));
-  if (!p.get("access_token") && !p.get("error")) return;
-  var type = p.get("type");
-  if (type === "recovery") {
-    window.location.replace("/reset-password" + h);
+  var s = window.location.search || "";
+  if (h.length < 2 && s.length < 2) return;
+  var hp = h.length > 1 ? new URLSearchParams(h.slice(1)) : null;
+  var sp = s.length > 1 ? new URLSearchParams(s.slice(1)) : null;
+  var hasAuth = (hp && (hp.get("access_token") || hp.get("error"))) ||
+                (sp && (sp.get("code") || sp.get("error")));
+  if (!hasAuth) return;
+  var type = (hp && hp.get("type")) || (sp && sp.get("type")) || "";
+  var errorCode = (hp && hp.get("error_code")) || (sp && sp.get("error_code")) || "";
+  var isRecovery = type === "recovery" ||
+                   /recovery|otp_expired|access_denied/i.test(errorCode) ||
+                   (hp && hp.get("access_token"));
+  if (isRecovery) {
+    window.location.replace("/reset-password" + h + s);
   }
 }catch(_e){}})();
 </script><style>body {transition: opacity ease-in 0.2s; }
